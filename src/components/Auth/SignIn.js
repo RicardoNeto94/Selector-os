@@ -21,12 +21,13 @@ const SignIn = () => {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/`,
+      },
     });
 
     if (error) {
       setErrorMsg(error.message);
     }
-  }
+  };
 
   return (
     <div className="card">
