@@ -16,10 +16,11 @@ const SignIn = () => {
   const supabase = createClientComponentClient();
   const [errorMsg, setErrorMsg] = useState(null);
 
-  async function signIn(formData) {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password,
+    const handleGoogleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
     });
 
     if (error) {
@@ -73,6 +74,15 @@ const SignIn = () => {
           </Form>
         )}
       </Formik>
+          
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        className="button-inverse w-full mt-4"
+      >
+        Continue with Google
+      </button>
+
       {errorMsg && <div className="text-red-600">{errorMsg}</div>}
       <Link href="/sign-up" className="link w-full">
         Don&apos;t have an account? Sign Up.
