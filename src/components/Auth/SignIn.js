@@ -16,15 +16,33 @@ const SignIn = () => {
   const supabase = createClientComponentClient();
   const [errorMsg, setErrorMsg] = useState(null);
 
-    const handleGoogleSignIn = async () => {
+  // Email/password sign-in (existing behaviour)
+  async function signIn(formData) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
+    }
+  }
+
+  // NEW: Google sign-in
+  const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        // Only read window in the browser
+        redirectTo:
+          typeof window !== 'undefined'
+            ? `${window.location.origin}/`
+            : undefined,
       },
     });
 
     if (error) {
+      console.error(error);
       setErrorMsg(error.message);
     }
   };
@@ -44,7 +62,10 @@ const SignIn = () => {
           <Form className="column w-full">
             <label htmlFor="email">Email</label>
             <Field
-              className={cn('input', errors.email && touched.email && 'bg-red-50')}
+              className={cn(
+                'input',
+                errors.email && touched.email && 'bg-red-50'
+              )}
               id="email"
               name="email"
               placeholder="jane@acme.com"
@@ -54,9 +75,12 @@ const SignIn = () => {
               <div className="text-red-600">{errors.email}</div>
             ) : null}
 
-            <label htmlFor="email">Password</label>
+            <label htmlFor="password">Password</label>
             <Field
-              className={cn('input', errors.password && touched.password && 'bg-red-50')}
+              className={cn(
+                'input',
+                errors.password && touched.password && 'bg-red-50'
+              )}
               id="password"
               name="password"
               type="password"
@@ -75,7 +99,7 @@ const SignIn = () => {
           </Form>
         )}
       </Formik>
-          
+
       <button
         type="button"
         onClick={handleGoogleSignIn}
@@ -84,8 +108,9 @@ const SignIn = () => {
         Continue with Google
       </button>
 
-      {errorMsg && <div className="text-red-600">{errorMsg}</div>}
-      <Link href="/sign-up" className="link w-full">
+      {errorMsg && <div className="text-red-600 mt-2">{errorMsg}</div>}
+
+      <Link href="/sign-up" className="link w-full mt-2">
         Don&apos;t have an account? Sign Up.
       </Link>
     </div>
