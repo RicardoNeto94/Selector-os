@@ -47,19 +47,23 @@ export default function DashboardPage() {
     );
   }
 
-  return (
-    <main className="p-8 text-center">
-      <h1 className="text-3xl font-bold mb-4">SelectorOS Dashboard</h1>
+return (
+  <main className="p-8 text-center">
+    <h1 className="text-3xl font-bold mb-4">SelectorOS Dashboard</h1>
 
-      <div className="mx-auto max-w-md border rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-2">{restaurant.name}</h2>
-        <p className="text-sm text-gray-500 mb-2">
-          Restaurant ID: <code>{restaurant.id}</code>
-        </p>
-        <p className="text-sm text-gray-500">
-          Created at: {new Date(restaurant.created_at).toLocaleString()}
-        </p>
-      </div>
-    </main>
-  );
-}
+    <div className="mx-auto max-w-md border rounded-lg p-6">
+      <h2 className="text-xl font-semibold mb-2">{restaurant.name}</h2>
+
+      <p className="text-sm text-gray-500 mb-2">
+        Restaurant ID: <code>{restaurant.id}</code>
+      </p>
+
+      <p className="text-sm text-gray-500">
+        Created at:{' '}
+        {restaurant.created_at
+          ? new Date(restaurant.created_at).toLocaleString()
+          : 'Unknown'}
+      </p>
+    </div>
+  </main>
+);
