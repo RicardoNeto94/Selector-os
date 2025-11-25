@@ -5,12 +5,15 @@ export async function GET() {
   const supabase = createRouteHandlerClient({ cookies });
 
   // 1) Get logged-in user
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return Response.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  // 2) Get this user's restaurant (we assume exactly one for now)
+  // 2) Get this user's restaurant (for now we assume exactly one)
   const { data: restaurant, error: restError } = await supabase
     .from('restaurants')
     .select('*')
@@ -28,7 +31,6 @@ export async function GET() {
   const { data: existingMenu, error: menuError } = await supabase
     .from('menus')
     .select('*')
-    .eq('owner_id', user.id)
     .eq('restaurant_id', restaurant.id)
     .maybeSingle();
 
@@ -41,11 +43,10 @@ export async function GET() {
     return Response.json(existingMenu);
   }
 
-  // 4) If no menu, create a default one
+  // 4) If no menu exists, create a default one
   const { data: createdMenu, error: createError } = await supabase
     .from('menus')
     .insert({
-      owner_id: user.id,
       restaurant_id: restaurant.id,
       name: 'Main Menu',
     })
