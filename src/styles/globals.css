@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* GLOBAL THEME VARIABLES */
+:root {
+  --primary: #d4af37;  /* Default: Shang Shi gold */
+  --secondary: #ffffff;
+  --accent: #8b6f47;
+
+  --font: 'Inter', sans-serif;
+
+  /* Visual system */
+  --card-style: glass; /* glass | solid */
+
+  /* Future-proof variables */
+  --radius: 16px;
+  --transition: 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+/* Your existing base styles start here */
 @layer base {
   h2 {
     @apply py-4 text-4xl font-black text-gray-800;
