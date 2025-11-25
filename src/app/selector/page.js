@@ -2,6 +2,41 @@
 
 import { useEffect, useState } from 'react';
 
+// 🔥 THEME INJECTION FUNCTION — added at top
+function applyTheme(theme) {
+  if (!theme) return;
+
+  const root = document.documentElement;
+
+  if (theme.theme_primary_color)
+    root.style.setProperty("--primary", theme.theme_primary_color);
+
+  if (theme.theme_secondary_color)
+    root.style.setProperty("--secondary", theme.theme_secondary_color);
+
+  if (theme.theme_accent_color)
+    root.style.setProperty("--accent", theme.theme_accent_color);
+
+  if (theme.theme_font)
+    root.style.setProperty("--font", theme.theme_font);
+
+  if (theme.theme_card_style)
+    root.style.setProperty("--card-style", theme.theme_card_style);
+
+  // Background image
+  if (theme.theme_background_url) {
+    document.body.style.backgroundImage = `url(${theme.theme_background_url})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+  }
+
+  // Optional logo element
+  const logoEl = document.getElementById("restaurant-logo");
+  if (logoEl && theme.theme_logo_url) {
+    logoEl.src = theme.theme_logo_url;
+  }
+}
+
 export default function SelectorPage() {
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
@@ -16,16 +51,21 @@ export default function SelectorPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // 1) Restaurant name (for header context)
+        // 1) Load restaurant (header + theme)
         const restRes = await fetch('/api/restaurant');
         const restData = await restRes.json();
         if (!restRes.ok) throw new Error(restData.error || 'Failed to load restaurant');
+
         setRestaurant(restData);
+
+        // 🔥 APPLY THEME HERE
+        applyTheme(restData);
 
         // 2) Dishes
         const dishesRes = await fetch('/api/dishes');
         const dishesData = await dishesRes.json();
         if (!dishesRes.ok) throw new Error(dishesData.error || 'Failed to load dishes');
+
         const loadedDishes = dishesData.dishes || [];
         setDishes(loadedDishes);
 
@@ -34,6 +74,7 @@ export default function SelectorPage() {
         const catalogData = await catalogRes.json();
         if (!catalogRes.ok)
           throw new Error(catalogData.error || 'Failed to load allergen catalog');
+
         setAllergenCatalog(catalogData.allergens || []);
 
         // 4) Per-dish allergens
@@ -47,6 +88,7 @@ export default function SelectorPage() {
             }
           })
         );
+
         setDishAllergens(allergenMap);
       } catch (err) {
         console.error(err);
@@ -59,6 +101,7 @@ export default function SelectorPage() {
     loadData();
   }, []);
 
+  // Toggle allergy
   const toggleAllergy = (code) => {
     setActiveAllergies((prev) =>
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
@@ -97,6 +140,7 @@ export default function SelectorPage() {
       {/* Allergen picker */}
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3 text-center">Guest allergies</h2>
+
         <div className="flex flex-wrap gap-2 justify-center mb-3">
           {allergenCatalog.map((a) => {
             const isActive = activeAllergies.includes(a.code);
@@ -118,6 +162,7 @@ export default function SelectorPage() {
             );
           })}
         </div>
+
         <div className="text-center text-sm text-gray-500">
           {activeAllergies.length === 0 ? (
             <span>No allergies selected. Showing all dishes.</span>
@@ -155,6 +200,7 @@ export default function SelectorPage() {
               const conflicts = activeAllergies.filter((code) =>
                 codesForDish.includes(code)
               );
+
               const isSafe =
                 activeAllergies.length === 0 ? true : conflicts.length === 0;
 
@@ -170,6 +216,7 @@ export default function SelectorPage() {
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <h3 className="font-semibold">{dish.name}</h3>
+
                       {dish.price != null && (
                         <span className="text-sm text-gray-600">
                           €{Number(dish.price).toFixed(2)}
@@ -181,6 +228,7 @@ export default function SelectorPage() {
                       <span className="text-xs text-gray-500 mr-1">
                         Allergens:
                       </span>
+
                       {allergens.length === 0 ? (
                         <span className="text-xs text-gray-400">none set</span>
                       ) : (
