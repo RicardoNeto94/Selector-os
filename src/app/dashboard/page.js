@@ -1,43 +1,65 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import Link from 'next/link';
 
 export default function DashboardPage() {
-  const supabase = createClientComponentClient();
-  const [user, setUser] = useState(null);
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
-    async function getUser() {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    }
-    getUser();
+    const loadRestaurant = async () => {
+      try {
+        const res = await fetch('/api/restaurant');
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load restaurant');
+        }
+
+        setRestaurant(data);
+      } catch (err) {
+        console.error(err);
+        setErrorMsg(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRestaurant();
   }, []);
 
-  if (!user) {
+  if (loading) {
     return (
-      <main className="p-8">
-        <h1 className="text-xl">Loading your dashboard...</h1>
+      <main className="p-8 text-center">
+        <h1 className="text-3xl font-bold mb-4">SelectorOS Dashboard</h1>
+        <p>Loading your restaurant...</p>
+      </main>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <main className="p-8 text-center">
+        <h1 className="text-3xl font-bold mb-4">SelectorOS Dashboard</h1>
+        <p className="text-red-600">Error: {errorMsg}</p>
       </main>
     );
   }
 
   return (
-    <main className="p-8">
+    <main className="p-8 text-center">
       <h1 className="text-3xl font-bold mb-4">SelectorOS Dashboard</h1>
 
-      <p>Logged in as <strong>{user.email}</strong></p>
-
-      <div className="mt-6 border rounded-lg p-4">
-        <p>Your dashboard is ready.</p>
-        <p className="mt-2">Next step: restaurant + menu database.</p>
+      <div className="mx-auto max-w-md border rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-2">{restaurant.name}</h2>
+        <p className="text-sm text-gray-500 mb-2">
+          Restaurant ID: <code>{restaurant.id}</code>
+        </p>
+        <p className="text-sm text-gray-500">
+          Created at: {new Date(restaurant.created_at).toLocaleString()}
+        </p>
       </div>
-
-      <Link href="/sign-out">
-        <button className="button-inverse w-full mt-6">Sign Out</button>
-      </Link>
     </main>
   );
 }
