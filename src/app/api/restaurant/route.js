@@ -28,6 +28,7 @@ export async function GET() {
     .insert({
       owner_id: user.id,
       name: 'My Restaurant',
+      created_at: new Date().toISOString(),
     })
     .select()
     .single();
