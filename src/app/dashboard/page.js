@@ -48,7 +48,7 @@ export default function DashboardHome() {
       .eq("restaurant_id", r.id);
 
     const { count: allergenCount } = await supabase
-      .from("allergens")
+      .from("allergen")
       .select("*", { count: "exact", head: true });
 
     const { data: missing } = await supabase.rpc("dishes_missing_allergens", {
