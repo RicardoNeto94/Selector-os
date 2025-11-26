@@ -32,30 +32,30 @@ export default function DashboardLayout({ children }) {
           justify-between 
           transition-all 
           duration-300
+          z-40
         `}
       >
         {/* Collapse toggle */}
-        {/* Collapse toggle */}
-<button
-  onClick={() => setCollapsed(!collapsed)}
-  className="
-    absolute top-8 
-    -right-3
-    w-9 h-9 
-    bg-white 
-    shadow-lg 
-    rounded-full 
-    flex items-center justify-center 
-    text-gray-600
-    hover:bg-gray-100 
-    transition-all
-    z-50
-  "
->
-  <span className="text-lg">{collapsed ? "›" : "‹"}</span>
-</button>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="
+            absolute top-8 
+            -right-3
+            w-9 h-9 
+            bg-white 
+            shadow-lg 
+            rounded-full 
+            flex items-center justify-center 
+            text-gray-600
+            hover:bg-gray-100 
+            transition-all
+            z-50
+          "
+        >
+          <span className="text-lg">{collapsed ? "›" : "‹"}</span>
+        </button>
 
-        {/* Main nav */}
+        {/* Nav */}
         <nav className="space-y-6">
           <div className="space-y-2">
             <SidebarItem href="/dashboard" collapsed={collapsed}>
@@ -100,8 +100,6 @@ export default function DashboardLayout({ children }) {
 
       {/* MAIN AREA */}
       <div className="flex-1 flex flex-col">
-
-        {/* Top bar */}
         <header className="h-16 border-b flex items-center px-6 relative bg-white">
           <div
             className={`
@@ -115,7 +113,6 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        {/* Horizontal tabs */}
         <div className="border-b bg-white/60 backdrop-blur-md flex space-x-6 px-6 py-4 text-sm">
           <Tab href="/dashboard" label="Overview" />
           <Tab href="/dashboard/menu" label="Menu" />
@@ -124,7 +121,6 @@ export default function DashboardLayout({ children }) {
           <Tab href="/dashboard/settings" label="Settings" />
         </div>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto px-12 py-10 page-fade">
           {children}
         </main>
@@ -133,7 +129,7 @@ export default function DashboardLayout({ children }) {
   );
 }
 
-/* Sidebar item (fixed arrow position) */
+/* Sidebar item */
 function SidebarItem({ href, collapsed, danger, children }) {
   const pathname = usePathname();
   const active = pathname === href;
@@ -154,19 +150,11 @@ function SidebarItem({ href, collapsed, danger, children }) {
         ${active && !danger ? "sidebar-item-active" : ""}
       `}
     >
-
-      {/* LEFT SECTION: ICON + LABEL */}
-      <div
-        className={`
-          flex items-center gap-3
-          ${collapsed ? "justify-center" : ""}
-        `}
-      >
+      <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
         <span className="text-xl">{children[0]}</span>
         {!collapsed && <span className="text-sm">{children[1]}</span>}
       </div>
 
-      {/* RIGHT ARROW — only on full sidebar */}
       {!collapsed && !danger && (
         <span
           className="
@@ -188,7 +176,7 @@ function SidebarItem({ href, collapsed, danger, children }) {
   );
 }
 
-/* Top tabs using current pathname */
+/* Tabs */
 function Tab({ href, label }) {
   const pathname = usePathname();
   const active = pathname === href;
@@ -202,9 +190,7 @@ function Tab({ href, label }) {
       `}
     >
       {label}
-      {active && (
-        <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-green-500 rounded-full"></span>
-      )}
+      {active && <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-green-500 rounded-full"></span>}
     </Link>
   );
 }
