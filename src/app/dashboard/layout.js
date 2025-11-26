@@ -73,9 +73,9 @@ export default function DashboardLayout({ children }) {
               {!collapsed && <span>Dishes</span>}
             </SidebarItem>
 
-            <SidebarItem href="/dashboard/allergens" collapsed={collapsed}>
+            <SidebarItem href="/dashboard/allergen" collapsed={collapsed}>
               ⚠️
-              {!collapsed && <span>Allergens</span>}
+              {!collapsed && <span>Allergen</span>}
             </SidebarItem>
           </div>
 
