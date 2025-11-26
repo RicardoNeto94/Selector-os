@@ -2,63 +2,74 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import "../../styles/globals.css";   
+import "../../styles/globals.css";
 
 export default function DashboardLayout({ children }) {
   const [logoSmall, setLogoSmall] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLogoSmall(true), 300);
+    const timer = setTimeout(() => setLogoSmall(true), 350);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
 
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r px-6 py-8 flex flex-col space-y-6 shadow-sm">
-        <nav className="flex flex-col space-y-4 text-gray-700">
-
-          <Link href="/dashboard" className="font-semibold hover:text-green-600">
-            Dashboard
-          </Link>
-
-          <Link href="/dashboard/menu" className="hover:text-green-600">
-            Menus
-          </Link>
-
-          <Link href="/dashboard/dishes" className="hover:text-green-600">
-            Dishes
-          </Link>
-
-          <Link href="/dashboard/allergens" className="hover:text-green-600">
-            Allergens
-          </Link>
-
-          <div className="border-t pt-4 mt-4 space-y-4">
-            <Link href="/dashboard/settings" className="hover:text-green-600">
-              Settings
+      <aside className="
+        w-64 
+        bg-white/80 
+        backdrop-blur-xl 
+        border-r 
+        px-6 
+        py-8 
+        flex 
+        flex-col 
+        justify-between 
+      ">
+        <nav className="space-y-6">
+          <div className="space-y-3">
+            <Link href="/dashboard" className="block text-lg font-semibold text-gray-900 hover:text-green-600 transition">
+              Dashboard
             </Link>
 
-            <Link href="/dashboard/billing" className="hover:text-green-600">
-              Billing
+            <Link href="/dashboard/menu" className="block text-gray-700 hover:text-green-600 transition">
+              🍽️ Menus
             </Link>
 
-            <Link href="/logout" className="hover:text-red-500">
-              Log out
+            <Link href="/dashboard/dishes" className="block text-gray-700 hover:text-green-600 transition">
+              🥢 Dishes
+            </Link>
+
+            <Link href="/dashboard/allergens" className="block text-gray-700 hover:text-green-600 transition">
+              ⚠️ Allergens
             </Link>
           </div>
 
+          <div className="pt-6 border-t space-y-3">
+            <Link href="/dashboard/settings" className="block text-gray-700 hover:text-green-600 transition">
+              ⚙️ Settings
+            </Link>
+
+            <Link href="/dashboard/billing" className="block text-gray-700 hover:text-green-600 transition">
+              💳 Billing
+            </Link>
+
+            <Link href="/logout" className="block text-red-500 hover:text-red-600 transition">
+              ⤫ Log out
+            </Link>
+          </div>
         </nav>
       </aside>
 
       {/* Main area */}
       <div className="flex-1 flex flex-col">
 
-        {/* Top bar with animated logo */}
-        <header className="h-16 border-b flex items-center px-6 relative">
+        {/* Top bar */}
+        <header className="h-16 border-b bg-white/70 backdrop-blur-lg flex items-center px-6 relative shadow-sm">
+
           <div
-            className={`transition-all duration-500 font-bold ${
+            className={`transition-all duration-500 font-bold tracking-tight ${
               logoSmall
                 ? "text-xl text-green-600 absolute right-6"
                 : "text-4xl mx-auto"
@@ -68,31 +79,41 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        {/* Horizontal scroll menu */}
-        <div className="border-b flex space-x-4 overflow-x-auto px-6 py-3 bg-gray-50 text-sm">
-          <Link href="/dashboard" className="font-medium hover:text-green-600">
-            Overview
-          </Link>
-          <Link href="/dashboard/menu" className="hover:text-green-600">
-            Menu
-          </Link>
-          <Link href="/dashboard/dishes" className="hover:text-green-600">
-            Dishes
-          </Link>
-          <Link href="/dashboard/allergens" className="hover:text-green-600">
-            Allergens
-          </Link>
-          <Link href="/dashboard/settings" className="hover:text-green-600">
-            Settings
-          </Link>
+        {/* Horizontal tabs */}
+        <div className="border-b bg-white/60 backdrop-blur-md flex space-x-6 px-6 py-4 text-sm">
+          <Tab href="/dashboard" label="Overview" />
+          <Tab href="/dashboard/menu" label="Menu" />
+          <Tab href="/dashboard/dishes" label="Dishes" />
+          <Tab href="/dashboard/allergens" label="Allergens" />
+          <Tab href="/dashboard/settings" label="Settings" />
         </div>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto px-8 py-6">
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto px-12 py-10">
           {children}
         </main>
 
       </div>
     </div>
+  );
+}
+
+/* Reusable tab with active indicator */
+function Tab({ href, label }) {
+  const isActive = typeof window !== "undefined" && window.location.pathname === href;
+
+  return (
+    <Link
+      href={href}
+      className={`
+        relative pb-2 transition 
+        ${isActive ? "text-green-600 font-semibold" : "text-gray-600 hover:text-gray-900"}
+      `}
+    >
+      {label}
+      {isActive && (
+        <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-green-500 rounded-full"></span>
+      )}
+    </Link>
   );
 }
