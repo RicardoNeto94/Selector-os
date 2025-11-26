@@ -31,29 +31,30 @@ export default function OnboardingPage() {
 
   if (error) {
     return (
-      <main className="p-8 text-center">
-        <h1 className="text-3xl font-bold">SelectorOS Onboarding</h1>
-        <p className="text-red-600 mt-4">Error: {error}</p>
-        <a href="/dashboard" className="button mt-6">
-          Go to dashboard
-        </a>
-      </main>
-    );
-  }
+  <main className="p-8 text-center">
+    <h1 className="text-3xl font-bold mb-8">SelectorOS Onboarding</h1>
 
-  if (!restaurant) {
-    return <main className="p-8 text-center">Loading…</main>;
-  }
+    <p className="text-lg mb-4">Welcome! Your restaurant is ready:</p>
 
-  return (
-    <main className="p-8 text-center">
-      <h1 className="text-3xl font-bold">SelectorOS Onboarding</h1>
-      <p className="mt-4">Welcome! Your restaurant is ready:</p>
-      <p className="mt-2 font-semibold">{restaurant.name}</p>
+    <p className="text-xl font-semibold mb-8">{restaurant.name}</p>
 
-      <a href="/dashboard" className="button mt-8">
-        Continue to dashboard
-      </a>
-    </main>
-  );
-}
+    <a
+      href="/dashboard"
+      className="
+        inline-block 
+        px-10 
+        py-4 
+        rounded-full 
+        text-lg 
+        font-semibold 
+        border-2 
+        border-green-400 
+        text-green-500 
+        hover:bg-green-50 
+        transition
+      "
+    >
+      Continue to dashboard
+    </a>
+  </main>
+);
