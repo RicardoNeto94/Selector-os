@@ -28,19 +28,13 @@ const SignIn = () => {
     }
   }
 
-  // NEW: Google sign-in
-  const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        // Only read window in the browser
-        redirectTo:
-          typeof window !== 'undefined'
-            ? `${window.location.origin}/`
-            : undefined,
-      },
-    });
-
+ const { error } = await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: `${window.location.origin}/onboarding`,
+  },
+});
+  
     if (error) {
       console.error(error);
       setErrorMsg(error.message);
