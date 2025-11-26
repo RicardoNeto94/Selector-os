@@ -55,39 +55,39 @@ export default function DashboardLayout({ children }) {
         <nav className="space-y-6">
           <div className="space-y-2">
             <SidebarItem href="/dashboard" collapsed={collapsed}>
-              <span className="text-lg">🏠</span>
+              🏠
               {!collapsed && <span>Dashboard</span>}
             </SidebarItem>
 
             <SidebarItem href="/dashboard/menu" collapsed={collapsed}>
-              <span>🍽️</span>
+              🍽️
               {!collapsed && <span>Menus</span>}
             </SidebarItem>
 
             <SidebarItem href="/dashboard/dishes" collapsed={collapsed}>
-              <span>🥢</span>
+              🥢
               {!collapsed && <span>Dishes</span>}
             </SidebarItem>
 
             <SidebarItem href="/dashboard/allergens" collapsed={collapsed}>
-              <span>⚠️</span>
+              ⚠️
               {!collapsed && <span>Allergens</span>}
             </SidebarItem>
           </div>
 
           <div className="pt-6 border-t space-y-2">
             <SidebarItem href="/dashboard/settings" collapsed={collapsed}>
-              <span>⚙️</span>
+              ⚙️
               {!collapsed && <span>Settings</span>}
             </SidebarItem>
 
             <SidebarItem href="/dashboard/billing" collapsed={collapsed}>
-              <span>💳</span>
+              💳
               {!collapsed && <span>Billing</span>}
             </SidebarItem>
 
             <SidebarItem href="/logout" collapsed={collapsed} danger>
-              <span>⤫</span>
+              ⤫
               {!collapsed && <span>Log out</span>}
             </SidebarItem>
           </div>
@@ -129,7 +129,7 @@ export default function DashboardLayout({ children }) {
   );
 }
 
-/* Sidebar item with active highlight */
+/* Sidebar item (fixed arrow position) */
 function SidebarItem({ href, collapsed, danger, children }) {
   const pathname = usePathname();
   const active = pathname === href;
@@ -138,13 +138,48 @@ function SidebarItem({ href, collapsed, danger, children }) {
     <Link
       href={href}
       className={`
-        sidebar-item flex items-center gap-3 text-sm
+        flex items-center 
+        ${collapsed ? "justify-center" : "justify-between"}
+        group
+        sidebar-item 
+        text-sm
+        rounded-xl
+        px-3 py-2
+        transition
         ${danger ? "text-red-500 hover:text-red-600" : "text-gray-700 hover:text-green-600"}
         ${active && !danger ? "sidebar-item-active" : ""}
-        ${collapsed ? "justify-center" : ""}
       `}
     >
-      {children}
+
+      {/* LEFT SECTION: ICON + LABEL */}
+      <div
+        className={`
+          flex items-center gap-3
+          ${collapsed ? "justify-center" : ""}
+        `}
+      >
+        <span className="text-xl">{children[0]}</span>
+        {!collapsed && <span className="text-sm">{children[1]}</span>}
+      </div>
+
+      {/* RIGHT ARROW — only on full sidebar */}
+      {!collapsed && !danger && (
+        <span
+          className="
+            w-7 h-7 
+            flex items-center justify-center
+            rounded-full 
+            bg-gray-100 
+            text-gray-500 
+            text-xs
+            opacity-0 group-hover:opacity-100
+            translate-x-1 group-hover:translate-x-0
+            transition-all 
+          "
+        >
+          ❯
+        </span>
+      )}
     </Link>
   );
 }
