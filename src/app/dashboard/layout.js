@@ -35,21 +35,25 @@ export default function DashboardLayout({ children }) {
         `}
       >
         {/* Collapse toggle */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="
-            absolute -right-4 top-8 
-            w-8 h-8 
-            bg-white 
-            shadow-md 
-            rounded-full 
-            flex items-center justify-center 
-            hover:bg-gray-100 
-            transition
-          "
-        >
-          {collapsed ? "›" : "‹"}
-        </button>
+        {/* Collapse toggle */}
+<button
+  onClick={() => setCollapsed(!collapsed)}
+  className="
+    absolute top-8 
+    -right-3
+    w-9 h-9 
+    bg-white 
+    shadow-lg 
+    rounded-full 
+    flex items-center justify-center 
+    text-gray-600
+    hover:bg-gray-100 
+    transition-all
+    z-50
+  "
+>
+  <span className="text-lg">{collapsed ? "›" : "‹"}</span>
+</button>
 
         {/* Main nav */}
         <nav className="space-y-6">
