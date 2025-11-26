@@ -1,67 +1,82 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-export default function OnboardingPage() {
-  const [restaurant, setRestaurant] = useState(null);
-  const [error, setError] = useState(null);
+export default function DashboardHome() {
   const supabase = createClientComponentClient();
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError("Not authenticated");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (error || !data) {
-        setError("Restaurant not found");
-      } else {
-        setRestaurant(data);
-      }
-    }
-
-    load();
+    loadRestaurant();
   }, []);
 
+  const loadRestaurant = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      setRestaurant(null);
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error(error);
+    }
+
+    setRestaurant(data);
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="text-gray-500 text-lg">Loading dashboard…</div>
+    );
+  }
+
   return (
-    <main className="p-12 text-center">
-      <h1 className="text-4xl font-bold mb-8">
-        Selector<span className="text-green-500">OS</span> Onboarding
+    <div className="max-w-3xl">
+
+      <h1 className="text-3xl font-bold mb-6">
+        Dashboard Overview
       </h1>
 
-      {error && (
-        <div className="text-red-500 text-xl mb-6">
-          Error: {error}
-        </div>
-      )}
+      {restaurant ? (
+        <div className="bg-white shadow-sm border rounded-xl p-6 space-y-3">
 
-      {restaurant && (
-        <>
-          <p className="text-lg mb-6">
-            Welcome! Your restaurant is ready:
-          </p>
-
-          <h2 className="text-2xl font-semibold mb-10">
+          <h2 className="text-xl font-semibold">
             {restaurant.name}
           </h2>
 
-          <Link href="/dashboard">
-            <button className="px-8 py-3 bg-green-500 text-white rounded-full text-lg hover:bg-green-600 transition">
-              Continue to dashboard
-            </button>
-          </Link>
-        </>
+          <p className="text-sm text-gray-600">
+            Restaurant ID: <span className="font-mono">{restaurant.id}</span>
+          </p>
+
+          <p className="text-sm text-gray-600">
+            Created at:{" "}
+            {restaurant.created_at
+              ? new Date(restaurant.created_at).toLocaleString()
+              : "Unknown"}
+          </p>
+
+        </div>
+      ) : (
+        <p className="text-red-600 text-lg">
+          No restaurant found for this user.
+        </p>
       )}
-    </main>
+
+      <p className="mt-6 text-gray-500">
+        Use the sidebar to manage menus, dishes, allergens, and account settings.
+      </p>
+
+    </div>
   );
 }
