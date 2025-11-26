@@ -1,156 +1,59 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function OnboardingPage() {
-  const router = useRouter();
-
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null);
-
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [cuisine, setCuisine] = useState('');
-  const [saving, setSaving] = useState(false);
+  const supabase = createClientComponentClient();
+  const [restaurant, setRestaurant] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadRestaurant = async () => {
-      try {
-        const res = await fetch('/api/restaurant');
-        const data = await res.json();
+    loadOnboarding();
+  }, []);
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to load restaurant');
-        }
-
-        // If onboarding already done, skip straight to dashboard
-        if (data.onboarding_complete) {
-          router.replace('/dashboard');
-          return;
-        }
-
-        // Pre-fill form with existing data if any
-        setName(data.name || '');
-        setLocation(data.location || '');
-        setCuisine(data.cuisine || '');
-      } catch (err) {
-        console.error(err);
-        setErrorMsg(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRestaurant();
-  }, [router]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg(null);
-    setSaving(true);
-
+  const loadOnboarding = async () => {
     try {
-      const res = await fetch('/api/restaurant', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, location, cuisine }),
-      });
+      // 1) Ensure restaurant exists (creates one if missing)
+      const restaurantRes = await fetch('/api/restaurant');
+      const restaurantData = await restaurantRes.json();
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to save restaurant info');
+      if (!restaurantData || restaurantData.error) {
+        setError('Restaurant not found');
+        return;
       }
 
-      // After onboarding → go to dashboard
-      router.replace('/dashboard');
+      setRestaurant(restaurantData);
     } catch (err) {
-      console.error(err);
-      setErrorMsg(err.message);
-    } finally {
-      setSaving(false);
+      setError(err.message);
     }
   };
 
-  if (loading) {
+  if (error) {
     return (
       <main className="p-8 text-center">
-        <h1 className="text-3xl font-bold mb-4">SelectorOS Onboarding</h1>
-        <p>Loading your restaurant profile…</p>
+        <h1 className="text-3xl font-bold">SelectorOS Onboarding</h1>
+        <p className="text-red-600 mt-4">Error: {error}</p>
+        <a href="/dashboard" className="button mt-6">
+          Go to dashboard
+        </a>
       </main>
     );
   }
 
-  if (errorMsg) {
-    return (
-      <main className="p-8 text-center">
-        <h1 className="text-3xl font-bold mb-4">SelectorOS Onboarding</h1>
-        <p className="text-red-600 mb-4">Error: {errorMsg}</p>
-        <button
-          className="button-inverse"
-          type="button"
-          onClick={() => router.replace('/dashboard')}
-        >
-          Go to dashboard
-        </button>
-      </main>
-    );
+  if (!restaurant) {
+    return <main className="p-8 text-center">Loading…</main>;
   }
 
   return (
-    <main className="p-4 sm:p-8 max-w-xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4 text-center">Welcome to SelectorOS</h1>
-      <p className="text-gray-600 text-center mb-6">
-        Tell us a bit about your restaurant. This helps us set up your dashboard correctly.
-      </p>
+    <main className="p-8 text-center">
+      <h1 className="text-3xl font-bold">SelectorOS Onboarding</h1>
+      <p className="mt-4">Welcome! Your restaurant is ready:</p>
+      <p className="mt-2 font-semibold">{restaurant.name}</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm mb-1 font-medium">
-            Restaurant name <span className="text-red-500">*</span>
-          </label>
-          <input
-            className="input w-full"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Shang Shi"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1 font-medium">Location</label>
-          <input
-            className="input w-full"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. Tallinn, Estonia"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1 font-medium">Cuisine / Concept</label>
-          <input
-            className="input w-full"
-            value={cuisine}
-            onChange={(e) => setCuisine(e.target.value)}
-            placeholder="e.g. Cantonese Fine Dining"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="button-inverse w-full mt-4"
-          disabled={saving}
-        >
-          {saving ? 'Saving…' : 'Save and go to dashboard'}
-        </button>
-
-        <p className="text-xs text-gray-500 text-center mt-2">
-          You can change this information later in your settings.
-        </p>
-      </form>
+      <a href="/dashboard" className="button mt-8">
+        Continue to dashboard
+      </a>
     </main>
   );
 }
