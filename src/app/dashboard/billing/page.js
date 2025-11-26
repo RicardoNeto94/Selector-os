@@ -59,35 +59,44 @@ export default function BillingPage() {
   }
 
   async function handleOpenPortal() {
-    setError(null);
-    setPortalLoading(true);
+  setError(null);
+  setPortalLoading(true);
 
+  try {
+    const res = await fetch("/api/create-portal", {
+      method: "POST",
+    });
+
+    let json = null;
     try {
-      const res = await fetch("/api/create-portal", {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to create billing portal session");
-      }
-
-      const json = await res.json();
-
-      if (!json.url) {
-        throw new Error("No portal URL returned");
-      }
-
-      setPortalUrl(json.url);
-
-      // redirect immediately
-      window.location.href = json.url;
-    } catch (err) {
-      console.error(err);
-      setError("Could not open Stripe billing portal.");
-    } finally {
-      setPortalLoading(false);
+      json = await res.json();
+    } catch (_) {
+      // ignore JSON parse errors
     }
+
+    if (!res.ok) {
+      const msg =
+        json?.error ||
+        `Failed to create billing portal session (status ${res.status})`;
+      throw new Error(msg);
+    }
+
+    if (!json?.url) {
+      throw new Error("No portal URL returned from server.");
+    }
+
+    setPortalUrl(json.url);
+
+    // redirect immediately
+    window.location.href = json.url;
+  } catch (err) {
+    console.error("Billing portal error (client):", err);
+    setError(err.message || "Could not open Stripe billing portal.");
+  } finally {
+    setPortalLoading(false);
   }
+}
+
 
   if (loading) {
     return <p className="text-gray-400">Loading billing details…</p>;
