@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import "../globals.css";
+
+// FIXED — correct path to globals.css
+import "../../globals.css";
 
 export default function DashboardLayout({ children }) {
   const [logoSmall, setLogoSmall] = useState(false);
