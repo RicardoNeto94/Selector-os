@@ -1,16 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import {
-  ChevronDownIcon,
-} from "@heroicons/react/24/outline";
-
+import { usePathname } from "next/navigation";
 import "../../styles/globals.css";
 
 export default function DashboardLayout({ children }) {
   const [logoSmall, setLogoSmall] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLogoSmall(true), 350);
@@ -20,75 +17,98 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
 
-      {/* Sidebar */}
-      <aside className="
-        w-64 
-        bg-white/80 
-        backdrop-blur-xl 
-        border-r 
-        px-6 
-        py-8 
-        flex 
-        flex-col 
-        justify-between 
-      ">
+      {/* SIDEBAR */}
+      <aside
+        className={`
+          relative
+          ${collapsed ? "w-20" : "w-64"}
+          bg-white/80 
+          backdrop-blur-xl 
+          border-r 
+          px-4 
+          py-8 
+          flex 
+          flex-col 
+          justify-between 
+          transition-all 
+          duration-300
+        `}
+      >
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="
+            absolute -right-4 top-8 
+            w-8 h-8 
+            bg-white 
+            shadow-md 
+            rounded-full 
+            flex items-center justify-center 
+            hover:bg-gray-100 
+            transition
+          "
+        >
+          {collapsed ? "›" : "‹"}
+        </button>
+
+        {/* Main nav */}
         <nav className="space-y-6">
-          <div className="space-y-3">
-            <Link href="/dashboard" className="sidebar-item block text-lg font-semibold text-gray-900 hover:text-green-600 transition">
-              Dashboard
-            </Link>
+          <div className="space-y-2">
+            <SidebarItem href="/dashboard" collapsed={collapsed}>
+              <span className="text-lg">🏠</span>
+              {!collapsed && <span>Dashboard</span>}
+            </SidebarItem>
 
-            <Link href="/dashboard/menu" className="sidebar-item block text-gray-700 hover:text-green-600 transition">
-              🍽️ Menus
-            </Link>
+            <SidebarItem href="/dashboard/menu" collapsed={collapsed}>
+              <span>🍽️</span>
+              {!collapsed && <span>Menus</span>}
+            </SidebarItem>
 
-            <Link href="/dashboard/dishes" className="sidebar-item block text-gray-700 hover:text-green-600 transition">
-              🥢 Dishes
-            </Link>
+            <SidebarItem href="/dashboard/dishes" collapsed={collapsed}>
+              <span>🥢</span>
+              {!collapsed && <span>Dishes</span>}
+            </SidebarItem>
 
-            <Link href="/dashboard/allergens" className="sidebar-item block text-gray-700 hover:text-green-600 transition">
-              ⚠️ Allergens
-            </Link>
+            <SidebarItem href="/dashboard/allergens" collapsed={collapsed}>
+              <span>⚠️</span>
+              {!collapsed && <span>Allergens</span>}
+            </SidebarItem>
           </div>
 
-          <div className="pt-6 border-t space-y-3">
-            <Link href="/dashboard/settings" className="sidebar-item block text-gray-700 hover:text-green-600 transition">
-              ⚙️ Settings
-            </Link>
+          <div className="pt-6 border-t space-y-2">
+            <SidebarItem href="/dashboard/settings" collapsed={collapsed}>
+              <span>⚙️</span>
+              {!collapsed && <span>Settings</span>}
+            </SidebarItem>
 
-            <Link href="/dashboard/billing" className="sidebar-item block text-gray-700 hover:text-green-600 transition">
-              💳 Billing
-            </Link>
+            <SidebarItem href="/dashboard/billing" collapsed={collapsed}>
+              <span>💳</span>
+              {!collapsed && <span>Billing</span>}
+            </SidebarItem>
 
-            <Link href="/logout" className="sidebar-item block text-red-500 hover:text-red-600 transition">
-              ⤫ Log out
-            </Link>
+            <SidebarItem href="/logout" collapsed={collapsed} danger>
+              <span>⤫</span>
+              {!collapsed && <span>Log out</span>}
+            </SidebarItem>
           </div>
         </nav>
       </aside>
 
-      {/* Main area */}
+      {/* MAIN AREA */}
       <div className="flex-1 flex flex-col">
 
         {/* Top bar */}
         <header className="h-16 border-b flex items-center px-6 relative bg-white">
-
-          {/* Animated Logo */}
           <div
-            className={`transition-all duration-500 font-bold ${
-              logoSmall
+            className={`
+              transition-all duration-500 font-bold
+              ${logoSmall
                 ? "text-xl text-green-600 absolute left-6"
-                : "text-4xl mx-auto"
-            }`}
+                : "text-4xl mx-auto"}
+            `}
           >
             Selector<span className="text-green-500">OS</span>
           </div>
-
-          {/* PROFILE BUTTON */}
-          <div className="absolute right-6">
-            <ProfileDropdown />
-          </div>
-
         </header>
 
         {/* Horizontal tabs */}
@@ -100,99 +120,52 @@ export default function DashboardLayout({ children }) {
           <Tab href="/dashboard/settings" label="Settings" />
         </div>
 
-        {/* Content */}
+        {/* Page content */}
         <main className="flex-1 overflow-y-auto px-12 py-10 page-fade">
           {children}
         </main>
-
       </div>
     </div>
   );
 }
 
-/* ---------------------------------------------
-   TAB COMPONENT
-----------------------------------------------*/
+/* Sidebar item with active highlight */
+function SidebarItem({ href, collapsed, danger, children }) {
+  const pathname = usePathname();
+  const active = pathname === href;
 
+  return (
+    <Link
+      href={href}
+      className={`
+        sidebar-item flex items-center gap-3 text-sm
+        ${danger ? "text-red-500 hover:text-red-600" : "text-gray-700 hover:text-green-600"}
+        ${active && !danger ? "sidebar-item-active" : ""}
+        ${collapsed ? "justify-center" : ""}
+      `}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/* Top tabs using current pathname */
 function Tab({ href, label }) {
-  const isActive = typeof window !== "undefined" && window.location.pathname === href;
+  const pathname = usePathname();
+  const active = pathname === href;
 
   return (
     <Link
       href={href}
       className={`
         relative pb-2 transition 
-        ${isActive ? "text-green-600 font-semibold" : "text-gray-600 hover:text-gray-900"}
+        ${active ? "text-green-600 font-semibold" : "text-gray-600 hover:text-gray-900"}
       `}
     >
       {label}
-      {isActive && (
+      {active && (
         <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-green-500 rounded-full"></span>
       )}
     </Link>
-  );
-}
-
-/* ---------------------------------------------
-   PROFILE DROPDOWN COMPONENT
-----------------------------------------------*/
-
-function ProfileDropdown() {
-  const supabase = createClientComponentClient();
-  const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const ref = useRef(null);
-
-  // Load user
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-  }, []);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    function close(e) {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, []);
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/sign-in";
-  };
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-full transition"
-      >
-        <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-semibold">
-          {user?.email?.charAt(0)?.toUpperCase() || "U"}
-        </div>
-
-        <ChevronDownIcon className="w-4 h-4 text-gray-600" />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 mt-3 w-56 rounded-xl bg-white shadow-xl border p-4 z-50 animate-fade-scale">
-          <p className="text-sm text-gray-700 font-medium truncate">
-            {user?.email}
-          </p>
-
-          <hr className="my-3" />
-
-          <button
-            onClick={logout}
-            className="w-full text-left text-red-600 hover:bg-red-50 py-2 px-2 rounded-lg font-semibold transition"
-          >
-            Log Out
-          </button>
-        </div>
-      )}
-    </div>
   );
 }
