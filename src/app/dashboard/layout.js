@@ -66,18 +66,25 @@ export default function DashboardLayout({ children }) {
       <div className="flex-1 flex flex-col">
 
         {/* Top bar */}
-        <header className="h-16 border-b bg-white/70 backdrop-blur-lg flex items-center px-6 relative shadow-sm">
+<header className="h-16 border-b flex items-center px-6 relative bg-white">
 
-          <div
-            className={`transition-all duration-500 font-bold tracking-tight ${
-              logoSmall
-                ? "text-xl text-green-600 absolute right-6"
-                : "text-4xl mx-auto"
-            }`}
-          >
-            Selector<span className="text-green-500">OS</span>
-          </div>
-        </header>
+  {/* Animated Logo */}
+  <div
+    className={`transition-all duration-500 font-bold ${
+      logoSmall
+        ? "text-xl text-green-600 absolute left-6"
+        : "text-4xl mx-auto"
+    }`}
+  >
+    Selector<span className="text-green-500">OS</span>
+  </div>
+
+  {/* PROFILE BUTTON */}
+  <div className="absolute right-6">
+    <ProfileDropdown />
+  </div>
+
+</header>
 
         {/* Horizontal tabs */}
         <div className="border-b bg-white/60 backdrop-blur-md flex space-x-6 px-6 py-4 text-sm">
