@@ -17,7 +17,6 @@ export default function OnboardingPage() {
         return;
       }
 
-      // fetch restaurant owned by this user
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
@@ -40,14 +39,12 @@ export default function OnboardingPage() {
         Selector<span className="text-green-500">OS</span> Onboarding
       </h1>
 
-      {/* Error state */}
       {error && (
         <div className="text-red-500 text-xl mb-6">
           Error: {error}
         </div>
       )}
 
-      {/* Success state */}
       {restaurant && (
         <>
           <p className="text-lg mb-6">
