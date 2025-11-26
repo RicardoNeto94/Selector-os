@@ -64,7 +64,51 @@
     @apply custom-focus rounded-md font-semibold text-green-400;
   }
 
-  .row {
+    .row {
     @apply flex flex-row items-center justify-start gap-1;
   }
+
+} 
+
+/* Smooth fade for all route transitions */
+.page-fade {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI hover animation */
+.kpi-card {
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.07);
+}
+
+/* Sidebar highlight */
+.sidebar-item {
+  border-left: 3px solid transparent;
+  padding-left: 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background: #f2f2f2;
+}
+
+.sidebar-item-active {
+  border-left-color: #4ade80;
+  background: #ecfdf5;
+  font-weight: 600;
+}
+
+/* Subtle Apple-style background */
+body {
+  background: linear-gradient(to bottom, #fafafa, #f4f4f4);
 }
