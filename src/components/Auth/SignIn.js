@@ -16,27 +16,28 @@ const SignIn = () => {
   const supabase = createClientComponentClient();
   const [errorMsg, setErrorMsg] = useState(null);
 
-  // Email/password sign-in (existing behaviour)
-  async function signIn(formData) {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password,
-    });
+  // Email/password sign-in
+  const signIn = async ({ email, password }) => {
+    setErrorMsg(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setErrorMsg(error.message);
+    } else {
+      window.location.href = '/onboarding';
     }
-  }
+  };
 
- const { error } = await supabase.auth.signInWithOAuth({
-  provider: 'google',
-  options: {
-    redirectTo: `${window.location.origin}/onboarding`,
-  },
-});
-  
+  // Google OAuth sign-in
+  const handleGoogleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/onboarding`,
+      },
+    });
+
     if (error) {
-      console.error(error);
       setErrorMsg(error.message);
     }
   };
@@ -44,11 +45,9 @@ const SignIn = () => {
   return (
     <div className="card">
       <h2 className="w-full text-center">Sign In</h2>
+
       <Formik
-        initialValues={{
-          email: '',
-          password: '',
-        }}
+        initialValues={{ email: '', password: '' }}
         validationSchema={SignInSchema}
         onSubmit={signIn}
       >
@@ -56,32 +55,26 @@ const SignIn = () => {
           <Form className="column w-full">
             <label htmlFor="email">Email</label>
             <Field
-              className={cn(
-                'input',
-                errors.email && touched.email && 'bg-red-50'
-              )}
+              className={cn('input', errors.email && touched.email && 'bg-red-50')}
               id="email"
               name="email"
               placeholder="jane@acme.com"
               type="email"
             />
-            {errors.email && touched.email ? (
+            {errors.email && touched.email && (
               <div className="text-red-600">{errors.email}</div>
-            ) : null}
+            )}
 
             <label htmlFor="password">Password</label>
             <Field
-              className={cn(
-                'input',
-                errors.password && touched.password && 'bg-red-50'
-              )}
+              className={cn('input', errors.password && touched.password && 'bg-red-50')}
               id="password"
               name="password"
               type="password"
             />
-            {errors.password && touched.password ? (
+            {errors.password && touched.password && (
               <div className="text-red-600">{errors.password}</div>
-            ) : null}
+            )}
 
             <Link href="/reset-password" className="link w-full">
               Forgot your password?
