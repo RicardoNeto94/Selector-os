@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
+// ⭐ Added missing icons here
 import {
   ChartBarIcon,
   PlusIcon,
   Cog6ToothIcon,
   ClipboardDocumentListIcon,
+  ExclamationTriangleIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 
 export default function DashboardHome() {
@@ -23,7 +27,9 @@ export default function DashboardHome() {
 
   const loadDashboard = async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     // Fetch restaurant
@@ -45,8 +51,9 @@ export default function DashboardHome() {
       .from("allergens")
       .select("*", { count: "exact", head: true });
 
-    const { data: missing } = await supabase
-      .rpc("dishes_missing_allergens", { rid: r.id });
+    const { data: missing } = await supabase.rpc("dishes_missing_allergens", {
+      rid: r.id,
+    });
 
     const { data: lastDish } = await supabase
       .from("dishes")
@@ -64,7 +71,7 @@ export default function DashboardHome() {
       menus: 1, // For now you only have Main Menu; scalable later
     });
 
-    // Activity feed (simple version)
+    // Activity feed
     const { data: recent } = await supabase
       .from("dishes")
       .select("*")
@@ -82,7 +89,6 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-12">
-
       {/* HEADER */}
       <div className="bg-white shadow-sm border rounded-2xl p-8">
         <h1 className="text-3xl font-bold mb-1">{restaurant.name}</h1>
@@ -99,17 +105,35 @@ export default function DashboardHome() {
 
       {/* KPI GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <KPICard
+          title="Total Dishes"
+          value={stats.dishes}
+          icon={<ChartBarIcon className="w-6 h-6" />}
+        />
 
-        <KPICard title="Total Dishes" value={stats.dishes} icon={<ChartBarIcon className="w-6 h-6" />} />
+        <KPICard
+          title="Allergens Used"
+          value={stats.allergens}
+          icon={<ClipboardDocumentListIcon className="w-6 h-6" />}
+        />
 
-        <KPICard title="Allergens Used" value={stats.allergens} icon={<ClipboardDocumentListIcon className="w-6 h-6" />} />
+        <KPICard
+          title="Missing Labels"
+          value={stats.missingLabels}
+          icon={<ExclamationTriangleIcon className="w-6 h-6 text-red-500" />}
+        />
 
-        <KPICard title="Missing Labels" value={stats.missingLabels} icon={<ExclamationTriangleIcon className="w-6 h-6 text-red-500" />} />
+        <KPICard
+          title="Menus"
+          value={stats.menus}
+          icon={<Bars3Icon className="w-6 h-6" />}
+        />
 
-        <KPICard title="Menus" value={stats.menus} icon={<Bars3Icon className="w-6 h-6" />} />
-
-        <KPICard title="Last Added Dish" value={stats.lastDish} icon={<PlusIcon className="w-6 h-6" />} />
-
+        <KPICard
+          title="Last Added Dish"
+          value={stats.lastDish}
+          icon={<PlusIcon className="w-6 h-6" />}
+        />
       </div>
 
       {/* QUICK ACTIONS */}
@@ -117,10 +141,26 @@ export default function DashboardHome() {
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <ActionButton href="/dashboard/dishes" label="Add Dish" icon={<PlusIcon className="w-6 h-6" />} />
-          <ActionButton href="/dashboard/allergens" label="Add Allergen" icon={<ClipboardDocumentListIcon className="w-6 h-6" />} />
-          <ActionButton href="/dashboard/menu" label="Edit Menu" icon={<ChartBarIcon className="w-6 h-6" />} />
-          <ActionButton href="/dashboard/settings" label="Settings" icon={<Cog6ToothIcon className="w-6 h-6" />} />
+          <ActionButton
+            href="/dashboard/dishes"
+            label="Add Dish"
+            icon={<PlusIcon className="w-6 h-6" />}
+          />
+          <ActionButton
+            href="/dashboard/allergens"
+            label="Add Allergen"
+            icon={<ClipboardDocumentListIcon className="w-6 h-6" />}
+          />
+          <ActionButton
+            href="/dashboard/menu"
+            label="Edit Menu"
+            icon={<ChartBarIcon className="w-6 h-6" />}
+          />
+          <ActionButton
+            href="/dashboard/settings"
+            label="Settings"
+            icon={<Cog6ToothIcon className="w-6 h-6" />}
+          />
         </div>
       </div>
 
@@ -143,7 +183,6 @@ export default function DashboardHome() {
           ))}
         </ul>
       </div>
-
     </div>
   );
 }
