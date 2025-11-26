@@ -131,8 +131,9 @@ export default function BillingPage() {
             </p>
           </div>
 
+          {/* 🔧 changed disabled condition here */}
           <UpgradeButton
-            disabled={!restaurant?.stripe_customer_id || portalLoading}
+            disabled={portalLoading}
             loading={portalLoading}
             onClick={handleOpenPortal}
           />
@@ -246,6 +247,7 @@ function UpgradeButton({ disabled, loading, onClick }) {
       `}
       disabled={disabled}
       onClick={onClick}
+      type="button"
     >
       {loading ? "Opening…" : "Manage / Upgrade Plan"}
     </button>
