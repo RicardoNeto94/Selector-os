@@ -1,4 +1,4 @@
-import "../theme.css";
+import "../../styles/theme.css";
 
 export const dynamic = "force-dynamic";
 
