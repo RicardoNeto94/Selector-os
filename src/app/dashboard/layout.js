@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }) {
     <div className="min-h-screen bg-[#f5f6fa] flex flex-col">
       {/* TOP BAR */}
       <header className="bg-gradient-to-br from-brand-dark to-brand-darkAlt text-white shadow-soft">
-        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
+        <nav className="mx-auto max-w-7xl px-8 pb-3 flex gap-4 text-sm overflow-x-auto">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center text-lg font-bold">
               S
@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }) {
       </header>
 
       {/* BODY */}
-      <div className="flex flex-1 mx-auto max-w-7xl w-full px-4 md:px-8 py-6 gap-6">
+      <div className="flex flex-1 w-full px-4 md:px-8 py-6 gap-6">
         {/* SIDEBAR */}
         <aside className="hidden md:flex flex-col w-60 bg-white rounded-xl3 shadow-card p-4">
           <div className="text-xs font-semibold text-gray-400 uppercase px-2 mb-3">
