@@ -1,5 +1,3 @@
-import "./Sidebar.css";
-
 export default function Sidebar({ active = "" }) {
   const items = [
     { id: "dashboard", icon: "🏠", href: "/dashboard" },
