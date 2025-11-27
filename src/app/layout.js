@@ -1,7 +1,8 @@
 import "../styles/globals.css";
 import "../styles/theme.css";
-import "../styles/sidebar.css";  // ⬅ Add this
-import Sidebar from "./components/Sidebar";  // ⬅ Add this
+import "../styles/sidebar.css";
+
+import Sidebar from "./components/Sidebar"; // Correct import
 
 export const metadata = {
   title: "SelectorOS",
@@ -14,11 +15,13 @@ export default function RootLayout({ children }) {
       <body>
         <div className="flex min-h-screen">
 
-          {/* NEW GLOW SIDEBAR */}
+          {/* SIDEBAR */}
           <Sidebar active="dashboard" />
 
           {/* MAIN AREA */}
-          <main className="flex-1 p-10">{children}</main>
+          <main className="flex-1 p-10">
+            {children}
+          </main>
         </div>
       </body>
     </html>
