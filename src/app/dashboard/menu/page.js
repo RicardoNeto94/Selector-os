@@ -74,34 +74,39 @@ export default function MenuPage() {
 
   // 🔴 NEW: delete menu handler
   async function handleDeleteMenu(menuId) {
-    if (!confirm("Are you sure you want to delete this menu? This cannot be undone.")) {
-      return;
-    }
-
-    setGlobalError(null);
-    setDeleteLoadingId(menuId);
-
-    try:
-      const res = await fetch("/api/menu/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ menuId }),
-      });
-
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(json.error || "Failed to delete menu");
-      }
-
-      // Remove from local state so UI updates immediately
-      setMenus((prev) => prev.filter((m) => m.id !== menuId));
-    } catch (err) {
-      console.error("Delete menu error (client):", err);
-      setGlobalError(err.message || "Could not delete menu");
-    } finally {
-      setDeleteLoadingId(null);
-    }
+  if (
+    !confirm(
+      "Are you sure you want to delete this menu? This cannot be undone."
+    )
+  ) {
+    return;
   }
+
+  setGlobalError(null);
+  setDeleteLoadingId(menuId);
+
+  try {
+    const res = await fetch("/api/menu/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ menuId }),
+    });
+
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(json.error || "Failed to delete menu");
+    }
+
+    // Remove from local state so UI updates immediately
+    setMenus((prev) => prev.filter((m) => m.id !== menuId));
+  } catch (err) {
+    console.error("Delete menu error (client):", err);
+    setGlobalError(err.message || "Could not delete menu");
+  } finally {
+    setDeleteLoadingId(null);
+  }
+}
+
 
   // 🔵 Existing: publish handler (you already have this wired to /api/menu/publish)
   async function handlePublish(menuId) {
