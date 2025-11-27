@@ -1,0 +1,28 @@
+:root {
+  --primary: #d4af37;
+  --secondary: #ffffff;
+  --accent: #8b6f47;
+  --background: none;
+  --logo: none;
+  --font: Inter, sans-serif;
+  --card-style: glass;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--background) no-repeat center center / cover;
+}
+
+.card {
+  border-radius: 20px;
+  padding: 1.5rem;
+  background: var(--card-style) == glass
+    ? rgba(255,255,255,0.6)
+    : white;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.accent-text {
+  color: var(--accent);
+}
