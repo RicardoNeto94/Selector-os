@@ -1,196 +1,137 @@
-"use client";
-
-import { useState, useEffect } from "react";
+// src/app/dashboard/layout.js
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import "../../styles/globals.css";
+
+export const dynamic = "force-dynamic";
+
+const navItems = [
+  { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard/menu", label: "Menu" },
+  { href: "/dashboard/dishes", label: "Dishes" },
+  { href: "/dashboard/allergen", label: "Allergens" },
+  { href: "/dashboard/settings", label: "Settings" },
+];
+
+const sidebarItems = [
+  { href: "/dashboard", label: "Dashboard", icon: "🏠" },
+  { href: "/dashboard/menu", label: "Menus", icon: "📋" },
+  { href: "/dashboard/dishes", label: "Dishes", icon: "🍽️" },
+  { href: "/dashboard/allergen", label: "Allergen", icon: "⚠️" },
+  { href: "/dashboard/billing", label: "Billing", icon: "💳" },
+  { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
+];
 
 export default function DashboardLayout({ children }) {
-  const [logoSmall, setLogoSmall] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLogoSmall(true), 350);
-    return () => clearTimeout(timer);
-  }, []);
+  const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
-
-      {/* SIDEBAR */}
-      <aside
-        className={`
-          relative
-          ${collapsed ? "w-20" : "w-64"}
-          bg-white/80 
-          backdrop-blur-xl 
-          border-r 
-          px-4 
-          py-8 
-          flex 
-          flex-col 
-          justify-between 
-          transition-all 
-          duration-300
-          z-40
-        `}
-      >
-        {/* Collapse toggle */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="
-            absolute top-8 
-            -right-3
-            w-9 h-9 
-            bg-white 
-            shadow-lg 
-            rounded-full 
-            flex items-center justify-center 
-            text-gray-600
-            hover:bg-gray-100 
-            transition-all
-            z-50
-          "
-        >
-          <span className="text-lg">{collapsed ? "›" : "‹"}</span>
-        </button>
-
-        {/* Nav */}
-        <nav className="space-y-6">
-          <div className="space-y-2">
-            <SidebarItem href="/dashboard" collapsed={collapsed}>
-              🏠
-              {!collapsed && <span>Dashboard</span>}
-            </SidebarItem>
-
-            <SidebarItem href="/dashboard/menu" collapsed={collapsed}>
-              🍽️
-              {!collapsed && <span>Menus</span>}
-            </SidebarItem>
-
-            <SidebarItem href="/dashboard/dishes" collapsed={collapsed}>
-              🥢
-              {!collapsed && <span>Dishes</span>}
-            </SidebarItem>
-
-            <SidebarItem href="/dashboard/allergen" collapsed={collapsed}>
-              ⚠️
-              {!collapsed && <span>Allergen</span>}
-            </SidebarItem>
+    <div className="min-h-screen bg-[#f5f6fa] flex flex-col">
+      {/* TOP BAR */}
+      <header className="bg-gradient-to-br from-brand-dark to-brand-darkAlt text-white shadow-soft">
+        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center text-lg font-bold">
+              S
+            </div>
+            <div>
+              <div className="text-xl font-semibold tracking-tight">
+                SelectorOS
+              </div>
+              <div className="text-xs text-white/60 -mt-0.5">
+                Service-ready allergen & menu cockpit
+              </div>
+            </div>
           </div>
 
-          <div className="pt-6 border-t space-y-2">
-            <SidebarItem href="/dashboard/settings" collapsed={collapsed}>
-              ⚙️
-              {!collapsed && <span>Settings</span>}
-            </SidebarItem>
-
-            <SidebarItem href="/dashboard/billing" collapsed={collapsed}>
-              💳
-              {!collapsed && <span>Billing</span>}
-            </SidebarItem>
-
-            <SidebarItem href="/logout" collapsed={collapsed} danger>
-              ⤫
-              {!collapsed && <span>Log out</span>}
-            </SidebarItem>
+          {/* Small top stats / placeholders */}
+          <div className="hidden md:flex items-center gap-6 text-sm text-white/70">
+            <div className="flex flex-col items-end leading-tight">
+              <span className="text-[11px] uppercase tracking-wide text-white/40">
+                Active restaurant
+              </span>
+              <span className="font-medium">My Restaurant</span>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <button className="flex items-center gap-2 text-xs bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded-full transition">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Live</span>
+            </button>
           </div>
-        </nav>
-      </aside>
-
-      {/* MAIN AREA */}
-      <div className="flex-1 flex flex-col">
-        <header className="h-16 border-b flex items-center px-6 relative bg-white">
-          <div
-            className={`
-              transition-all duration-500 font-bold
-              ${logoSmall
-                ? "text-xl text-green-600 absolute left-6"
-                : "text-4xl mx-auto"}
-            `}
-          >
-            Selector<span className="text-green-500">OS</span>
-          </div>
-        </header>
-
-        <div className="border-b bg-white/60 backdrop-blur-md flex space-x-6 px-6 py-4 text-sm">
-          <Tab href="/dashboard" label="Overview" />
-          <Tab href="/dashboard/menu" label="Menu" />
-          <Tab href="/dashboard/dishes" label="Dishes" />
-          <Tab href="/dashboard/allergens" label="Allergens" />
-          <Tab href="/dashboard/settings" label="Settings" />
         </div>
 
-        <main className="flex-1 overflow-y-auto px-12 py-10 page-fade">
-          {children}
+        {/* TOP TABS (Overview / Menu / Dishes / Allergens / Settings) */}
+        <nav className="mx-auto max-w-7xl px-8 pb-3 flex gap-4 text-sm overflow-x-auto">
+          {navItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== "/dashboard" &&
+                pathname?.startsWith(item.href));
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-4 py-2 rounded-full transition whitespace-nowrap
+                  ${
+                    active
+                      ? "bg-white text-brand-dark shadow-md"
+                      : "text-white/65 hover:bg-white/10"
+                  }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </header>
+
+      {/* BODY */}
+      <div className="flex flex-1 mx-auto max-w-7xl w-full px-4 md:px-8 py-6 gap-6">
+        {/* SIDEBAR */}
+        <aside className="hidden md:flex flex-col w-60 bg-white rounded-xl3 shadow-card p-4">
+          <div className="text-xs font-semibold text-gray-400 uppercase px-2 mb-3">
+            Navigation
+          </div>
+          <nav className="space-y-1">
+            {sidebarItems.map((item) => {
+              const active =
+                pathname === item.href ||
+                (item.href !== "/dashboard" &&
+                  pathname?.startsWith(item.href));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl2 text-sm transition
+                    ${
+                      active
+                        ? "bg-[#111827] text-white shadow-soft"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="mt-auto pt-4 border-t border-gray-100">
+            <button className="w-full text-left text-xs text-gray-400 hover:text-gray-700 px-2 py-1">
+              Log out
+            </button>
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT */}
+        <main className="flex-1">
+          {/* Slight “floating” effect */}
+          <div className="rounded-xl3 shadow-soft bg-white/70 backdrop-blur-sm p-6 md:p-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
-  );
-}
-
-/* Sidebar item */
-function SidebarItem({ href, collapsed, danger, children }) {
-  const pathname = usePathname();
-  const active = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      className={`
-        flex items-center 
-        ${collapsed ? "justify-center" : "justify-between"}
-        group
-        sidebar-item 
-        text-sm
-        rounded-xl
-        px-3 py-2
-        transition
-        ${danger ? "text-red-500 hover:text-red-600" : "text-gray-700 hover:text-green-600"}
-        ${active && !danger ? "sidebar-item-active" : ""}
-      `}
-    >
-      <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
-        <span className="text-xl">{children[0]}</span>
-        {!collapsed && <span className="text-sm">{children[1]}</span>}
-      </div>
-
-      {!collapsed && !danger && (
-        <span
-          className="
-            w-7 h-7 
-            flex items-center justify-center
-            rounded-full 
-            bg-gray-100 
-            text-gray-500 
-            text-xs
-            opacity-0 group-hover:opacity-100
-            translate-x-1 group-hover:translate-x-0
-            transition-all 
-          "
-        >
-          ❯
-        </span>
-      )}
-    </Link>
-  );
-}
-
-/* Tabs */
-function Tab({ href, label }) {
-  const pathname = usePathname();
-  const active = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      className={`
-        relative pb-2 transition 
-        ${active ? "text-green-600 font-semibold" : "text-gray-600 hover:text-gray-900"}
-      `}
-    >
-      {label}
-      {active && <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-green-500 rounded-full"></span>}
-    </Link>
   );
 }
