@@ -1,26 +1,29 @@
 import "../styles/globals.css";
 import "../styles/theme.css";
+import { Satoshi } from "next/font/google";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "SelectorOS",
+  description: "Restaurant menu & allergen cockpit",
+};
 
-export default async function RestaurantPublicLayout({ children, params }) {
-  const slug = params.slug;
-
-  // choose theme based on slug prefix
-  const themeFile =
-    slug.includes("shang") ? "theme-shangshi.css" :
-    slug.includes("koyo") ? "theme-koyo.css" :
-    "theme-modern.css";
-
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="stylesheet" href={`/r/${slug}/${themeFile}`} />
-      </head>
-
       <body>
-        <div className="container">
-          {children}
+        <div className="flex min-h-screen">
+          {/* SIDEBAR */}
+          <aside className="sidebar">
+            <a href="/dashboard" className="active">🏠</a>
+            <a href="/dashboard/menu">📋</a>
+            <a href="/dashboard/dishes">🍽️</a>
+            <a href="/dashboard/allergen">⚠️</a>
+            <a href="/dashboard/billing">💳</a>
+            <a href="/dashboard/settings">⚙️</a>
+          </aside>
+
+          {/* MAIN AREA */}
+          <main className="flex-1">{children}</main>
         </div>
       </body>
     </html>
