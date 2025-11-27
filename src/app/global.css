@@ -1,0 +1,12 @@
+/* Global resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Ensure full dark theme */
+html, body {
+  height: 100%;
+  background: #0f0f12;
+}
