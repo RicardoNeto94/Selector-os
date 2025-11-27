@@ -1,0 +1,18 @@
+/* ========== SHANG SHI LUXURY THEME ========== */
+
+:root {
+  --bg: radial-gradient(circle at center, #d1b16a, #000000 80%);
+  --text: #fff;
+
+  --primary: #d4af37;
+  --secondary: #e8d8a0;
+
+  --card-bg: rgba(255, 255, 255, 0.12);
+  --card-border: rgba(255, 255, 255, 0.18);
+  --card-radius: 22px;
+
+  --accent: #f4d77c;
+
+  --font-primary: 'Playfair Display', serif;
+  --font-secondary: 'Inter', sans-serif;
+}
