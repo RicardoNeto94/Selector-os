@@ -1,7 +1,7 @@
 import "../styles/globals.css";
 import "../styles/theme.css";
 import "../styles/sidebar.css";  // ⬅ Add this
-import Sidebar from "./components/Sidebar.js";  // ⬅ Add this
+import Sidebar from "./components/Sidebar";  // ⬅ Add this
 
 export const metadata = {
   title: "SelectorOS",
