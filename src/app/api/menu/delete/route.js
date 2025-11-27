@@ -1,24 +1,12 @@
 // src/app/api/menu/delete/route.js
-export const dynamic = "force-dynamic";
 
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 export async function POST(req) {
-  const supabase = createRouteHandlerClient({ cookies });
-
   try {
-    const { menuId } = await req.json();
+    const supabase = createRouteHandlerClient({ cookies });
 
-    if (!menuId) {
-      return NextResponse.json(
-        { error: "Missing menuId in request body" },
-        { status: 400 }
-      );
-    }
-
-    // Logged-in user
     const {
       data: { user },
       error: userError,
@@ -26,44 +14,59 @@ export async function POST(req) {
 
     if (userError || !user) {
       console.error("User error:", userError);
-      return NextResponse.json({ error: "Not logged in" }, { status: 401 });
+      return Response.json({ error: "Not logged in" }, { status: 401 });
     }
 
-    // Restaurant for this user
-    const { data: restaurant, error: restaurantError } = await supabase
-      .from("restaurants")
-      .select("id")
-      .eq("owner_id", user.id)
+    const body = await req.json();
+    const menuId = body.menuId;
+
+    if (!menuId) {
+      return Response.json({ error: "menuId is required" }, { status: 400 });
+    }
+
+    // Optional: make sure this menu belongs to the logged-in owner
+    const { data: menu, error: menuError } = await supabase
+      .from("menus")
+      .select("id, restaurant_id")
+      .eq("id", menuId)
       .maybeSingle();
 
-    if (restaurantError || !restaurant) {
-      console.error("Restaurant error:", restaurantError);
-      return NextResponse.json(
-        { error: "Restaurant not found for this user" },
-        { status: 400 }
-      );
+    if (menuError || !menu) {
+      console.error("Menu not found or error:", menuError);
+      return Response.json({ error: "Menu not found" }, { status: 404 });
     }
 
-    // Delete the menu that belongs to this restaurant
+    // Check restaurant ownership
+    const { data: restaurant, error: restaurantError } = await supabase
+      .from("restaurants")
+      .select("id, owner_id")
+      .eq("id", menu.restaurant_id)
+      .maybeSingle();
+
+    if (restaurantError || !restaurant || restaurant.owner_id !== user.id) {
+      console.error("Restaurant ownership error:", restaurantError);
+      return Response.json({ error: "Not allowed to delete this menu" }, { status: 403 });
+    }
+
+    // Delete the menu
     const { error: deleteError } = await supabase
       .from("menus")
       .delete()
-      .eq("id", menuId)
-      .eq("restaurant_id", restaurant.id);
+      .eq("id", menuId);
 
     if (deleteError) {
       console.error("Delete menu error:", deleteError);
-      return NextResponse.json(
-        { error: "Failed to delete menu" },
+      return Response.json(
+        { error: deleteError.message ?? "Failed to delete menu" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
+    return Response.json({ success: true });
   } catch (err) {
-    console.error("Menu delete error (server):", err);
-    return NextResponse.json(
-      { error: "Failed to delete menu" },
+    console.error("Unexpected error in /api/menu/delete:", err);
+    return Response.json(
+      { error: "Unexpected error while deleting menu" },
       { status: 500 }
     );
   }
