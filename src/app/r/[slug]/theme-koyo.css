@@ -1,0 +1,18 @@
+/* ========== KOYO JAPANESE MINIMAL THEME ========== */
+
+:root {
+  --bg: #000000;
+  --text: #fafafa;
+
+  --primary: #d4001a;
+  --secondary: #666;
+
+  --card-bg: #0d0d0d;
+  --card-border: #222;
+  --card-radius: 14px;
+
+  --accent: #e31d28;
+
+  --font-primary: 'Noto Sans JP', sans-serif;
+  --font-secondary: 'Inter', sans-serif;
+}
