@@ -56,29 +56,34 @@ export default function DashboardLayout({ children }) {
 
         </div>
 
-        {/* 🔥 NEW HORIZONTAL NAV MENU */}
-        <nav className="mx-auto max-w-7xl px-8 pb-4 flex gap-3 text-sm overflow-x-auto">
-          {topTabs.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+     {/* 🔥 NEW CENTERED HORIZONTAL NAV MENU WITH ICONS */}
+<nav className="mx-auto max-w-7xl px-8 pb-4 flex justify-center text-sm">
+  <div className="flex gap-4 overflow-x-auto">
+    {topTabs.map((item) => {
+      const active =
+        pathname === item.href ||
+        (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-4 py-2 rounded-full transition whitespace-nowrap
-                  ${
-                    active
-                      ? "bg-white text-brand-dark shadow-md"
-                      : "text-white/70 hover:bg-white/10"
-                  }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`
+            flex items-center gap-2 px-4 py-2 rounded-full transition whitespace-nowrap
+            ${
+              active
+                ? "bg-white text-brand-dark shadow-md"
+                : "text-white/70 hover:bg-white/10"
+            }
+          `}
+        >
+          <span className="text-base">{item.icon}</span>
+          <span>{item.label}</span>
+        </Link>
+      );
+    })}
+  </div>
+</nav>
       </header>
 
       {/* MAIN CONTENT */}
