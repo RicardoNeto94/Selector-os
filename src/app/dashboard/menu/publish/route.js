@@ -1,103 +1,109 @@
 // src/app/api/menu/publish/route.js
 export const dynamic = "force-dynamic";
 
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import crypto from "crypto";
 
-export async function POST(request) {
+export async function POST(req) {
+  const supabase = createRouteHandlerClient({ cookies });
+
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    // 1) Read body
+    const { menuId } = await req.json();
 
-    // 1) Get logged in user
+    if (!menuId) {
+      return NextResponse.json(
+        { error: "Missing menuId in request body" },
+        { status: 400 }
+      );
+    }
+
+    // 2) Get logged in user
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      console.error("Auth error:", userError);
-      return Response.json({ error: "Not authenticated" }, { status: 401 });
+      console.error("User error:", userError);
+      return NextResponse.json({ error: "Not logged in" }, { status: 401 });
     }
 
-    // 2) Parse body for menuId
-    let body = {};
-    try {
-      body = await request.json();
-    } catch {
-      // if body is empty we'll handle below
-    }
-
-    const menuId = body?.menuId || body?.id;
-    if (!menuId) {
-      return Response.json(
-        { error: "menuId is required in request body" },
-        { status: 400 }
-      );
-    }
-
-    // 3) Get restaurant for this user
+    // 3) Get restaurant owned by this user
     const { data: restaurant, error: restaurantError } = await supabase
       .from("restaurants")
-      .select("id, name, slug")
+      .select("id, slug, name")
       .eq("owner_id", user.id)
       .maybeSingle();
 
-    if (restaurantError || !restaurant) {
+    if (restaurantError) {
       console.error("Restaurant error:", restaurantError);
-      return Response.json(
+    }
+
+    if (!restaurant) {
+      return NextResponse.json(
         { error: "Restaurant not found for this user" },
         { status: 404 }
       );
     }
 
-    // 4) Get the menu that belongs to this restaurant
+    // 4) Find the menu for this restaurant
     const { data: menu, error: menuError } = await supabase
       .from("menus")
-      .select("id, name, public_url")
+      .select("id, name, public_slug")
       .eq("id", menuId)
       .eq("restaurant_id", restaurant.id)
       .maybeSingle();
 
     if (menuError) {
-      console.error("Menu query error:", menuError);
-      return Response.json({ error: "Error loading menu" }, { status: 500 });
+      console.error("Menu select error:", menuError);
     }
 
     if (!menu) {
-      return Response.json(
-        { error: "Menu not found for this restaurant" },
-        { status: 404 }
-      );
+      console.error("Menu not found with", {
+        menuId,
+        restaurantId: restaurant.id,
+      });
+      return NextResponse.json({ error: "Menu not found" }, { status: 404 });
     }
 
-    // 5) Build public URL
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    // 5) Generate a slug if we don't have one yet
+    let slug = menu.public_slug;
 
-    const restaurantSlug = restaurant.slug || restaurant.id;
-    const publicUrl = `${baseUrl}/selector/${restaurantSlug}/${menu.id}`;
+    if (!slug) {
+      const safeName = menu.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
-    // 6) Save to menus.public_url
-    const { error: updateError } = await supabase
-      .from("menus")
-      .update({ public_url: publicUrl })
-      .eq("id", menu.id)
-      .eq("restaurant_id", restaurant.id);
+      const random = crypto.randomBytes(4).toString("hex");
+      slug = `${safeName}-${random}`;
 
-    if (updateError) {
-      console.error("Error saving public_url:", updateError);
-      return Response.json(
-        { error: "Failed to save public link" },
-        { status: 500 }
-      );
+      const { error: updateError } = await supabase
+        .from("menus")
+        .update({ public_slug: slug })
+        .eq("id", menu.id);
+
+      if (updateError) {
+        console.error("Failed to save public_slug:", updateError);
+        return NextResponse.json(
+          { error: "Could not save public link" },
+          { status: 500 }
+        );
+      }
     }
 
-    // 7) Return URL to client
-    return Response.json({ url: publicUrl });
+    // 6) Build public URL (this is where guests will see the allergen tool)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const publicUrl = `${baseUrl}/selector/${slug}`;
+
+    return NextResponse.json({ url: publicUrl });
   } catch (err) {
-    console.error("Publish route fatal error:", err);
-    return Response.json(
-      { error: "Unexpected error in publish route" },
+    console.error("Stripe menu publish error (server):", err);
+    return NextResponse.json(
+      { error: "Failed to create billing portal session on server" },
       { status: 500 }
     );
   }
