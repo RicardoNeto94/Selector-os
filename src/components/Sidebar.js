@@ -1,3 +1,5 @@
+import "./Sidebar.css";
+
 export default function Sidebar({ active = "" }) {
   const items = [
     { id: "dashboard", icon: "🏠", href: "/dashboard" },
@@ -10,7 +12,7 @@ export default function Sidebar({ active = "" }) {
 
   return (
     <aside className="sidebar-wall w-24 min-h-screen flex flex-col items-center py-12 space-y-8">
-      {items.map(item => (
+      {items.map((item) => (
         <a
           key={item.id}
           href={item.href}
