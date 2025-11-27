@@ -7,12 +7,12 @@ export const dynamic = "force-dynamic";
 
 /* TOP BAR TABS */
 const topTabs = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/menu", label: "Menus" },
-  { href: "/dashboard/dishes", label: "Dishes" },
-  { href: "/dashboard/allergen", label: "Allergens" },
-  { href: "/dashboard/billing", label: "Billing" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard", label: "Overview", icon: "🏠" },
+  { href: "/dashboard/menu", label: "Menus", icon: "📋" },
+  { href: "/dashboard/dishes", label: "Dishes", icon: "🍽️" },
+  { href: "/dashboard/allergen", label: "Allergens", icon: "⚠️" },
+  { href: "/dashboard/billing", label: "Billing", icon: "💳" },
+  { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
 ];
 
 export default function DashboardLayout({ children }) {
