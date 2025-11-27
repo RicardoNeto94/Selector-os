@@ -1,9 +1,8 @@
-/* Gradient wall behind sidebar */
 .sidebar-wall {
-  background: linear-gradient(to bottom, #1a1a1f, #0d0d0f);
+  background: linear-gradient(to bottom, #232428, #101114);
 }
 
-/* Shared pill style */
+/* Glass button */
 .sidebar-pill {
   width: 56px;
   height: 56px;
@@ -24,28 +23,28 @@
   transition: background 0.25s ease, transform 0.2s ease;
 }
 
-/* Hover */
+/* Hover effect */
 .sidebar-pill:hover {
-  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,0,0,0.45));
+  background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(0,0,0,0.45));
   transform: translateY(-2px);
 }
 
 /* Active glow */
 .sidebar-pill.active {
   position: relative;
-  background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(20,20,20,0.6));
+  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(20,20,20,0.65));
 }
 
 .sidebar-pill.active::before {
   content: "";
   position: absolute;
-  inset: -12px;
+  inset: -14px;
   background: radial-gradient(circle, rgba(0,255,150,0.35), transparent 70%);
   filter: blur(18px);
   z-index: -1;
 }
 
-/* Icons inside pill */
+/* Icon */
 .sidebar-icon {
   width: 26px;
   height: 26px;
