@@ -89,7 +89,7 @@ export default function DashboardLayout({ children }) {
       {/* BODY */}
       <div className="flex flex-1 w-full px-4 md:px-8 py-6 gap-6">
         {/* SIDEBAR */}
-        <aside className="hidden md:flex flex-col w-60 bg-white rounded-xl3 shadow-card p-4">
+        <aside className="hidden md:flex flex-col w-60 bg-white rounded-2xl shadow-card p-4">
           <div className="text-xs font-semibold text-gray-400 uppercase px-2 mb-3">
             Navigation
           </div>
@@ -104,7 +104,7 @@ export default function DashboardLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl2 text-sm transition
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition
                     ${
                       active
                         ? "bg-[#111827] text-white shadow-soft"
@@ -128,7 +128,7 @@ export default function DashboardLayout({ children }) {
         {/* MAIN CONTENT */}
         <main className="flex-1">
           {/* Slight “floating” effect */}
-          <div className="rounded-xl3 shadow-soft bg-white/70 backdrop-blur-sm p-6 md:p-8">
+          <div className="rounded-2xl shadow-soft bg-white/70 backdrop-blur-sm p-6 md:p-8">
             {children}
           </div>
         </main>
