@@ -56,32 +56,50 @@ export default function DashboardLayout({ children }) {
 
         </div>
 
-     {/* 🔥 NEW CENTERED HORIZONTAL NAV MENU WITH ICONS */}
-<nav className="mx-auto max-w-7xl px-8 pb-4 flex justify-center text-sm">
-  <div className="flex gap-4 overflow-x-auto">
-    {topTabs.map((item) => {
-      const active =
-        pathname === item.href ||
-        (item.href !== "/dashboard" && pathname.startsWith(item.href));
+ 
+{/* 🔥 Centered Sticky Nav with Animated Underline */}
+<nav className="sticky top-[72px] z-30 bg-gradient-to-br from-brand-dark to-brand-darkAlt shadow-sm">
+  <div className="mx-auto max-w-7xl px-8 py-3 flex justify-center text-sm">
+    <div className="flex gap-6 overflow-x-auto">
+      {topTabs.map((item) => {
+        const active =
+          pathname === item.href ||
+          (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
-      return (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={`
-            flex items-center gap-2 px-4 py-2 rounded-full transition whitespace-nowrap
-            ${
-              active
-                ? "bg-white text-brand-dark shadow-md"
-                : "text-white/70 hover:bg-white/10"
-            }
-          `}
-        >
-          <span className="text-base">{item.icon}</span>
-          <span>{item.label}</span>
-        </Link>
-      );
-    })}
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              relative flex items-center gap-2 px-4 py-2 whitespace-nowrap
+              transition-all duration-200
+              ${
+                active
+                  ? "text-white font-semibold"
+                  : "text-white/70 hover:text-white"
+              }
+            `}
+          >
+            {/* Icon */}
+            <span className="text-base">{item.icon}</span>
+            {item.label}
+
+            {/* Animated Underline */}
+            <span
+              className={`
+                absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] rounded-full
+                transition-all duration-300
+                ${
+                  active
+                    ? "w-8 bg-white opacity-100"
+                    : "w-0 bg-white opacity-0 group-hover:w-6"
+                }
+              `}
+            />
+          </Link>
+        );
+      })}
+    </div>
   </div>
 </nav>
       </header>
