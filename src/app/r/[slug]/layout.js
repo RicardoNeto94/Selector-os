@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import "../../styles/theme.css";
+import "../../../styles/theme.css";
 
 export default function RestaurantPublicLayout({ children }) {
   return (
