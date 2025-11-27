@@ -1,11 +1,8 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import AuthProvider from "src/components/AuthProvider";
+import "src/styles/globals.css";
 
-import AuthProvider from 'src/components/AuthProvider';
-
-import 'src/styles/globals.css';
-
-// do not cache this layout
 export const revalidate = 0;
 
 export default async function RootLayout({ children }) {
@@ -17,15 +14,11 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body>
-        <div className="flex min-h-screen flex-col items-center justify-center py-2">
-          <main className="flex w-full flex-1 shrink-0 flex-col items-center justify-center px-8 text-center sm:px-20">
-            <h1 className="mb-12 text-5xl font-bold sm:text-6xl">
-              Selector<span className="font-black text-green-400">OS</span>
-            </h1>
-            <AuthProvider accessToken={session?.access_token}>{children}</AuthProvider>
-          </main>
-        </div>
+      <body className="min-h-screen bg-[#f5f6fa] antialiased">
+        {/* No centering, no flex constraints */}
+        <AuthProvider accessToken={session?.access_token}>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
