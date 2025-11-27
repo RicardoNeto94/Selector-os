@@ -1,8 +1,6 @@
-export const dynamic = "force-dynamic";
+// src/app/api/create-portal/route.js
 
-import Stripe from "stripe";
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+export const dynamic = "force-dynamic";
 
 import Stripe from "stripe";
 import { cookies } from "next/headers";
@@ -23,10 +21,7 @@ export async function POST() {
 
     if (userError || !user) {
       console.error("User error:", userError);
-      return Response.json(
-        { error: "Not logged in" },
-        { status: 401 }
-      );
+      return Response.json({ error: "Not logged in" }, { status: 401 });
     }
 
     // 3) Find the restaurant owned by this user
