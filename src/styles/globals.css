@@ -117,7 +117,7 @@ body {
   min-height: 100vh;
   background: linear-gradient(to bottom, #fafafa, #f4f4f4);
   overflow-x: hidden;
-
+}
   /* Enable hover underline expansion */
 nav a {
   position: relative;
