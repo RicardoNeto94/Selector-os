@@ -1,4 +1,3 @@
-// src/app/api/create-portal/route.js
 
 import Stripe from "stripe";
 import { cookies } from "next/headers";
