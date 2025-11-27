@@ -1,0 +1,18 @@
+/* ========== MODERN DARK THEME ========== */
+
+:root {
+  --bg: #0f131a;
+  --text: #e6e6e6;
+
+  --primary: #4da8ff;
+  --secondary: #9ab8d0;
+
+  --card-bg: #1a212e;
+  --card-border: #263243;
+  --card-radius: 18px;
+
+  --accent: #5bb4ff;
+
+  --font-primary: 'Inter', sans-serif;
+  --font-secondary: 'Inter', sans-serif;
+}
