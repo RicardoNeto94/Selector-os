@@ -8,21 +8,32 @@
   --card-style: glass;
 }
 
+/* Global styling */
 body {
   font-family: var(--font);
   background: var(--background) no-repeat center center / cover;
+  color: var(--primary);
 }
 
+/* Card styles */
 .card {
   border-radius: 20px;
   padding: 1.5rem;
-  background: var(--card-style) == glass
-    ? rgba(255,255,255,0.6)
-    : white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
+/* Glass mode */
+.card[data-style="glass"] {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* Solid mode */
+.card[data-style="solid"] {
+  background: white;
+}
+
+/* Accent helper */
 .accent-text {
   color: var(--accent);
 }
