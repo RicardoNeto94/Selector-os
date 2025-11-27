@@ -1,25 +1,23 @@
-export default function Sidebar({ active = "home" }) {
+export default function Sidebar({ active = "" }) {
   const items = [
-    { id: "home", icon: "🏠" },
-    { id: "menu", icon: "📄" },
-    { id: "users", icon: "👥" },
-    { id: "clock", icon: "🕒" },
-    { id: "calendar", icon: "📅" },
-    { id: "settings", icon: "⚙️" },
+    { id: "dashboard", icon: "🏠", href: "/dashboard" },
+    { id: "menu", icon: "📋", href: "/dashboard/menu" },
+    { id: "dishes", icon: "🍽️", href: "/dashboard/dishes" },
+    { id: "allergens", icon: "⚠️", href: "/dashboard/allergens" },
+    { id: "billing", icon: "💳", href: "/dashboard/billing" },
+    { id: "settings", icon: "⚙️", href: "/dashboard/settings" },
   ];
 
   return (
     <aside className="sidebar-wall w-24 min-h-screen flex flex-col items-center py-12 space-y-8">
-      {items.map((item) => (
-        <button
+      {items.map(item => (
+        <a
           key={item.id}
-          className={`
-            sidebar-pill relative flex items-center justify-center
-            ${active === item.id ? "active" : ""}
-          `}
+          href={item.href}
+          className={`sidebar-pill ${active === item.id ? "active" : ""}`}
         >
           <span className="sidebar-icon text-2xl">{item.icon}</span>
-        </button>
+        </a>
       ))}
     </aside>
   );
