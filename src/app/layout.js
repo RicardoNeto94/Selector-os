@@ -1,5 +1,5 @@
-import "./globals.css";
-import "../styles/theme.css";
+import "./styles/globals.css";
+import "./styles/theme.css";
 import { Satoshi } from "next/font/google";
 
 export const metadata = {
