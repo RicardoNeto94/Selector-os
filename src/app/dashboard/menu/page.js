@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function MenuPage() {
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
   const [restaurant, setRestaurant] = useState(null);
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // new state for publish flow
   const [publishingId, setPublishingId] = useState(null);
-  const [error, setError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     loadMenus();
@@ -21,46 +23,60 @@ export default function MenuPage() {
 
   async function loadMenus() {
     setLoading(true);
-    setError(null);
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
-    // Get logged in user
+    // 1) Get logged-in user
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser();
-    if (!user) {
+
+    if (userError || !user) {
+      console.error(userError);
+      setErrorMessage("You must be logged in to view menus.");
       setLoading(false);
       return;
     }
 
-    // Get the restaurant
-    const { data: r } = await supabase
+    // 2) Get restaurant
+    const { data: r, error: restaurantError } = await supabase
       .from("restaurants")
       .select("*")
       .eq("owner_id", user.id)
       .maybeSingle();
 
-    setRestaurant(r);
-
-    if (!r) {
-      setMenus([]);
+    if (restaurantError || !r) {
+      console.error(restaurantError);
+      setErrorMessage("Could not load restaurant for this user.");
       setLoading(false);
       return;
     }
 
-    // Get menus
-    const { data: m } = await supabase
+    setRestaurant(r);
+
+    // 3) Get menus
+    const { data: m, error: menuError } = await supabase
       .from("menus")
       .select("*")
       .eq("restaurant_id", r.id)
       .order("created_at", { ascending: true });
 
+    if (menuError) {
+      console.error(menuError);
+      setErrorMessage("Failed to load menus.");
+      setLoading(false);
+      return;
+    }
+
     setMenus(m || []);
     setLoading(false);
   }
 
-  // 🔧 Step 4 – call /api/menu/publish
+  // 🔗 Publish menu -> ask backend for public URL
   async function handlePublish(menuId) {
-    setError(null);
+    setErrorMessage(null);
+    setSuccessMessage(null);
     setPublishingId(menuId);
 
     try {
@@ -76,36 +92,37 @@ export default function MenuPage() {
       try {
         json = await res.json();
       } catch {
-        // ignore JSON parse errors, we'll fallback to generic message
+        // ignore parse errors
       }
 
       if (!res.ok) {
         const msg =
           json?.error ||
-          `Failed to publish menu (status ${res.status}).`;
+          `Failed to publish menu (status ${res.status}). Check Supabase policies.`;
         throw new Error(msg);
       }
 
-      // Expecting { url, menuId? } from the API
-      const publicUrl = json?.url;
-
-      // Optimistically update this menu with the public URL
-      if (publicUrl) {
-        setMenus((prev) =>
-          prev.map((m) =>
-            m.id === menuId ? { ...m, public_url: publicUrl } : m
-          )
-        );
+      if (!json?.url) {
+        throw new Error("Publish endpoint did not return a public URL.");
       }
 
-      // Optional: quick feedback
-      // alert("Menu published! Public link copied to clipboard.");
-      if (publicUrl && navigator?.clipboard) {
-        navigator.clipboard.writeText(publicUrl).catch(() => {});
+      setSuccessMessage(`Public link ready: ${json.url}`);
+
+      // Try to copy URL for convenience
+      if (navigator?.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(json.url);
+          setSuccessMessage(`Copied public URL to clipboard: ${json.url}`);
+        } catch {
+          // ignore copy failures
+        }
       }
+
+      // Refresh menus so public_url is visible if you later display it
+      await loadMenus();
     } catch (err) {
-      console.error("Publish menu error:", err);
-      setError(err.message || "Something went wrong while publishing.");
+      console.error("Publish menu error (client):", err);
+      setErrorMessage(err.message || "Failed to publish menu.");
     } finally {
       setPublishingId(null);
     }
@@ -131,15 +148,27 @@ export default function MenuPage() {
             rounded-xl 
             hover:bg-green-600 transition font-semibold
           "
+          type="button"
+          onClick={() => {
+            // We don’t have the full menu-builder yet
+            // For now we just reload, or later this will go to /dashboard/menu/[id]
+            alert("Menu creation/editing UI is coming next.");
+          }}
         >
           + Add Menu
         </button>
       </div>
 
-      {/* ERROR BANNER */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4">
-          {error}
+      {/* GLOBAL STATUS BANNERS */}
+      {errorMessage && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4 text-center">
+          {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl p-4 text-center">
+          {successMessage}
         </div>
       )}
 
@@ -148,58 +177,51 @@ export default function MenuPage() {
         {menus.map((menu) => (
           <div
             key={menu.id}
-            className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow transition space-y-4"
+            className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow transition flex flex-col justify-between"
           >
             <div>
               <h2 className="text-xl font-semibold">{menu.name}</h2>
               <p className="text-gray-500 text-sm mt-1">
                 Created: {new Date(menu.created_at).toLocaleString()}
               </p>
+
+              {menu.public_url && (
+                <p className="text-xs text-gray-400 mt-2 break-all">
+                  Public link: {menu.public_url}
+                </p>
+              )}
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="mt-4 flex items-center gap-4">
               <button
-                className="
-                  text-green-600 font-semibold hover:underline
-                "
+                className="text-green-600 font-semibold hover:underline"
+                type="button"
+                onClick={() => {
+                  // TODO: when we build the menu builder, we’ll navigate there.
+                  // Example: router.push(`/dashboard/menu/${menu.id}`);
+                  alert("Edit Menu UI not built yet – this is just a placeholder.");
+                }}
               >
                 Edit Menu →
               </button>
 
               <button
-                type="button"
-                onClick={() => handlePublish(menu.id)}
-                disabled={publishingId === menu.id}
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-semibold
-                  border border-green-500 
-                  text-green-700
-                  hover:bg-green-50
-                  transition
-                  disabled:opacity-50 disabled:cursor-not-allowed
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition
+                  ${
+                    publishingId === menu.id
+                      ? "bg-gray-300 text-gray-700 cursor-wait"
+                      : "bg-green-500 text-white hover:bg-green-600"
+                  }
                 `}
+                type="button"
+                disabled={publishingId === menu.id}
+                onClick={() => handlePublish(menu.id)}
               >
                 {publishingId === menu.id
                   ? "Publishing…"
                   : "Create / Update public link"}
               </button>
             </div>
-
-            {menu.public_url && (
-              <div className="pt-2 border-t mt-2">
-                <p className="text-xs text-gray-500 mb-1">
-                  Public allergen tool:
-                </p>
-                <a
-                  href={menu.public_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-green-700 underline break-all"
-                >
-                  {menu.public_url}
-                </a>
-              </div>
-            )}
           </div>
         ))}
 
