@@ -1,4 +1,5 @@
 // src/app/api/create-portal/route.js
+
 export const dynamic = "force-dynamic";
 
 import Stripe from "stripe";
@@ -6,7 +7,6 @@ import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  // apiVersion is optional but nice to pin
   apiVersion: "2024-06-20",
 });
 
@@ -42,7 +42,7 @@ export async function POST() {
 
     let customerId = restaurant.stripe_customer_id;
 
-    // 3) Create customer if missing
+    // 3) Create Stripe customer if missing
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
@@ -65,7 +65,7 @@ export async function POST() {
       }
     }
 
-    // 4) Billing portal session
+    // 4) Create Billing Portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing`,
@@ -75,5 +75,21 @@ export async function POST() {
   } catch (err) {
     console.error("Stripe portal error (server):", err);
 
-    const message =
-      (err && type
+    let message = "Unknown server error";
+    if (
+      err &&
+      typeof err === "object" &&
+      "message" in err &&
+      typeof err.message === "string"
+    ) {
+      message = err.message;
+    } else if (typeof err === "string") {
+      message = err;
+    }
+
+    return Response.json(
+      { error: `Stripe server error: ${message}` },
+      { status: 500 }
+    );
+  }
+}
