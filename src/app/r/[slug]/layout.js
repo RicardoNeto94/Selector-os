@@ -1,30 +1,14 @@
-import "../styles/globals.css";
-import "../styles/theme.css";
-import { Satoshi } from "next/font/google";
+export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "SelectorOS",
-  description: "Restaurant menu & allergen cockpit",
-};
+import "../../styles/theme.css";
 
-export default function RootLayout({ children }) {
+export default function RestaurantPublicLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <div className="flex min-h-screen">
-          {/* SIDEBAR */}
-          <aside className="sidebar">
-            <a href="/dashboard" className="active">🏠</a>
-            <a href="/dashboard/menu">📋</a>
-            <a href="/dashboard/dishes">🍽️</a>
-            <a href="/dashboard/allergen">⚠️</a>
-            <a href="/dashboard/billing">💳</a>
-            <a href="/dashboard/settings">⚙️</a>
-          </aside>
-
-          {/* MAIN AREA */}
-          <main className="flex-1">{children}</main>
-        </div>
+      <body className="bg-white min-h-screen">
+        <main className="w-full max-w-4xl mx-auto py-10 px-6">
+          {children}
+        </main>
       </body>
     </html>
   );
