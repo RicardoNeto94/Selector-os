@@ -96,6 +96,9 @@
   padding-left: 0.75rem;
   border-radius: 6px;
   transition: all 0.2s ease;
+  height: 100%; /* Ensure sidebar items are full height */
+  display: flex;
+  align-items: center; /* Vertically center the content */
 }
 
 .sidebar-item:hover {
@@ -109,6 +112,18 @@
 }
 
 /* Subtle Apple-style background */
+/* Ensure the body fills the screen */
 body {
-  background: linear-gradient(to bottom, #fafafa, #f4f4f4);
+  min-height: 100vh; /* Ensure the body takes up the full height */
+  display: flex;
+  flex-direction: column;
 }
+
+/* Make sure the main content doesn't shrink */
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
