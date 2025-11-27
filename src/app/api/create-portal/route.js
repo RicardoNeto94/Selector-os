@@ -1,19 +1,20 @@
 // src/app/api/create-portal/route.js
-
 export const dynamic = "force-dynamic";
 
 import Stripe from "stripe";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+  // apiVersion is optional but nice to pin
+  apiVersion: "2024-06-20",
+});
 
 export async function POST() {
   try {
-    // 1) Supabase client for server route
     const supabase = createRouteHandlerClient({ cookies });
 
-    // 2) Get logged-in user
+    // 1) Logged-in user
     const {
       data: { user },
       error: userError,
@@ -24,7 +25,7 @@ export async function POST() {
       return Response.json({ error: "Not logged in" }, { status: 401 });
     }
 
-    // 3) Find the restaurant owned by this user
+    // 2) Restaurant for this user
     const { data: restaurant, error: restaurantError } = await supabase
       .from("restaurants")
       .select("id, name, stripe_customer_id")
@@ -41,7 +42,7 @@ export async function POST() {
 
     let customerId = restaurant.stripe_customer_id;
 
-    // 4) If no Stripe customer yet, create one and save it
+    // 3) Create customer if missing
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
@@ -64,7 +65,7 @@ export async function POST() {
       }
     }
 
-    // 5) Create Stripe Billing Portal session
+    // 4) Billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing`,
@@ -73,9 +74,6 @@ export async function POST() {
     return Response.json({ url: session.url });
   } catch (err) {
     console.error("Stripe portal error (server):", err);
-    return Response.json(
-      { error: "Failed to create billing portal session on server" },
-      { status: 500 }
-    );
-  }
-}
+
+    const message =
+      (err && type
