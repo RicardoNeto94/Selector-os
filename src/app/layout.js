@@ -1,24 +1,34 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import AuthProvider from "src/components/AuthProvider";
-import "src/styles/globals.css";
+import "./globals.css";
+import "../styles/theme.css";
+import { Satoshi } from "next/font/google";
 
-export const revalidate = 0;
+export const metadata = {
+  title: "SelectorOS",
+  description: "Restaurant menu & allergen cockpit",
+};
 
-export default async function RootLayout({ children }) {
-  const supabase = createServerComponentClient({ cookies });
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#f5f6fa] antialiased">
-        {/* No centering, no flex constraints */}
-        <AuthProvider accessToken={session?.access_token}>
-          {children}
-        </AuthProvider>
+      <body>
+        <div className="flex min-h-screen">
+
+          {/* SIDEBAR */}
+          <aside className="sidebar">
+            <a href="/dashboard" className="active">🏠</a>
+            <a href="/dashboard/menu">📋</a>
+            <a href="/dashboard/dishes">🍽</a>
+            <a href="/dashboard/allergen">⚠️</a>
+            <a href="/dashboard/billing">💳</a>
+            <a href="/dashboard/settings">⚙️</a>
+          </aside>
+
+          {/* MAIN CONTENT AREA */}
+          <main className="flex-1 p-10">
+            {children}
+          </main>
+
+        </div>
       </body>
     </html>
   );
