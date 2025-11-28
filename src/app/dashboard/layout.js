@@ -4,13 +4,13 @@ export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="flex min-h-screen text-slate-100">
-      {/* SIDEBAR */}
+    <div className="min-h-screen text-slate-100 bg-[#050509]">
+      {/* Fixed sidebar rail */}
       <Sidebar />
 
-      {/* RIGHT SIDE – HEADER + CONTENT */}
-      <div className="flex-1 flex flex-col">
-        {/* TOP HEADER – full width, no side margins */}
+      {/* Right side – pushed right so it clears the max sidebar width (w-56) */}
+      <div className="pl-56 flex flex-col min-h-screen">
+        {/* TOP HEADER – full width, no outer margins */}
         <header className="border-b border-white/10 bg-gradient-to-r from-[#111827] to-[#020617]">
           <div className="px-6 py-4 flex items-center justify-between">
             {/* Brand */}
