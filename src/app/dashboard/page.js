@@ -28,37 +28,29 @@ export default function DashboardHome() {
   }, []);
 
   const loadDashboard = async () => {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      // 1) Auth check
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+  try {
+    // 1) Auth check
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-      if (userError) throw userError;
+    if (userError) {
+      console.error("Auth error:", userError);
 
-      if (!user) {
-        router.push("/sign-in");
-        return;
-      }
+      // If the token is invalid / session_id missing, clean up and go to login
+      await supabase.auth.signOut();
+      router.push("/sign-in");
+      return;
+    }
 
-      // 2) Restaurant check
-      const { data: r, error: restaurantError } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (restaurantError) throw restaurantError;
-
-      if (!r) {
-        // User is logged in but has no restaurant yet → send to onboarding
-        router.push("/onboarding");
-        return;
-      }
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
 
       setRestaurant(r);
 
