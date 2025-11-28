@@ -1,15 +1,16 @@
-// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+const forms = require("@tailwindcss/forms");
+
 module.exports = {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "media", // or "class" if you later use a .dark toggle
   theme: {
     extend: {
       colors: {
         brand: {
           dark: "#15192c",
           darkAlt: "#242a46",
-          accent: "#25D366", // keep your SelectorOS green
+          accent: "#25D366", // SelectorOS green
           muted: "#9ca3af",
         },
       },
@@ -23,5 +24,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [forms],
 };
