@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 import {
   ChartBarIcon,
   ClipboardDocumentListIcon,
@@ -13,81 +14,156 @@ import {
 
 export default function DashboardHome() {
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
   const [restaurant, setRestaurant] = useState(null);
   const [stats, setStats] = useState(null);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDashboard = async () => {
     setLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    setError("");
 
-    // Restaurant
-    const { data: r } = await supabase
-      .from("restaurants")
-      .select("*")
-      .eq("owner_id", user.id)
-      .maybeSingle();
+    try {
+      // 1) Auth check
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    setRestaurant(r);
+      if (userError) throw userError;
 
-    // KPIs
-    const { count: dishCount } = await supabase
-      .from("dishes")
-      .select("*", { count: "exact", head: true })
-      .eq("restaurant_id", r.id);
+      if (!user) {
+        router.push("/sign-in");
+        return;
+      }
 
-    const { count: allergenCount } = await supabase
-      .from("allergen")
-      .select("*", { count: "exact", head: true });
+      // 2) Restaurant check
+      const { data: r, error: restaurantError } = await supabase
+        .from("restaurants")
+        .select("*")
+        .eq("owner_id", user.id)
+        .maybeSingle();
 
-    const { data: missing } = await supabase.rpc("dishes_missing_allergens", {
-      rid: r.id,
-    });
+      if (restaurantError) throw restaurantError;
 
-    const { data: lastDish } = await supabase
-      .from("dishes")
-      .select("*")
-      .eq("restaurant_id", r.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+      if (!r) {
+        // User is logged in but has no restaurant yet → send to onboarding
+        router.push("/onboarding");
+        return;
+      }
 
-    setStats({
-      dishes: dishCount || 0,
-      allergens: allergenCount || 0,
-      missingLabels: missing?.count || 0,
-      lastDish: lastDish?.name || "No dishes yet",
-      menus: 1,
-    });
+      setRestaurant(r);
 
-    // Activity feed
-    const { data: recent } = await supabase
-      .from("dishes")
-      .select("*")
-      .eq("restaurant_id", r.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
+      // 3) KPIs
+      const { count: dishCount, error: dishError } = await supabase
+        .from("dishes")
+        .select("*", { count: "exact", head: true })
+        .eq("restaurant_id", r.id);
 
-    setActivity(recent || []);
-    setLoading(false);
+      if (dishError) throw dishError;
+
+      const { count: allergenCount, error: allergenError } = await supabase
+        .from("allergen")
+        .select("*", { count: "exact", head: true });
+
+      if (allergenError) throw allergenError;
+
+      const { data: missing, error: missingError } =
+        await supabase.rpc("dishes_missing_allergens", {
+          rid: r.id,
+        });
+
+      if (missingError) throw missingError;
+
+      const { data: lastDish, error: lastDishError } = await supabase
+        .from("dishes")
+        .select("*")
+        .eq("restaurant_id", r.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastDishError) throw lastDishError;
+
+      setStats({
+        dishes: dishCount || 0,
+        allergens: allergenCount || 0,
+        missingLabels: missing?.count || 0,
+        lastDish: lastDish?.name || "No dishes yet",
+        menus: 1,
+      });
+
+      // 4) Activity feed
+      const { data: recent, error: recentError } = await supabase
+        .from("dishes")
+        .select("*")
+        .eq("restaurant_id", r.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (recentError) throw recentError;
+
+      setActivity(recent || []);
+    } catch (err) {
+      console.error("Dashboard load error:", err);
+      setError(err.message || "Failed to load your SelectorOS workspace.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading || !restaurant || !stats) {
+  // ───────────────────────────
+  //  RENDER STATES
+  // ───────────────────────────
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
         Loading your SelectorOS workspace…
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[70vh] text-slate-300 text-sm gap-3">
+        <p>{error}</p>
+        <button
+          onClick={loadDashboard}
+          className="button px-4 py-2 text-xs rounded-full"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!restaurant || !stats) {
+    // Safety net – shouldn't normally happen because of the redirects above
+    return (
+      <div className="flex flex-col items-center justify-center h-[70vh] text-slate-300 text-sm gap-3">
+        <p>We couldn&apos;t find a restaurant for this account.</p>
+        <button
+          onClick={() => router.push("/onboarding")}
+          className="button px-4 py-2 text-xs rounded-full"
+        >
+          Go to onboarding
+        </button>
+      </div>
+    );
+  }
+
+  // ───────────────────────────
+  //  MAIN DASHBOARD UI (unchanged)
+  // ───────────────────────────
 
   return (
     <div className="space-y-8 text-slate-100">
@@ -296,8 +372,15 @@ export default function DashboardHome() {
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
-            <HealthPill label="Labelled dishes" value={stats.dishes - stats.missingLabels} />
-            <HealthPill label="Unlabelled" value={stats.missingLabels} tone="warning" />
+            <HealthPill
+              label="Labelled dishes"
+              value={stats.dishes - stats.missingLabels}
+            />
+            <HealthPill
+              label="Unlabelled"
+              value={stats.missingLabels}
+              tone="warning"
+            />
             <HealthPill label="Menus live" value={stats.menus} />
           </div>
         </div>
@@ -328,12 +411,12 @@ function Tag({ label, value, tone = "default" }) {
 
 function KPICard({ title, value, description, icon, tone = "default" }) {
   const borderClass =
-    tone === "warning"
-      ? "border-amber-400/40"
-      : "border-slate-700/70";
+    tone === "warning" ? "border-amber-400/40" : "border-slate-700/70";
 
   return (
-    <div className={`rounded-2xl bg-slate-950/80 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.6)] flex items-start gap-4`}>
+    <div
+      className={`rounded-2xl bg-slate-950/80 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.6)] flex items-start gap-4`}
+    >
       <div className="p-2.5 rounded-xl bg-slate-800/80 text-slate-100">
         {icon}
       </div>
@@ -370,9 +453,7 @@ function HealthPill({ label, value, tone = "default" }) {
       : "text-emerald-300 bg-emerald-500/5 border-emerald-400/30";
 
   return (
-    <div
-      className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}
-    >
+    <div className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}>
       <span className="text-[11px] uppercase tracking-wide opacity-80">
         {label}
       </span>
