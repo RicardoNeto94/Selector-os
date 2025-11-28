@@ -124,7 +124,7 @@
 html,
 body {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #232428, #101114);
+  background: #050509;
   color: #e5e5e5;
   overflow-x: hidden;
 }
