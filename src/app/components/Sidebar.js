@@ -3,18 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  HomeIcon,
+  Squares2X2Icon,
+  ClipboardDocumentListIcon,
+  ExclamationTriangleIcon,
+  CreditCardIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
 
   const items = [
-    { id: "dashboard", icon: "🏠", label: "Overview", href: "/dashboard" },
-    { id: "menu", icon: "📋", label: "Menus", href: "/dashboard/menu" },
-    { id: "dishes", icon: "🍽️", label: "Dishes", href: "/dashboard/dishes" },
-    { id: "allergen", icon: "⚠️", label: "Allergens", href: "/dashboard/allergen" },
-    { id: "billing", icon: "💳", label: "Billing", href: "/dashboard/billing" },
-    { id: "settings", icon: "⚙️", label: "Settings", href: "/dashboard/settings" },
+    { id: "dashboard", icon: HomeIcon, label: "Overview", href: "/dashboard" },
+    { id: "menu", icon: Squares2X2Icon, label: "Menus", href: "/dashboard/menu" },
+    { id: "dishes", icon: ClipboardDocumentListIcon, label: "Dishes", href: "/dashboard/dishes" },
+    { id: "allergen", icon: ExclamationTriangleIcon, label: "Allergens", href: "/dashboard/allergen" },
+    { id: "billing", icon: CreditCardIcon, label: "Billing", href: "/dashboard/billing" },
+    { id: "settings", icon: Cog6ToothIcon, label: "Settings", href: "/dashboard/settings" },
   ];
 
   const getActive = () => {
@@ -29,7 +37,7 @@ export default function Sidebar() {
     <aside
       className={`sidebar-wall ${
         expanded ? "w-56" : "w-20"
-      } min-h-screen flex flex-col items-center py-6 gap-6 transition-all duration-300`}
+      } sticky top-0 h-screen flex flex-col items-center py-4 gap-6 transition-all duration-300`}
     >
       {/* Expand / collapse */}
       <button
@@ -37,7 +45,7 @@ export default function Sidebar() {
         onClick={() => setExpanded((v) => !v)}
         className="sidebar-pill flex items-center justify-center"
       >
-        <span className="sidebar-icon text-lg">
+        <span className="sidebar-icon text-lg text-slate-100">
           {expanded ? "←" : "→"}
         </span>
         {expanded && (
@@ -50,6 +58,7 @@ export default function Sidebar() {
       {/* Menu items */}
       <div className="mt-4 flex flex-col items-stretch gap-4 w-full">
         {items.map((item) => {
+          const Icon = item.icon;
           const isActive = active === item.id;
 
           return (
@@ -63,7 +72,7 @@ export default function Sidebar() {
                 href={item.href}
                 className={`sidebar-pill ${isActive ? "active" : ""}`}
               >
-                <span className="sidebar-icon text-2xl">{item.icon}</span>
+                <Icon className="sidebar-icon text-slate-100" />
               </Link>
 
               {expanded && (
