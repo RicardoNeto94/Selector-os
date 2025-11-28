@@ -104,12 +104,18 @@ export default function DashboardLayout({ children }) {
 </nav>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 md:px-8 py-6">
-        <div className="rounded-2xl shadow-soft bg-white/70 backdrop-blur-sm p-6 md:p-8">
+            {/* MAIN CONTENT */}
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 md:px-8 py-8">
+        <div
+          className="
+            rounded-3xl border border-white/10
+            bg-slate-950/70 backdrop-blur-2xl
+            shadow-[0_32px_80px_rgba(0,0,0,0.75)]
+            p-6 md:p-8
+          "
+        >
           {children}
         </div>
       </main>
-    </div>
-  );
-}
+   }
+
