@@ -17,7 +17,7 @@ export default function Sidebar() {
     { id: "settings", icon: "⚙️", label: "Settings", href: "/dashboard/settings" },
   ];
 
-  // Detect active section by pathname:
+  // Detect active section from pathname
   const getActive = () => {
     if (!pathname) return "";
     const parts = pathname.split("/").filter(Boolean); // ["dashboard", "menu"]
@@ -32,6 +32,7 @@ export default function Sidebar() {
         expanded ? "w-56" : "w-20"
       } min-h-screen flex flex-col items-center py-6 gap-6 transition-all duration-300`}
     >
+
       {/* Expand / collapse */}
       <button
         type="button"
@@ -41,6 +42,7 @@ export default function Sidebar() {
         <span className="sidebar-icon text-lg">
           {expanded ? "←" : "→"}
         </span>
+
         {expanded && (
           <span className="ml-2 text-xs text-slate-200 whitespace-nowrap">
             Collapse
