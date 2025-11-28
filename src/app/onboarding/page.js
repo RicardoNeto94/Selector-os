@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 
@@ -10,6 +10,7 @@ export default function OnboardingPage() {
 
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true); // new: to avoid flicker while we check
 
   // SLUGIFY FUNCTION
   const slugify = (str) =>
@@ -18,6 +19,48 @@ export default function OnboardingPage() {
       .trim()
       .replace(/[\s\W-]+/g, "-")
       .replace(/^-+|-+$/g, "");
+
+  // 1) On mount, check if this user already has a restaurant.
+  //    If yes → onboarding is skipped, go straight to dashboard.
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+          console.error("User error during onboarding check:", userError);
+          router.push("/sign-in");
+          return;
+        }
+
+        const { data: existingRestaurant, error: restaurantError } =
+          await supabase
+            .from("restaurants")
+            .select("id")
+            .eq("owner_id", user.id)
+            .maybeSingle();
+
+        if (restaurantError) {
+          console.error("Restaurant check error:", restaurantError);
+          // if the check fails, we let them stay here rather than blocking
+          return;
+        }
+
+        // If the user already has a restaurant, skip onboarding.
+        if (existingRestaurant) {
+          router.push("/dashboard");
+          return;
+        }
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    run();
+  }, [router, supabase]);
 
   async function createRestaurant() {
     if (!name.trim()) return;
@@ -61,6 +104,18 @@ export default function OnboardingPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // While we are checking whether the user already has a restaurant,
+  // show a subtle loading state instead of flickering the form.
+  if (checking) {
+    return (
+      <main className="flex flex-col items-center justify-center min-h-screen px-6 py-20 text-slate-50">
+        <p className="text-sm text-slate-300">
+          Preparing your SelectorOS workspace…
+        </p>
+      </main>
+    );
   }
 
   return (
