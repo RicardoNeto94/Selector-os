@@ -5,12 +5,12 @@ export const dynamic = "force-dynamic";
 export default function DashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen text-slate-100">
-      {/* SIDEBAR – only here, not in root layout */}
+      {/* SIDEBAR – lives only here */}
       <Sidebar />
 
       {/* RIGHT SIDE – HEADER + CONTENT */}
       <div className="flex-1 flex flex-col">
-        {/* TOP HEADER – BRAND + STATUS */}
+        {/* TOP HEADER */}
         <header className="border-b border-white/10 bg-gradient-to-r from-[#111827] to-[#020617]">
           <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
             {/* Brand */}
@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }) {
               </div>
             </div>
 
-            {/* Active restaurant + live pill (static for now) */}
+            {/* Active restaurant + live pill */}
             <div className="flex items-center gap-3 text-xs">
               <div className="text-right">
                 <div className="uppercase tracking-[0.18em] text-slate-400 text-[10px]">
