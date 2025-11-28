@@ -5,14 +5,14 @@ export const dynamic = "force-dynamic";
 export default function DashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen text-slate-100">
-      {/* SIDEBAR – lives only here */}
+      {/* SIDEBAR */}
       <Sidebar />
 
       {/* RIGHT SIDE – HEADER + CONTENT */}
       <div className="flex-1 flex flex-col">
-        {/* TOP HEADER */}
+        {/* TOP HEADER – full width, no side margins */}
         <header className="border-b border-white/10 bg-gradient-to-r from-[#111827] to-[#020617]">
-          <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+          <div className="px-6 py-4 flex items-center justify-between">
             {/* Brand */}
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 border border-white/20 text-sm font-semibold">
@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* MAIN CONTENT WRAPPER */}
-        <main className="flex-1 mx-auto w-full max-w-7xl px-4 md:px-8 py-8">
+        <main className="flex-1 px-4 md:px-8 py-8">
           <div
             className="
               rounded-3xl border border-white/10
