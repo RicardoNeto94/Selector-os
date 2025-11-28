@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   ChartBarIcon,
   ClipboardDocumentListIcon,
   ExclamationTriangleIcon,
   Bars3Icon,
-  Cog6ToothIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 
@@ -28,37 +27,56 @@ export default function DashboardHome() {
   }, []);
 
   const loadDashboard = async () => {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    // 1) Auth check
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    try {
+      // 1) Check auth
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (userError) {
-      console.error("Auth error:", userError);
+      if (userError) {
+        console.error("Auth error:", userError);
+        await supabase.auth.signOut();
+        router.push("/sign-in");
+        return;
+      }
 
-      // If the token is invalid / session_id missing, clean up and go to login
-      await supabase.auth.signOut();
-      router.push("/sign-in");
-      return;
-    }
+      if (!user) {
+        router.push("/sign-in");
+        return;
+      }
 
-    if (!user) {
-      router.push("/sign-in");
-      return;
-    }
+      // 2) Get restaurant for this user
+      const {
+        data: restaurantRow,
+        error: restaurantError,
+      } = await supabase
+        .from("restaurants")
+        .select("*")
+        .eq("owner_id", user.id)
+        .maybeSingle();
 
-      setRestaurant(r);
+      if (restaurantError) {
+        console.error("Restaurant error:", restaurantError);
+        throw restaurantError;
+      }
 
-      // 3) KPIs
+      if (!restaurantRow) {
+        // User somehow skipped onboarding – send them there
+        router.push("/onboarding");
+        return;
+      }
+
+      setRestaurant(restaurantRow);
+
+      // 3) KPI counts
       const { count: dishCount, error: dishError } = await supabase
         .from("dishes")
         .select("*", { count: "exact", head: true })
-        .eq("restaurant_id", r.id);
+        .eq("restaurant_id", restaurantRow.id);
 
       if (dishError) throw dishError;
 
@@ -70,7 +88,7 @@ export default function DashboardHome() {
 
       const { data: missing, error: missingError } =
         await supabase.rpc("dishes_missing_allergens", {
-          rid: r.id,
+          rid: restaurantRow.id,
         });
 
       if (missingError) throw missingError;
@@ -78,7 +96,7 @@ export default function DashboardHome() {
       const { data: lastDish, error: lastDishError } = await supabase
         .from("dishes")
         .select("*")
-        .eq("restaurant_id", r.id)
+        .eq("restaurant_id", restaurantRow.id)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -97,7 +115,7 @@ export default function DashboardHome() {
       const { data: recent, error: recentError } = await supabase
         .from("dishes")
         .select("*")
-        .eq("restaurant_id", r.id)
+        .eq("restaurant_id", restaurantRow.id)
         .order("created_at", { ascending: false })
         .limit(5);
 
@@ -106,17 +124,14 @@ export default function DashboardHome() {
       setActivity(recent || []);
     } catch (err) {
       console.error("Dashboard load error:", err);
-      setError(err.message || "Failed to load your SelectorOS workspace.");
+      setError(err.message || "Failed to load dashboard.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ───────────────────────────
-  //  RENDER STATES
-  // ───────────────────────────
-
-  if (loading) {
+  // LOADING STATE
+  if (loading && !restaurant && !stats && !error) {
     return (
       <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
         Loading your SelectorOS workspace…
@@ -124,14 +139,12 @@ export default function DashboardHome() {
     );
   }
 
+  // ERROR STATE
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[70vh] text-slate-300 text-sm gap-3">
-        <p>{error}</p>
-        <button
-          onClick={loadDashboard}
-          className="button px-4 py-2 text-xs rounded-full"
-        >
+      <div className="flex flex-col items-center justify-center h-[70vh] text-slate-300 text-sm gap-4">
+        <span>{error}</span>
+        <button onClick={loadDashboard} className="button px-6 py-2 text-sm">
           Retry
         </button>
       </div>
@@ -139,24 +152,15 @@ export default function DashboardHome() {
   }
 
   if (!restaurant || !stats) {
-    // Safety net – shouldn't normally happen because of the redirects above
+    // Safety net
     return (
-      <div className="flex flex-col items-center justify-center h-[70vh] text-slate-300 text-sm gap-3">
-        <p>We couldn&apos;t find a restaurant for this account.</p>
-        <button
-          onClick={() => router.push("/onboarding")}
-          className="button px-4 py-2 text-xs rounded-full"
-        >
-          Go to onboarding
-        </button>
+      <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
+        No restaurant data available.
       </div>
     );
   }
 
-  // ───────────────────────────
-  //  MAIN DASHBOARD UI (unchanged)
-  // ───────────────────────────
-
+  // NORMAL DASHBOARD RENDER
   return (
     <div className="space-y-8 text-slate-100">
       {/* TOP GREETING + SUMMARY */}
@@ -348,7 +352,7 @@ export default function DashboardHome() {
           </div>
         </div>
 
-        {/* Right: “Completed tasks / health” placeholder */}
+        {/* Right: “System health” */}
         <div className="rounded-3xl bg-slate-950/85 border border-slate-800/70 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7 flex flex-col justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
@@ -445,7 +449,9 @@ function HealthPill({ label, value, tone = "default" }) {
       : "text-emerald-300 bg-emerald-500/5 border-emerald-400/30";
 
   return (
-    <div className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}>
+    <div
+      className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}
+    >
       <span className="text-[11px] uppercase tracking-wide opacity-80">
         {label}
       </span>
