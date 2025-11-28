@@ -35,9 +35,9 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`sidebar-wall ${
+      className={`sidebar-wall fixed left-0 top-0 h-screen ${
         expanded ? "w-56" : "w-20"
-      } sticky top-0 h-screen flex flex-col items-center py-4 gap-6 transition-all duration-300`}
+      } flex flex-col items-center py-4 gap-6 transition-all duration-300 z-40`}
     >
       {/* Expand / collapse */}
       <button
