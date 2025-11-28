@@ -33,8 +33,11 @@
   }
 
   .card {
-    @apply column min-w-[20rem] items-center gap-8 rounded-2xl bg-white py-8 px-4 shadow-md sm:min-w-[24rem] sm:px-10;
-  }
+  @apply column min-w-[20rem] items-center gap-8 rounded-2xl 
+    bg-slate-950/70 border border-white/10 
+    py-8 px-4 shadow-[0_18px_45px_rgba(0,0,0,0.55)]
+    sm:min-w-[24rem] sm:px-10;
+}
 
   .column {
     @apply flex flex-col items-start justify-center gap-4;
