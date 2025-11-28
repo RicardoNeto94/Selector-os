@@ -1,5 +1,5 @@
 .sidebar-wall {
-  background: linear-gradient(to bottom, #232428, #101114);
+  background: radial-gradient(circle at top left, #1f2933 0, #050509 60%);
 }
 
 /* Glass button */
