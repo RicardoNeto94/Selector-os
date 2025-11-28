@@ -1,5 +1,6 @@
+/* Transparent wrapper so icons float on the page background */
 .sidebar-wall {
-  background: radial-gradient(circle at top left, #1f2933 0, #050509 60%);
+  background: transparent;
 }
 
 /* Glass button */
@@ -67,7 +68,7 @@
 .sidebar-icon {
   width: 22px;
   height: 22px;
-  opacity: 0.85;
+  opacity: 0.9;
   transition: opacity 0.2s ease;
 }
 
