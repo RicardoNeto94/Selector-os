@@ -4,50 +4,69 @@
 
 /* Glass button */
 .sidebar-pill {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.35));
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(0, 0, 0, 0.35)
+  );
   backdrop-filter: blur(14px);
 
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
   box-shadow:
-    0px 8px 24px rgba(0,0,0,0.35),
-    inset 0px 1px 2px rgba(255,255,255,0.12);
+    0px 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0px 1px 2px rgba(255, 255, 255, 0.12);
 
-  transition: background 0.25s ease, transform 0.2s ease;
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
 }
 
 /* Hover effect */
 .sidebar-pill:hover {
-  background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(0,0,0,0.45));
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(0, 0, 0, 0.45)
+  );
   transform: translateY(-2px);
 }
 
 /* Active glow */
 .sidebar-pill.active {
   position: relative;
-  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(20,20,20,0.65));
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(20, 20, 20, 0.65)
+  );
 }
 
 .sidebar-pill.active::before {
   content: "";
   position: absolute;
   inset: -14px;
-  background: radial-gradient(circle, rgba(0,255,150,0.35), transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 150, 0.35),
+    transparent 70%
+  );
   filter: blur(18px);
   z-index: -1;
 }
 
 /* Icon */
 .sidebar-icon {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   opacity: 0.85;
   transition: opacity 0.2s ease;
 }
