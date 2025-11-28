@@ -113,11 +113,13 @@
 
 /* Subtle Apple-style background */
 /* Ensure the body fills the screen */
-body {
+html, body {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #fafafa, #f4f4f4);
+  background: linear-gradient(to bottom, #232428, #101114);
+  color: #e5e5e5;
   overflow-x: hidden;
 }
+
   /* Enable hover underline expansion */
 nav a {
   position: relative;
