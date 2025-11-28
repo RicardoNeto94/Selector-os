@@ -52,3 +52,61 @@ export default function AllergensPage() {
             </h1>
             <p className="text-sm text-slate-300/80 max-w-xl">
               Centralize allergen definitions once and reuse them across all
+              dishes and menus. Updates are reflected live in your staff tools.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-start md:items-end gap-3">
+            <p className="text-xs text-slate-400">
+              Total allergens in library
+            </p>
+            <div className="text-3xl font-semibold text-emerald-400">
+              {allergens.length}
+            </div>
+            <button
+              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-sm font-semibold hover:bg-emerald-400 hover:-translate-y-0.5 transition"
+            >
+              + Add allergen
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ALLERGEN GRID */}
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {allergens.map((a) => (
+          <div
+            key={a.id}
+            className="rounded-2xl border border-white/8 bg-slate-950/70 p-6 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.55)] hover:border-emerald-400/40 hover:-translate-y-0.5 transition"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xl font-bold text-emerald-300">
+                {a.allergen_code}
+              </span>
+              <span className="text-xs text-slate-400 italic">
+                Edit coming soon
+              </span>
+            </div>
+
+            <p className="font-semibold text-slate-100 mb-1">{a.name}</p>
+
+            {a.description && (
+              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                {a.description}
+              </p>
+            )}
+          </div>
+        ))}
+
+        {allergens.length === 0 && (
+          <div className="col-span-full text-center text-slate-400 py-20">
+            <p className="text-lg mb-2">No allergens added yet.</p>
+            <p className="text-sm">
+              Start by creating your first allergen in the library.
+            </p>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
