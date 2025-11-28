@@ -117,5 +117,4 @@ export default function DashboardLayout({ children }) {
           {children}
         </div>
       </main>
-   }
 
