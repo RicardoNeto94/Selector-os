@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 
 export default function OnboardingPage() {
   const supabase = createClientComponentClient();
   const router = useRouter();
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
   // SLUGIFY FUNCTION
@@ -16,93 +16,83 @@ export default function OnboardingPage() {
     str
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9]+/g, '-') // replace spaces + symbols
-      .replace(/^-+|-+$/g, ''); // remove leading/trailing hyphens
-
-  // If user already has a restaurant → skip onboarding
-  useEffect(() => {
-    checkExistingRestaurant();
-  }, []);
-
-  async function checkExistingRestaurant() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('restaurants')
-      .select('slug')
-      .eq('owner_id', user.id)
-      .single();
-
-    if (data?.slug) {
-      router.push(`/r/${data.slug}`);
-    }
-  }
+      .replace(/[\s\W-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
   async function createRestaurant() {
-    setLoading(true);
+    if (!name.trim()) return;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      setLoading(true);
 
-    if (!user) {
-      alert('You must be signed in.');
-      return;
-    }
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    const slug = slugify(name);
+      if (userError || !user) {
+        console.error("User error:", userError);
+        router.push("/sign-in");
+        return;
+      }
 
-    // Insert restaurant
-    const { data, error } = await supabase
-      .from('restaurants')
-      .insert([
-        {
+      const slug = slugify(name);
+
+      const { data, error } = await supabase
+        .from("restaurants")
+        .insert({
           owner_id: user.id,
-          name,
+          name: name.trim(),
           slug,
-        },
-      ])
-      .select()
-      .single();
+        })
+        .select("*")
+        .maybeSingle();
 
-    if (error) {
-      alert('Error: ' + error.message);
+      if (error) {
+        console.error("Create restaurant error:", error);
+        throw error;
+      }
+
+      // Go straight to dashboard after onboarding
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Onboarding error:", err);
+      alert(err.message || "Failed to create restaurant");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Redirect to /r/[slug]
-    router.push(`/r/${slug}`);
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-6 py-20">
-      <h1 className="text-4xl font-bold mb-10">
-        Welcome to Selector<span className="text-green-500">OS</span>
+    <main className="flex flex-col items-center justify-center min-h-screen px-6 py-20 bg-gradient-to-b from-[#232428] to-[#101114] text-slate-50">
+      <h1 className="text-4xl font-bold mb-10 text-center">
+        Welcome to Selector<span className="text-emerald-400">OS</span>
       </h1>
 
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8 space-y-6">
-        <label className="block text-left text-gray-700 font-semibold">
-          Your Restaurant Name
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-950/80 p-8 space-y-6 shadow-[0_24px_60px_rgba(0,0,0,0.75)]">
+        <p className="text-sm text-slate-300">
+          Let&apos;s start by creating your first restaurant. You can change its
+          name later in Settings.
+        </p>
+
+        <label className="block text-left text-sm font-semibold text-slate-300">
+          Restaurant name
         </label>
 
         <input
           type="text"
           placeholder="Ex: Koyo"
-          className="w-full border rounded-xl px-4 py-3 text-lg"
+          className="input"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <button
           onClick={createRestaurant}
-          disabled={loading || name.length < 2}
-          className="w-full py-3 rounded-xl bg-green-500 text-white text-lg font-semibold hover:bg-green-600 disabled:opacity-40"
+          disabled={loading || name.trim().length < 2}
+          className="w-full button disabled:opacity-40"
         >
-          {loading ? 'Creating...' : 'Create & Continue'}
+          {loading ? "Creating…" : "Create & Continue"}
         </button>
       </div>
     </main>
