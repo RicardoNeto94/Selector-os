@@ -72,41 +72,54 @@ export default function AllergensPage() {
         </div>
       </section>
 
-      {/* ALLERGEN GRID */}
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {allergens.map((a) => (
-          <div
-            key={a.id}
-            className="rounded-2xl border border-white/8 bg-slate-950/70 p-6 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.55)] hover:border-emerald-400/40 hover:-translate-y-0.5 transition"
+      {/* ALLERGENS CONTENT */}
+      {allergens.length === 0 ? (
+        // EMPTY STATE
+        <section className="rounded-3xl bg-slate-950/80 border border-white/10 p-12 shadow-[0_22px_60px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center text-center space-y-3">
+          <p className="text-sm font-semibold tracking-[0.18em] uppercase text-slate-400">
+            Allergen library
+          </p>
+          <p className="text-2xl md:text-3xl font-bold text-slate-50">
+            No allergens added yet.
+          </p>
+          <p className="text-sm text-slate-300 max-w-md">
+            Start by creating your first allergen in the library. Your dishes
+            and menus will be able to reuse these tags instantly.
+          </p>
+          <button
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 text-slate-950 px-5 py-2.5 text-sm font-semibold hover:bg-emerald-400 hover:-translate-y-0.5 transition"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xl font-bold text-emerald-300">
-                {a.allergen_code}
-              </span>
-              <span className="text-xs text-slate-400 italic">
-                Edit coming soon
-              </span>
+            + Add allergen
+          </button>
+        </section>
+      ) : (
+        // GRID VIEW
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {allergens.map((a) => (
+            <div
+              key={a.id}
+              className="rounded-2xl border border-white/8 bg-slate-950/70 p-6 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.55)] hover:border-emerald-400/40 hover:-translate-y-0.5 transition"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xl font-bold text-emerald-300">
+                  {a.allergen_code}
+                </span>
+                <span className="text-xs text-slate-400 italic">
+                  Edit coming soon
+                </span>
+              </div>
+
+              <p className="font-semibold text-slate-100 mb-1">{a.name}</p>
+
+              {a.description && (
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  {a.description}
+                </p>
+              )}
             </div>
-
-            <p className="font-semibold text-slate-100 mb-1">{a.name}</p>
-
-            {a.description && (
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                {a.description}
-              </p>
-            )}
-          </div>
-        ))}
-
-        {allergens.length === 0 && (
-          <div className="col-span-full text-center text-slate-400 py-20">
-            <p className="text-lg mb-2">No allergens added yet.</p>
-            <p className="text-sm">
-              Start by creating your first allergen in the library.
-            </p>
-          </div>
-        )}
-      </section>
+          ))}
+        </section>
+      )}
     </div>
   );
 }
