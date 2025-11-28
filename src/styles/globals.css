@@ -25,23 +25,23 @@
   }
 
   .button {
-  @apply custom-focus inline-flex items-center justify-center
-    rounded-full px-6 py-2.5 text-sm font-semibold
-    bg-emerald-500 text-slate-950
-    hover:bg-emerald-400
-    transition;
-}
+    @apply custom-focus inline-flex items-center justify-center
+      rounded-full px-6 py-2.5 text-sm font-semibold
+      bg-emerald-500 text-slate-950
+      hover:bg-emerald-400
+      transition;
+  }
 
   .button-inverse {
     @apply custom-focus rounded-full border-2 border-white bg-green-400 px-8 py-2 font-bold text-white hover:border-green-400 hover:bg-white hover:text-green-400 focus:border-green-400 focus:bg-white focus:text-green-400;
   }
 
   .card {
-  @apply column min-w-[20rem] items-center gap-6
-    rounded-2xl bg-slate-950/70 border border-white/10
-    py-8 px-4 sm:min-w-[24rem] sm:px-10
-    shadow-[0_24px_60px_rgba(0,0,0,0.7)];
-}
+    @apply column min-w-[20rem] items-center gap-6
+      rounded-2xl bg-slate-950/70 border border-white/10
+      py-8 px-4 sm:min-w-[24rem] sm:px-10
+      shadow-[0_24px_60px_rgba(0,0,0,0.7)];
+  }
 
   .column {
     @apply flex flex-col items-start justify-center gap-4;
@@ -64,21 +64,20 @@
   }
 
   .input {
-  @apply custom-focus w-full rounded-xl
-    border border-slate-600 bg-slate-900/70
-    text-slate-50 placeholder:text-slate-500
-    px-4 py-2.5 text-sm;
-}
+    @apply custom-focus w-full rounded-xl
+      border border-slate-600 bg-slate-900/70
+      text-slate-50 placeholder:text-slate-500
+      px-4 py-2.5 text-sm;
+  }
 
   .link {
     @apply custom-focus rounded-md font-semibold text-green-400;
   }
 
-    .row {
+  .row {
     @apply flex flex-row items-center justify-start gap-1;
   }
-
-} 
+}
 
 /* Smooth fade for all route transitions */
 .page-fade {
@@ -121,16 +120,16 @@
   font-weight: 600;
 }
 
-/* Subtle Apple-style background */
-/* Ensure the body fills the screen */
-html, body {
+/* Subtle unified background */
+html,
+body {
   min-height: 100vh;
   background: linear-gradient(to bottom, #232428, #101114);
   color: #e5e5e5;
   overflow-x: hidden;
 }
 
-  /* Enable hover underline expansion */
+/* Enable hover underline expansion */
 nav a {
   position: relative;
 }
@@ -139,5 +138,3 @@ nav a:hover span:last-child {
   width: 6px;
   opacity: 0.8;
 }
-
-
