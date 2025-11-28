@@ -73,9 +73,14 @@ export default function DishesPage() {
 
         {dishes.map((dish) => (
           <div
-            key={dish.id}
-            className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer"
-          >
+  key={dish.id}
+  className="
+    bg-slate-950/70 border border-white/10 rounded-2xl
+    p-6 shadow-[0_18px_45px_rgba(0,0,0,0.55)]
+    hover:border-emerald-400/40 hover:-translate-y-0.5
+    transition cursor-pointer
+  "
+>
             {/* Dish header */}
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">{dish.name}</h2>
