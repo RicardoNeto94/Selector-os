@@ -19,92 +19,76 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-[#f5f6fa] flex flex-col">
-      
-      {/* HEADER (Logo + Restaurant status) */}
-      <header className="bg-gradient-to-br from-brand-dark to-brand-darkAlt text-white shadow-soft">
-        
-        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
-          
-          {/* LEFT SIDE: LOGO */}
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#232428] to-[#101114] text-slate-100">
+      {/* TOP BAR */}
+      <header className="border-b border-white/10 bg-gradient-to-r from-[#111827] to-[#020617]">
+        <div className="mx-auto flex items-center justify-between px-6 py-4 max-w-7xl">
+          {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center text-lg font-bold">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 border border-white/20 text-sm font-semibold">
               S
             </div>
             <div>
-              <div className="text-xl font-semibold tracking-tight">SelectorOS</div>
-              <div className="text-xs text-white/60 -mt-0.5">
-                Service-ready allergen & menu cockpit
+              <div className="text-sm font-semibold">SelectorOS</div>
+              <div className="text-xs text-slate-400">
+                Service-ready allergen &amp; menu cockpit
               </div>
             </div>
           </div>
 
-          {/* RIGHT SIDE: STATUS */}
-          <div className="hidden md:flex items-center gap-6 text-sm text-white/70">
-            <div className="flex flex-col items-end leading-tight">
-              <span className="text-[11px] uppercase tracking-wide text-white/40">
+          {/* Active restaurant + status */}
+          <div className="flex items-center gap-3 text-xs">
+            <div className="text-right">
+              <div className="uppercase tracking-[0.18em] text-slate-400 text-[10px]">
                 Active restaurant
-              </span>
-              <span className="font-medium">My Restaurant</span>
+              </div>
+              <div className="text-sm font-semibold">My Restaurant</div>
             </div>
-            <div className="w-px h-8 bg-white/10" />
-            <button className="flex items-center gap-2 text-xs bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded-full transition">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <div className="inline-flex items-center gap-1 rounded-full bg-slate-900/70 px-3 py-1 border border-emerald-500/40 text-[11px] text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Live</span>
-            </button>
+            </div>
           </div>
-
         </div>
 
- 
-{/* 🔥 Centered Sticky Nav with Animated Underline */}
-<nav className="sticky top-[72px] z-30 bg-gradient-to-br from-brand-dark to-brand-darkAlt shadow-sm">
-  <div className="mx-auto max-w-7xl px-8 py-3 flex justify-center text-sm">
-    <div className="flex gap-6 overflow-x-auto">
-      {topTabs.map((item) => {
-        const active =
-          pathname === item.href ||
-          (item.href !== "/dashboard" && pathname.startsWith(item.href));
+        {/* CENTERED NAV TABS */}
+        <nav className="sticky top-0 z-30 bg-gradient-to-br from-[#111827] to-[#020617] shadow-sm">
+          <div className="mx-auto max-w-7xl px-6 py-3 flex justify-center text-sm">
+            <div className="flex gap-4 overflow-x-auto">
+              {topTabs.map((item) => {
+                const active =
+                  pathname === item.href ||
+                  (item.href !== "/dashboard" &&
+                    pathname.startsWith(item.href));
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`
-              relative flex items-center gap-2 px-4 py-2 whitespace-nowrap
-              transition-all duration-200
-              ${
-                active
-                  ? "text-white font-semibold"
-                  : "text-white/70 hover:text-white"
-              }
-            `}
-          >
-            {/* Icon */}
-            <span className="text-base">{item.icon}</span>
-            {item.label}
-
-            {/* Animated Underline */}
-            <span
-              className={`
-                absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] rounded-full
-                transition-all duration-300
-                ${
-                  active
-                    ? "w-8 bg-white opacity-100"
-                    : "w-0 bg-white opacity-0 group-hover:w-6"
-                }
-              `}
-            />
-          </Link>
-        );
-      })}
-    </div>
-  </div>
-</nav>
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`
+                      relative flex items-center gap-2 px-4 py-2 whitespace-nowrap
+                      transition-all duration-200
+                      ${
+                        active
+                          ? "text-white font-semibold"
+                          : "text-slate-300 hover:text-white"
+                      }
+                    `}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="absolute inset-x-4 -bottom-1 h-0.5 rounded-full bg-emerald-400" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
       </header>
 
-            {/* MAIN CONTENT */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 md:px-8 py-8">
         <div
           className="
@@ -117,4 +101,6 @@ export default function DashboardLayout({ children }) {
           {children}
         </div>
       </main>
-
+    </div>
+  );
+}
