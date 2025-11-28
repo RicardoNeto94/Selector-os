@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-export default function Sidebar({ active = "" }) {
+export default function Sidebar() {
+  const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
 
   const items = [
@@ -15,13 +17,22 @@ export default function Sidebar({ active = "" }) {
     { id: "settings", icon: "⚙️", label: "Settings", href: "/dashboard/settings" },
   ];
 
+  // Detect active section by pathname:
+  const getActive = () => {
+    if (!pathname) return "";
+    const parts = pathname.split("/").filter(Boolean); // ["dashboard", "menu"]
+    return parts[1] || "dashboard";
+  };
+
+  const active = getActive();
+
   return (
     <aside
       className={`sidebar-wall ${
         expanded ? "w-56" : "w-20"
       } min-h-screen flex flex-col items-center py-6 gap-6 transition-all duration-300`}
     >
-      {/* Expand / collapse button */}
+      {/* Expand / collapse */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
