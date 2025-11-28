@@ -1,28 +1,11 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
 export const dynamic = "force-dynamic";
 
-/* TOP BAR TABS */
-const topTabs = [
-  { href: "/dashboard", label: "Overview", icon: "🏠" },
-  { href: "/dashboard/menu", label: "Menus", icon: "📋" },
-  { href: "/dashboard/dishes", label: "Dishes", icon: "🍽️" },
-  { href: "/dashboard/allergen", label: "Allergens", icon: "⚠️" },
-  { href: "/dashboard/billing", label: "Billing", icon: "💳" },
-  { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
-];
-
 export default function DashboardLayout({ children }) {
-  const pathname = usePathname();
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#232428] to-[#101114] text-slate-100">
-      {/* TOP BAR */}
+    <div className="min-h-screen flex flex-col text-slate-100">
+      {/* TOP HEADER – BRAND + STATUS */}
       <header className="border-b border-white/10 bg-gradient-to-r from-[#111827] to-[#020617]">
-        <div className="mx-auto flex items-center justify-between px-6 py-4 max-w-7xl">
+        <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           {/* Brand */}
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 border border-white/20 text-sm font-semibold">
@@ -36,7 +19,7 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* Active restaurant + status */}
+          {/* Active restaurant + live pill (static for now) */}
           <div className="flex items-center gap-3 text-xs">
             <div className="text-right">
               <div className="uppercase tracking-[0.18em] text-slate-400 text-[10px]">
@@ -50,45 +33,9 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
         </div>
-
-        {/* CENTERED NAV TABS */}
-        <nav className="sticky top-0 z-30 bg-gradient-to-br from-[#111827] to-[#020617] shadow-sm">
-          <div className="mx-auto max-w-7xl px-6 py-3 flex justify-center text-sm">
-            <div className="flex gap-4 overflow-x-auto">
-              {topTabs.map((item) => {
-                const active =
-                  pathname === item.href ||
-                  (item.href !== "/dashboard" &&
-                    pathname.startsWith(item.href));
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`
-                      relative flex items-center gap-2 px-4 py-2 whitespace-nowrap
-                      transition-all duration-200
-                      ${
-                        active
-                          ? "text-white font-semibold"
-                          : "text-slate-300 hover:text-white"
-                      }
-                    `}
-                  >
-                    <span className="text-lg">{item.icon}</span>
-                    <span>{item.label}</span>
-                    {active && (
-                      <span className="absolute inset-x-4 -bottom-1 h-0.5 rounded-full bg-emerald-400" />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </nav>
       </header>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT WRAPPER */}
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 md:px-8 py-8">
         <div
           className="
