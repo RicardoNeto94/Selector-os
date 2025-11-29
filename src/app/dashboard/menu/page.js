@@ -55,8 +55,9 @@ export default async function MenuDashboardPage() {
     console.error("Error loading menus", menusError);
   }
 
-  // Public path for this restaurant's guest allergen page
-  const publicPath = `/menu/${restaurant.slug}`;
+  // ✅ Public path for this restaurant's guest allergen page
+  //    Route lives at /r/[slug]
+  const publicPath = `/r/${restaurant.slug}`;
 
   return (
     <main className="page-fade px-6 py-10 text-slate-100">
