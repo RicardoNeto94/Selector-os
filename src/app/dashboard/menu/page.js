@@ -55,8 +55,12 @@ export default async function MenuDashboardPage() {
     console.error("Error loading menus", menusError);
   }
 
+  // App URL for generating public links
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  // NEW: Public link is always based on restaurant slug
+  const publicUrl = `${appUrl}/menu/${restaurant.slug}`;
 
   return (
     <main className="page-fade px-6 py-10 text-slate-100">
@@ -72,8 +76,8 @@ export default async function MenuDashboardPage() {
               <span className="text-emerald-400">{restaurant.name}</span>
             </h1>
             <p className="mt-1 text-sm text-slate-300/80 max-w-xl">
-              Each menu below has its own guest-facing allergen page. Share the
-              link or QR code with guests or staff.
+              Each menu below feeds into your guest-facing allergen page.
+              Share the link or QR code with guests or staff.
             </p>
           </div>
         </header>
@@ -94,77 +98,63 @@ export default async function MenuDashboardPage() {
                 <thead className="text-slate-400 border-b border-slate-800/80">
                   <tr>
                     <th className="text-left py-2 pr-4 font-normal">Name</th>
-                    <th className="text-left py-2 pr-4 font-normal">
-                      Created
-                    </th>
-                    <th className="text-left py-2 pr-4 font-normal">
-                      Status
-                    </th>
+                    <th className="text-left py-2 pr-4 font-normal">Created</th>
+                    <th className="text-left py-2 pr-4 font-normal">Status</th>
                     <th className="text-left py-2 pr-4 font-normal">
                       Public allergen link
                     </th>
-                    <th className="text-left py-2 pr-4 font-normal">
-                      Actions
-                    </th>
+                    <th className="text-left py-2 pr-4 font-normal">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
-                  {menus.map((m) => {
-                    const publicUrl = m.public_slug
-                      ? `${appUrl}/menu/${m.public_slug}`
-                      : null;
+                  {menus.map((m) => (
+                    <tr key={m.id} className="hover:bg-slate-900/60">
+                      <td className="py-3 pr-4 font-medium">
+                        {m.name || "Unnamed menu"}
+                      </td>
 
-                    return (
-                      <tr key={m.id} className="hover:bg-slate-900/60">
-                        <td className="py-3 pr-4 font-medium">
-                          {m.name || "Unnamed menu"}
-                        </td>
-                        <td className="py-3 pr-4 text-slate-300/80">
-                          {m.created_at
-                            ? new Date(m.created_at).toLocaleString()
-                            : "—"}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium border ${
-                              m.is_active
-                                ? "border-emerald-400/60 text-emerald-300 bg-emerald-500/10"
-                                : "border-slate-600/60 text-slate-300 bg-slate-800/60"
-                            }`}
-                          >
-                            {m.is_active ? "Active" : "Inactive"}
+                      <td className="py-3 pr-4 text-slate-300/80">
+                        {m.created_at
+                          ? new Date(m.created_at).toLocaleString()
+                          : "—"}
+                      </td>
+
+                      <td className="py-3 pr-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium border ${
+                            m.is_active
+                              ? "border-emerald-400/60 text-emerald-300 bg-emerald-500/10"
+                              : "border-slate-600/60 text-slate-300 bg-slate-800/60"
+                          }`}
+                        >
+                          {m.is_active ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+
+                      {/* Public link now always shown */}
+                      <td className="py-3 pr-4 text-slate-300/80">
+                        <div className="flex items-center gap-2">
+                          <LinkIcon className="w-4 h-4 opacity-70" />
+                          <span className="truncate max-w-[260px]">
+                            {publicUrl}
                           </span>
-                        </td>
-                        <td className="py-3 pr-4 text-slate-300/80">
-                          {publicUrl ? (
-                            <div className="flex items-center gap-2">
-                              <LinkIcon className="w-4 h-4 opacity-70" />
-                              <span className="truncate max-w-[260px]">
-                                {publicUrl}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-500 text-xs">
-                              No public slug
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 pr-4">
-                          {publicUrl && (
-                            <a
-                              href={publicUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-semibold px-3 py-1.5 hover:bg-emerald-300 transition"
-                            >
-                              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                              Guest view
-                            </a>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                        </div>
+                      </td>
+
+                      {/* Guest view button */}
+                      <td className="py-3 pr-4">
+                        <a
+                          href={publicUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-semibold px-3 py-1.5 hover:bg-emerald-300 transition"
+                        >
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                          Guest view
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -172,8 +162,8 @@ export default async function MenuDashboardPage() {
         </section>
 
         <p className="text-[11px] text-slate-500 max-w-xl">
-          Note: Deactivating or deleting a menu in the future will immediately
-          disable its public allergen page, so old QR codes stop working.
+          Note: Deactivating or deleting a menu will immediately disable its
+          effect on your public allergen page.
         </p>
       </div>
     </main>
