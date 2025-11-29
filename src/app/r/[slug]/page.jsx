@@ -2,243 +2,283 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-// Master allergen list – same codes you use in Shang Shi
-const ALLERGENS = [
-  { code: "GL", label: "Gluten" },
-  { code: "CE", label: "Celery" },
-  { code: "CR", label: "Crustaceans" },
-  { code: "EG", label: "Eggs" },
-  { code: "FL", label: "Fish" },
-  { code: "LU", label: "Lupin" },
-  { code: "MO", label: "Molluscs" },
-  { code: "MI", label: "Milk" },
-  { code: "MU", label: "Mustard" },
-  { code: "NU", label: "Nuts" },
-  { code: "PE", label: "Peanuts" },
-  { code: "SE", label: "Sesame" },
-  { code: "SO", label: "Soya" },
-  { code: "SU", label: "Sulphites" },
-  { code: "GA", label: "Garlic" },
-  { code: "ON", label: "Onion" },
-  { code: "MR", label: "Mushroom" },
+// Allergen codes you support – matches your DB codes
+const ALLERGEN_CODES = [
+  "GL", // gluten
+  "CE",
+  "CR",
+  "EG",
+  "FL",
+  "LU",
+  "MO",
+  "MI",
+  "MU",
+  "NU",
+  "PE",
+  "SE",
+  "SO",
+  "SU",
+  "GA",
+  "ON",
+  "MR",
 ];
 
-export default function PublicMenuPage({ params }) {
-  const slug = params.slug;
+function niceNameFromSlug(slug) {
+  if (!slug) return "";
+  return slug
+    .split("-")
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
 
-  const [dishes, setDishes] = useState([]);
+export default function PublicAllergenPage({ params }) {
+  const { slug } = params;
+
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [dishes, setDishes] = useState([]);
   const [activeAllergens, setActiveAllergens] = useState([]);
 
-  useEffect(() => {
-    let cancelled = false;
+  const restaurantName = niceNameFromSlug(slug);
+  const restaurantInitial = restaurantName.charAt(0) || slug.charAt(0) || "S";
 
-    async function load() {
+  useEffect(() => {
+    async function loadMenu() {
       try {
         setLoading(true);
-        const res = await fetch(`/api/public-menu/${slug}`);
+        setError("");
+
+        const res = await fetch(`/api/public-menu/${slug}`, {
+          cache: "no-store",
+        });
+
         if (!res.ok) {
-          console.error("Failed to load menu", await res.text());
-          if (!cancelled) setDishes([]);
-          return;
+          throw new Error("Failed to load menu");
         }
-        const data = await res.json();
-        if (!cancelled) setDishes(Array.isArray(data) ? data : []);
+
+        const json = await res.json();
+
+        // API returns an array of rows:
+        // [{ name, category, description, price, allergens: ['GL','CR', ...] }, ...]
+        setDishes(Array.isArray(json) ? json : []);
       } catch (err) {
         console.error("Public menu error", err);
-        if (!cancelled) setDishes([]);
+        setError("Failed to load menu");
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
 
-    load();
-    return () => {
-      cancelled = true;
-    };
+    loadMenu();
   }, [slug]);
 
-  const toggleAllergen = (code) => {
+  // Toggle allergen in the dock
+  function toggleAllergen(code) {
     setActiveAllergens((prev) =>
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
-  };
+  }
 
-  // A dish is SAFE if it does NOT contain any selected allergens
-  const visibleDishes = useMemo(() => {
-    if (!activeAllergens.length) return dishes;
-    return dishes.filter(
-      (d) =>
-        !d.allergens ||
-        d.allergens.length === 0 ||
-        !d.allergens.some((a) => activeAllergens.includes(a))
-    );
+  // A dish is SAFE if it does NOT contain any of the active allergen codes
+  const { safeDishes, hiddenCount } = useMemo(() => {
+    if (!activeAllergens.length) {
+      return { safeDishes: dishes, hiddenCount: 0 };
+    }
+
+    const safe = dishes.filter((dish) => {
+      const dishAllergens = dish.allergens || [];
+      return !dishAllergens.some((code) => activeAllergens.includes(code));
+    });
+
+    const hidden = dishes.length - safe.length;
+    return { safeDishes: safe, hiddenCount: hidden };
   }, [dishes, activeAllergens]);
 
-  const safeCount = visibleDishes.length;
+  const safeCount = safeDishes.length;
+
+  // ---------------------------------------------------------------------------
+  // RENDER
+  // ---------------------------------------------------------------------------
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#02111b] via-[#021c2e] to-[#03989e] text-slate-100">
+        <p className="text-sm opacity-80">Loading your SelectorOS workspace…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#02111b] via-[#021c2e] to-[#03989e] text-slate-100">
+        <div className="rounded-3xl bg-black/50 border border-red-500/40 px-6 py-4 shadow-2xl">
+          <p className="text-sm text-red-100">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#020308] via-[#04101a] to-[#041920] text-slate-50 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-5xl rounded-3xl bg-slate-950/80 border border-emerald-400/15 shadow-[0_40px_120px_rgba(0,0,0,0.9)] overflow-hidden relative">
-        {/* Glow background */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-24 -top-24 w-72 h-72 rounded-full bg-emerald-500/25 blur-3xl" />
-          <div className="absolute right-[-40px] bottom-[-40px] w-80 h-80 rounded-full bg-cyan-400/25 blur-3xl" />
+    <div className="min-h-screen bg-gradient-to-br from-[#02111b] via-[#021c2e] to-[#03989e] text-slate-100 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-6xl rounded-[32px] bg-slate-950/80 border border-teal-400/20 shadow-[0_40px_120px_rgba(0,0,0,0.9)] overflow-hidden">
+        {/* HEADER */}
+        <div className="px-8 pt-8 pb-4 md:px-10 md:pt-10 md:pb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          {/* Left: avatar + title */}
+          <div className="flex items-center gap-5">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 text-2xl font-bold shadow-[0_0_40px_rgba(252,211,77,0.5)]">
+              {restaurantInitial.toUpperCase()}
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">
+                Safe dishes for
+              </p>
+              <h1 className="text-2xl md:text-3xl font-semibold">
+                {restaurantName}
+              </h1>
+              <p className="mt-1 text-xs md:text-sm text-slate-300/80 max-w-xl">
+                Select allergen codes to hide dishes that contain them. Anything
+                left is <span className="font-semibold">SAFE</span> to serve.
+              </p>
+            </div>
+          </div>
+
+          {/* Right: copy */}
+          <div className="text-right text-[10px] md:text-xs text-slate-400">
+            <div className="uppercase tracking-[0.25em]">
+              SelectorOS • Guest view
+            </div>
+            <div className="mt-1">Live data from your cockpit</div>
+          </div>
         </div>
 
-        <div className="relative p-6 md:p-8 space-y-6">
-          {/* Header */}
-          <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-800 shadow-[0_0_40px_rgba(250,204,21,0.4)] flex items-center justify-center text-lg font-semibold text-slate-900">
-                {slug.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.25em] text-emerald-300/80">
-                  Safe dishes for
-                </p>
-                <h1 className="text-xl md:text-2xl font-semibold">
-                  <span className="capitalize text-emerald-300">{slug.replace(/-/g, " ")}</span>
-                </h1>
-                <p className="text-xs md:text-sm text-slate-300/80 mt-1">
-                  Select allergen codes to hide dishes that contain them. Anything left is{" "}
-                  <span className="font-semibold">SAFE</span> to serve.
-                </p>
-              </div>
-            </div>
+        {/* STATS STRIP */}
+        <div className="px-8 md:px-10 pb-4 flex flex-wrap items-center gap-3 text-xs md:text-sm">
+          <span className="inline-flex items-center rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/40 px-3 py-1">
+            {safeCount} safe {safeCount === 1 ? "dish" : "dishes"}
+          </span>
 
-            <div className="text-right text-[11px] uppercase tracking-[0.22em] text-slate-400">
-              <div>SELECTOROS • GUEST VIEW</div>
-              <div className="text-[10px] text-slate-500">
-                Live data from your cockpit
-              </div>
-            </div>
-          </header>
-
-          {/* Status strip */}
-          <div className="flex flex-wrap items-center gap-3 text-xs">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/50 text-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-              <span className="font-semibold">
-                {safeCount} safe {safeCount === 1 ? "dish" : "dishes"}
-              </span>
-            </span>
+          {activeAllergens.length === 0 ? (
             <span className="text-slate-300/80">
-              {activeAllergens.length === 0 ? (
-                <>No filters active – all dishes are shown.</>
-              ) : (
+              No filters active – all dishes are shown.
+            </span>
+          ) : (
+            <span className="text-slate-300/80">
+              Hiding dishes that contain:{" "}
+              <span className="font-semibold">
+                {activeAllergens.join(", ")}
+              </span>
+              {hiddenCount > 0 && (
                 <>
-                  Hiding dishes that contain:{" "}
-                  <span className="font-semibold">
-                    {activeAllergens.join(", ")}
-                  </span>
+                  {" "}
+                  · <span className="font-semibold">{hiddenCount}</span>{" "}
+                  hidden.
                 </>
               )}
             </span>
-          </div>
+          )}
+        </div>
 
-          {/* Allergen dock */}
-          <section className="mt-2">
-            <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-2">
-              Allergen dock
+        {/* ALLERGEN DOCK – THIS IS THE FLOATING ROW */}
+        <div className="px-8 md:px-10 pb-6">
+          <div className="rounded-3xl border border-teal-500/30 bg-slate-950/80 backdrop-blur-xl shadow-[0_18px_60px_rgba(0,0,0,0.9)] px-4 py-3 flex flex-wrap gap-2">
+            {ALLERGEN_CODES.map((code) => {
+              const active = activeAllergens.includes(code);
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => toggleAllergen(code)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium border transition
+                    ${
+                      active
+                        ? "bg-emerald-400 text-slate-950 border-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.7)]"
+                        : "bg-slate-900/80 text-slate-200 border-slate-600/60 hover:border-emerald-300/70 hover:text-emerald-200"
+                    }
+                  `}
+                >
+                  {code}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* MENU LIST */}
+        <div className="px-8 md:px-10 pb-10">
+          <div className="rounded-3xl border border-teal-500/30 bg-gradient-to-br from-slate-950/90 to-slate-950/60 px-6 py-5">
+            <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+              <span className="uppercase tracking-[0.2em]">Menu</span>
+              <span>Allergens shown per dish</span>
             </div>
-            <div className="flex flex-wrap gap-2 rounded-2xl bg-slate-900/80 border border-slate-700/60 px-3 py-3">
-              {ALLERGENS.map((a) => {
-                const active = activeAllergens.includes(a.code);
+
+            <div className="space-y-3">
+              {safeDishes.map((dish) => {
+                const dishAllergens = dish.allergens || [];
+                const isCompletelySafe = dishAllergens.length === 0;
+
                 return (
-                  <button
-                    key={a.code}
-                    onClick={() => toggleAllergen(a.code)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-medium border transition
-                      ${
-                        active
-                          ? "bg-emerald-400 text-slate-900 border-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.7)]"
-                          : "bg-slate-900/60 text-slate-200 border-slate-700 hover:border-emerald-300/60 hover:text-emerald-100"
-                      }`}
+                  <div
+                    key={dish.name + dish.category}
+                    className="rounded-2xl border border-teal-500/25 bg-slate-950/80 px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
                   >
-                    {a.code}
-                  </button>
+                    {/* Left */}
+                    <div>
+                      {dish.category && (
+                        <div className="text-[10px] uppercase tracking-[0.25em] text-teal-300/70 mb-1">
+                          {dish.category}
+                        </div>
+                      )}
+                      <div className="font-semibold text-sm md:text-base">
+                        {dish.name}
+                      </div>
+                      {dish.description && (
+                        <div className="mt-1 text-xs text-slate-300/80 max-w-xl">
+                          {dish.description}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right */}
+                    <div className="flex items-end gap-4 justify-between md:justify-end">
+                      <div className="text-right">
+                        {typeof dish.price === "number" && (
+                          <div className="font-semibold text-sm md:text-base">
+                            {dish.price.toFixed(2)} €
+                          </div>
+                        )}
+                        <div className="mt-1 text-[11px] text-slate-400">
+                          Allergens:{" "}
+                          {dishAllergens.length
+                            ? dishAllergens.join(", ")
+                            : "None"}
+                        </div>
+                      </div>
+
+                      <div>
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold border ${
+                            isCompletelySafe
+                              ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/70"
+                              : "bg-slate-800/80 text-amber-300 border-amber-400/60"
+                          }`}
+                        >
+                          {isCompletelySafe ? "SAFE" : "HAS ALLERGENS"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
-            </div>
-          </section>
 
-          {/* Menu card */}
-          <section className="mt-4">
-            <div className="rounded-3xl border border-emerald-400/40 bg-gradient-to-br from-slate-950/90 via-slate-950/70 to-slate-900/80 px-5 py-4 md:px-7 md:py-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-[11px] uppercase tracking-[0.2em] text-emerald-300/90">
-                  Menu
+              {safeDishes.length === 0 && (
+                <div className="text-xs text-slate-300/80 py-4">
+                  No dishes are safe with the current allergen filters. Remove
+                  some filters to see more dishes.
                 </div>
-                <div className="text-[11px] text-slate-400">
-                  Allergens shown per dish
-                </div>
-              </div>
-
-              {loading ? (
-                <div className="py-10 text-center text-sm text-slate-400">
-                  Loading live menu…
-                </div>
-              ) : dishes.length === 0 ? (
-                <div className="py-10 text-center text-sm text-slate-400">
-                  No dishes configured yet. Ask your server to refresh the menu.
-                </div>
-              ) : visibleDishes.length === 0 ? (
-                <div className="py-10 text-center text-sm text-slate-400">
-                  Your selected allergens hide all dishes. Try removing one filter.
-                </div>
-              ) : (
-                <ul className="space-y-4">
-                  {visibleDishes.map((d) => {
-                    const hasAllergens = d.allergens && d.allergens.length > 0;
-                    return (
-                      <li
-                        key={d.name + d.category}
-                        className="rounded-2xl border border-emerald-500/40 bg-slate-950/60 px-4 py-4 md:px-5 md:py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
-                      >
-                        <div>
-                          {d.category && (
-                            <p className="text-[10px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">
-                              {d.category}
-                            </p>
-                          )}
-                          <p className="text-sm md:text-base font-semibold text-slate-50">
-                            {d.name}
-                          </p>
-                          {d.description && (
-                            <p className="text-xs md:text-sm text-slate-300/80 mt-1">
-                              {d.description}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col items-end gap-2">
-                          {typeof d.price === "number" && (
-                            <p className="text-sm md:text-base font-semibold text-slate-50">
-                              {d.price.toFixed(2)} €
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2">
-                            <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 border border-emerald-400/60 text-emerald-200">
-                              SAFE
-                            </span>
-                            <span className="text-[11px] text-slate-300/80">
-                              Allergens:{" "}
-                              {hasAllergens
-                                ? d.allergens.join(", ")
-                                : "None"}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
               )}
             </div>
-          </section>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
