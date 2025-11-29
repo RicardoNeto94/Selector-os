@@ -55,12 +55,8 @@ export default async function MenuDashboardPage() {
     console.error("Error loading menus", menusError);
   }
 
-  // App URL for generating public links
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-  // NEW: Public link is always based on restaurant slug
-  const publicUrl = `${appUrl}/menu/${restaurant.slug}`;
+  // Public path for this restaurant's guest allergen page
+  const publicPath = `/menu/${restaurant.slug}`;
 
   return (
     <main className="page-fade px-6 py-10 text-slate-100">
@@ -131,12 +127,12 @@ export default async function MenuDashboardPage() {
                         </span>
                       </td>
 
-                      {/* Public link now always shown */}
+                      {/* Public link – same for all menus (per restaurant) in v1 */}
                       <td className="py-3 pr-4 text-slate-300/80">
                         <div className="flex items-center gap-2">
                           <LinkIcon className="w-4 h-4 opacity-70" />
                           <span className="truncate max-w-[260px]">
-                            {publicUrl}
+                            {publicPath}
                           </span>
                         </div>
                       </td>
@@ -144,7 +140,7 @@ export default async function MenuDashboardPage() {
                       {/* Guest view button */}
                       <td className="py-3 pr-4">
                         <a
-                          href={publicUrl}
+                          href={publicPath}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-semibold px-3 py-1.5 hover:bg-emerald-300 transition"
@@ -162,8 +158,8 @@ export default async function MenuDashboardPage() {
         </section>
 
         <p className="text-[11px] text-slate-500 max-w-xl">
-          Note: Deactivating or deleting a menu will immediately disable its
-          effect on your public allergen page.
+          Note: Deactivating or deleting a menu will immediately change what
+          guests see on your allergen page.
         </p>
       </div>
     </main>
