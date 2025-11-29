@@ -84,15 +84,14 @@ export default function GuestMenu({ slug }) {
       : `Hiding dishes that contain: ${Array.from(
           selectedAllergens
         ).join(", ")}`;
-  
-    const hasActiveFilters = selectedAllergens.size > 0;
+
+  const hasActiveFilters = selectedAllergens.size > 0;
 
   const handleResetFilters = () => {
     setSelectedAllergens(new Set());
   };
 
-
-    return (
+  return (
     <div className="guest-root">
       <div className="guest-shell">
         {/* Header */}
@@ -164,9 +163,7 @@ export default function GuestMenu({ slug }) {
                 return (
                   <article
                     key={dish.name + dish.category}
-                    className={
-                      "guest-card " + (blocked ? "" : "safe")
-                    }
+                    className={"guest-card " + (blocked ? "" : "safe")}
                   >
                     <div className="guest-card-header">
                       <div>
@@ -214,37 +211,22 @@ export default function GuestMenu({ slug }) {
         )}
       </div>
 
-      {/* ---------------- FLOATING DOCK ---------------- */}
-      {!loading && !error && dishes.length > 0 && (
-        <div className="guest-dock">
-          <div className="guest-dock-inner">
-            {/* Safe dish count */}
-            <div className="guest-dock-safe">
-              <span className="guest-dock-dot" />
-              <span className="guest-dock-safe-label">{countText}</span>
-            </div>
+      {/* FLOATING DOCK – bottom centre */}
+      <div className="guest-floating-dock">
+        <button className="guest-dock-pill guest-dock-count">
+          {countText}
+        </button>
 
-            {/* Divider */}
-            <span className="guest-dock-divider" />
+        <span className="guest-dock-text">{activeFilterText}</span>
 
-            {/* Active filter text */}
-            <span className="guest-dock-text">{activeFilterText}</span>
-
-            {/* Reset */}
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              disabled={!hasActiveFilters}
-              className={
-                "guest-dock-reset" + (hasActiveFilters ? " active" : "")
-              }
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-      )}
-      {/* ------------------------------------------------ */}
+        <button
+          className="guest-dock-pill guest-dock-reset"
+          onClick={handleResetFilters}
+          disabled={!hasActiveFilters}
+        >
+          Reset
+        </button>
+      </div>
     </div>
   );
 }
