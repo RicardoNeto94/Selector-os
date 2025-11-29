@@ -84,6 +84,13 @@ export default function GuestMenu({ slug }) {
       : `Hiding dishes that contain: ${Array.from(
           selectedAllergens
         ).join(", ")}`;
+  
+    const hasActiveFilters = selectedAllergens.size > 0;
+
+  const handleResetFilters = () => {
+    setSelectedAllergens(new Set());
+  };
+
 
   return (
     <div className="guest-root">
