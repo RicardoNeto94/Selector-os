@@ -4,7 +4,6 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Hard fail at build time if misconfigured
 if (!supabaseUrl || !supabaseKey) {
   throw new Error(
     "Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
@@ -32,7 +31,10 @@ export async function GET(_req, { params }) {
   if (error) {
     console.error("menu_for_slug error", error);
     return NextResponse.json(
-      { error: "Failed to load menu" },
+      {
+        error: error.message || "Failed to load menu",
+        details: error,
+      },
       { status: 500 }
     );
   }
