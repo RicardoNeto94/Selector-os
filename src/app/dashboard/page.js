@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   ChartBarIcon,
@@ -9,6 +10,8 @@ import {
   Bars3Icon,
   Cog6ToothIcon,
   PlusIcon,
+  LinkIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 
 export default function DashboardHome() {
@@ -18,6 +21,7 @@ export default function DashboardHome() {
   const [stats, setStats] = useState(null);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [copyStatus, setCopyStatus] = useState("Copy link");
 
   useEffect(() => {
     loadDashboard();
@@ -25,27 +29,26 @@ export default function DashboardHome() {
 
   const loadDashboard = async () => {
     setLoading(true);
-
-    // Get current user
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Restaurant for this user
+    // Restaurant
     const { data: r } = await supabase
       .from("restaurants")
       .select("*")
       .eq("owner_id", user.id)
       .maybeSingle();
 
+    setRestaurant(r);
+
     if (!r) {
-      // No restaurant yet – nothing else we can do
+      setStats(null);
+      setActivity([]);
       setLoading(false);
       return;
     }
-
-    setRestaurant(r);
 
     // KPIs
     const { count: dishCount } = await supabase
@@ -89,6 +92,26 @@ export default function DashboardHome() {
     setLoading(false);
   };
 
+  const handleCopyPublicLink = () => {
+    if (!restaurant?.slug) return;
+    const path = `/r/${restaurant.slug}`;
+    const fullUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}${path}`
+        : path;
+
+    navigator.clipboard
+      .writeText(fullUrl)
+      .then(() => {
+        setCopyStatus("Copied!");
+        setTimeout(() => setCopyStatus("Copy link"), 1500);
+      })
+      .catch(() => {
+        setCopyStatus("Failed");
+        setTimeout(() => setCopyStatus("Copy link"), 1500);
+      });
+  };
+
   if (loading || !restaurant || !stats) {
     return (
       <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
@@ -96,6 +119,8 @@ export default function DashboardHome() {
       </div>
     );
   }
+
+  const publicPath = `/r/${restaurant.slug}`;
 
   return (
     <div className="space-y-8 text-slate-100">
@@ -288,7 +313,7 @@ export default function DashboardHome() {
           </div>
         </div>
 
-        {/* Right: “System health” */}
+        {/* Right: “Completed tasks / health” placeholder */}
         <div className="rounded-3xl bg-slate-950/85 border border-slate-800/70 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7 flex flex-col justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
@@ -314,6 +339,56 @@ export default function DashboardHome() {
               tone="warning"
             />
             <HealthPill label="Menus live" value={stats.menus} />
+          </div>
+        </div>
+      </section>
+
+      {/* PUBLIC ALLERGEN PAGES */}
+      <section className="rounded-3xl bg-slate-950/90 border border-slate-800/80 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7 flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+              Public allergen menu
+            </p>
+            <h3 className="text-lg font-semibold mt-1">
+              Active guest / staff-facing page
+            </h3>
+            <p className="text-sm text-slate-400 mt-1 max-w-xl">
+              Share this link with your team or guests. It opens the live
+              SelectorOS allergen tool for{" "}
+              <span className="font-semibold text-slate-100">
+                {restaurant.name}
+              </span>
+              .
+            </p>
+          </div>
+          <Cog6ToothIcon className="w-6 h-6 text-slate-500" />
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 rounded-full bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 text-xs">
+            <LinkIcon className="w-4 h-4 text-emerald-400" />
+            <span className="font-mono text-[11px]">
+              {publicPath}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href={publicPath}
+              target="_blank"
+              className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-400 text-slate-950 hover:bg-emerald-300 transition"
+            >
+              Open allergen page
+            </Link>
+            <button
+              type="button"
+              onClick={handleCopyPublicLink}
+              className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600 transition"
+            >
+              <DocumentDuplicateIcon className="w-4 h-4" />
+              <span>{copyStatus}</span>
+            </button>
           </div>
         </div>
       </section>
@@ -346,9 +421,7 @@ function KPICard({ title, value, description, icon, tone = "default" }) {
     tone === "warning" ? "border-amber-400/40" : "border-slate-700/70";
 
   return (
-    <div
-      className={`rounded-2xl bg-slate-950/80 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.6)] flex items-start gap-4`}
-    >
+    <div className={`rounded-2xl bg-slate-950/80 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.6)] flex items-start gap-4`}>
       <div className="p-2.5 rounded-xl bg-slate-800/80 text-slate-100">
         {icon}
       </div>
@@ -385,7 +458,9 @@ function HealthPill({ label, value, tone = "default" }) {
       : "text-emerald-300 bg-emerald-500/5 border-emerald-400/30";
 
   return (
-    <div className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}>
+    <div
+      className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}
+    >
       <span className="text-[11px] uppercase tracking-wide opacity-80">
         {label}
       </span>
