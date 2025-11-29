@@ -92,7 +92,7 @@ export default function GuestMenu({ slug }) {
   };
 
 
-  return (
+    return (
     <div className="guest-root">
       <div className="guest-shell">
         {/* Header */}
@@ -213,6 +213,38 @@ export default function GuestMenu({ slug }) {
           </>
         )}
       </div>
+
+      {/* ---------------- FLOATING DOCK ---------------- */}
+      {!loading && !error && dishes.length > 0 && (
+        <div className="guest-dock">
+          <div className="guest-dock-inner">
+            {/* Safe dish count */}
+            <div className="guest-dock-safe">
+              <span className="guest-dock-dot" />
+              <span className="guest-dock-safe-label">{countText}</span>
+            </div>
+
+            {/* Divider */}
+            <span className="guest-dock-divider" />
+
+            {/* Active filter text */}
+            <span className="guest-dock-text">{activeFilterText}</span>
+
+            {/* Reset */}
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
+              className={
+                "guest-dock-reset" + (hasActiveFilters ? " active" : "")
+              }
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      )}
+      {/* ------------------------------------------------ */}
     </div>
   );
 }
