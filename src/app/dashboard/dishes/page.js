@@ -1,131 +1,163 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function DishesPage() {
   const supabase = createClientComponentClient();
 
-  const [restaurant, setRestaurant] = useState(null);
-  const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [restaurant, setRestaurant] = useState(null);
+  const [menus, setMenus] = useState([]);
+  const [dishes, setDishes] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadDishes();
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadDishes() {
+  const loadData = async () => {
     setLoading(true);
+    setError("");
 
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (userError || !user) {
+      setError("You must be logged in.");
       setLoading(false);
       return;
     }
 
-    // Get restaurant for this owner
-    const { data: r } = await supabase
+    const { data: r, error: rError } = await supabase
       .from("restaurants")
       .select("*")
       .eq("owner_id", user.id)
       .maybeSingle();
 
+    if (rError || !r) {
+      setError("No restaurant found.");
+      setLoading(false);
+      return;
+    }
     setRestaurant(r);
 
-    // Get dishes for that restaurant
-    const { data: d } = await supabase
+    const { data: menusData, error: mError } = await supabase
+      .from("menus")
+      .select("*")
+      .eq("restaurant_id", r.id);
+
+    if (mError) {
+      setError("Failed to load menus.");
+      setLoading(false);
+      return;
+    }
+
+    setMenus(menusData || []);
+
+    if (!menusData || menusData.length === 0) {
+      setDishes([]);
+      setLoading(false);
+      return;
+    }
+
+    const menuIds = menusData.map((m) => m.id);
+
+    const { data: dishesData, error: dError } = await supabase
       .from("dishes")
-      .select("*, allergens ( allergen_code )")
-      .eq("restaurant_id", r.id)
+      .select("*")
+      .in("menu_id", menuIds)
       .order("created_at", { ascending: false });
 
-    setDishes(d || []);
+    if (dError) {
+      setError("Failed to load dishes.");
+      setLoading(false);
+      return;
+    }
+
+    setDishes(dishesData || []);
     setLoading(false);
-  }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[60vh] text-slate-300 text-sm">
+      <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
         Loading dishes…
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 text-slate-100">
-      {/* HEADER */}
-      <div className="bg-slate-950/80 border border-white/10 rounded-2xl p-8 shadow-[0_24px_60px_rgba(0,0,0,0.7)]">
-        <h1 className="text-3xl font-bold text-slate-50">Dishes</h1>
-        <p className="text-slate-400 mt-1">
-          Manage your dishes, allergens, and descriptions.
-        </p>
+    <div className="max-w-5xl mx-auto mt-10 mb-20">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-400/80 mb-2">
+            SelectorOS • Dishes
+          </p>
+          <h1 className="text-2xl font-semibold text-slate-50">Dishes</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            All dishes across your menus. Changes here update your live
+            allergen view.
+          </p>
+        </div>
 
-        <button className="mt-6 inline-flex items-center gap-2 px-5 py-3 bg-emerald-500 text-slate-950 rounded-xl hover:bg-emerald-400 transition font-semibold">
-          + Add Dish
-        </button>
+        <a
+          href="/dashboard/dishes/new"
+          className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 transition"
+        >
+          + Add dish
+        </a>
       </div>
 
-      {/* DISH LIST */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {dishes.map((dish) => (
-          <div
-            key={dish.id}
-            className="bg-slate-950/70 border border-white/10 rounded-2xl p-6 shadow-[0_18px_45px_rgba(0,0,0,0.55)] hover:border-emerald-400/40 hover:-translate-y-0.5 transition cursor-pointer"
-          >
-            {/* Dish header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">{dish.name}</h2>
+      {error && (
+        <div className="rounded-xl border border-red-500/60 bg-red-500/10 px-4 py-2 text-xs text-red-200 mb-4">
+          {error}
+        </div>
+      )}
 
-              <Link
-                href={`/dashboard/dishes/${dish.id}`}
-                className="text-emerald-400 text-sm font-semibold hover:underline"
-              >
-                Edit →
-              </Link>
-            </div>
-
-            {/* Allergens */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {dish.allergens && dish.allergens.length > 0 ? (
-                dish.allergens.map((a) => (
-                  <span
-                    key={a.allergen_code}
-                    className="px-3 py-1 text-xs rounded-full bg-slate-800/80 text-slate-100"
+      {dishes.length === 0 ? (
+        <div className="rounded-2xl bg-slate-950/80 border border-slate-800/80 p-6 text-sm text-slate-300">
+          No dishes yet. Start by adding your first dish.
+        </div>
+      ) : (
+        <div className="rounded-2xl bg-slate-950/80 border border-slate-800/80 p-4">
+          <table className="w-full text-sm text-slate-200">
+            <thead className="text-xs uppercase tracking-wide text-slate-400 border-b border-slate-800">
+              <tr>
+                <th className="text-left py-2">Name</th>
+                <th className="text-left py-2">Menu</th>
+                <th className="text-left py-2">Category</th>
+                <th className="text-right py-2">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dishes.map((d) => {
+                const menu = menus.find((m) => m.id === d.menu_id);
+                return (
+                  <tr
+                    key={d.id}
+                    className="border-b border-slate-900/80 hover:bg-slate-900/50"
                   >
-                    {a.allergen_code}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-slate-500">
-                  No allergens linked yet.
-                </span>
-              )}
-            </div>
-
-            {/* Created date */}
-            <p className="mt-4 text-xs text-slate-500">
-              Created:{" "}
-              {dish.created_at
-                ? new Date(dish.created_at).toLocaleString()
-                : "—"}
-            </p>
-          </div>
-        ))}
-
-        {/* EMPTY STATE */}
-        {dishes.length === 0 && (
-          <div className="col-span-full text-center text-slate-400 py-20">
-            <p className="text-lg mb-2">No dishes yet.</p>
-            <p className="text-sm">
-              Start by adding your first dish to this restaurant.
-            </p>
-          </div>
-        )}
-      </div>
+                    <td className="py-2 pr-4 font-medium">{d.name}</td>
+                    <td className="py-2 pr-4 text-slate-300">
+                      {menu?.name || "—"}
+                    </td>
+                    <td className="py-2 pr-4 text-slate-400 text-xs">
+                      {d.category || "—"}
+                    </td>
+                    <td className="py-2 pl-4 text-right">
+                      {d.price != null ? `${Number(d.price).toFixed(2)} €` : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
