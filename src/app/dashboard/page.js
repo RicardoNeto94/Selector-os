@@ -1,18 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   ChartBarIcon,
   ClipboardDocumentListIcon,
   ExclamationTriangleIcon,
   Bars3Icon,
-  Cog6ToothIcon,
-  PlusIcon,
-  LinkIcon,
-  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/20/solid";
 
 export default function DashboardHome() {
   const supabase = createClientComponentClient();
@@ -21,10 +17,10 @@ export default function DashboardHome() {
   const [stats, setStats] = useState(null);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [copyStatus, setCopyStatus] = useState("Copy link");
 
   useEffect(() => {
     loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDashboard = async () => {
@@ -43,18 +39,10 @@ export default function DashboardHome() {
 
     setRestaurant(r);
 
-    if (!r) {
-      setStats(null);
-      setActivity([]);
-      setLoading(false);
-      return;
-    }
-
     // KPIs
     const { count: dishCount } = await supabase
       .from("dishes")
-      .select("*", { count: "exact", head: true })
-      .eq("restaurant_id", r.id);
+      .select("*", { count: "exact", head: true });
 
     const { count: allergenCount } = await supabase
       .from("allergen")
@@ -67,7 +55,6 @@ export default function DashboardHome() {
     const { data: lastDish } = await supabase
       .from("dishes")
       .select("*")
-      .eq("restaurant_id", r.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -84,32 +71,11 @@ export default function DashboardHome() {
     const { data: recent } = await supabase
       .from("dishes")
       .select("*")
-      .eq("restaurant_id", r.id)
       .order("created_at", { ascending: false })
       .limit(5);
 
     setActivity(recent || []);
     setLoading(false);
-  };
-
-  const handleCopyPublicLink = () => {
-    if (!restaurant?.slug) return;
-    const path = `/r/${restaurant.slug}`;
-    const fullUrl =
-      typeof window !== "undefined"
-        ? `${window.location.origin}${path}`
-        : path;
-
-    navigator.clipboard
-      .writeText(fullUrl)
-      .then(() => {
-        setCopyStatus("Copied!");
-        setTimeout(() => setCopyStatus("Copy link"), 1500);
-      })
-      .catch(() => {
-        setCopyStatus("Failed");
-        setTimeout(() => setCopyStatus("Copy link"), 1500);
-      });
   };
 
   if (loading || !restaurant || !stats) {
@@ -119,8 +85,6 @@ export default function DashboardHome() {
       </div>
     );
   }
-
-  const publicPath = `/r/${restaurant.slug}`;
 
   return (
     <div className="space-y-8 text-slate-100">
@@ -188,7 +152,7 @@ export default function DashboardHome() {
 
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <QuickButton
-                  href="/dashboard/dishes"
+                  href="/dashboard/dishes/new"   // 🔥 go straight to creation form
                   label="Add dish"
                   icon={<PlusIcon className="w-4 h-4" />}
                 />
@@ -313,7 +277,7 @@ export default function DashboardHome() {
           </div>
         </div>
 
-        {/* Right: “Completed tasks / health” placeholder */}
+        {/* Right: System health */}
         <div className="rounded-3xl bg-slate-950/85 border border-slate-800/70 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7 flex flex-col justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
@@ -339,56 +303,6 @@ export default function DashboardHome() {
               tone="warning"
             />
             <HealthPill label="Menus live" value={stats.menus} />
-          </div>
-        </div>
-      </section>
-
-      {/* PUBLIC ALLERGEN PAGES */}
-      <section className="rounded-3xl bg-slate-950/90 border border-slate-800/80 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7 flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-              Public allergen menu
-            </p>
-            <h3 className="text-lg font-semibold mt-1">
-              Active guest / staff-facing page
-            </h3>
-            <p className="text-sm text-slate-400 mt-1 max-w-xl">
-              Share this link with your team or guests. It opens the live
-              SelectorOS allergen tool for{" "}
-              <span className="font-semibold text-slate-100">
-                {restaurant.name}
-              </span>
-              .
-            </p>
-          </div>
-          <Cog6ToothIcon className="w-6 h-6 text-slate-500" />
-        </div>
-
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 text-xs">
-            <LinkIcon className="w-4 h-4 text-emerald-400" />
-            <span className="font-mono text-[11px]">
-              {publicPath}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href={publicPath}
-              target="_blank"
-              className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-400 text-slate-950 hover:bg-emerald-300 transition"
-            >
-              Open allergen page
-            </Link>
-            <button
-              type="button"
-              onClick={handleCopyPublicLink}
-              className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600 transition"
-            >
-              <DocumentDuplicateIcon className="w-4 h-4" />
-              <span>{copyStatus}</span>
-            </button>
           </div>
         </div>
       </section>
@@ -418,7 +332,9 @@ function Tag({ label, value, tone = "default" }) {
 
 function KPICard({ title, value, description, icon, tone = "default" }) {
   const borderClass =
-    tone === "warning" ? "border-amber-400/40" : "border-slate-700/70";
+    tone === "warning"
+      ? "border-amber-400/40"
+      : "border-slate-700/70";
 
   return (
     <div className={`rounded-2xl bg-slate-950/80 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.6)] flex items-start gap-4`}>
