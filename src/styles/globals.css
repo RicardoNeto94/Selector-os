@@ -124,11 +124,10 @@
 html,
 body {
   min-height: 100vh;
+  /* full-page blue → teal gradient */
   background:
-    radial-gradient(at 20% 80%, rgba(8, 50, 100, 1) 0%, rgba(5, 25, 60, 1) 60%, rgba(3, 15, 40, 1) 100%),
-    radial-gradient(at 80% 20%, rgba(0, 255, 240, 0.45) 0%, rgba(0, 200, 240, 0.35) 40%, rgba(0, 140, 220, 0.1) 70%),
-    radial-gradient(at 60% 50%, rgba(0, 180, 220, 0.4) 0%, rgba(0, 120, 200, 0.25) 40%, rgba(0, 70, 150, 0.1) 75%);
-  background-blend-mode: normal;
+    radial-gradient(circle at top right, #2df0e0 0%, #0bbfd0 30%, #063a63 80%),
+    radial-gradient(circle at bottom left, #021222 0%, #020813 55%, #000000 100%);
   color: #e5e5e5;
   overflow-x: hidden;
 }
