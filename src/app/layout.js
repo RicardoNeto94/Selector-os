@@ -1,6 +1,5 @@
-import "../styles/globals.css";
-import "../styles/theme.css";
-import "../styles/sidebar.css";
+// src/app/layout.js
+import "./styles/globals.css";
 
 export const metadata = {
   title: "SelectorOS",
@@ -10,7 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen text-slate-100">
+      {/* IMPORTANT: no bg-* class here */}
+      <body className="min-h-screen text-slate-100 antialiased">
         {children}
       </body>
     </html>
