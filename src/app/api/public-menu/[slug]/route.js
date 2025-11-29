@@ -2,14 +2,21 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, serviceKey, {
-  auth: { persistSession: false }
+// Hard fail at build time if misconfigured
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    "Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  );
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: { persistSession: false },
 });
 
 export async function GET(_req, { params }) {
-  const slug = params.slug;
+  const slug = params?.slug;
 
   if (!slug) {
     return NextResponse.json(
@@ -19,7 +26,7 @@ export async function GET(_req, { params }) {
   }
 
   const { data, error } = await supabase.rpc("menu_for_slug", {
-    slug_input: slug
+    slug_input: slug,
   });
 
   if (error) {
@@ -30,6 +37,5 @@ export async function GET(_req, { params }) {
     );
   }
 
-  // Shape is already [{ name, category, description, allergens: [] }]
   return NextResponse.json(data ?? []);
 }
