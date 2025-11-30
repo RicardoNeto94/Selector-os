@@ -1,45 +1,44 @@
 /* src/styles/guest.css */
 
-/* Root layout background */
+/* === PAGE BACKGROUND & LAYOUT ====================== */
+
 .guest-root {
   min-height: 100vh;
-  padding: 32px 16px 120px;
+  padding: 40px 24px 96px;
   display: flex;
-  align-items: flex-start;
   justify-content: center;
-  /* Elegant cool-toned radial gradient */
   background:
-    radial-gradient(circle at 20% 0%, #1be4ff55 0%, #041220 40%, #020617 85%);
-  color: #e5f9ff;
+    radial-gradient(circle at top center, #14b8a6 0%, #020617 45%, #000000 100%);
+  color: #f9fafb;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
 }
 
-/* Shell = main container */
+/* acts just as a frame, not a big card anymore */
 .guest-shell {
   width: 100%;
-  max-width: 1280px;
-  border-radius: 36px;
-  padding: 32px 36px 40px;
-  background: radial-gradient(circle at top left, #0a1f33 0%, #020712 70%);
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  box-shadow:
-    0 26px 80px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(15, 23, 42, 0.5);
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-/* Header */
+/* === HEADER ======================================== */
+
 .guest-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
-  margin-bottom: 26px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .guest-header-main {
   display: flex;
-  gap: 22px;
+  gap: 16px;
   align-items: center;
 }
 
@@ -50,63 +49,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 20% 20%, #ffd86f, #f59e0b 55%, #92400e);
+  background: radial-gradient(circle at 20% 20%, #ffd86f, #f97316 55%, #92400e);
   box-shadow:
     0 16px 30px rgba(0, 0, 0, 0.7),
     inset 0 3px 6px rgba(255, 255, 255, 0.35);
   font-weight: 700;
   font-size: 28px;
-  color: #111827;
+  color: #020617;
 }
 
 .guest-header-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .guest-header-title span {
-  color: #4ade80;
+  color: #22c55e;
 }
 
 .guest-header-subtitle {
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.86);
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .guest-meta {
-  text-align: right;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: rgba(148, 163, 184, 0.9);
+  color: rgba(148, 163, 184, 0.95);
 }
 
-/* Allergen pills row */
+/* === ALLERGEN PILLS ROW ============================ */
+
 .guest-chips-row {
-  margin-top: 8px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(15, 23, 42, 0.8);
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.9);
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
-}
-
-.guest-no-allergens {
-  font-size: 12px;
-  color: rgba(148, 163, 184, 0.9);
 }
 
 .guest-pill {
   position: relative;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.5);
-  background: radial-gradient(circle at top left, #02101b, #020617);
+  background: radial-gradient(circle at top left, #020617, #020617 70%);
   padding: 4px 14px 4px 20px;
   font-size: 11px;
-  letter-spacing: 0.08em;
-  color: rgba(226, 232, 240, 0.95);
+  letter-spacing: 0.09em;
+  color: rgba(226, 232, 240, 0.96);
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
@@ -128,12 +123,12 @@
 }
 
 .guest-pill:hover {
-  border-color: rgba(52, 211, 153, 0.65);
+  border-color: rgba(56, 189, 248, 0.75);
   transform: translateY(-1px);
 }
 
 .guest-pill.active {
-  border-color: #4ade80;
+  border-color: #22c55e;
   background: radial-gradient(circle at top left, #064e3b, #020617);
 }
 
@@ -141,103 +136,95 @@
   background: #22c55e;
 }
 
-/* GRID LAYOUT — NEW */
+/* === DISH GRID ===================================== */
+
 .guest-grid {
   margin-top: 32px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 22px;
-  padding-bottom: 120px; /* space for dock */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
 }
 
-/* Dish card */
+/* “Rounded square” dish cards */
 .guest-card {
   border-radius: 28px;
-  padding: 22px 24px 20px;
-  border: 1px solid rgba(148, 163, 184, 0.32);
-  background: radial-gradient(circle at top left, #020817, #020617 65%);
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.75);
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+  padding: 18px 20px 16px;
+  background: radial-gradient(circle at top left, #020617, #020617 70%);
+  border: 1px solid rgba(30, 64, 175, 0.6);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
 }
 
 .guest-card.safe {
-  border-color: rgba(52, 211, 153, 0.85);
-}
-
-.guest-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.85);
+  border-color: rgba(34, 197, 94, 0.9);
 }
 
 .guest-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
+  gap: 16px;
 }
 
 .guest-card-category {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: rgba(148, 163, 184, 0.9);
+  color: rgba(148, 163, 184, 0.96);
 }
 
 .guest-card-name {
-  margin-top: 2px;
-  font-size: 17px;
+  margin-top: 4px;
+  font-size: 18px;
   font-weight: 600;
-  color: #e8faff;
+  color: #f9fafb;
 }
 
 .guest-card-price {
   font-size: 16px;
   font-weight: 600;
-  color: #c9e4f0;
+  color: #e5e7eb;
 }
 
 .guest-card-desc {
   margin-top: 8px;
   font-size: 13px;
-  color: rgba(203, 213, 225, 0.9);
+  color: rgba(156, 163, 175, 0.96);
 }
 
 .guest-card-footer {
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  color: rgba(148, 163, 184, 0.9);
+  color: rgba(148, 163, 184, 0.96);
 }
 
 .guest-safe-tag {
   border-radius: 999px;
   padding: 4px 12px;
-  border: 1px solid rgba(52, 211, 153, 0.7);
-  background: rgba(16, 185, 129, 0.12);
-  color: #a7f3d0;
+  border: 1px solid rgba(34, 197, 94, 0.8);
+  background: rgba(22, 163, 74, 0.25);
+  color: #bbf7d0;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
 
-.guest-safe-tag.blocked {
-  border-color: rgba(248, 113, 113, 0.8);
-  background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
-}
+/* === EMPTY STATE =================================== */
 
-/* Empty states */
 .guest-empty {
   margin-top: 32px;
   font-size: 13px;
-  color: rgba(148, 163, 184, 0.95);
+  color: rgba(148, 163, 184, 0.96);
+  text-align: center;
 }
 
-/* Floating dock */
+/* === FLOATING DOCK (BOTTOM) ======================= */
+
 .guest-dock {
   position: fixed;
   left: 0;
@@ -253,13 +240,13 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 18px;
+  padding: 8px 16px;
   border-radius: 999px;
   background: radial-gradient(circle at top left, #020617, #020617 70%);
-  border: 1px solid rgba(148, 163, 184, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.55);
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(15, 23, 42, 0.6);
+    0 0 0 1px rgba(15, 23, 42, 0.8);
 }
 
 .guest-count-pill {
@@ -294,7 +281,7 @@
 }
 
 .guest-reset-btn:hover:not(:disabled) {
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.95);
   border-color: rgba(248, 250, 252, 0.9);
   transform: translateY(-1px);
 }
