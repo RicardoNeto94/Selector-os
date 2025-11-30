@@ -112,7 +112,7 @@ export default function GuestMenu({ slug }) {
     });
   }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
 
-    const handleToggleAllergen = (code) => {
+  const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
       if (next.has(code)) {
@@ -123,3 +123,228 @@ export default function GuestMenu({ slug }) {
       return next;
     });
   };
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory((prev) => (prev === category ? null : category));
+  };
+
+  const handleResetAll = () => {
+    setSelectedAllergens(new Set());
+    setContainsMode(false);
+    setSelectedCategory(null);
+  };
+
+  const hasAnyActiveFilter =
+    hasFilters || containsMode || selectedCategory !== null;
+
+  const countText = hasFilters
+    ? `${safeCount} safe dish${safeCount === 1 ? "" : "es"}`
+    : `${filteredDishes.length} dish${
+        filteredDishes.length === 1 ? "" : "es"
+      }`;
+
+  const filterText = hasFilters
+    ? containsMode
+      ? "Showing only dishes that CONTAIN selected allergens."
+      : "SAFE dishes marked in green, dishes that contain your allergens marked in red."
+    : "Select allergen codes to see what is safe or contains them.";
+
+  return (
+    <div className="guest-root">
+      <div className="guest-shell">
+        {/* Header */}
+        <header className="guest-header">
+          <div className="guest-header-main">
+            <div className="guest-logo-circle">S</div>
+            <div>
+              <div className="guest-header-title">
+                Safe dishes for{" "}
+                <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
+              </div>
+              <p className="guest-header-subtitle">
+                Select allergen codes to hide or show dishes. Anything left is{" "}
+                <strong>SAFE</strong> to serve.
+              </p>
+            </div>
+          </div>
+
+          <div className="guest-meta">
+            <div>SELECTOROS • GUEST VIEW</div>
+            <div>LIVE DATA FROM YOUR COCKPIT</div>
+          </div>
+        </header>
+
+        {/* Content */}
+        {loading ? (
+          <div className="guest-empty">Loading menu…</div>
+        ) : error ? (
+          <div className="guest-empty">{error}</div>
+        ) : filteredDishes.length === 0 ? (
+          <div className="guest-empty">
+            No dishes match the current selection. Try changing or resetting
+            your filters.
+          </div>
+        ) : (
+          <section className="guest-grid">
+            {filteredDishes.map((dish) => {
+              const dishAllergens = dish.allergens || [];
+              const dishHasSelected =
+                hasFilters &&
+                dishAllergens.some((code) => selectedAllergens.has(code));
+
+              // Badge logic for the top-left chips row
+              let badgeLabel = null;
+              let badgeClass = "";
+              if (hasFilters) {
+                if (dishHasSelected) {
+                  badgeLabel = "Contains";
+                  badgeClass = "dish-chip dish-chip-contains";
+                } else {
+                  badgeLabel = "SAFE";
+                  badgeClass = "dish-chip dish-chip-safe";
+                }
+              }
+
+              return (
+                <article
+                  key={dish.id ?? dish.name + (dish.category || "")}
+                  className="guest-card"
+                >
+                  <div className="guest-card-header">
+                    <div>
+                      {/* pills row */}
+                      <div className="dish-chip-row">
+                        {badgeLabel && (
+                          <span className={badgeClass}>{badgeLabel}</span>
+                        )}
+                        <span className="dish-chip dish-chip-category">
+                          {dish.category || "Dish"}
+                        </span>
+                      </div>
+
+                      <div className="guest-card-name">{dish.name}</div>
+                    </div>
+
+                    <div className="guest-card-price">
+                      {typeof dish.price === "number" &&
+                      !Number.isNaN(dish.price)
+                        ? `${dish.price.toFixed(2)} €`
+                        : ""}
+                    </div>
+                  </div>
+
+                  {dish.description && (
+                    <p className="guest-card-desc">{dish.description}</p>
+                  )}
+
+                  <div className="guest-card-footer">
+                    <span className="guest-card-allergens">
+                      Allergens:{" "}
+                      {dishAllergens.length
+                        ? dishAllergens.join(", ")
+                        : "None"}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
+      </div>
+
+      {/* Floating dock */}
+      {!loading && dishes.length > 0 && (
+        <div className="guest-dock">
+          <div className="guest-dock-inner">
+            {/* Left: counts & helper text */}
+            <div className="guest-dock-left">
+              <span className="guest-count-pill">{countText}</span>
+              <span className="guest-dock-text">{filterText}</span>
+            </div>
+
+            {/* Middle: dynamic panels (Filter & Category) */}
+            <div className="guest-dock-middle">
+              {showFilterPanel && allergenList.length > 0 && (
+                <div className="guest-chips-row guest-chips-row--dock">
+                  {allergenList.map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      className={
+                        "guest-pill" +
+                        (selectedAllergens.has(code) ? " active" : "")
+                      }
+                      onClick={() => handleToggleAllergen(code)}
+                    >
+                      <span className="guest-pill-dot" />
+                      {code}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {showCategoryPanel && categoryList.length > 0 && (
+                <div className="guest-chips-row guest-chips-row--dock guest-chips-row--categories">
+                  {categoryList.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={
+                        "guest-pill" +
+                        (selectedCategory === category ? " active" : "")
+                      }
+                      onClick={() => handleCategoryClick(category)}
+                    >
+                      <span className="guest-pill-dot" />
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: four-toggle cluster */}
+            <div className="guest-dock-right">
+              <button
+                type="button"
+                className={
+                  "dock-toggle" + (showFilterPanel ? " dock-toggle-on" : "")
+                }
+                onClick={() => setShowFilterPanel((prev) => !prev)}
+              >
+                Filter
+              </button>
+              <button
+                type="button"
+                className={
+                  "dock-toggle" + (showCategoryPanel ? " dock-toggle-on" : "")
+                }
+                onClick={() => setShowCategoryPanel((prev) => !prev)}
+              >
+                Category
+              </button>
+              <button
+                type="button"
+                className={
+                  "dock-toggle" + (containsMode ? " dock-toggle-on" : "")
+                }
+                onClick={() => setContainsMode((prev) => !prev)}
+                disabled={!hasFilters}
+              >
+                Contain
+              </button>
+              <button
+                type="button"
+                className="guest-reset-btn"
+                onClick={handleResetAll}
+                disabled={!hasAnyActiveFilter}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
