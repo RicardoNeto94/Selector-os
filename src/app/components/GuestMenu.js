@@ -112,7 +112,14 @@ export default function GuestMenu({ slug }) {
     });
   }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
 
-  const handleToggleAllergen = (code) => {
+    const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.
+      if (next.has(code)) {
+        next.delete(code);
+      } else {
+        next.add(code);
+      }
+      return next;
+    });
+  };
