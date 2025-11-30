@@ -71,6 +71,10 @@ export default function GuestMenu({ slug }) {
     });
   };
 
+  const handleResetFilters = () => {
+    setSelectedAllergens(new Set());
+  };
+
   const countText =
     safeDishes.length === 0
       ? "No safe dishes"
@@ -84,12 +88,6 @@ export default function GuestMenu({ slug }) {
       : `Hiding dishes that contain: ${Array.from(
           selectedAllergens
         ).join(", ")}`;
-
-  const hasActiveFilters = selectedAllergens.size > 0;
-
-  const handleResetFilters = () => {
-    setSelectedAllergens(new Set());
-  };
 
   return (
     <div className="guest-root">
@@ -110,7 +108,7 @@ export default function GuestMenu({ slug }) {
           </div>
 
           <div className="guest-meta">
-            <div>SelectorOS • Guest view</div>
+            <div>SELECTOROS • GUEST VIEW</div>
             <div>Live data from your cockpit</div>
           </div>
         </header>
@@ -211,21 +209,24 @@ export default function GuestMenu({ slug }) {
         )}
       </div>
 
-      {/* FLOATING DOCK – bottom centre */}
-      <div className="guest-floating-dock">
-        <button className="guest-dock-pill guest-dock-count">
-          {countText}
-        </button>
+      {/* Floating dock */}
+      <div className="guest-dock">
+        <div className="guest-dock-inner">
+          <div className="guest-dock-count">
+            <span>{countText}</span>
+            <span>{activeFilterText}</span>
+          </div>
 
-        <span className="guest-dock-text">{activeFilterText}</span>
-
-        <button
-          className="guest-dock-pill guest-dock-reset"
-          onClick={handleResetFilters}
-          disabled={!hasActiveFilters}
-        >
-          Reset
-        </button>
+          {selectedAllergens.size > 0 && (
+            <button
+              type="button"
+              className="guest-dock-reset"
+              onClick={handleResetFilters}
+            >
+              Reset
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
