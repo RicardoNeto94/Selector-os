@@ -1,80 +1,77 @@
-/* ============================
-   GUEST VIEW – GLOBAL LAYOUT
-   ============================ */
+/* src/styles/guest.css */
 
+/* Page background */
 .guest-root {
   min-height: 100vh;
-  padding: 64px 24px 112px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  background:
-    radial-gradient(circle at top left, #16ffe0 0%, #007a9b 25%, #020918 70%, #000207 100%);
-  color: #f9fafb;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-/* Single main glass card */
-.guest-shell {
-  width: min(1180px, 100%);
-  border-radius: 32px;
-  padding: 32px 40px 40px;
-  background: radial-gradient(circle at top left, #081625 0%, #040915 55%, #030712 100%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 36px 120px rgba(0, 0, 0, 0.80);
-}
-
-/* ============================
-   HEADER
-   ============================ */
-
-.guest-header {
+  padding: 32px 16px 80px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top left, #1be4ff 0%, #041220 40%, #020617 85%);
+  color: #e5f9ff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    sans-serif;
+}
+
+/* Main card */
+.guest-shell {
+  width: 100%;
+  max-width: 1120px;
+  border-radius: 32px;
+  padding: 28px 32px 36px;
+  background: radial-gradient(circle at top left, #0c2437 0%, #020712 70%);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(15, 23, 42, 0.5);
+}
+
+/* Header */
+.guest-header {
+  display: flex;
   justify-content: space-between;
-  gap: 32px;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 20px;
 }
 
 .guest-header-main {
   display: flex;
-  align-items: center;
   gap: 20px;
+  align-items: center;
 }
 
 .guest-logo-circle {
-  width: 76px;
-  height: 76px;
+  width: 72px;
+  height: 72px;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 30px;
-  color: #1a1712;
-  background: radial-gradient(circle at 30% 20%, #ffeaa0 0%, #f5b540 50%, #d8861a 100%);
+  background: radial-gradient(circle at 20% 20%, #ffd86f, #f59e0b 55%, #92400e);
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.75),
-    inset 0 1px 3px rgba(255, 255, 255, 0.85);
+    0 16px 30px rgba(0, 0, 0, 0.7),
+    inset 0 3px 6px rgba(255, 255, 255, 0.35);
+  font-weight: 700;
+  font-size: 28px;
+  color: #111827;
 }
 
 .guest-header-title {
-  font-size: 24px;
-  line-height: 1.3;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .guest-header-title span {
-  color: #5dfcc6;
-  text-transform: lowercase;
+  color: #4ade80;
 }
 
 .guest-header-subtitle {
   margin-top: 4px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.75);
+  color: rgba(226, 232, 240, 0.88);
 }
 
 .guest-meta {
@@ -82,66 +79,41 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: rgba(148, 163, 184, 0.85);
-  white-space: nowrap;
+  color: rgba(148, 163, 184, 0.9);
 }
 
-/* ============================
-   FILTER STRIP
-   ============================ */
-
-.guest-filters {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(148, 163, 184, 0.22);
+/* Allergen chips row */
+.guest-chips-row {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.8);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
-.guest-filters-left {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-}
-
-.guest-count {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid rgba(45, 212, 191, 0.55);
-}
-
-.guest-active-filter {
+.guest-no-allergens {
   font-size: 12px;
   color: rgba(148, 163, 184, 0.9);
 }
 
-/* Allergen pills (top row) */
 .guest-pill {
   position: relative;
   border-radius: 999px;
-  padding: 5px 14px 5px 22px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: radial-gradient(circle at top left, #02101b, #020617);
+  padding: 4px 14px 4px 20px;
   font-size: 11px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.85), #020617);
-  color: rgba(226, 232, 240, 0.9);
-  cursor: pointer;
+  letter-spacing: 0.08em;
+  color: rgba(226, 232, 240, 0.95);
+  text-transform: uppercase;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  cursor: pointer;
   transition:
-    background 0.18s ease,
     border-color 0.18s ease,
-    box-shadow 0.18s ease,
+    background 0.18s ease,
     transform 0.12s ease;
 }
 
@@ -151,214 +123,175 @@
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.9);
+  background: rgba(148, 163, 184, 0.75);
 }
 
 .guest-pill:hover {
-  border-color: rgba(45, 212, 191, 0.85);
-  box-shadow: 0 0 18px rgba(45, 212, 191, 0.35);
+  border-color: rgba(52, 211, 153, 0.65);
   transform: translateY(-1px);
 }
 
 .guest-pill.active {
-  border-color: rgba(52, 211, 153, 0.95);
-  background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.25), #020617);
+  border-color: #4ade80;
+  background: radial-gradient(circle at top left, #064e3b, #020617);
 }
 
 .guest-pill.active .guest-pill-dot {
-  background: #34d399;
+  background: #22c55e;
 }
 
-/* ============================
-   DISH CARD LIST
-   ============================ */
-
+/* Cards */
 .guest-grid {
-  margin-top: 24px;
+  margin-top: 26px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .guest-card {
-  border-radius: 28px;
-  padding: 18px 22px 18px 24px;
-  background: radial-gradient(circle at top left, #020b16 0%, #020617 55%, #020617 100%);
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75);
+  border-radius: 22px;
+  padding: 18px 24px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  background: radial-gradient(circle at top left, #020817, #020617 65%);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.75);
 }
 
 .guest-card.safe {
-  border-color: rgba(34, 197, 94, 0.65);
+  border-color: rgba(52, 211, 153, 0.9);
+}
+
+.guest-card-blocked {
+  opacity: 0.32;
+  filter: grayscale(0.35);
 }
 
 .guest-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
+  align-items: baseline;
+  gap: 20px;
 }
 
 .guest-card-category {
   font-size: 11px;
-  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(148, 163, 184, 0.85);
+  letter-spacing: 0.18em;
+  color: rgba(148, 163, 184, 0.95);
 }
 
 .guest-card-name {
-  margin-top: 6px;
-  font-size: 16px;
+  margin-top: 2px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .guest-card-price {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  color: #fefce8;
 }
 
 .guest-card-desc {
   margin-top: 8px;
-  font-size: 12px;
-  color: rgba(148, 163, 184, 0.9);
+  font-size: 13px;
+  color: rgba(203, 213, 225, 0.9);
 }
 
 .guest-card-footer {
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
   font-size: 11px;
+  color: rgba(148, 163, 184, 0.95);
 }
 
 .guest-safe-tag {
-  padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(16, 185, 129, 0.8);
-  background: radial-gradient(circle at top left, rgba(22, 163, 74, 0.25), #022c22);
+  padding: 4px 12px;
+  border: 1px solid rgba(52, 211, 153, 0.7);
+  background: rgba(16, 185, 129, 0.1);
   color: #a7f3d0;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 500;
   text-transform: uppercase;
+  letter-spacing: 0.14em;
 }
 
 .guest-safe-tag.blocked {
-  border-color: rgba(248, 113, 113, 0.85);
-  background: radial-gradient(circle at top left, rgba(248, 113, 113, 0.25), #3f1114);
+  border-color: rgba(248, 113, 113, 0.8);
+  background: rgba(239, 68, 68, 0.12);
   color: #fecaca;
 }
 
-.guest-card-allergens {
-  color: rgba(148, 163, 184, 0.9);
-}
-
-/* ============================
-   EMPTY / ERROR STATES
-   ============================ */
-
+/* Empty states */
 .guest-empty {
   margin-top: 32px;
-  text-align: center;
   font-size: 13px;
   color: rgba(148, 163, 184, 0.95);
 }
 
-/* ============================
-   FLOATING DOCK (BOTTOM)
-   ============================ */
-
+/* Floating dock at bottom */
 .guest-dock {
   position: fixed;
-  left: 50%;
-  bottom: 32px;
-  transform: translateX(-50%);
-  width: min(680px, calc(100% - 32px));
-  pointer-events: none; /* Only inner content clickable */
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .guest-dock-inner {
   pointer-events: auto;
-  border-radius: 999px;
-  padding: 10px 20px;
-  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617);
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  box-shadow:
-    0 18px 55px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(15, 23, 42, 1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  font-size: 12px;
-}
-
-.guest-dock-count {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top left, #020617, #020617 70%);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(15, 23, 42, 0.6);
+}
+
+.guest-count-pill {
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: linear-gradient(to right, #22c55e, #4ade80);
+  color: #022c22;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.guest-dock-text {
+  font-size: 11px;
   color: rgba(226, 232, 240, 0.9);
 }
 
-.guest-dock-count span:first-child {
-  padding: 4px 12px;
+.guest-reset-btn {
+  margin-left: 8px;
   border-radius: 999px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.9);
-  color: #bbf7d0;
-  font-weight: 600;
-}
-
-.guest-dock-filters {
-  flex: 1;
-  text-align: left;
-  color: rgba(148, 163, 184, 0.9);
-  font-size: 11px;
-}
-
-.guest-dock-reset {
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.6);
   background: transparent;
-  color: rgba(226, 232, 240, 0.95);
+  color: rgba(226, 232, 240, 0.9);
   font-size: 11px;
+  padding: 4px 12px;
   cursor: pointer;
   transition:
     background 0.18s ease,
+    border-color 0.18s ease,
     color 0.18s ease,
-    border-color 0.18s ease;
+    transform 0.12s ease;
 }
 
-.guest-dock-reset:hover {
-  background: rgba(148, 163, 184, 0.14);
-  border-color: rgba(226, 232, 240, 0.95);
+.guest-reset-btn:hover:not(:disabled) {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(248, 250, 252, 0.9);
+  transform: translateY(-1px);
 }
 
-/* Mobile tweaks */
-@media (max-width: 768px) {
-  .guest-shell {
-    padding: 20px 18px 24px;
-    border-radius: 24px;
-  }
-
-  .guest-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .guest-meta {
-    text-align: left;
-    white-space: normal;
-  }
-
-  .guest-card-footer {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .guest-dock-inner {
-    padding-inline: 14px;
-  }
+.guest-reset-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
