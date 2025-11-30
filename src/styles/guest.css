@@ -270,12 +270,11 @@
 
 /* === FLOATING DOCK (BOTTOM) ======================= */
 
-/* Floating dock – frosted glass, Apple-style */
 .guest-dock {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 26px;
+  bottom: 24px;
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -286,130 +285,109 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(248, 250, 252, 0.75)
-  );
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 18px 45px rgba(15, 23, 42, 0.35),
-    0 0 0 1px rgba(148, 163, 184, 0.25);
+  background: transparent;
 }
 
-.guest-dock-left,
-.guest-dock-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.guest-dock-left {
-  flex-shrink: 0;
-}
-
-.guest-dock-middle {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
-}
-
-/* Reuse allergen pills in dock without border-top line */
-.guest-chips-row--dock {
-  margin: 0;
-  padding: 0;
-  border-top: none;
-  justify-content: flex-start;
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-.guest-chips-row--categories {
-  margin-top: 4px;
-}
-
-.guest-count-pill {
-  border-radius: 999px;
-  padding: 4px 12px;
-  background: linear-gradient(to right, #22c55e, #4ade80);
-  color: #022c22;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: lowercase;
-}
-
-.guest-dock-text {
-  font-size: 11px;
-  color: rgba(15, 23, 42, 0.75);
-}
-
-/* Toggle pills on the right side of the dock */
-.dock-toggle {
+/* iOS-style switch for "Contain" mode */
+.ios-switch {
+  width: 64px;
+  height: 34px;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.7);
-  background: rgba(255, 255, 255, 0.2);
-  color: rgba(15, 23, 42, 0.8);
-  font-size: 11px;
-  padding: 4px 14px;
+  background: #111827;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(15, 23, 42, 0.8);
+  display: flex;
+  align-items: center;
+  padding: 3px;
   cursor: pointer;
   transition:
     background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.12s ease;
+    border-color 0.18s ease;
 }
 
-.dock-toggle:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(148, 163, 184, 0.95);
-  transform: translateY(-1px);
-}
-
-.dock-toggle-on {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: rgba(15, 23, 42, 0.95);
-  color: #f9fafb;
-}
-
-.dock-toggle:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-/* Reset button matches dock style but lighter */
-.guest-reset-btn {
-  margin-left: 4px;
+.ios-switch-knob {
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.55);
-  background: rgba(255, 255, 255, 0.18);
-  color: rgba(15, 23, 42, 0.8);
-  font-size: 11px;
-  padding: 4px 12px;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.12s ease;
+  background: #f9fafb;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+  transform: translateX(0);
+  transition: transform 0.18s ease;
 }
 
-.guest-reset-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.4);
-  border-color: rgba(148, 163, 184, 0.9);
-  transform: translateY(-1px);
+.ios-switch-on {
+  background: #22c55e;
+  border-color: #4ade80;
 }
 
-.guest-reset-btn:disabled {
-  opacity: 0.4;
+.ios-switch-on .ios-switch-knob {
+  transform: translateX(26px);
+}
+
+.ios-switch:disabled {
+  opacity: 0.35;
   cursor: default;
 }
 
+/* Icon buttons cluster */
+
+.guest-dock-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dock-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: radial-gradient(circle at 30% 0, #4b5563, #020617);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(15, 23, 42, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+  color: #e5e7eb;
+  font-size: 18px;
+}
+
+.dock-icon:hover:not(:disabled),
+.dock-icon-active {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(148, 163, 184, 1);
+  border-color: rgba(248, 250, 252, 0.9);
+}
+
+.dock-icon:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dock-icon-gold {
+  background: radial-gradient(circle at 30% 0, #facc15, #92400e);
+  border-color: rgba(250, 204, 21, 0.9);
+  box-shadow:
+    0 0 18px rgba(250, 204, 21, 0.7),
+    0 10px 26px rgba(0, 0, 0, 0.9);
+  color: #111827;
+  font-weight: 600;
+}
+
+.dock-icon-label {
+  line-height: 1;
+}
 /* === DISH PILLS (CATEGORY + STATUS) ================= */
 
 .dish-chip-row {
@@ -449,4 +427,3 @@
   background: #f97373;
   color: #450a0a;
 }
-
