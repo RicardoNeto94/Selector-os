@@ -151,16 +151,12 @@
 .guest-card {
   border-radius: 28px;
   padding: 18px 20px 16px;
-  background: radial-gradient(circle at top left, #020617, #020617 70%);
-  border: 1px solid rgba(30, 64, 175, 0.6);
+  background: #020617; /* solid, like your reference UI */
+  border: none;        /* ✅ no outline */
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.75),
     0 0 0 1px rgba(15, 23, 42, 0.9);
   color: #e5e7eb;
-}
-
-.guest-card.safe {
-  border-color: transparent !important;
 }
 
 .guest-card-header {
@@ -168,6 +164,46 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+}
+
+/* === DISH PILLS (CATEGORY + STATUS) ================= */
+
+.dish-chip-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dish-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: capitalize;
+  border: none;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Blue category pill (Starters / Mains / etc) */
+.dish-chip-category {
+  background: #60a5fa;
+  color: #0b1120;
+}
+
+/* Green SAFE pill */
+.dish-chip-safe {
+  background: #22c55e;
+  color: #052e16;
+}
+
+/* Red CONTAINS pill */
+.dish-chip-contains {
+  background: #f97373;
+  color: #450a0a;
 }
 
 .guest-card-category {
