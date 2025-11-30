@@ -228,4 +228,138 @@ export default function GuestMenu({ slug }) {
         ) : (
           <section className="guest-grid">
             {filteredDishes.map((dish) => {
-              const dishAllergens = di
+              const dishAllergens = dish.allergens || [];
+              const dishHasSelected =
+                hasFilters &&
+                dishAllergens.some((code) => selectedAllergens.has(code));
+
+              // Badge logic for the top-left chips row
+              let badgeLabel = null;
+              let badgeClass = "";
+              if (hasFilters) {
+                if (dishHasSelected) {
+                  badgeLabel = "Contains";
+                  badgeClass = "dish-chip dish-chip-contains";
+                } else {
+                  badgeLabel = "SAFE";
+                  badgeClass = "dish-chip dish-chip-safe";
+                }
+              }
+
+              return (
+                <article
+                  key={dish.id ?? dish.name + (dish.category || "")}
+                  className="guest-card"
+                >
+                  <div className="guest-card-header">
+                    <div>
+                      {/* pills row */}
+                      <div className="dish-chip-row">
+                        {badgeLabel && (
+                          <span className={badgeClass}>{badgeLabel}</span>
+                        )}
+                        <span className="dish-chip dish-chip-category">
+                          {dish.category || "Dish"}
+                        </span>
+                      </div>
+
+                      <div className="guest-card-name">{dish.name}</div>
+                    </div>
+
+                    <div className="guest-card-price">
+                      {typeof dish.price === "number" &&
+                      !Number.isNaN(dish.price)
+                        ? `${dish.price.toFixed(2)} €`
+                        : ""}
+                    </div>
+                  </div>
+
+                  {dish.description && (
+                    <p className="guest-card-desc">{dish.description}</p>
+                  )}
+
+                  <div className="guest-card-footer">
+                    <span className="guest-card-allergens">
+                      Allergens:{" "}
+                      {dishAllergens.length
+                        ? dishAllergens.join(", ")
+                        : "None"}
+                    </span>
+                    <span className="guest-safe-tag">
+                      {hasFilters
+                        ? `${safeCount} safe left`
+                        : `${filteredDishes.length} dish${
+                            filteredDishes.length === 1 ? "" : "es"
+                          }`}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
+      </div>
+
+      {/* Floating dock – switch + 4 icon buttons */}
+      {!loading && dishes.length > 0 && (
+        <div className="guest-dock">
+          <div className="guest-dock-inner">
+            {/* Contain toggle (green iOS switch) */}
+            <button
+              type="button"
+              className={"ios-switch" + (containsMode ? " ios-switch-on" : "")}
+              onClick={() => setContainsMode((prev) => !prev)}
+              disabled={!hasFilters}
+            >
+              <span className="ios-switch-knob" />
+            </button>
+
+            <div className="guest-dock-icons">
+              {/* Filter toggle */}
+              <button
+                type="button"
+                className={
+                  "dock-icon" + (showFilterPanel ? " dock-icon-active" : "")
+                }
+                onClick={() => setShowFilterPanel((prev) => !prev)}
+              >
+                <span className="dock-icon-label">≡</span>
+              </button>
+
+              {/* Category toggle */}
+              <button
+                type="button"
+                className={
+                  "dock-icon" + (showCategoryPanel ? " dock-icon-active" : "")
+                }
+                onClick={() => setShowCategoryPanel((prev) => !prev)}
+              >
+                <span className="dock-icon-label">▦</span>
+              </button>
+
+              {/* Select all allergens / clear */}
+              <button
+                type="button"
+                className="dock-icon dock-icon-gold"
+                onClick={handleSelectAllAllergens}
+                disabled={allergenList.length === 0}
+              >
+                <span className="dock-icon-label">+</span>
+              </button>
+
+              {/* Reset all */}
+              <button
+                type="button"
+                className="dock-icon"
+                onClick={handleResetAll}
+                disabled={!hasAnyActiveFilter}
+              >
+                <span className="dock-icon-label">↻</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
