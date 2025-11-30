@@ -1,4 +1,3 @@
-// src/app/components/GuestMenu.js
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -10,20 +9,27 @@ export default function GuestMenu({ slug }) {
   const [error, setError] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
 
-  // Load menu JSON from our API
+  // Load menu JSON from API OR local test file
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`/api/public-menu/${slug}`);
+        // 🔥 If testing Shang Shi, load local JSON instead of API
+        const url =
+          slug === "shang-shi"
+            ? "/shangshi-menu.json"
+            : `/api/public-menu/${slug}`;
+
+        const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
+
         const json = await res.json();
 
-        // Ensure allergens is always an array
+        // Normalize allergens
         const normalized = (json || []).map((d) => ({
           ...d,
           allergens: Array.isArray(d.allergens) ? d.allergens : [],
@@ -41,16 +47,16 @@ export default function GuestMenu({ slug }) {
     load();
   }, [slug]);
 
-  // Unique sorted allergen codes present in the menu
+  // All unique allergens in menu
   const allergenList = useMemo(() => {
     const set = new Set();
     dishes.forEach((d) => (d.allergens || []).forEach((a) => set.add(a)));
     return Array.from(set).sort();
   }, [dishes]);
 
-  // SAFE dishes = dishes that do NOT contain any selected allergen
+  // Compute SAFE dishes
   const safeDishes = useMemo(() => {
-    if (!selectedAllergens || selectedAllergens.size === 0) return dishes;
+    if (selectedAllergens.size === 0) return dishes;
 
     return dishes.filter((d) => {
       const hasBlocked = (d.allergens || []).some((code) =>
@@ -63,21 +69,16 @@ export default function GuestMenu({ slug }) {
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
-      } else {
-        next.add(code);
-      }
+      next.has(code) ? next.delete(code) : next.add(code);
       return next;
     });
   };
-
-  const hasActiveFilters = selectedAllergens.size > 0;
 
   const handleResetFilters = () => {
     setSelectedAllergens(new Set());
   };
 
+  // Header text
   const countText =
     safeDishes.length === 0
       ? "No safe dishes"
@@ -94,7 +95,6 @@ export default function GuestMenu({ slug }) {
 
   return (
     <div className="guest-root">
-      {/* Main card */}
       <div className="guest-shell">
         {/* Header */}
         <header className="guest-header">
@@ -102,30 +102,30 @@ export default function GuestMenu({ slug }) {
             <div className="guest-logo-circle">S</div>
             <div>
               <div className="guest-header-title">
-                Safe dishes for{" "}
-                <span>{slug.replace(/-/g, " ")}</span>
+                Safe dishes for <span>{slug.replace(/-/g, " ")}</span>
               </div>
               <p className="guest-header-subtitle">
-                Select allergen codes to hide dishes that contain them.
-                Anything left is <strong>SAFE</strong> to serve.
+                Select allergen codes to hide dishes that contain them. Anything
+                left is <strong>SAFE</strong> to serve.
               </p>
             </div>
           </div>
 
           <div className="guest-meta">
             <div>SELECTOROS • GUEST VIEW</div>
-            <div>Live data from your cockpit</div>
+            <div>LIVE DATA FROM YOUR COCKPIT</div>
           </div>
         </header>
 
-        {/* Allergen chips row */}
-        <section className="guest-chips-row">
-          {allergenList.length === 0 ? (
-            <span className="guest-no-allergens">
-              No allergens configured yet for this menu.
-            </span>
-          ) : (
-            allergenList.map((code) => (
+        {/* Filters */}
+        <section className="guest-filters">
+          <div className="guest-filters-left">
+            <span className="guest-count">{countText}</span>
+            <span className="guest-active-filter">{activeFilterText}</span>
+          </div>
+
+          <div className="guest-filters-left">
+            {allergenList.map((code) => (
               <button
                 key={code}
                 type="button"
@@ -138,11 +138,11 @@ export default function GuestMenu({ slug }) {
                 <span className="guest-pill-dot" />
                 {code}
               </button>
-            ))
-          )}
+            ))}
+          </div>
         </section>
 
-        {/* Content */}
+        {/* CONTENT */}
         {loading ? (
           <div className="guest-empty">Loading menu…</div>
         ) : error ? (
@@ -150,80 +150,74 @@ export default function GuestMenu({ slug }) {
         ) : dishes.length === 0 ? (
           <div className="guest-empty">
             This menu has no dishes yet. Add dishes in your SelectorOS
-            cockpit.
+            dashboard.
           </div>
         ) : (
-          <section className="guest-grid">
-            {safeDishes.map((dish) => {
-              const blocked =
-                selectedAllergens.size > 0 &&
-                (dish.allergens || []).some((code) =>
-                  selectedAllergens.has(code)
+          <>
+            <section className="guest-grid">
+              {safeDishes.map((dish) => {
+                const blocked =
+                  selectedAllergens.size > 0 &&
+                  (dish.allergens || []).some((code) =>
+                    selectedAllergens.has(code)
+                  );
+
+                return (
+                  <article
+                    key={dish.name + dish.category}
+                    className={"guest-card " + (blocked ? "" : "safe")}
+                  >
+                    <div className="guest-card-header">
+                      <div>
+                        <div className="guest-card-category">
+                          {dish.category || "Dish"}
+                        </div>
+                        <div className="guest-card-name">{dish.name}</div>
+                      </div>
+
+                      <div className="guest-card-price">
+                        {dish.price != null ? `${dish.price.toFixed(2)} €` : ""}
+                      </div>
+                    </div>
+
+                    {dish.description && (
+                      <p className="guest-card-desc">{dish.description}</p>
+                    )}
+
+                    <div className="guest-card-footer">
+                      <span
+                        className={
+                          "guest-safe-tag " + (blocked ? "blocked" : "")
+                        }
+                      >
+                        {blocked ? "Hidden by filter" : "SAFE"}
+                      </span>
+                      <span className="guest-card-allergens">
+                        Allergens:{" "}
+                        {dish.allergens?.length
+                          ? dish.allergens.join(", ")
+                          : "None"}
+                      </span>
+                    </div>
+                  </article>
                 );
+              })}
+            </section>
 
-              return (
-                <article
-                  key={dish.name + dish.category}
-                  className={
-                    "guest-card " + (blocked ? "guest-card-blocked" : "safe")
-                  }
-                >
-                  <div className="guest-card-header">
-                    <div>
-                      <div className="guest-card-category">
-                        {dish.category || "Dish"}
-                      </div>
-                      <div className="guest-card-name">
-                        {dish.name}
-                      </div>
-                    </div>
-                    <div className="guest-card-price">
-                      {dish.price != null
-                        ? `${dish.price.toFixed(2)} €`
-                        : ""}
-                    </div>
-                  </div>
-
-                  {dish.description && (
-                    <p className="guest-card-desc">
-                      {dish.description}
-                    </p>
-                  )}
-
-                  <div className="guest-card-footer">
-                    <span
-                      className={
-                        "guest-safe-tag " +
-                        (blocked ? "blocked" : "")
-                      }
-                    >
-                      {blocked ? "Hidden by filter" : "SAFE"}
-                    </span>
-                    <span className="guest-card-allergens">
-                      Allergens:{" "}
-                      {dish.allergens && dish.allergens.length
-                        ? dish.allergens.join(", ")
-                        : "None"}
-                    </span>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+            {safeDishes.length === 0 && (
+              <div className="guest-empty">
+                No dishes are safe with the current allergen selection.
+                Remove allergens to see more dishes.
+              </div>
+            )}
+          </>
         )}
-      </div>
 
-      {/* Floating dock at the bottom */}
-      <div className="guest-dock">
-        <div className="guest-dock-inner">
-          <span className="guest-count-pill">{countText}</span>
-          <span className="guest-dock-text">{activeFilterText}</span>
-          <button
-            type="button"
-            className="guest-reset-btn"
-            onClick={handleResetFilters}
-            disabled={!hasActiveFilters}
-          >
+        {/* BOTTOM FLOATING DOCK */}
+        <div className="guest-floating-dock">
+          <span className="guest-count">{countText}</span>
+          <span className="guest-active-filter">{activeFilterText}</span>
+          <button className="guest-reset-btn" onClick={handleResetFilters}>
             Reset
           </button>
         </div>
