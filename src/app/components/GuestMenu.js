@@ -1,3 +1,4 @@
+// src/app/components/GuestMenu.js
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -71,6 +72,8 @@ export default function GuestMenu({ slug }) {
     });
   };
 
+  const hasActiveFilters = selectedAllergens.size > 0;
+
   const handleResetFilters = () => {
     setSelectedAllergens(new Set());
   };
@@ -91,6 +94,7 @@ export default function GuestMenu({ slug }) {
 
   return (
     <div className="guest-root">
+      {/* Main card */}
       <div className="guest-shell">
         {/* Header */}
         <header className="guest-header">
@@ -98,11 +102,12 @@ export default function GuestMenu({ slug }) {
             <div className="guest-logo-circle">S</div>
             <div>
               <div className="guest-header-title">
-                Safe dishes for <span>{slug.replace(/-/g, " ")}</span>
+                Safe dishes for{" "}
+                <span>{slug.replace(/-/g, " ")}</span>
               </div>
               <p className="guest-header-subtitle">
-                Select allergen codes to hide dishes that contain them. Anything
-                left is <strong>SAFE</strong> to serve.
+                Select allergen codes to hide dishes that contain them.
+                Anything left is <strong>SAFE</strong> to serve.
               </p>
             </div>
           </div>
@@ -113,15 +118,14 @@ export default function GuestMenu({ slug }) {
           </div>
         </header>
 
-        {/* Filters row */}
-        <section className="guest-filters">
-          <div className="guest-filters-left">
-            <span className="guest-count">{countText}</span>
-            <span className="guest-active-filter">{activeFilterText}</span>
-          </div>
-
-          <div className="guest-filters-left">
-            {allergenList.map((code) => (
+        {/* Allergen chips row */}
+        <section className="guest-chips-row">
+          {allergenList.length === 0 ? (
+            <span className="guest-no-allergens">
+              No allergens configured yet for this menu.
+            </span>
+          ) : (
+            allergenList.map((code) => (
               <button
                 key={code}
                 type="button"
@@ -134,8 +138,8 @@ export default function GuestMenu({ slug }) {
                 <span className="guest-pill-dot" />
                 {code}
               </button>
-            ))}
-          </div>
+            ))
+          )}
         </section>
 
         {/* Content */}
@@ -146,86 +150,82 @@ export default function GuestMenu({ slug }) {
         ) : dishes.length === 0 ? (
           <div className="guest-empty">
             This menu has no dishes yet. Add dishes in your SelectorOS
-            dashboard.
+            cockpit.
           </div>
         ) : (
-          <>
-            <section className="guest-grid">
-              {safeDishes.map((dish) => {
-                const blocked =
-                  selectedAllergens.size > 0 &&
-                  (dish.allergens || []).some((code) =>
-                    selectedAllergens.has(code)
-                  );
-
-                return (
-                  <article
-                    key={dish.name + dish.category}
-                    className={"guest-card " + (blocked ? "" : "safe")}
-                  >
-                    <div className="guest-card-header">
-                      <div>
-                        <div className="guest-card-category">
-                          {dish.category || "Dish"}
-                        </div>
-                        <div className="guest-card-name">{dish.name}</div>
-                      </div>
-                      <div className="guest-card-price">
-                        {dish.price != null ? `${dish.price.toFixed(2)} €` : ""}
-                      </div>
-                    </div>
-
-                    {dish.description && (
-                      <p className="guest-card-desc">{dish.description}</p>
-                    )}
-
-                    <div className="guest-card-footer">
-                      <span
-                        className={
-                          "guest-safe-tag " + (blocked ? "blocked" : "")
-                        }
-                      >
-                        {blocked ? "Hidden by filter" : "SAFE"}
-                      </span>
-                      <span className="guest-card-allergens">
-                        Allergens:{" "}
-                        {dish.allergens && dish.allergens.length
-                          ? dish.allergens.join(", ")
-                          : "None"}
-                      </span>
-                    </div>
-                  </article>
+          <section className="guest-grid">
+            {safeDishes.map((dish) => {
+              const blocked =
+                selectedAllergens.size > 0 &&
+                (dish.allergens || []).some((code) =>
+                  selectedAllergens.has(code)
                 );
-              })}
-            </section>
 
-            {safeDishes.length === 0 && (
-              <div className="guest-empty">
-                No dishes are safe with the current allergen selection. Remove
-                one or more allergens to see more dishes.
-              </div>
-            )}
-          </>
+              return (
+                <article
+                  key={dish.name + dish.category}
+                  className={
+                    "guest-card " + (blocked ? "guest-card-blocked" : "safe")
+                  }
+                >
+                  <div className="guest-card-header">
+                    <div>
+                      <div className="guest-card-category">
+                        {dish.category || "Dish"}
+                      </div>
+                      <div className="guest-card-name">
+                        {dish.name}
+                      </div>
+                    </div>
+                    <div className="guest-card-price">
+                      {dish.price != null
+                        ? `${dish.price.toFixed(2)} €`
+                        : ""}
+                    </div>
+                  </div>
+
+                  {dish.description && (
+                    <p className="guest-card-desc">
+                      {dish.description}
+                    </p>
+                  )}
+
+                  <div className="guest-card-footer">
+                    <span
+                      className={
+                        "guest-safe-tag " +
+                        (blocked ? "blocked" : "")
+                      }
+                    >
+                      {blocked ? "Hidden by filter" : "SAFE"}
+                    </span>
+                    <span className="guest-card-allergens">
+                      Allergens:{" "}
+                      {dish.allergens && dish.allergens.length
+                        ? dish.allergens.join(", ")
+                        : "None"}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
         )}
       </div>
 
-      {/* Floating dock */}
+      {/* Floating dock at the bottom */}
       <div className="guest-dock">
         <div className="guest-dock-inner">
-          <div className="guest-dock-count">
-            <span>{countText}</span>
-            <span>{activeFilterText}</span>
-          </div>
-
-          {selectedAllergens.size > 0 && (
-            <button
-              type="button"
-              className="guest-dock-reset"
-              onClick={handleResetFilters}
-            >
-              Reset
-            </button>
-          )}
+          <span className="guest-count-pill">{countText}</span>
+          <span className="guest-dock-text">{activeFilterText}</span>
+          <button
+            type="button"
+            className="guest-reset-btn"
+            onClick={handleResetFilters}
+            disabled={!hasActiveFilters}
+          >
+            Reset
+          </button>
         </div>
       </div>
     </div>
