@@ -119,28 +119,31 @@ export default function GuestMenu({ slug }) {
 
         {/* Filters */}
         <section className="guest-filters">
-          <div className="guest-filters-left">
-            <span className="guest-count">{countText}</span>
-            <span className="guest-active-filter">{activeFilterText}</span>
-          </div>
+  <div className="guest-filters-left">
+    <div className="guest-filters-topline">
+      <span className="guest-count">{countText}</span>
+      <span className="guest-dot">•</span>
+      <span className="guest-active-filter">{activeFilterText}</span>
+    </div>
+  </div>
 
-          <div className="guest-filters-left">
-            {allergenList.map((code) => (
-              <button
-                key={code}
-                type="button"
-                className={
-                  "guest-pill" +
-                  (selectedAllergens.has(code) ? " active" : "")
-                }
-                onClick={() => handleToggleAllergen(code)}
-              >
-                <span className="guest-pill-dot" />
-                {code}
-              </button>
-            ))}
-          </div>
-        </section>
+  <div className="guest-filters-right">
+    {allergenList.map((code) => (
+      <button
+        key={code}
+        type="button"
+        className={
+          "guest-pill" +
+          (selectedAllergens.has(code) ? " active" : "")
+        }
+        onClick={() => handleToggleAllergen(code)}
+      >
+        <span className="guest-pill-dot" />
+        {code}
+      </button>
+    ))}
+  </div>
+</section>
 
         {/* CONTENT */}
         {loading ? (
