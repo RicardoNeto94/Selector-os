@@ -1,27 +1,28 @@
 /* src/styles/guest.css */
 
-/* Page background */
+/* Root layout background */
 .guest-root {
   min-height: 100vh;
-  padding: 32px 16px 80px;
+  padding: 32px 16px 120px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  /* Elegant cool-toned radial gradient */
   background:
-    radial-gradient(circle at top left, #1be4ff 0%, #041220 40%, #020617 85%);
+    radial-gradient(circle at 20% 0%, #1be4ff55 0%, #041220 40%, #020617 85%);
   color: #e5f9ff;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
 }
 
-/* Main card */
+/* Shell = main container */
 .guest-shell {
   width: 100%;
-  max-width: 1120px;
-  border-radius: 32px;
-  padding: 28px 32px 36px;
-  background: radial-gradient(circle at top left, #0c2437 0%, #020712 70%);
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  max-width: 1280px;
+  border-radius: 36px;
+  padding: 32px 36px 40px;
+  background: radial-gradient(circle at top left, #0a1f33 0%, #020712 70%);
+  border: 1px solid rgba(148, 163, 184, 0.26);
   box-shadow:
     0 26px 80px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(15, 23, 42, 0.5);
@@ -33,12 +34,12 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 26px;
 }
 
 .guest-header-main {
   display: flex;
-  gap: 20px;
+  gap: 22px;
   align-items: center;
 }
 
@@ -59,7 +60,7 @@
 }
 
 .guest-header-title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -71,54 +72,7 @@
 .guest-header-subtitle {
   margin-top: 4px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.88);
-}
-
-/* Filters row under the header */
-.guest-filters {
-  margin-top: 8px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(15, 23, 42, 0.8);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.guest-filters-left {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.guest-filters-right {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-/* New compact topline */
-.guest-filters-topline {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 12px;
-  color: rgba(203, 213, 225, 0.95);
-}
-
-.guest-dot {
-  font-size: 0.75rem;
-  opacity: 0.6;
-  transform: translateY(1px);
-}
-
-/* Optional: make count a bit stronger */
-.guest-count {
-  font-weight: 600;
-}
-
-.guest-active-filter {
-  opacity: 0.9;
+  color: rgba(226, 232, 240, 0.86);
 }
 
 .guest-meta {
@@ -129,7 +83,7 @@
   color: rgba(148, 163, 184, 0.9);
 }
 
-/* Allergen chips row */
+/* Allergen pills row */
 .guest-chips-row {
   margin-top: 8px;
   padding-top: 14px;
@@ -187,37 +141,40 @@
   background: #22c55e;
 }
 
-/* Cards */
-/* Grid layout for dish cards */
+/* GRID LAYOUT — NEW */
 .guest-grid {
-  margin-top: 26px;
+  margin-top: 32px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 18px;
-  padding-bottom: 80px; /* space for dock */
+  gap: 22px;
+  padding-bottom: 120px; /* space for dock */
 }
 
+/* Dish card */
 .guest-card {
-  border-radius: 22px;
-  padding: 18px 24px 16px;
-  border: 1px solid rgba(148, 163, 184, 0.38);
+  border-radius: 28px;
+  padding: 22px 24px 20px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
   background: radial-gradient(circle at top left, #020817, #020617 65%);
   box-shadow: 0 18px 38px rgba(0, 0, 0, 0.75);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .guest-card.safe {
-  border-color: rgba(52, 211, 153, 0.9);
+  border-color: rgba(52, 211, 153, 0.85);
 }
 
-.guest-card-blocked {
-  opacity: 0.32;
-  filter: grayscale(0.35);
+.guest-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.85);
 }
 
 .guest-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 20px;
 }
 
@@ -225,18 +182,20 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: rgba(148, 163, 184, 0.95);
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .guest-card-name {
   margin-top: 2px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
+  color: #e8faff;
 }
 
 .guest-card-price {
   font-size: 16px;
   font-weight: 600;
+  color: #c9e4f0;
 }
 
 .guest-card-desc {
@@ -246,19 +205,19 @@
 }
 
 .guest-card-footer {
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  color: rgba(148, 163, 184, 0.95);
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .guest-safe-tag {
   border-radius: 999px;
   padding: 4px 12px;
   border: 1px solid rgba(52, 211, 153, 0.7);
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.12);
   color: #a7f3d0;
   font-weight: 500;
   text-transform: uppercase;
@@ -278,7 +237,7 @@
   color: rgba(148, 163, 184, 0.95);
 }
 
-/* Floating dock at bottom */
+/* Floating dock */
 .guest-dock {
   position: fixed;
   left: 0;
@@ -294,7 +253,7 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
   background: radial-gradient(circle at top left, #020617, #020617 70%);
   border: 1px solid rgba(148, 163, 184, 0.45);
