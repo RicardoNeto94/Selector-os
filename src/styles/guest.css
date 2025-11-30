@@ -270,6 +270,7 @@
 
 /* === FLOATING DOCK (BOTTOM) ======================= */
 
+/* Floating dock – frosted glass, Apple-style */
 .guest-dock {
   position: fixed;
   left: 0;
@@ -285,18 +286,20 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
-  background: radial-gradient(circle at top left, #020617, #020617 70%);
-  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(248, 250, 252, 0.75)
+  );
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(15, 23, 42, 0.8);
-  max-width: 1100px;
-  width: calc(100% - 32px);
+    0 18px 45px rgba(15, 23, 42, 0.35),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
 }
-
-/* Dock sections */
 
 .guest-dock-left,
 .guest-dock-right {
@@ -312,11 +315,12 @@
 .guest-dock-middle {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  gap: 4px;
   justify-content: center;
 }
 
 /* Reuse allergen pills in dock without border-top line */
-
 .guest-chips-row--dock {
   margin: 0;
   padding: 0;
@@ -326,38 +330,8 @@
   overflow-x: auto;
 }
 
-/* Contains toggle pill */
-
-.dock-toggle {
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: transparent;
-  color: rgba(226, 232, 240, 0.9);
-  font-size: 11px;
-  padding: 4px 14px;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.12s ease;
-}
-
-.dock-toggle:hover:not(:disabled) {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: rgba(248, 250, 252, 0.9);
-  transform: translateY(-1px);
-}
-
-.dock-toggle:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.dock-toggle-on {
-  background: #f97373;
-  border-color: #fecaca;
-  color: #450a0a;
+.guest-chips-row--categories {
+  margin-top: 4px;
 }
 
 .guest-count-pill {
@@ -372,15 +346,49 @@
 
 .guest-dock-text {
   font-size: 11px;
-  color: rgba(226, 232, 240, 0.9);
+  color: rgba(15, 23, 42, 0.75);
 }
 
-.guest-reset-btn {
-  margin-left: 8px;
+/* Toggle pills on the right side of the dock */
+.dock-toggle {
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: transparent;
-  color: rgba(226, 232, 240, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(15, 23, 42, 0.8);
+  font-size: 11px;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s ease;
+}
+
+.dock-toggle:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(148, 163, 184, 0.95);
+  transform: translateY(-1px);
+}
+
+.dock-toggle-on {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(15, 23, 42, 0.95);
+  color: #f9fafb;
+}
+
+.dock-toggle:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Reset button matches dock style but lighter */
+.guest-reset-btn {
+  margin-left: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(15, 23, 42, 0.8);
   font-size: 11px;
   padding: 4px 12px;
   cursor: pointer;
@@ -392,8 +400,8 @@
 }
 
 .guest-reset-btn:hover:not(:disabled) {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: rgba(248, 250, 252, 0.9);
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(148, 163, 184, 0.9);
   transform: translateY(-1px);
 }
 
