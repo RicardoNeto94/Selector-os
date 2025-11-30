@@ -160,7 +160,7 @@
 }
 
 .guest-card.safe {
-  border-color: rgba(34, 197, 94, 0.9);
+  border-color: transparent !important;
 }
 
 .guest-card-header {
