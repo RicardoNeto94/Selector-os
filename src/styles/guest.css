@@ -188,11 +188,13 @@
 }
 
 /* Cards */
+/* Grid layout for dish cards */
 .guest-grid {
   margin-top: 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  padding-bottom: 80px; /* space for dock */
 }
 
 .guest-card {
