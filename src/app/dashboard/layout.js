@@ -1,4 +1,5 @@
-// src/app/dashboard/layout.js
+
+import Image from "next/image";
 import Link from "next/link";
 import "../../styles/dashboard.css";
 
