@@ -14,6 +14,30 @@ export default function GuestMenu({ slug }) {
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  // --- NEW: exclusive toggles for filter / category panels ---
+  const toggleFilterPanel = () => {
+    setShowFilterPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        // opening filters -> close categories
+        setShowCategoryPanel(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleCategoryPanel = () => {
+    setShowCategoryPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        // opening categories -> close filters
+        setShowFilterPanel(false);
+      }
+      return next;
+    });
+  };
+  // ------------------------------------------------------------
+
   // Load menu JSON from our public API
   useEffect(() => {
     async function load() {
@@ -64,7 +88,7 @@ export default function GuestMenu({ slug }) {
   const hasFilters = selectedAllergens.size > 0;
   const hasAnyDish = dishes.length > 0;
 
-  // Safe count (we still use this for logic if needed)
+  // Safe count (kept for logic if you want to show counts later)
   const safeCount = useMemo(() => {
     if (!hasFilters) {
       return dishes.filter((d) =>
@@ -257,7 +281,7 @@ export default function GuestMenu({ slug }) {
         (showFilterPanel || showCategoryPanel) && (
           <div className="guest-filterbar">
             <div className="guest-filterbar-inner">
-              {showFilterPanel && allergenList.length > 0 && (
+              {showFilterPanel && allergenList.length > 0 ? (
                 <div className="guest-chips-row guest-chips-row--floating">
                   {allergenList.map((code) => (
                     <button
@@ -274,9 +298,9 @@ export default function GuestMenu({ slug }) {
                     </button>
                   ))}
                 </div>
-              )}
+              ) : null}
 
-              {showCategoryPanel && categoryList.length > 0 && (
+              {showCategoryPanel && categoryList.length > 0 ? (
                 <div className="guest-chips-row guest-chips-row--floating guest-chips-row--categories">
                   {categoryList.map((category) => (
                     <button
@@ -293,7 +317,7 @@ export default function GuestMenu({ slug }) {
                     </button>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}
@@ -319,7 +343,7 @@ export default function GuestMenu({ slug }) {
                 className={
                   "dock-icon" + (showFilterPanel ? " dock-icon-active" : "")
                 }
-                onClick={() => setShowFilterPanel((prev) => !prev)}
+                onClick={toggleFilterPanel}
               >
                 <span className="dock-icon-label">≡</span>
               </button>
@@ -330,7 +354,7 @@ export default function GuestMenu({ slug }) {
                 className={
                   "dock-icon" + (showCategoryPanel ? " dock-icon-active" : "")
                 }
-                onClick={() => setShowCategoryPanel((prev) => !prev)}
+                onClick={toggleCategoryPanel}
               >
                 <span className="dock-icon-label">▦</span>
               </button>
