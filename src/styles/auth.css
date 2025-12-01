@@ -80,52 +80,23 @@
 
 /* === CARD =================================================== */
 
-.auth-card {
-  position: relative;
-  z-index: 2;      /* make sure card is above gradients */
-  width: 100%;
-  max-width: 420px;
-  border-radius: 28px;
-  padding: 36px 32px 28px;
-  background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.96));
-  box-shadow:
-    0 30px 70px rgba(15, 23, 42, 0.45),
-    0 0 0 1px rgba(148, 163, 184, 0.35);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
+/* === FLOATING LOGO ABOVE CARD (NO PILL) ======================= */
 
-/* top floating icon */
-.auth-card-icon {
+.auth-card-logo-floating {
   position: absolute;
-  top: -24px;
+  top: -42px; /* slightly above */
   left: 50%;
   transform: translateX(-50%);
-  width: 52px;
-  height: 52px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #f9fafb, #e5e7eb);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 18px 40px rgba(15, 23, 42, 0.45),
-    0 0 0 1px rgba(148, 163, 184, 0.4);
+  z-index: 5;
 }
 
-/* 🔥 inner circle now acts as a frame for the logo image */
-.auth-card-icon-inner {
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
+.auth-card-logo-img-only {
+  width: 72px;  /* adjust if needed */
+  height: auto;
+  object-fit: contain;
+
+  /* optional subtle shadow like Apple uses */
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.25));
 }
 
 /* === TYPOGRAPHY ============================================ */
