@@ -338,24 +338,10 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 84px;
+  bottom: 140px; /* increased space so it sits above the new dock */
   display: flex;
   justify-content: center;
   pointer-events: none;
   z-index: 30;
 }
 
-.guest-filterbar-inner {
-  pointer-events: auto;
-  max-width: min(1120px, 100% - 32px);
-  border-radius: 999px;
-  padding: 8px 16px;
-  background: rgba(3, 7, 18, 0.96);
-  border: 1px solid rgba(15, 23, 42, 0.95);
-}
-
-.guest-chips-row--floating {
-  margin: 0;
-  padding: 0;
-  border-top: none;
-}
