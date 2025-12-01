@@ -108,32 +108,36 @@ export default function GuestMenu({ slug }) {
   }, [dishes, hasFilters, selectedAllergens, selectedCategory]);
 
   // Main dish list logic
-  const filteredDishes = useMemo(() => {
-    let list = dishes;
+  // Main dish list logic (updated)
+const filteredDishes = useMemo(() => {
+  let list = dishes;
 
-    if (selectedCategory) {
-      list = list.filter((d) => d.category === selectedCategory);
+  // 1) Category filter
+  if (selectedCategory) {
+    list = list.filter((d) => d.category === selectedCategory);
+  }
+
+  // 2) No allergen filters → return list as-is
+  if (!hasFilters) {
+    return list;
+  }
+
+  // 3) Allergen filtering logic
+  return list.filter((d) => {
+    const dishAllergens = d.allergens || [];
+    const hasSelected = dishAllergens.some((code) =>
+      selectedAllergens.has(code)
+    );
+
+    // DEFAULT = SAFE VIEW → hide dishes that contain the allergen
+    if (!containsMode) {
+      return !hasSelected;
     }
 
-    if (!hasFilters) {
-      return list;
-    }
-
-    return list.filter((d) => {
-      const dishAllergens = d.allergens || [];
-      const hasSelected = dishAllergens.some((code) =>
-        selectedAllergens.has(code)
-      );
-
-      if (containsMode) {
-        // SHOW ONLY dishes that CONTAIN selected allergens
-        return hasSelected;
-      }
-
-      // When containsMode is off, show everything; we just visually label them
-      return true;
-    });
-  }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
+    // CONTAINS mode → show only dishes that contain selected allergen(s)
+    return hasSelected;
+  });
+}, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
 
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
