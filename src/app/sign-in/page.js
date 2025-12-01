@@ -14,35 +14,36 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("submit clicked"); // quick debug
+  setError("");
 
-    if (!email || !password) {
-      setError("Please fill in both fields.");
-      return;
+  if (!email || !password) {
+    setError("Please fill in both fields.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      throw signInError;
     }
 
-    try {
-      setLoading(true);
+    router.push("/dashboard");
+  } catch (err) {
+    console.error(err);
+    setError(err.message || "Failed to sign in.");
+    setLoading(false);
+  }
+};
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        throw signInError;
-      }
-
-      // redirect to dashboard on success
-      router.push("/dashboard");
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Failed to sign in.");
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="auth-root">
