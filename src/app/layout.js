@@ -1,4 +1,5 @@
 // src/app/layout.js
+import Image from "next/image";
 import "../styles/globals.css";
 import "../styles/theme.css";
 
