@@ -1,4 +1,4 @@
-
+// src/app/dashboard/layout.js
 import Image from "next/image";
 import Link from "next/link";
 import "../../styles/dashboard.css";
@@ -10,32 +10,45 @@ export default function DashboardLayout({ children }) {
     <div className="so-dashboard-root">
       {/* SIDEBAR */}
       <aside className="so-sidebar">
-        <div className="so-sidebar-logo">S</div>
+        {/* Logo pill */}
+        <div className="so-sidebar-logo">
+          <div className="so-sidebar-logo-inner">
+            <Image
+              src="/selectoros-logo.png"
+              alt="SelectorOS logo"
+              fill
+              sizes="180px"
+              className="so-sidebar-logo-img"
+              priority
+            />
+          </div>
+        </div>
 
+        {/* Nav dots */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-dot so-nav-active">
-            ⬤
+            ●
           </Link>
           <Link href="/dashboard/menu" className="so-nav-dot">
-            ☰
+            ▤
           </Link>
           <Link href="/dashboard/dishes" className="so-nav-dot">
-            🍽
+            ◱
           </Link>
           <Link href="/dashboard/allergen" className="so-nav-dot">
-            ⚕
+            ✚
           </Link>
           <Link href="/dashboard/settings" className="so-nav-dot">
-            ⚙️
+            ⚙
           </Link>
           <Link href="/dashboard/billing" className="so-nav-dot">
-            💳
+            ⧉
           </Link>
         </nav>
 
         <div className="so-sidebar-bottom">
           <div className="so-nav-dot" aria-label="Profile">
-            🙂
+            ●
           </div>
         </div>
       </aside>
