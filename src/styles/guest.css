@@ -15,7 +15,6 @@
     sans-serif;
 }
 
-
 /* acts just as a frame, not a big card anymore */
 .guest-shell {
   width: 100%;
@@ -161,7 +160,6 @@
 
   color: #e5e7eb;
 
-  /* ❗ Important: this ALLOWS the grid to control width */
   width: 100%;
   max-width: 100%;
 }
@@ -213,13 +211,6 @@
   color: #450a0a;
 }
 
-.guest-card-category {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: rgba(148, 163, 184, 0.96);
-}
-
 .guest-card-name {
   margin-top: 4px;
   font-size: 18px;
@@ -248,6 +239,13 @@
   color: rgba(148, 163, 184, 0.96);
 }
 
+/* allergens line in card footer */
+.guest-card-allergens {
+  font-size: 11px;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* not used right now, but harmless to keep */
 .guest-safe-tag {
   border-radius: 999px;
   padding: 4px 12px;
@@ -265,7 +263,6 @@
   display: block;
   padding-left: 8px;
 }
-
 
 /* === EMPTY STATE =================================== */
 
@@ -286,6 +283,7 @@
   display: flex;
   justify-content: center;
   pointer-events: none;
+  z-index: 40;
 }
 
 .guest-dock-inner {
@@ -293,7 +291,13 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: transparent;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 0% 0%, #020617, #020617 75%);
+  border: 1px solid rgba(15, 23, 42, 0.9);
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.9),
+    0 0 0 1px rgba(15, 23, 42, 0.85);
 }
 
 /* iOS-style switch for "Contain" mode */
@@ -397,6 +401,33 @@
   line-height: 1;
 }
 
+/* Count + helper text block on the dock */
+
+.guest-dock-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-left: 4px;
+  max-width: 260px;
+}
+
+.guest-count-pill {
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: linear-gradient(to right, #22c55e, #4ade80);
+  color: #022c22;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.guest-dock-text {
+  font-size: 11px;
+  color: rgba(148, 163, 184, 0.95);
+  white-space: normal;
+}
+
 /* === FLOATING FILTER BAR (CHIPS ABOVE DOCK) ======== */
 
 .guest-filterbar {
@@ -407,6 +438,7 @@
   display: flex;
   justify-content: center;
   pointer-events: none;
+  z-index: 30;
 }
 
 .guest-filterbar-inner {
@@ -427,43 +459,4 @@
   padding: 0;
   border-top: none;
   justify-content: center;
-}
-/* === DISH PILLS (CATEGORY + STATUS) ================= */
-
-.dish-chip-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.dish-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 14px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: capitalize;
-  border: none;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
-}
-
-/* Blue category pill */
-.dish-chip-category {
-  background: #60a5fa;
-  color: #0b1120;
-}
-
-/* Green SAFE pill */
-.dish-chip-safe {
-  background: #22c55e;
-  color: #052e16;
-}
-
-/* Red CONTAINS pill */
-.dish-chip-contains {
-  background: #f97373;
-  color: #450a0a;
 }
