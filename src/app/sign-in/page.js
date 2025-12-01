@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import Image from "next/image";
 import "../../styles/auth.css";
 
 export default function SignInPage() {
@@ -14,48 +15,51 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log("submit clicked"); // quick debug
-  setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  if (!email || !password) {
-    setError("Please fill in both fields.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      throw signInError;
+    if (!email || !password) {
+      setError("Please fill in both fields.");
+      return;
     }
 
-    router.push("/dashboard");
-  } catch (err) {
-    console.error(err);
-    setError(err.message || "Failed to sign in.");
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
 
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to sign in.");
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="auth-root">
-      {/* top-left logo */}
+      {/* REAL SELECTOROS LOGO */}
       <div className="auth-logo">
-        <div className="auth-logo-badge">SO</div>
-        <span className="auth-logo-text">SelectorOS</span>
+        <div className="auth-logo-img-wrapper">
+          <Image
+            src="/selectoros-logo.png"
+            alt="SelectorOS Logo"
+            fill
+            sizes="200px"
+            priority
+            className="auth-logo-img"
+          />
+        </div>
       </div>
 
-      {/* center card */}
+      {/* CENTERED CARD */}
       <div className="auth-card">
-        {/* floating icon */}
         <div className="auth-card-icon">
           <div className="auth-card-icon-inner">⏎</div>
         </div>
@@ -66,7 +70,6 @@ const handleSubmit = async (e) => {
         </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          {/* EMAIL */}
           <div className="auth-field">
             <span className="auth-field-icon">✉️</span>
             <input
@@ -79,7 +82,6 @@ const handleSubmit = async (e) => {
             />
           </div>
 
-          {/* PASSWORD */}
           <div className="auth-field">
             <span className="auth-field-icon">🔒</span>
             <input
@@ -93,14 +95,12 @@ const handleSubmit = async (e) => {
           </div>
 
           <div className="auth-password-row">
-            <span />
-            {/* wire this to your own reset flow later if you want */}
+            <span></span>
             <a href="/forgot-password" className="auth-link">
               Forgot password?
             </a>
           </div>
 
-          {/* PRIMARY BUTTON */}
           <button
             type="submit"
             className="auth-primary-btn"
@@ -110,48 +110,32 @@ const handleSubmit = async (e) => {
           </button>
         </form>
 
-        {/* DIVIDER */}
         <div className="auth-divider">
           <div className="auth-divider-line" />
           <span>Or sign in with</span>
           <div className="auth-divider-line" />
         </div>
 
-        {/* SOCIAL BUTTONS – you can later hook these to Supabase OAuth */}
         <div className="auth-social-row">
-          <button
-            type="button"
-            className="auth-social-btn"
-            // onClick={...} // add Google OAuth here
-          >
+          <button type="button" className="auth-social-btn">
             <span className="auth-social-icon">G</span>
             <span>Google</span>
           </button>
-          <button
-            type="button"
-            className="auth-social-btn"
-            // onClick={...}
-          >
+          <button type="button" className="auth-social-btn">
             <span className="auth-social-icon">f</span>
             <span>Facebook</span>
           </button>
-          <button
-            type="button"
-            className="auth-social-btn"
-            // onClick={...}
-          >
+          <button type="button" className="auth-social-btn">
             <span className="auth-social-icon"></span>
             <span>Apple</span>
           </button>
         </div>
 
-        {error && (
+        {error ? (
           <p className="auth-footer-text" style={{ color: "#b91c1c" }}>
             {error}
           </p>
-        )}
-
-        {!error && (
+        ) : (
           <p className="auth-footer-text">
             Protected access for restaurant operators only.
           </p>
