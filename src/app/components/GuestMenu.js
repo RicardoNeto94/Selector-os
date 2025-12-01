@@ -8,7 +8,7 @@ export default function GuestMenu({ slug }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
-  const [containsMode, setContainsMode] = useState(false); // false = show all dishes, true = only dishes that CONTAIN selected allergens
+  const [containsMode, setContainsMode] = useState(false); // switch in dock
   const [showFilterPanel, setShowFilterPanel] = useState(true);
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -107,7 +107,7 @@ export default function GuestMenu({ slug }) {
         return hasSelected;
       }
 
-      // Contains mode OFF → show everything (we just use badges for SAFE / Contains)
+      // Contains mode OFF → show everything; badges are handled separately
       return true;
     });
   }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
@@ -136,11 +136,9 @@ export default function GuestMenu({ slug }) {
 
   const handleSelectAllAllergens = () => {
     setSelectedAllergens((prev) => {
-      // if everything is already selected, clear
       if (prev.size === allergenList.length) {
         return new Set();
       }
-      // otherwise select all
       return new Set(allergenList);
     });
   };
@@ -161,8 +159,8 @@ export default function GuestMenu({ slug }) {
                 <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
               </div>
               <p className="guest-header-subtitle">
-                Select allergen codes to hide or show dishes. Anything left is{" "}
-                <strong>SAFE</strong> to serve.
+                Select allergen codes, then use the dock to switch between
+                SAFE view and Contains view.
               </p>
             </div>
           </div>
@@ -172,48 +170,6 @@ export default function GuestMenu({ slug }) {
             <div>LIVE DATA FROM YOUR COCKPIT</div>
           </div>
         </header>
-
-        {/* Allergen + Category chips (appear above dock, controlled by icons) */}
-        {allergenList.length > 0 && (
-          <>
-            {showFilterPanel && (
-              <div className="guest-chips-row">
-                {allergenList.map((code) => (
-                  <button
-                    key={code}
-                    type="button"
-                    className={
-                      "guest-pill" + (selectedAllergens.has(code) ? " active" : "")
-                    }
-                    onClick={() => handleToggleAllergen(code)}
-                  >
-                    <span className="guest-pill-dot" />
-                    {code}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {showCategoryPanel && categoryList.length > 0 && (
-              <div className="guest-chips-row guest-chips-row--categories">
-                {categoryList.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    className={
-                      "guest-pill" +
-                      (selectedCategory === category ? " active" : "")
-                    }
-                    onClick={() => handleCategoryClick(category)}
-                  >
-                    <span className="guest-pill-dot" />
-                    {category}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
 
         {/* Content */}
         {loading ? (
@@ -233,10 +189,10 @@ export default function GuestMenu({ slug }) {
                 hasFilters &&
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
-              // Badge logic for the top-left chips row
+              // Badge logic – only when we are in "Contains" mode AND have filters
               let badgeLabel = null;
               let badgeClass = "";
-              if (hasFilters) {
+              if (hasFilters && containsMode) {
                 if (dishHasSelected) {
                   badgeLabel = "Contains";
                   badgeClass = "dish-chip dish-chip-contains";
@@ -286,7 +242,7 @@ export default function GuestMenu({ slug }) {
                         : "None"}
                     </span>
                     <span className="guest-safe-tag">
-                      {hasFilters
+                      {hasFilters && containsMode
                         ? `${safeCount} safe left`
                         : `${filteredDishes.length} dish${
                             filteredDishes.length === 1 ? "" : "es"
@@ -299,6 +255,53 @@ export default function GuestMenu({ slug }) {
           </section>
         )}
       </div>
+
+      {/* FLOATING FILTER BAR (chips) */}
+      {!loading &&
+        dishes.length > 0 &&
+        (showFilterPanel || showCategoryPanel) && (
+          <div className="guest-filterbar">
+            <div className="guest-filterbar-inner">
+              {showFilterPanel && allergenList.length > 0 && (
+                <div className="guest-chips-row guest-chips-row--floating">
+                  {allergenList.map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      className={
+                        "guest-pill" +
+                        (selectedAllergens.has(code) ? " active" : "")
+                      }
+                      onClick={() => handleToggleAllergen(code)}
+                    >
+                      <span className="guest-pill-dot" />
+                      {code}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {showCategoryPanel && categoryList.length > 0 && (
+                <div className="guest-chips-row guest-chips-row--floating guest-chips-row--categories">
+                  {categoryList.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={
+                        "guest-pill" +
+                        (selectedCategory === category ? " active" : "")
+                      }
+                      onClick={() => handleCategoryClick(category)}
+                    >
+                      <span className="guest-pill-dot" />
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
       {/* Floating dock – switch + 4 icon buttons */}
       {!loading && dishes.length > 0 && (
