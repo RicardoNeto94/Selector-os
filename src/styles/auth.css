@@ -10,7 +10,15 @@
   box-sizing: border-box;
 
   /* soft sky gradient */
-  background: radial-gradient(circle at 20% 0%, #e7f3ff 0, #c9e3ff 30%, #b4d9ff 45%, #9fc8f8 60%, #8bb7f0 75%, #76a3e6 100%);
+  background: radial-gradient(
+    circle at 20% 0%,
+    #e7f3ff 0,
+    #c9e3ff 30%,
+    #b4d9ff 45%,
+    #9fc8f8 60%,
+    #8bb7f0 75%,
+    #76a3e6 100%
+  );
   position: relative;
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
@@ -80,23 +88,43 @@
 
 /* === CARD =================================================== */
 
+.auth-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 28px;
+  padding: 40px 32px 28px; /* extra top for floating logo */
+  background: radial-gradient(
+    circle at 0 0,
+    rgba(255, 255, 255, 0.95),
+    rgba(241, 245, 249, 0.96)
+  );
+  box-shadow:
+    0 30px 70px rgba(15, 23, 42, 0.45),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 /* === FLOATING LOGO ABOVE CARD (NO PILL) ======================= */
 
 .auth-card-logo-floating {
   position: absolute;
-  top: -42px; /* slightly above */
+  top: -38px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
 }
 
 .auth-card-logo-img-only {
-  width: 72px;  /* adjust if needed */
+  width: 72px;
   height: auto;
   object-fit: contain;
-
-  /* optional subtle shadow like Apple uses */
-  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.25));
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
 }
 
 /* === TYPOGRAPHY ============================================ */
@@ -283,20 +311,4 @@
   font-size: 11px;
   color: #9ca3af;
   text-align: center;
-}
-
-/* === LOGO INSIDE CARD ====================================== */
-
-.auth-card-logo {
-  margin-top: 4px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: center;
-}
-
-.auth-card-logo-img {
-  max-width: 220px;
-  width: 70%;
-  height: auto;
-  object-fit: contain;
 }
