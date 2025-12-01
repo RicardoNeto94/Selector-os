@@ -9,7 +9,7 @@ export default function GuestMenu({ slug }) {
   const [error, setError] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
   const [containsMode, setContainsMode] = useState(false); // switch in dock
-  const [showFilterPanel, setShowFilterPanel] = useState(true);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
@@ -140,6 +140,27 @@ export default function GuestMenu({ slug }) {
         return new Set();
       }
       return new Set(allergenList);
+    });
+  };
+
+  // NEW: make filter/category buttons mutually exclusive
+  const handleFilterButtonClick = () => {
+    setShowFilterPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        setShowCategoryPanel(false);
+      }
+      return next;
+    });
+  };
+
+  const handleCategoryButtonClick = () => {
+    setShowCategoryPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        setShowFilterPanel(false);
+      }
+      return next;
     });
   };
 
@@ -324,7 +345,7 @@ export default function GuestMenu({ slug }) {
                 className={
                   "dock-icon" + (showFilterPanel ? " dock-icon-active" : "")
                 }
-                onClick={() => setShowFilterPanel((prev) => !prev)}
+                onClick={handleFilterButtonClick}
               >
                 <span className="dock-icon-label">≡</span>
               </button>
@@ -335,7 +356,7 @@ export default function GuestMenu({ slug }) {
                 className={
                   "dock-icon" + (showCategoryPanel ? " dock-icon-active" : "")
                 }
-                onClick={() => setShowCategoryPanel((prev) => !prev)}
+                onClick={handleCategoryButtonClick}
               >
                 <span className="dock-icon-label">▦</span>
               </button>
