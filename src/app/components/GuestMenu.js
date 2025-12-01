@@ -82,7 +82,7 @@ export default function GuestMenu({ slug }) {
     return safe;
   }, [dishes, hasFilters, selectedAllergens, selectedCategory]);
 
-  // Main dish list logic
+   // Main dish list logic
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
@@ -96,6 +96,7 @@ export default function GuestMenu({ slug }) {
       return list;
     }
 
+    // We have selected allergens → filter based on mode
     return list.filter((d) => {
       const dishAllergens = d.allergens || [];
       const hasSelected = dishAllergens.some((code) =>
@@ -107,11 +108,12 @@ export default function GuestMenu({ slug }) {
         return hasSelected;
       }
 
-      // Contains mode OFF → show everything; badges are handled separately
-      return true;
+      // SAFE mode (switch OFF) → only dishes that do NOT contain any selected allergen
+      return !hasSelected;
     });
   }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
-
+ // Main dish list logic
+ 
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
