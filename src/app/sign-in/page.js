@@ -46,29 +46,21 @@ export default function SignInPage() {
 
   return (
     <div className="auth-root">
-      {/* small brand in the top-left */}
-      <div className="auth-logo">
-        <div className="auth-logo-badge">SO</div>
-        <span className="auth-logo-text">SelectorOS</span>
-      </div>
+      {/* NOTE: removed the top-left “SO SelectorOS” logo */}
 
       {/* center card */}
       <div className="auth-card">
-        {/* floating icon stays as-is */}
+        {/* floating logo badge */}
         <div className="auth-card-icon">
-          <div className="auth-card-icon-inner">⏎</div>
-        </div>
-
-        {/* NEW: logo inside the card, above the title */}
-        <div className="auth-card-logo">
-          <Image
-            src="/selectoros-logo.png"   // <-- put your logo file here
-            alt="SelectorOS"
-            width={220}
-            height={60}
-            priority
-            className="auth-card-logo-img"
-          />
+          <div className="auth-card-icon-inner">
+            <Image
+              src="/selectoros-logo.png"
+              alt="SelectorOS logo"
+              width={26}
+              height={26}
+              className="auth-card-icon-logo"
+            />
+          </div>
         </div>
 
         <h1 className="auth-title">Sign in with email</h1>
@@ -110,6 +102,7 @@ export default function SignInPage() {
             </a>
           </div>
 
+          {/* PRIMARY BUTTON */}
           <button
             type="submit"
             className="auth-primary-btn"
@@ -119,12 +112,14 @@ export default function SignInPage() {
           </button>
         </form>
 
+        {/* DIVIDER */}
         <div className="auth-divider">
           <div className="auth-divider-line" />
           <span>Or sign in with</span>
           <div className="auth-divider-line" />
         </div>
 
+        {/* SOCIAL BUTTONS – hook these to OAuth later */}
         <div className="auth-social-row">
           <button type="button" className="auth-social-btn">
             <span className="auth-social-icon">G</span>
