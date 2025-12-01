@@ -1,0 +1,284 @@
+/* src/styles/dashboard.css */
+
+/* ====== COLOR SYSTEM ===================== */
+
+:root {
+  --so-bg: #f3f2ec;
+  --so-bg-soft: #e8e4d9;
+
+  --so-surface: #ffffff;
+  --so-surface-soft: #f7f5ef;
+
+  --so-text-main: #1c1f23;
+  --so-text-muted: #7b8088;
+
+  --so-border-subtle: rgba(15, 23, 42, 0.06);
+
+  --so-primary: #4b7c5a;       /* muted green */
+  --so-primary-soft: #e4f0e7;
+  --so-primary-strong: #2e5b3e;
+
+  --so-accent-beige: #e2d3af;
+  --so-accent-purple: #7c7f98;
+  --so-accent-red: #d14a40;
+
+  --so-radius-lg: 24px;
+  --so-radius-md: 18px;
+  --so-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+/* ====== GLOBAL DASHBOARD SHELL =============================== */
+
+.so-dashboard-root {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  background: var(--so-bg);
+  color: var(--so-text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    sans-serif;
+}
+
+/* ====== LEFT SIDEBAR ========================================= */
+
+.so-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 12px 22px;
+  background: #f0eee6;
+  border-right: 1px solid rgba(15, 23, 42, 0.04);
+  gap: 24px;
+}
+
+.so-sidebar-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 0, #1f2933, #020617);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f9fafb;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.so-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.so-nav-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  background: #f6f3ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.12s ease;
+}
+
+.so-nav-dot:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+}
+
+.so-nav-dot.so-nav-active {
+  background: var(--so-primary-soft);
+  color: var(--so-primary-strong);
+}
+
+/* Bottom avatar */
+
+.so-sidebar-bottom {
+  margin-top: auto;
+}
+
+/* ====== MAIN AREA ============================================ */
+
+.so-main {
+  padding: 24px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Top header (greeting + search + actions) */
+
+.so-topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.so-topbar-text {
+  flex: 1;
+}
+
+.so-topbar-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.so-topbar-subtitle {
+  font-size: 13px;
+  color: var(--so-text-muted);
+}
+
+.so-search {
+  flex: 0 0 320px;
+  display: flex;
+  align-items: center;
+  background: #f8f5ee;
+  border-radius: 999px;
+  padding: 0 16px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  gap: 10px;
+}
+
+.so-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--so-text-main);
+}
+
+.so-search input::placeholder {
+  color: var(--so-text-muted);
+}
+
+.so-circle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f5ee;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* ====== CARD SYSTEM ========================================== */
+
+.so-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.so-card {
+  border-radius: var(--so-radius-lg);
+  background: var(--so-surface);
+  box-shadow: var(--so-shadow-soft);
+  border: 1px solid var(--so-border-subtle);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.so-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--so-text-muted);
+}
+
+.so-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.so-card-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #eef5ef;
+  color: var(--so-primary-strong);
+  font-weight: 600;
+}
+
+.so-metric-main {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.so-metric-sub {
+  font-size: 11px;
+  color: var(--so-text-muted);
+}
+
+/* Large lower grid (2 columns) */
+
+.so-grid-lg {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr;
+  gap: 18px;
+}
+
+/* Simple placeholder chart styling */
+
+.so-chart-placeholder {
+  border-radius: var(--so-radius-md);
+  background: var(--so-surface-soft);
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--so-text-muted);
+}
+
+/* Tables / lists */
+
+.so-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.so-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.so-list-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.so-list-title {
+  font-weight: 600;
+}
+
+.so-list-sub {
+  font-size: 11px;
+  color: var(--so-text-muted);
+}
+
+.so-list-value {
+  font-weight: 600;
+}
