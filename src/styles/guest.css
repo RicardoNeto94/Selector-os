@@ -259,6 +259,14 @@
   letter-spacing: 0.14em;
 }
 
+.guest-footer,
+.guest-summary-text {
+  white-space: normal;
+  display: block;
+  padding-left: 8px;
+}
+
+
 /* === EMPTY STATE =================================== */
 
 .guest-empty {
