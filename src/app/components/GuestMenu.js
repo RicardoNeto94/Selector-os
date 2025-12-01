@@ -10,11 +10,13 @@ export default function GuestMenu({ slug }) {
 
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
   const [containsMode, setContainsMode] = useState(false);
+
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
+
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Load menu JSON from our public API
+  // Load public menu JSON
   useEffect(() => {
     async function load() {
       try {
@@ -22,23 +24,20 @@ export default function GuestMenu({ slug }) {
         setError("");
 
         const res = await fetch(`/api/public-menu/${slug}`);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();
-
-        // Debug: see what the API is actually returning
-        console.log("GuestMenu data for slug", slug, json);
 
         const normalized = (json || []).map((d) => ({
           ...d,
           allergens: Array.isArray(d.allergens) ? d.allergens : [],
         }));
 
+        console.log("Public menu normalized:", normalized);
+
         setDishes(normalized);
       } catch (err) {
-        console.error("Failed to load public menu", err);
+        console.error(err);
         setError("Failed to load menu. Please try again.");
       } finally {
         setLoading(false);
@@ -48,26 +47,26 @@ export default function GuestMenu({ slug }) {
     if (slug) load();
   }, [slug]);
 
-  // Unique sorted allergen codes
+  // Unique sorted allergen list
   const allergenList = useMemo(() => {
-    const set = new Set();
-    dishes.forEach((d) => (d.allergens || []).forEach((a) => set.add(a)));
-    return Array.from(set).sort();
+    const s = new Set();
+    dishes.forEach((d) => (d.allergens || []).forEach((a) => s.add(a)));
+    return Array.from(s).sort();
   }, [dishes]);
 
-  // Unique sorted category list
+  // Unique category list
   const categoryList = useMemo(() => {
-    const set = new Set();
+    const s = new Set();
     dishes.forEach((d) => {
-      if (d.category) set.add(d.category);
+      if (d.category) s.add(d.category);
     });
-    return Array.from(set).sort();
+    return Array.from(s).sort();
   }, [dishes]);
 
   const hasFilters = selectedAllergens.size > 0;
   const hasAnyDish = dishes.length > 0;
 
-  // Safe count for dock
+  // Count pills logic
   const safeCount = useMemo(() => {
     if (!hasFilters) {
       return dishes.filter((d) =>
@@ -75,74 +74,68 @@ export default function GuestMenu({ slug }) {
       ).length;
     }
 
-    let safe = 0;
+    let c = 0;
     dishes.forEach((d) => {
       if (selectedCategory && d.category !== selectedCategory) return;
-      const hasSelected = (d.allergens || []).some((code) =>
+
+      const containsSelected = (d.allergens || []).some((code) =>
         selectedAllergens.has(code)
       );
-      if (!hasSelected) safe += 1;
+
+      if (!containsSelected) c += 1;
     });
-    return safe;
+    return c;
   }, [dishes, hasFilters, selectedAllergens, selectedCategory]);
 
-  // Main dish list logic
+  // Filtered list logic
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
-    if (selectedCategory) {
-      list = list.filter((d) => d.category === selectedCategory);
-    }
+    if (selectedCategory) list = list.filter((d) => d.category === selectedCategory);
 
-    if (!hasFilters) {
-      return list;
-    }
+    if (!hasFilters) return list;
 
-    return list.filter((d) => {
-      const dishAllergens = d.allergens || [];
-      const hasSelected = dishAllergens.some((code) =>
-        selectedAllergens.has(code)
+    // If "contains" mode is ON → show only dishes containing the selected allergens
+    if (containsMode) {
+      return list.filter((d) =>
+        (d.allergens || []).some((code) => selectedAllergens.has(code))
       );
+    }
 
-      if (containsMode) {
-        // SHOW ONLY dishes that CONTAIN selected allergens
-        return hasSelected;
-      }
-
-      // When containsMode is off, show everything (we just mark SAFE / Contains visually)
-      return true;
-    });
+    // ContainsMode OFF → show everything but add SAFE/CONTAINS badges
+    return list;
   }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
 
+  // Always render at least the full dishes list when no filters
+  const listToRender =
+    filteredDishes.length > 0 || !hasAnyDish ? filteredDishes : dishes;
+
+  // Select/Unselect allergens
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
-      } else {
-        next.add(code);
-      }
+      next.has(code) ? next.delete(code) : next.add(code);
       return next;
     });
   };
 
-  const handleCategoryClick = (category) => {
-    setSelectedCategory((prev) => (prev === category ? null : category));
+  // Category click
+  const handleCategoryClick = (cat) => {
+    setSelectedCategory((prev) => (prev === cat ? null : cat));
   };
 
+  // Reset everything
   const handleResetAll = () => {
     setSelectedAllergens(new Set());
-    setContainsMode(false);
     setSelectedCategory(null);
+    setContainsMode(false);
     setShowFilterPanel(false);
     setShowCategoryPanel(false);
   };
 
   const handleSelectAllAllergens = () => {
     setSelectedAllergens((prev) => {
-      if (prev.size === allergenList.length) {
-        return new Set();
-      }
+      if (prev.size === allergenList.length) return new Set();
       return new Set(allergenList);
     });
   };
@@ -150,12 +143,9 @@ export default function GuestMenu({ slug }) {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
-  // TEXT FOR DOCK
   const countText = hasFilters
     ? containsMode
-      ? `${filteredDishes.length} dish${
-          filteredDishes.length === 1 ? "" : "es"
-        } containing selection`
+      ? `${filteredDishes.length} dish${filteredDishes.length === 1 ? "" : "es"} containing selection`
       : `${safeCount} safe dish${safeCount === 1 ? "" : "es"}`
     : `${dishes.length} dish${dishes.length === 1 ? "" : "es"}`;
 
@@ -165,14 +155,10 @@ export default function GuestMenu({ slug }) {
       : "SAFE dishes in green; dishes containing your allergens in red."
     : "Use filters to highlight or limit dishes by allergens and category.";
 
-  // Decide what we actually render: never show "no dishes" if API returned any
-  const listToRender =
-    filteredDishes.length > 0 || !hasAnyDish ? filteredDishes : dishes;
-
   return (
     <div className="guest-root">
       <div className="guest-shell">
-        {/* Header */}
+        {/* HEADER */}
         <header className="guest-header">
           <div className="guest-header-main">
             <div className="guest-logo-circle">S</div>
@@ -182,7 +168,7 @@ export default function GuestMenu({ slug }) {
                 <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
               </div>
               <p className="guest-header-subtitle">
-                Live view of your configured dishes. Filters never delete data –
+                Live view of your configured dishes. Filters never delete data – 
                 they only change what’s visible.
               </p>
             </div>
@@ -194,27 +180,26 @@ export default function GuestMenu({ slug }) {
           </div>
         </header>
 
-        {/* Content */}
+        {/* MAIN SECTION */}
         {loading ? (
           <div className="guest-empty">Loading menu…</div>
         ) : error ? (
           <div className="guest-empty">{error}</div>
         ) : !hasAnyDish ? (
           <div className="guest-empty">
-            No dishes configured yet. Add dishes in your SelectorOS back office.
+            No dishes configured yet. Add dishes in your SelectorOS cockpit.
           </div>
         ) : (
           <section className="guest-grid">
             {listToRender.map((dish) => {
-              const dishAllergens = dish.allergens || [];
-              const dishHasSelected =
-                hasFilters &&
-                dishAllergens.some((code) => selectedAllergens.has(code));
+              const allergens = dish.allergens || [];
+              const hasSelected = allergens.some((c) => selectedAllergens.has(c));
 
+              // ALWAYS show badges when filters are used
               let badgeLabel = null;
               let badgeClass = "";
-              if (hasFilters && containsMode) {
-                if (dishHasSelected) {
+              if (hasFilters) {
+                if (hasSelected) {
                   badgeLabel = "Contains";
                   badgeClass = "dish-chip dish-chip-contains";
                 } else {
@@ -224,10 +209,7 @@ export default function GuestMenu({ slug }) {
               }
 
               return (
-                <article
-                  key={dish.id ?? dish.name + (dish.category || "")}
-                  className="guest-card"
-                >
+                <article key={dish.id} className="guest-card">
                   <div className="guest-card-header">
                     <div>
                       <div className="dish-chip-row">
@@ -242,12 +224,11 @@ export default function GuestMenu({ slug }) {
                       <div className="guest-card-name">{dish.name}</div>
                     </div>
 
-                    <div className="guest-card-price">
-                      {typeof dish.price === "number" &&
-                      !Number.isNaN(dish.price)
-                        ? `${dish.price.toFixed(2)} €`
-                        : ""}
-                    </div>
+                    {typeof dish.price === "number" && (
+                      <div className="guest-card-price">
+                        {dish.price.toFixed(2)} €
+                      </div>
+                    )}
                   </div>
 
                   {dish.description && (
@@ -256,10 +237,7 @@ export default function GuestMenu({ slug }) {
 
                   <div className="guest-card-footer">
                     <span className="guest-card-allergens">
-                      Allergens:{" "}
-                      {dishAllergens.length
-                        ? dishAllergens.join(", ")
-                        : "None"}
+                      Allergens: {allergens.length ? allergens.join(", ") : "None"}
                     </span>
                   </div>
                 </article>
@@ -269,7 +247,7 @@ export default function GuestMenu({ slug }) {
         )}
       </div>
 
-      {/* FLOATING FILTER BAR (chips) */}
+      {/* FLOATING FILTER BAR */}
       {!loading &&
         hasAnyDish &&
         (showFilterPanel || showCategoryPanel) && (
@@ -296,18 +274,18 @@ export default function GuestMenu({ slug }) {
 
               {showCategoryPanel && categoryList.length > 0 && (
                 <div className="guest-chips-row guest-chips-row--floating guest-chips-row--categories">
-                  {categoryList.map((category) => (
+                  {categoryList.map((cat) => (
                     <button
-                      key={category}
+                      key={cat}
                       type="button"
                       className={
                         "guest-pill" +
-                        (selectedCategory === category ? " active" : "")
+                        (selectedCategory === cat ? " active" : "")
                       }
-                      onClick={() => handleCategoryClick(category)}
+                      onClick={() => handleCategoryClick(cat)}
                     >
                       <span className="guest-pill-dot" />
-                      {category}
+                      {cat}
                     </button>
                   ))}
                 </div>
@@ -316,11 +294,11 @@ export default function GuestMenu({ slug }) {
           </div>
         )}
 
-      {/* Floating dock – switch + 4 icon buttons */}
+      {/* FLOATING DOCK */}
       {!loading && hasAnyDish && (
         <div className="guest-dock">
           <div className="guest-dock-inner">
-            {/* Contain toggle (green iOS switch) */}
+            {/* Contains / Safe switch */}
             <button
               type="button"
               className={"ios-switch" + (containsMode ? " ios-switch-on" : "")}
@@ -337,7 +315,7 @@ export default function GuestMenu({ slug }) {
                 className={
                   "dock-icon" + (showFilterPanel ? " dock-icon-active" : "")
                 }
-                onClick={() => setShowFilterPanel((prev) => !prev)}
+                onClick={() => setShowFilterPanel((p) => !p)}
               >
                 <span className="dock-icon-label">≡</span>
               </button>
@@ -348,12 +326,12 @@ export default function GuestMenu({ slug }) {
                 className={
                   "dock-icon" + (showCategoryPanel ? " dock-icon-active" : "")
                 }
-                onClick={() => setShowCategoryPanel((prev) => !prev)}
+                onClick={() => setShowCategoryPanel((p) => !p)}
               >
                 <span className="dock-icon-label">▦</span>
               </button>
 
-              {/* Select all allergens / clear */}
+              {/* Select all allergens */}
               <button
                 type="button"
                 className="dock-icon dock-icon-gold"
@@ -363,7 +341,7 @@ export default function GuestMenu({ slug }) {
                 <span className="dock-icon-label">+</span>
               </button>
 
-              {/* Reset all */}
+              {/* Reset */}
               <button
                 type="button"
                 className="dock-icon"
@@ -374,6 +352,7 @@ export default function GuestMenu({ slug }) {
               </button>
             </div>
 
+            {/* Counter + text */}
             <div className="guest-dock-left">
               <span className="guest-count-pill">{countText}</span>
               <span className="guest-dock-text">{filterText}</span>
