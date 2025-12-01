@@ -55,18 +55,13 @@ export default function SignInPage() {
       {/* center card */}
       <div className="auth-card">
         {/* floating icon with your logo */}
-        <div className="auth-card-icon">
-          <div className="auth-card-icon-inner">
-            <Image
-              src="/selectoros-logo.png"
-              alt="SelectorOS logo"
-              width={30}
-              height={30}
-              className="auth-card-logo-img"
-              priority
-            />
-          </div>
-        </div>
+        <div className="auth-card-logo-floating">
+  <img
+    src="/selectoros-logo.png"
+    alt="SelectorOS Logo"
+    className="auth-card-logo-img-only"
+  />
+</div>
 
         <h1 className="auth-title">Sign in with email</h1>
         <p className="auth-subtitle">
