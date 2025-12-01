@@ -9,12 +9,12 @@ export default function GuestMenu({ slug }) {
   const [error, setError] = useState("");
 
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
-  const [containsMode, setContainsMode] = useState(false); // off = SAFE dishes, on = CONTAINS
+  const [containsMode, setContainsMode] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // --- LOAD DATA FROM PUBLIC API ------------------------------------
+  // Load menu JSON from our public API
   useEffect(() => {
     async function load() {
       try {
@@ -22,17 +22,17 @@ export default function GuestMenu({ slug }) {
         setError("");
 
         const res = await fetch(`/api/public-menu/${slug}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
 
         const json = await res.json();
 
         const normalized = (json || []).map((d) => ({
           ...d,
-          // ensure allergens is always an array of codes, e.g. ["GL", "CE"]
           allergens: Array.isArray(d.allergens) ? d.allergens : [],
         }));
 
-        console.log("GuestMenu data for slug", slug, normalized);
         setDishes(normalized);
       } catch (err) {
         console.error("Failed to load public menu", err);
@@ -45,15 +45,14 @@ export default function GuestMenu({ slug }) {
     if (slug) load();
   }, [slug]);
 
-  const hasAnyDish = dishes.length > 0;
-
-  // --- UNIQUE ALLERGEN & CATEGORY LISTS -----------------------------
+  // Unique sorted allergen codes
   const allergenList = useMemo(() => {
     const set = new Set();
     dishes.forEach((d) => (d.allergens || []).forEach((a) => set.add(a)));
     return Array.from(set).sort();
   }, [dishes]);
 
+  // Unique sorted category list
   const categoryList = useMemo(() => {
     const set = new Set();
     dishes.forEach((d) => {
@@ -63,47 +62,49 @@ export default function GuestMenu({ slug }) {
   }, [dishes]);
 
   const hasFilters = selectedAllergens.size > 0;
+  const hasAnyDish = dishes.length > 0;
 
-  // --- FILTERED DISH LIST (CORE LOGIC) ------------------------------
+  // === MAIN FILTERING LOGIC ==========================
+  // EXACT behavior:
+  // - No allergens selected  -> show all dishes (respecting category)
+  // - Allergens selected + containsMode = false -> only SAFE dishes
+  //   (no selected allergens)
+  // - Allergens selected + containsMode = true  -> only dishes that CONTAIN
+  //   at least one selected allergen
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
-    // category filter first
+    // Category filter first
     if (selectedCategory) {
       list = list.filter((d) => d.category === selectedCategory);
     }
 
+    // No allergens selected => just category filter
     if (!hasFilters) {
-      // no allergens selected → just category filtering
       return list;
     }
 
-    // when there ARE selected allergens:
+    // With allergens selected, switch between SAFE / CONTAINS
     return list.filter((d) => {
       const dishAllergens = d.allergens || [];
       const hasSelected = dishAllergens.some((code) =>
         selectedAllergens.has(code)
       );
 
-      if (containsMode) {
-        // switch ON → show ONLY dishes that CONTAIN the selected allergens
-        return hasSelected;
-      }
-
-      // switch OFF → show ONLY SAFE dishes (no selected allergens)
-      return !hasSelected;
+      // containsMode OFF  -> SAFE only (no selected allergens)
+      // containsMode ON   -> only dishes that contain selected allergens
+      return containsMode ? hasSelected : !hasSelected;
     });
   }, [dishes, selectedCategory, hasFilters, selectedAllergens, containsMode]);
 
-  const listToRender =
-    filteredDishes.length > 0 || !hasAnyDish ? filteredDishes : dishes;
-
-  // --- HANDLERS -----------------------------------------------------
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) next.delete(code);
-      else next.add(code);
+      if (next.has(code)) {
+        next.delete(code);
+      } else {
+        next.add(code);
+      }
       return next;
     });
   };
@@ -122,7 +123,9 @@ export default function GuestMenu({ slug }) {
 
   const handleSelectAllAllergens = () => {
     setSelectedAllergens((prev) => {
-      if (prev.size === allergenList.length) return new Set();
+      if (prev.size === allergenList.length) {
+        return new Set();
+      }
       return new Set(allergenList);
     });
   };
@@ -130,7 +133,10 @@ export default function GuestMenu({ slug }) {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
-  // --- RENDER -------------------------------------------------------
+  // Decide what we actually render: never show "no dishes" if API returned any
+  const listToRender =
+    filteredDishes.length > 0 || !hasAnyDish ? filteredDishes : dishes;
+
   return (
     <div className="guest-root">
       <div className="guest-shell">
@@ -169,19 +175,16 @@ export default function GuestMenu({ slug }) {
           <section className="guest-grid">
             {listToRender.map((dish) => {
               const dishAllergens = dish.allergens || [];
-              const dishHasSelected =
-                hasFilters &&
-                dishAllergens.some((code) => selectedAllergens.has(code));
 
+              // Simple chips: SAFE when in safe-mode, CONTAINS when in contains-mode.
               let badgeLabel = null;
               let badgeClass = "";
-              if (hasFilters && containsMode) {
-                // only show SAFE / CONTAINS tags in "contains" mode
-                if (dishHasSelected) {
+              if (hasFilters) {
+                if (containsMode) {
                   badgeLabel = "Contains";
                   badgeClass = "dish-chip dish-chip-contains";
                 } else {
-                  badgeLabel = "SAFE";
+                  badgeLabel = "Safe";
                   badgeClass = "dish-chip dish-chip-safe";
                 }
               }
@@ -232,7 +235,7 @@ export default function GuestMenu({ slug }) {
         )}
       </div>
 
-      {/* FLOATING FILTER BAR (only one type visible at a time) */}
+      {/* FLOATING FILTER BAR (chips) */}
       {!loading &&
         hasAnyDish &&
         (showFilterPanel || showCategoryPanel) && (
@@ -279,11 +282,11 @@ export default function GuestMenu({ slug }) {
           </div>
         )}
 
-      {/* Floating dock – switch + buttons, NO text block */}
+      {/* Floating dock – only switch + icons */}
       {!loading && hasAnyDish && (
         <div className="guest-dock">
           <div className="guest-dock-inner">
-            {/* SAFE / CONTAINS switch */}
+            {/* Contain toggle (green iOS switch) */}
             <button
               type="button"
               className={"ios-switch" + (containsMode ? " ios-switch-on" : "")}
@@ -294,7 +297,7 @@ export default function GuestMenu({ slug }) {
             </button>
 
             <div className="guest-dock-icons">
-              {/* Filter (allergens) */}
+              {/* Filter toggle */}
               <button
                 type="button"
                 className={
@@ -311,7 +314,7 @@ export default function GuestMenu({ slug }) {
                 <span className="dock-icon-label">≡</span>
               </button>
 
-              {/* Category */}
+              {/* Category toggle */}
               <button
                 type="button"
                 className={
