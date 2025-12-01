@@ -32,7 +32,9 @@ export default function SignInPage() {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        throw signInError;
+      }
 
       router.push("/dashboard");
     } catch (err) {
@@ -44,19 +46,29 @@ export default function SignInPage() {
 
   return (
     <div className="auth-root">
-      {/* REAL SELECTOROS LOGO */}
+      {/* small brand in the top-left */}
       <div className="auth-logo">
-  <img
-    src="/selectoros-logo.png"
-    alt="SelectorOS Logo"
-    className="auth-logo-img"
-  />
-</div>
+        <div className="auth-logo-badge">SO</div>
+        <span className="auth-logo-text">SelectorOS</span>
+      </div>
 
-      {/* CENTERED CARD */}
+      {/* center card */}
       <div className="auth-card">
+        {/* floating icon stays as-is */}
         <div className="auth-card-icon">
           <div className="auth-card-icon-inner">⏎</div>
+        </div>
+
+        {/* NEW: logo inside the card, above the title */}
+        <div className="auth-card-logo">
+          <Image
+            src="/selectoros-logo.png"   // <-- put your logo file here
+            alt="SelectorOS"
+            width={220}
+            height={60}
+            priority
+            className="auth-card-logo-img"
+          />
         </div>
 
         <h1 className="auth-title">Sign in with email</h1>
@@ -65,6 +77,7 @@ export default function SignInPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          {/* EMAIL */}
           <div className="auth-field">
             <span className="auth-field-icon">✉️</span>
             <input
@@ -77,6 +90,7 @@ export default function SignInPage() {
             />
           </div>
 
+          {/* PASSWORD */}
           <div className="auth-field">
             <span className="auth-field-icon">🔒</span>
             <input
@@ -90,7 +104,7 @@ export default function SignInPage() {
           </div>
 
           <div className="auth-password-row">
-            <span></span>
+            <span />
             <a href="/forgot-password" className="auth-link">
               Forgot password?
             </a>
