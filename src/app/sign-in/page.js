@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "../../styles/auth.css";
 
@@ -54,14 +53,14 @@ export default function SignInPage() {
 
       {/* center card */}
       <div className="auth-card">
-        {/* floating icon with your logo */}
+        {/* floating logo (no pill) */}
         <div className="auth-card-logo-floating">
-  <img
-    src="/selectoros-logo.png"
-    alt="SelectorOS Logo"
-    className="auth-card-logo-img-only"
-  />
-</div>
+          <img
+            src="/selectoros-logo.png"
+            alt="SelectorOS logo"
+            className="auth-card-logo-img-only"
+          />
+        </div>
 
         <h1 className="auth-title">Sign in with email</h1>
         <p className="auth-subtitle">
