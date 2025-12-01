@@ -1,13 +1,161 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+"use client";
 
-import SignIn from "src/components/Auth/SignIn";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import "../../styles/auth.css";
 
-export default async function SignInPage() {
-  const supabase = createServerComponentClient({ cookies });
+export default function SignInPage() {
+  const supabase = createClientComponentClient();
+  const router = useRouter();
 
-  // Just fetch session so Supabase client is wired – no redirect here.
-  await supabase.auth.getSession();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  return <SignIn />;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Please fill in both fields.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        throw signInError;
+      }
+
+      // redirect to dashboard on success
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to sign in.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-root">
+      {/* top-left logo */}
+      <div className="auth-logo">
+        <div className="auth-logo-badge">SO</div>
+        <span className="auth-logo-text">SelectorOS</span>
+      </div>
+
+      {/* center card */}
+      <div className="auth-card">
+        {/* floating icon */}
+        <div className="auth-card-icon">
+          <div className="auth-card-icon-inner">⏎</div>
+        </div>
+
+        <h1 className="auth-title">Sign in with email</h1>
+        <p className="auth-subtitle">
+          Access your SelectorOS cockpit to manage dishes, menus and allergens.
+        </p>
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          {/* EMAIL */}
+          <div className="auth-field">
+            <span className="auth-field-icon">✉️</span>
+            <input
+              className="auth-input"
+              type="email"
+              placeholder="Email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          {/* PASSWORD */}
+          <div className="auth-field">
+            <span className="auth-field-icon">🔒</span>
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="Password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-password-row">
+            <span />
+            {/* wire this to your own reset flow later if you want */}
+            <a href="/forgot-password" className="auth-link">
+              Forgot password?
+            </a>
+          </div>
+
+          {/* PRIMARY BUTTON */}
+          <button
+            type="submit"
+            className="auth-primary-btn"
+            disabled={loading}
+          >
+            {loading ? "Signing in…" : "Get Started"}
+          </button>
+        </form>
+
+        {/* DIVIDER */}
+        <div className="auth-divider">
+          <div className="auth-divider-line" />
+          <span>Or sign in with</span>
+          <div className="auth-divider-line" />
+        </div>
+
+        {/* SOCIAL BUTTONS – you can later hook these to Supabase OAuth */}
+        <div className="auth-social-row">
+          <button
+            type="button"
+            className="auth-social-btn"
+            // onClick={...} // add Google OAuth here
+          >
+            <span className="auth-social-icon">G</span>
+            <span>Google</span>
+          </button>
+          <button
+            type="button"
+            className="auth-social-btn"
+            // onClick={...}
+          >
+            <span className="auth-social-icon">f</span>
+            <span>Facebook</span>
+          </button>
+          <button
+            type="button"
+            className="auth-social-btn"
+            // onClick={...}
+          >
+            <span className="auth-social-icon"></span>
+            <span>Apple</span>
+          </button>
+        </div>
+
+        {error && (
+          <p className="auth-footer-text" style={{ color: "#b91c1c" }}>
+            {error}
+          </p>
+        )}
+
+        {!error && (
+          <p className="auth-footer-text">
+            Protected access for restaurant operators only.
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
