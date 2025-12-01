@@ -1,5 +1,3 @@
-/* src/styles/auth.css */
-
 /* === FULL PAGE BACKGROUND ================================== */
 
 .auth-root {
@@ -17,9 +15,11 @@
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
+
+  z-index: 0;
 }
 
-/* subtle arcs / rings */
+/* subtle arcs / rings – behind everything + no pointer events */
 .auth-root::before,
 .auth-root::after {
   content: "";
@@ -27,6 +27,8 @@
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.55);
   opacity: 0.7;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .auth-root::before {
@@ -53,6 +55,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  z-index: 2; /* above background */
 }
 
 .auth-logo-badge {
@@ -79,6 +82,7 @@
 
 .auth-card {
   position: relative;
+  z-index: 2;      /* make sure card is above gradients */
   width: 100%;
   max-width: 420px;
   border-radius: 28px;
