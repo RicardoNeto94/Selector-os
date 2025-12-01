@@ -126,7 +126,7 @@
 .auth-card-logo-img-only {
   width: 260px;             /* bigger logo */
   height: auto;
-  max-width: 120px;
+  max-width: 300px;
   object-fit: contain;
   display: block;
 
