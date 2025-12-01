@@ -45,12 +45,6 @@ export default function SignInPage() {
 
   return (
     <div className="auth-root">
-      {/* top-left logo */}
-      <div className="auth-logo">
-        <div className="auth-logo-badge">SO</div>
-        <span className="auth-logo-text">SelectorOS</span>
-      </div>
-
       {/* center card */}
       <div className="auth-card">
         {/* floating logo (no pill) */}
