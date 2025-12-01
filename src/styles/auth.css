@@ -117,14 +117,14 @@
 
 .auth-card-logo-floating {
   position: absolute;
-  top: -40px;              /* same vertical spot as the old pill */
+  top: -100px;              /* same vertical spot as the old pill */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
 }
 
 .auth-card-logo-img-only {
-  width: 140px;             /* bigger logo */
+  width: 260px;             /* bigger logo */
   height: auto;
   max-width: 120px;
   object-fit: contain;
