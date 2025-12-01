@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Image from "next/image";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "../../styles/auth.css";
 
 export default function SignInPage() {
@@ -46,19 +46,24 @@ export default function SignInPage() {
 
   return (
     <div className="auth-root">
-      {/* NOTE: removed the top-left “SO SelectorOS” logo */}
+      {/* top-left logo */}
+      <div className="auth-logo">
+        <div className="auth-logo-badge">SO</div>
+        <span className="auth-logo-text">SelectorOS</span>
+      </div>
 
       {/* center card */}
       <div className="auth-card">
-        {/* floating logo badge */}
+        {/* floating icon with your logo */}
         <div className="auth-card-icon">
           <div className="auth-card-icon-inner">
             <Image
               src="/selectoros-logo.png"
               alt="SelectorOS logo"
-              width={26}
-              height={26}
-              className="auth-card-icon-logo"
+              width={30}
+              height={30}
+              className="auth-card-logo-img"
+              priority
             />
           </div>
         </div>
@@ -102,7 +107,6 @@ export default function SignInPage() {
             </a>
           </div>
 
-          {/* PRIMARY BUTTON */}
           <button
             type="submit"
             className="auth-primary-btn"
@@ -112,14 +116,12 @@ export default function SignInPage() {
           </button>
         </form>
 
-        {/* DIVIDER */}
         <div className="auth-divider">
           <div className="auth-divider-line" />
           <span>Or sign in with</span>
           <div className="auth-divider-line" />
         </div>
 
-        {/* SOCIAL BUTTONS – hook these to OAuth later */}
         <div className="auth-social-row">
           <button type="button" className="auth-social-btn">
             <span className="auth-social-icon">G</span>
