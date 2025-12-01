@@ -313,3 +313,19 @@
   color: #9ca3af;
   text-align: center;
 }
+/* === LOGO INSIDE CARD ====================================== */
+
+.auth-card-logo {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.auth-card-logo-img {
+  max-width: 220px;
+  width: 70%;
+  height: auto;
+  object-fit: contain;
+}
+
