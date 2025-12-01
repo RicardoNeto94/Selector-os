@@ -117,7 +117,7 @@
 
 .auth-card-logo-floating {
   position: absolute;
-  top: -26px;              /* same vertical spot as the old pill */
+  top: -32px;              /* same vertical spot as the old pill */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
