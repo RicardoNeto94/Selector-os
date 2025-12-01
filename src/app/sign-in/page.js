@@ -46,17 +46,12 @@ export default function SignInPage() {
     <div className="auth-root">
       {/* REAL SELECTOROS LOGO */}
       <div className="auth-logo">
-        <div className="auth-logo-img-wrapper">
-          <Image
-            src="/selectoros-logo.png"
-            alt="SelectorOS Logo"
-            fill
-            sizes="200px"
-            priority
-            className="auth-logo-img"
-          />
-        </div>
-      </div>
+  <img
+    src="/selectoros-logo.png"
+    alt="SelectorOS Logo"
+    className="auth-logo-img"
+  />
+</div>
 
       {/* CENTERED CARD */}
       <div className="auth-card">
