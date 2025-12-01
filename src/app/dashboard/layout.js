@@ -1,6 +1,6 @@
 // src/app/dashboard/layout.js
 import Link from "next/link";
-import "../styles/dashboard.css";
+import "../../styles/dashboard.css";
 
 export const dynamic = "force-dynamic";
 
