@@ -116,16 +116,16 @@
     0 0 0 1px rgba(148, 163, 184, 0.4);
 }
 
+/* 🔥 inner circle now acts as a frame for the logo image */
 .auth-card-icon-inner {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #0f172a, #111827);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f9fafb;
-  font-size: 16px;
+  background: transparent;
 }
 
 /* === TYPOGRAPHY ============================================ */
@@ -313,6 +313,7 @@
   color: #9ca3af;
   text-align: center;
 }
+
 /* === LOGO INSIDE CARD ====================================== */
 
 .auth-card-logo {
@@ -328,4 +329,3 @@
   height: auto;
   object-fit: contain;
 }
-
