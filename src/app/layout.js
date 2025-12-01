@@ -1,7 +1,6 @@
 // src/app/layout.js
 import "../styles/globals.css";
 import "../styles/theme.css";
-import "../styles/sidebar.css";
 
 export const metadata = {
   title: "SelectorOS",
