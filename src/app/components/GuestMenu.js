@@ -14,30 +14,6 @@ export default function GuestMenu({ slug }) {
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // --- NEW: exclusive toggles for filter / category panels ---
-  const toggleFilterPanel = () => {
-    setShowFilterPanel((prev) => {
-      const next = !prev;
-      if (next) {
-        // opening filters -> close categories
-        setShowCategoryPanel(false);
-      }
-      return next;
-    });
-  };
-
-  const toggleCategoryPanel = () => {
-    setShowCategoryPanel((prev) => {
-      const next = !prev;
-      if (next) {
-        // opening categories -> close filters
-        setShowFilterPanel(false);
-      }
-      return next;
-    });
-  };
-  // ------------------------------------------------------------
-
   // Load menu JSON from our public API
   useEffect(() => {
     async function load() {
@@ -88,7 +64,7 @@ export default function GuestMenu({ slug }) {
   const hasFilters = selectedAllergens.size > 0;
   const hasAnyDish = dishes.length > 0;
 
-  // Safe count (kept for logic if you want to show counts later)
+  // Safe count (how many dishes are SAFE given current filters/category)
   const safeCount = useMemo(() => {
     if (!hasFilters) {
       return dishes.filter((d) =>
@@ -108,36 +84,35 @@ export default function GuestMenu({ slug }) {
   }, [dishes, hasFilters, selectedAllergens, selectedCategory]);
 
   // Main dish list logic
-  // Main dish list logic (updated)
-const filteredDishes = useMemo(() => {
-  let list = dishes;
+  const filteredDishes = useMemo(() => {
+    let list = dishes;
 
-  // 1) Category filter
-  if (selectedCategory) {
-    list = list.filter((d) => d.category === selectedCategory);
-  }
-
-  // 2) No allergen filters → return list as-is
-  if (!hasFilters) {
-    return list;
-  }
-
-  // 3) Allergen filtering logic
-  return list.filter((d) => {
-    const dishAllergens = d.allergens || [];
-    const hasSelected = dishAllergens.some((code) =>
-      selectedAllergens.has(code)
-    );
-
-    // DEFAULT = SAFE VIEW → hide dishes that contain the allergen
-    if (!containsMode) {
-      return !hasSelected;
+    // Category filter first
+    if (selectedCategory) {
+      list = list.filter((d) => d.category === selectedCategory);
     }
 
-    // CONTAINS mode → show only dishes that contain selected allergen(s)
-    return hasSelected;
-  });
-}, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
+    // No allergen filters → just category filter
+    if (!hasFilters) {
+      return list;
+    }
+
+    // With allergen filters:
+    // containsMode = false → show only SAFE dishes (do NOT contain selection)
+    // containsMode = true  → show only dishes that CONTAIN selected allergens
+    return list.filter((d) => {
+      const dishAllergens = d.allergens || [];
+      const hasSelected = dishAllergens.some((code) =>
+        selectedAllergens.has(code)
+      );
+
+      if (containsMode) {
+        return hasSelected;      // show only "bad" dishes
+      } else {
+        return !hasSelected;     // show only SAFE dishes
+      }
+    });
+  }, [dishes, hasFilters, selectedAllergens, containsMode, selectedCategory]);
 
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
@@ -175,9 +150,24 @@ const filteredDishes = useMemo(() => {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
-  // Decide what we actually render: never show "no dishes" if API returned any
-  const listToRender =
-    filteredDishes.length > 0 || !hasAnyDish ? filteredDishes : dishes;
+  // Decide what we actually render: if filters kill everything but we *do* have dishes,
+  // still show the filtered result (empty grid) so it's clear no dish matches.
+  const listToRender = filteredDishes;
+
+  // Text for dock (you can tweak copy later)
+  const countText = hasFilters
+    ? containsMode
+      ? `${filteredDishes.length} dish${
+          filteredDishes.length === 1 ? "" : "es"
+        } with selected allergens`
+      : `${safeCount} safe dish${safeCount === 1 ? "" : "es"}`
+    : `${dishes.length} dish${dishes.length === 1 ? "" : "es"}`;
+
+  const filterText = hasFilters
+    ? containsMode
+      ? "Showing only dishes that CONTAIN the selected allergens."
+      : "Showing only dishes that are SAFE for the selected allergens."
+    : "Use filters to switch between safe dishes or those that contain the allergen.";
 
   return (
     <div className="guest-root">
@@ -213,6 +203,11 @@ const filteredDishes = useMemo(() => {
           <div className="guest-empty">
             No dishes configured yet. Add dishes in your SelectorOS back office.
           </div>
+        ) : listToRender.length === 0 ? (
+          <div className="guest-empty">
+            No dishes match your current filters. Try changing or resetting
+            filters.
+          </div>
         ) : (
           <section className="guest-grid">
             {listToRender.map((dish) => {
@@ -221,13 +216,16 @@ const filteredDishes = useMemo(() => {
                 hasFilters &&
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
+              // Badge logic:
+              // - containsMode = false (SAFE view) -> show SAFE pill
+              // - containsMode = true (CONTAINS view) -> show Contains pill
               let badgeLabel = null;
               let badgeClass = "";
-              if (hasFilters && containsMode) {
-                if (dishHasSelected) {
+              if (hasFilters) {
+                if (containsMode && dishHasSelected) {
                   badgeLabel = "Contains";
                   badgeClass = "dish-chip dish-chip-contains";
-                } else {
+                } else if (!containsMode && !dishHasSelected) {
                   badgeLabel = "SAFE";
                   badgeClass = "dish-chip dish-chip-safe";
                 }
@@ -285,7 +283,7 @@ const filteredDishes = useMemo(() => {
         (showFilterPanel || showCategoryPanel) && (
           <div className="guest-filterbar">
             <div className="guest-filterbar-inner">
-              {showFilterPanel && allergenList.length > 0 ? (
+              {showFilterPanel && allergenList.length > 0 && (
                 <div className="guest-chips-row guest-chips-row--floating">
                   {allergenList.map((code) => (
                     <button
@@ -302,9 +300,9 @@ const filteredDishes = useMemo(() => {
                     </button>
                   ))}
                 </div>
-              ) : null}
+              )}
 
-              {showCategoryPanel && categoryList.length > 0 ? (
+              {showCategoryPanel && categoryList.length > 0 && (
                 <div className="guest-chips-row guest-chips-row--floating guest-chips-row--categories">
                   {categoryList.map((category) => (
                     <button
@@ -321,12 +319,12 @@ const filteredDishes = useMemo(() => {
                     </button>
                   ))}
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         )}
 
-      {/* Floating dock – only switch + icons */}
+      {/* Floating dock – only switch + icons + helper text */}
       {!loading && hasAnyDish && (
         <div className="guest-dock">
           <div className="guest-dock-inner">
@@ -347,7 +345,10 @@ const filteredDishes = useMemo(() => {
                 className={
                   "dock-icon" + (showFilterPanel ? " dock-icon-active" : "")
                 }
-                onClick={toggleFilterPanel}
+                onClick={() => {
+                  setShowFilterPanel((prev) => !prev);
+                  if (!showFilterPanel) setShowCategoryPanel(false);
+                }}
               >
                 <span className="dock-icon-label">≡</span>
               </button>
@@ -358,7 +359,10 @@ const filteredDishes = useMemo(() => {
                 className={
                   "dock-icon" + (showCategoryPanel ? " dock-icon-active" : "")
                 }
-                onClick={toggleCategoryPanel}
+                onClick={() => {
+                  setShowCategoryPanel((prev) => !prev);
+                  if (!showCategoryPanel) setShowFilterPanel(false);
+                }}
               >
                 <span className="dock-icon-label">▦</span>
               </button>
@@ -382,6 +386,11 @@ const filteredDishes = useMemo(() => {
               >
                 <span className="dock-icon-label">↻</span>
               </button>
+            </div>
+
+            <div className="guest-dock-left">
+              <span className="guest-count-pill">{countText}</span>
+              <span className="guest-dock-text">{filterText}</span>
             </div>
           </div>
         </div>
