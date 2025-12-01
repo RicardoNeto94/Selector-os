@@ -12,18 +12,12 @@ export default function DashboardLayout({ children }) {
       <aside className="so-sidebar">
         {/* Logo pill */}
         <div className="so-sidebar-logo">
-          <div className="so-sidebar-logo-inner">
-            <Image
-              src="/selectoros-logo.png"
-              alt="SelectorOS logo"
-              fill
-              sizes="180px"
-              className="so-sidebar-logo-img"
-              priority
-            />
-          </div>
-        </div>
-
+  <img
+    src="/selectoros-logo.png"
+    alt="SelectorOS Logo"
+    className="so-sidebar-logo-img"
+  />
+</div>
         {/* Nav dots */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-dot so-nav-active">
