@@ -30,7 +30,9 @@ export default function GuestMenu({ slug }) {
 
         const normalized = (json || []).map((d) => ({
           ...d,
-          allergens: Array.isArray(d.allergens) ? d.allergens : [],
+          allergens: Array.isArray(d.allergens)
+            ? d.allergens.map((a) => String(a).trim().toUpperCase())
+            : [],
         }));
 
         setDishes(normalized);
@@ -127,8 +129,8 @@ export default function GuestMenu({ slug }) {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
-  const listToRender =
-    filteredDishes.length > 0 || !hasAnyDish ? filteredDishes : dishes;
+  // IMPORTANT: no fallback to full dishes when filter is empty
+  const listToRender = filteredDishes;
 
   return (
     <div className="guest-root">
@@ -163,6 +165,10 @@ export default function GuestMenu({ slug }) {
         ) : !hasAnyDish ? (
           <div className="guest-empty">
             No dishes configured yet. Add dishes in your SelectorOS back office.
+          </div>
+        ) : listToRender.length === 0 ? (
+          <div className="guest-empty">
+            No dishes match your current filters. Adjust allergens or category.
           </div>
         ) : (
           <section className="guest-grid">
