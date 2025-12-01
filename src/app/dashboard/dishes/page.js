@@ -89,11 +89,11 @@ export default function DishesPage() {
     );
     if (!confirmed) return;
 
-    try {
-      setDeletingId(dishId);
-      setError("");
+    setError("");
+    setDeletingId(dishId);
 
-      // 1) Delete allergen links (in case FK doesn't cascade)
+    try {
+      // Try to delete dish_allergens first, but don't completely block if this fails.
       const { error: daError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -101,12 +101,9 @@ export default function DishesPage() {
 
       if (daError) {
         console.error("Failed to delete dish_allergens", daError);
-        setError("Failed to delete dish allergens.");
-        setDeletingId(null);
-        return;
+        // We still attempt to delete the dish; DB might have ON DELETE CASCADE or no constraints.
       }
 
-      // 2) Delete dish itself
       const { error: dishError } = await supabase
         .from("dishes")
         .delete()
@@ -114,13 +111,13 @@ export default function DishesPage() {
 
       if (dishError) {
         console.error("Failed to delete dish", dishError);
-        setError("Failed to delete dish.");
+        setError("Failed to delete dish. Check console / Supabase logs.");
         setDeletingId(null);
         return;
       }
 
-      // 3) Refresh list
-      await loadData();
+      // Locally remove the dish from state so UI updates immediately
+      setDishes((prev) => prev.filter((d) => d.id !== dishId));
       setDeletingId(null);
     } catch (err) {
       console.error(err);
