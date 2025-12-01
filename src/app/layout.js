@@ -3,8 +3,6 @@ import "../styles/globals.css";
 import "../styles/theme.css";
 import "../styles/sidebar.css";
 
-import Sidebar from "./components/Sidebar";
-
 export const metadata = {
   title: "SelectorOS",
   description: "Restaurant menu & allergen cockpit",
