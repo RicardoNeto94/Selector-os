@@ -11,6 +11,7 @@ export default function DishesPage() {
   const [menus, setMenus] = useState([]);
   const [dishes, setDishes] = useState([]);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -82,6 +83,52 @@ export default function DishesPage() {
     setLoading(false);
   };
 
+  const handleDeleteDish = async (dishId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this dish? This cannot be undone."
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(dishId);
+      setError("");
+
+      // 1) Delete allergen links (in case FK doesn't cascade)
+      const { error: daError } = await supabase
+        .from("dish_allergens")
+        .delete()
+        .eq("dish_id", dishId);
+
+      if (daError) {
+        console.error("Failed to delete dish_allergens", daError);
+        setError("Failed to delete dish allergens.");
+        setDeletingId(null);
+        return;
+      }
+
+      // 2) Delete dish itself
+      const { error: dishError } = await supabase
+        .from("dishes")
+        .delete()
+        .eq("id", dishId);
+
+      if (dishError) {
+        console.error("Failed to delete dish", dishError);
+        setError("Failed to delete dish.");
+        setDeletingId(null);
+        return;
+      }
+
+      // 3) Refresh list
+      await loadData();
+      setDeletingId(null);
+    } catch (err) {
+      console.error(err);
+      setError("Unexpected error while deleting dish.");
+      setDeletingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
@@ -131,6 +178,7 @@ export default function DishesPage() {
                 <th className="text-left py-2">Menu</th>
                 <th className="text-left py-2">Category</th>
                 <th className="text-right py-2">Price</th>
+                <th className="text-right py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -149,7 +197,19 @@ export default function DishesPage() {
                       {d.category || "—"}
                     </td>
                     <td className="py-2 pl-4 text-right">
-                      {d.price != null ? `${Number(d.price).toFixed(2)} €` : "—"}
+                      {d.price != null
+                        ? `${Number(d.price).toFixed(2)} €`
+                        : "—"}
+                    </td>
+                    <td className="py-2 pl-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDish(d.id)}
+                        disabled={deletingId === d.id}
+                        className="text-[11px] rounded-full px-3 py-1 border border-red-500/60 text-red-200 hover:bg-red-500/10 disabled:opacity-50"
+                      >
+                        {deletingId === d.id ? "Deleting…" : "Delete"}
+                      </button>
                     </td>
                   </tr>
                 );
