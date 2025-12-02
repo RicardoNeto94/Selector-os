@@ -1,104 +1,105 @@
 /* ====== COLOR SYSTEM ===================== */
 
-:root {
-  --so-bg: #f3f2ec;
-  --so-bg-soft: #e8e4d9;
-
-  --so-surface: #ffffff;
-  --so-surface-soft: #f7f5ef;
-
-  --so-text-main: #111827;
-  --so-text-muted: #6b7280;
-
-  --so-border-subtle: rgba(15, 23, 42, 0.06);
-
-  --so-primary: #4b7c5a;       /* muted green */
-  --so-primary-soft: #e4f0e7;
-  --so-primary-strong: #245239;
-
-  --so-accent-beige: #e2d3af;
-  --so-accent-purple: #7c7f98;
-  --so-accent-red: #d14a40;
-
-  --so-radius-lg: 22px;
-  --so-radius-pill: 999px;
-  --so-shadow-soft: 0 22px 60px rgba(15, 23, 42, 0.12);
-}
-
-/* ====== GLOBAL DASHBOARD SHELL =============================== */
+/* === SHELL LAYOUT =================================================== */
 
 .so-dashboard-root {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  background: radial-gradient(circle at top, #f9f8f2 0, #eee8db 45%, #e3dccf 100%);
-  color: var(--so-text-main);
+  display: flex;
+  background: radial-gradient(circle at top left, #020617, #020617 70%);
+  color: #e5f3ff;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
 }
 
-/* ====== LEFT SIDEBAR ========================================= */
-
 .so-sidebar {
+  width: 260px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px 18px 24px;
-  gap: 24px;
-  background:
-    radial-gradient(circle at 0 0, rgba(190, 242, 200, 0.35), transparent 55%),
-    radial-gradient(circle at 100% 0, rgba(59, 130, 246, 0.18), transparent 60%),
-    linear-gradient(180deg, #071b17, #031019);
-  color: #e5e7eb;
-  border-right: 1px solid rgba(15, 23, 42, 0.45);
+  justify-content: space-between;
+  padding: 18px 14px 18px;
+  background: radial-gradient(circle at top left, #022c22, #020617 70%);
+  border-right: 1px solid rgba(15, 23, 42, 0.95);
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.75);
 }
 
-/* brand */
+/* MAIN CANVAS */
+.so-main {
+  flex: 1;
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #0b1120, #020617 70%);
+  padding: 28px 32px 40px;
+  overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .so-sidebar {
+    width: 72px;
+    padding-inline: 10px;
+  }
+
+  .so-main {
+    padding: 20px 16px 28px;
+  }
+}
+
+/* === BRAND ========================================================= */
 
 .so-sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 4px 8px;
+  gap: 10px;
+  padding: 4px 4px 18px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
 }
 
 .so-sidebar-brand-mark {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
-  background: radial-gradient(circle at 30% 0, #bbf7d0, #16a34a);
+  background: radial-gradient(circle at 30% 0, #4ade80, #065f46);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(15, 23, 42, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 18px;
-  color: #022c22;
-  box-shadow:
-    0 12px 26px rgba(6, 78, 59, 0.65),
-    0 0 0 1px rgba(148, 163, 184, 0.6);
+  color: #e5f3ff;
 }
 
 .so-sidebar-brand-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  gap: 2px;
 }
 
 .so-sidebar-brand-name {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #e5f3ff;
 }
 
 .so-sidebar-brand-sub {
-  font-size: 11px;
-  letter-spacing: 0.16em;
+  font-size: 10px;
   text-transform: uppercase;
-  color: rgba(203, 213, 225, 0.85);
+  letter-spacing: 0.18em;
+  color: rgba(191, 219, 254, 0.75);
 }
 
-/* nav */
+/* Hide brand text on very narrow sidebar (mobile) */
+@media (max-width: 768px) {
+  .so-sidebar-brand-text {
+    display: none;
+  }
+}
+
+/* === NAV ITEMS ===================================================== */
 
 .so-sidebar-nav {
-  margin-top: 6px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -108,71 +109,60 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 11px;
-  border-radius: 14px;
+  padding: 8px 10px;
+  border-radius: 999px;
   text-decoration: none;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.9);
-  border: 1px solid transparent;
+  color: rgba(226, 232, 240, 0.92);
   transition:
-    background 0.16s ease,
-    border-color 0.16s ease,
-    transform 0.08s ease,
-    box-shadow 0.16s ease,
-    color 0.16s ease;
-}
-
-.so-nav-item:hover {
-  background: rgba(15, 118, 110, 0.25);
-  border-color: rgba(45, 212, 191, 0.6);
-  transform: translateY(-1px);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.6);
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s ease;
 }
 
 .so-nav-icon-wrap {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.9);
+  background: radial-gradient(circle at 30% 0, #020617, #020617 70%);
+  border: 1px solid rgba(51, 65, 85, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .so-nav-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
-.so-nav-label {
-  flex: 1;
+.so-nav-item:hover {
+  background: radial-gradient(circle at 30% 0, #0f766e, #022c22);
+  transform: translateY(-1px);
 }
 
-/* user section */
+/* === USER FOOTER =================================================== */
 
 .so-sidebar-user {
-  margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid rgba(15, 23, 42, 0.7);
+  margin-top: 24px;
+  padding: 10px 8px 4px;
+  border-top: 1px solid rgba(15, 23, 42, 0.9);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .so-user-avatar {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
-  background: radial-gradient(circle at 25% 0, #fef9c3, #f97316);
+  background: radial-gradient(circle at 30% 0, #f97316, #92400e);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2933;
-  box-shadow:
-    0 12px 26px rgba(15, 23, 42, 0.7),
-    0 0 0 1px rgba(248, 250, 252, 0.4);
+  font-size: 14px;
+  font-weight: 600;
+  color: #020617;
 }
 
 .so-user-meta {
@@ -181,14 +171,15 @@
 }
 
 .so-user-name {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .so-user-tag {
-  font-size: 11px;
+  font-size: 10px;
   color: rgba(148, 163, 184, 0.9);
 }
+
 
 /* ====== MAIN AREA ============================================ */
 
