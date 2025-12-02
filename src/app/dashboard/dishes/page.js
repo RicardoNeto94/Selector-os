@@ -94,7 +94,7 @@ export default function DishesPage() {
     setDeletingId(dishId);
 
     try {
-      // Try to delete dish_allergens first, but don't completely block if this fails.
+      // Delete dish_allergens first (if exists)
       const { error: daError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -102,7 +102,6 @@ export default function DishesPage() {
 
       if (daError) {
         console.error("Failed to delete dish_allergens", daError);
-        // We still attempt to delete the dish; DB might have ON DELETE CASCADE or no constraints.
       }
 
       const { error: dishError } = await supabase
@@ -117,7 +116,6 @@ export default function DishesPage() {
         return;
       }
 
-      // Locally remove the dish from state so UI updates immediately
       setDishes((prev) => prev.filter((d) => d.id !== dishId));
       setDeletingId(null);
     } catch (err) {
@@ -177,7 +175,6 @@ export default function DishesPage() {
                 <th className="text-left py-2">Category</th>
                 <th className="text-right py-2">Price</th>
                 <th className="text-right py-2">Actions</th>
-                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -200,17 +197,22 @@ export default function DishesPage() {
                         ? `${Number(d.price).toFixed(2)} €`
                         : "—"}
                     </td>
-                    <td className="py-2 pl-4 text-right">
+
+                    {/* Actions: Edit + Delete */}
+                    <td className="py-2 pl-4 text-right space-x-2">
+                      <Link
+                        href={`/dashboard/dishes/${d.id}`}
+                        className="inline-flex items-center px-3 py-1 text-[11px] font-medium rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-400 hover:text-slate-950 transition"
+                      >
+                        Edit
+                      </Link>
+
                       <button
                         type="button"
                         onClick={() => handleDeleteDish(d.id)}
                         disabled={deletingId === d.id}
                         className="text-[11px] rounded-full px-3 py-1 border border-red-500/60 text-red-200 hover:bg-red-500/10 disabled:opacity-50"
-                      <td className="text-right">
-        <Link
-          href={`/dashboard/dishes/${dish.id}`}
-          className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-400 hover:text-slate-950 transition"
-        >
+                      >
                         {deletingId === d.id ? "Deleting…" : "Delete"}
                       </button>
                     </td>
@@ -224,3 +226,4 @@ export default function DishesPage() {
     </div>
   );
 }
+
