@@ -57,27 +57,26 @@
   overflow: hidden;
 }
 
-.guest-logo-img {
-  max-width: 100%;
-  max-height: 100%;
+.guest-header-logo-img {
+  height: 56px;
+  width: auto;
   object-fit: contain;
-  border-radius: inherit;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
 }
 
+/* fallback circle if no logo uploaded */
 .guest-logo-circle {
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   border-radius: 999px;
+  background: #facc15;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 20% 20%, #ffd86f, #f97316 55%, #92400e);
-  box-shadow:
-    0 16px 30px rgba(0, 0, 0, 0.7),
-    inset 0 3px 6px rgba(255, 255, 255, 0.35);
+  font-size: 26px;
   font-weight: 700;
-  font-size: 28px;
-  color: #020617;
+  color: #111827;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
 }
 
 .guest-header-title {
