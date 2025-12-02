@@ -26,8 +26,8 @@ export default function EditDishPage() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
 
-  // allergen selection (set of allergen.id)
-  const [selectedAllergenIds, setSelectedAllergenIds] = useState(new Set());
+  // allergen selection: array of allergen.id
+  const [selectedAllergenIds, setSelectedAllergenIds] = useState([]);
 
   useEffect(() => {
     if (!dishId) return;
@@ -111,7 +111,7 @@ export default function EditDishPage() {
       setPrice(dish.price != null ? String(dish.price) : "");
       setDescription(dish.description || "");
 
-      // 5) Dish allergens (join table) → pre-select only these
+      // 5) Dish allergens (join table) → preselect only those
       const { data: dishAllergens, error: daError } = await supabase
         .from("dish_allergens")
         .select("allergen_id")
@@ -125,11 +125,11 @@ export default function EditDishPage() {
         const ids = dishAllergens
           .map((row) => row.allergen_id)
           .filter((x) => x != null)
-          .map((x) => Number(x)); // normalize type
+          .map((x) => Number(x)); // normalise to number
 
-        setSelectedAllergenIds(new Set(ids));
+        setSelectedAllergenIds(ids);
       } else {
-        setSelectedAllergenIds(new Set());
+        setSelectedAllergenIds([]);
       }
 
       setLoading(false);
@@ -142,13 +142,12 @@ export default function EditDishPage() {
 
   const toggleAllergen = (allergenId) => {
     setSelectedAllergenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(allergenId)) {
-        next.delete(allergenId);
-      } else {
-        next.add(allergenId);
+      const idNum = Number(allergenId);
+      const exists = prev.includes(idNum);
+      if (exists) {
+        return prev.filter((id) => id !== idNum);
       }
-      return next;
+      return [...prev, idNum];
     });
   };
 
@@ -204,7 +203,7 @@ export default function EditDishPage() {
         return;
       }
 
-      const idsArray = Array.from(selectedAllergenIds);
+      const idsArray = selectedAllergenIds.map((id) => Number(id));
       if (idsArray.length > 0) {
         const insertRows = idsArray.map((aid) => ({
           dish_id: dishId,
@@ -359,7 +358,8 @@ export default function EditDishPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {allergens.map((a) => {
-                const checked = selectedAllergenIds.has(a.id);
+                const idNum = Number(a.id);
+                const checked = selectedAllergenIds.includes(idNum);
                 return (
                   <label
                     key={a.id}
@@ -368,7 +368,7 @@ export default function EditDishPage() {
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => toggleAllergen(a.id)}
+                      onChange={() => toggleAllergen(idNum)}
                       className="h-3 w-3 rounded border-slate-500 bg-slate-900"
                     />
                     <span>
