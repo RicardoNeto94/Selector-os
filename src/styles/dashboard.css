@@ -26,9 +26,17 @@
 }
 
 .so-sidebar-brand {
-  padding: 10px 6px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px 24px;
 }
 
+.so-sidebar-logo-img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
 .so-sidebar {
   padding: 20px 14px 20px;
 }
