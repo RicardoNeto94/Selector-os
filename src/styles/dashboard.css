@@ -4,30 +4,27 @@
 
 :root {
   --so-bg: #f3f2ec;
-  --so-bg-soft: #ece7dc;
+  --so-bg-soft: #e8e4d9;
 
   --so-surface: #ffffff;
   --so-surface-soft: #f7f5ef;
 
-  --so-text-main: #151922;
-  --so-text-muted: #80858e;
+  --so-text-main: #1c1f23;
+  --so-text-muted: #7b8088;
 
   --so-border-subtle: rgba(15, 23, 42, 0.06);
 
   --so-primary: #4b7c5a;       /* muted green */
   --so-primary-soft: #e4f0e7;
-  --so-primary-strong: #2f5c3f;
+  --so-primary-strong: #2e5b3e;
 
   --so-accent-beige: #e2d3af;
   --so-accent-purple: #7c7f98;
   --so-accent-red: #d14a40;
 
-  --so-radius-xl: 32px;
-  --so-radius-lg: 22px;
-  --so-radius-md: 16px;
-
-  --so-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.10);
-  --so-shadow-lift: 0 26px 70px rgba(15, 23, 42, 0.16);
+  --so-radius-lg: 24px;
+  --so-radius-md: 18px;
+  --so-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
 }
 
 /* ====== GLOBAL DASHBOARD SHELL =============================== */
@@ -35,48 +32,11 @@
 .so-dashboard-root {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr);
-  background:
-    radial-gradient(circle at 10% 0%, #ffffff 0, #f3f2ec 40%, #e7e2d6 100%);
+  grid-template-columns: 76px minmax(0, 1fr);
+  background: var(--so-bg);
   color: var(--so-text-main);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
-  position: relative;
-  overflow: hidden;
-}
-
-/* big organic blobs in the background */
-.so-dashboard-root::before,
-.so-dashboard-root::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  border-radius: 999px;
-  filter: blur(60px);
-  opacity: 0.55;
-  z-index: 0;
-}
-
-.so-dashboard-root::before {
-  width: 430px;
-  height: 430px;
-  background: radial-gradient(circle at 30% 20%, #dbe8f8, #c0d2f2 55%, transparent 70%);
-  top: -120px;
-  right: 8%;
-}
-
-.so-dashboard-root::after {
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle at 10% 80%, #e4f0e7, #d0e4d3 50%, transparent 70%);
-  bottom: -180px;
-  left: 12%;
-}
-
-/* make content float above blobs */
-.so-dashboard-root > * {
-  position: relative;
-  z-index: 1;
 }
 
 /* ====== LEFT SIDEBAR ========================================= */
@@ -86,87 +46,74 @@
   flex-direction: column;
   align-items: center;
   padding: 18px 12px 22px;
-  background: rgba(246, 243, 235, 0.96);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: #f0eee6;
   border-right: 1px solid rgba(15, 23, 42, 0.04);
   gap: 24px;
-  margin: 18px 0 18px 18px;
-  border-radius: 28px;
-  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.12);
 }
 
 .so-sidebar-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 0 10px;
+  padding: 20px 0 16px;
 }
 
+/* pill wrapper if you drop a logo image inside */
 .so-sidebar-logo-inner {
   position: relative;
-  width: 162px;
-  height: 52px;
+  width: 180px;   /* tweak to match your logo proportions */
+  height: 56px;
   border-radius: 999px;
   overflow: hidden;
-  background: radial-gradient(circle at 0% 0%, #1f2937, #020617);
+  background: rgba(15, 23, 42, 0.98);
   box-shadow:
-    0 18px 40px rgba(15, 23, 42, 0.85),
-    0 0 0 1px rgba(148, 163, 184, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    0 18px 40px rgba(15, 23, 42, 0.9),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
 }
 
 .so-sidebar-logo-img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
-
-/* nav dots */
 
 .so-sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .so-nav-dot {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.03);
-  background: linear-gradient(145deg, #f7f3ea, #f0ece1);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  background: #f6f3ea;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  color: #a0a5b0;
+  color: #9ca3af;
   cursor: pointer;
   transition:
-    background 0.22s ease,
-    color 0.22s ease,
-    box-shadow 0.16s ease,
-    transform 0.12s ease,
-    border-color 0.16s ease;
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.12s ease;
 }
 
 .so-nav-dot:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
-  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
 }
 
 .so-nav-dot.so-nav-active {
-  background: radial-gradient(circle at 20% 0%, #e7f5ec, #d7ecdf);
+  background: var(--so-primary-soft);
   color: var(--so-primary-strong);
-  box-shadow:
-    0 14px 30px rgba(34, 197, 94, 0.18),
-    0 0 0 1px rgba(22, 163, 74, 0.4);
 }
 
 /* Bottom avatar */
-
 .so-sidebar-bottom {
   margin-top: auto;
 }
@@ -178,11 +125,6 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  margin: 18px 18px 24px 12px;
-  border-radius: 32px;
-  background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.98), rgba(248, 246, 239, 0.96));
-  box-shadow: var(--so-shadow-lift);
-  border: 1px solid rgba(148, 163, 184, 0.28);
 }
 
 /* Top header (greeting + search + actions) */
@@ -201,7 +143,6 @@
   font-size: 26px;
   font-weight: 700;
   margin-bottom: 4px;
-  letter-spacing: 0.01em;
 }
 
 .so-topbar-subtitle {
@@ -213,17 +154,11 @@
   flex: 0 0 320px;
   display: flex;
   align-items: center;
-  background: linear-gradient(145deg, #f8f5ee, #f1ede4);
+  background: #f8f5ee;
   border-radius: 999px;
   padding: 0 16px;
   border: 1px solid rgba(15, 23, 42, 0.06);
   gap: 10px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-}
-
-.so-search span {
-  font-size: 15px;
-  color: var(--so-text-muted);
 }
 
 .so-search input {
@@ -247,19 +182,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #f8f5ee, #f2eee5);
+  background: #f8f5ee;
   font-size: 17px;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
-}
-
-.so-circle-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16);
 }
 
 /* ====== CARD SYSTEM ========================================== */
@@ -270,14 +195,9 @@
   gap: 18px;
 }
 
-/* base card */
 .so-card {
   border-radius: var(--so-radius-lg);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.98),
-    rgba(247, 245, 239, 0.98)
-  );
+  background: var(--so-surface);
   box-shadow: var(--so-shadow-soft);
   border: 1px solid var(--so-border-subtle);
   padding: 18px 20px;
@@ -285,24 +205,6 @@
   flex-direction: column;
   gap: 10px;
 }
-
-/* very slight organic variation by position */
-.so-grid .so-card:nth-child(1) {
-  border-radius: 28px;
-}
-.so-grid .so-card:nth-child(2) {
-  transform: translateY(2px);
-}
-.so-grid .so-card:nth-child(3) {
-  border-radius: 22px;
-}
-
-/* hero-style cards in big grid */
-.so-grid-lg .so-card {
-  border-radius: var(--so-radius-xl);
-}
-
-/* card header */
 
 .so-card-header {
   display: flex;
@@ -319,20 +221,17 @@
 }
 
 .so-card-pill {
-  padding: 5px 11px;
+  padding: 6px 10px;
   border-radius: 999px;
   font-size: 11px;
-  background: linear-gradient(135deg, #e7f3ea, #dae8dd);
+  background: #eef5ef;
   color: var(--so-primary-strong);
   font-weight: 600;
 }
 
-/* main metric */
-
 .so-metric-main {
   font-size: 24px;
   font-weight: 700;
-  letter-spacing: 0.02em;
 }
 
 .so-metric-sub {
@@ -352,8 +251,8 @@
 
 .so-chart-placeholder {
   border-radius: var(--so-radius-md);
-  background: radial-gradient(circle at 0 0, #f3f5fb, #eef1f7);
-  border: 1px dashed rgba(148, 163, 184, 0.55);
+  background: var(--so-surface-soft);
+  border: 1px dashed rgba(148, 163, 184, 0.5);
   min-height: 180px;
   display: flex;
   align-items: center;
@@ -394,4 +293,134 @@
 
 .so-list-value {
   font-weight: 600;
+}
+
+/* Generic table tweak so all tables in main area behave well */
+.so-main table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* ====== RESPONSIVE LAYOUT BREAKPOINTS ======================== */
+
+/* --- Medium screens: soften grid and sidebar width ----------- */
+@media (max-width: 1024px) {
+  .so-dashboard-root {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .so-main {
+    padding: 20px 20px 28px;
+  }
+
+  .so-topbar {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .so-search {
+    flex: 1 1 100%;
+    max-width: 100%;
+    order: 3;
+  }
+
+  .so-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .so-grid-lg {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
+/* --- Small screens: sidebar becomes bottom nav, grids collapse --- */
+@media (max-width: 768px) {
+  .so-dashboard-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .so-main {
+    padding: 16px 14px 80px; /* bottom padding so bottom nav doesn’t cover content */
+  }
+
+  .so-sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 64px;
+    padding: 10px 18px;
+    border-right: none;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(240, 238, 230, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    z-index: 40;
+  }
+
+  .so-sidebar-logo {
+    padding: 0;
+  }
+
+  .so-sidebar-logo-inner {
+    width: 120px;
+    height: 40px;
+    box-shadow:
+      0 10px 24px rgba(15, 23, 42, 0.5),
+      0 0 0 1px rgba(148, 163, 184, 0.3);
+  }
+
+  .so-sidebar-nav {
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  .so-sidebar-bottom {
+    margin-top: 0;
+  }
+
+  .so-nav-dot {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .so-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .so-topbar-title {
+    font-size: 20px;
+  }
+
+  .so-topbar-subtitle {
+    font-size: 12px;
+  }
+
+  .so-search {
+    width: 100%;
+  }
+
+  .so-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .so-grid-lg {
+    grid-template-columns: 1fr;
+  }
+
+  /* tables: make them scroll horizontally instead of squishing */
+  .so-main table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
