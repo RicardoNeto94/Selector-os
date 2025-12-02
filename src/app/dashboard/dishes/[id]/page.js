@@ -111,7 +111,7 @@ export default function EditDishPage() {
       setPrice(dish.price != null ? String(dish.price) : "");
       setDescription(dish.description || "");
 
-      // 5) Dish allergens (join table)
+      // 5) Dish allergens (join table) → pre-select only these
       const { data: dishAllergens, error: daError } = await supabase
         .from("dish_allergens")
         .select("allergen_id")
@@ -124,8 +124,12 @@ export default function EditDishPage() {
       if (dishAllergens && dishAllergens.length > 0) {
         const ids = dishAllergens
           .map((row) => row.allergen_id)
-          .filter((x) => x != null);
+          .filter((x) => x != null)
+          .map((x) => Number(x)); // normalize type
+
         setSelectedAllergenIds(new Set(ids));
+      } else {
+        setSelectedAllergenIds(new Set());
       }
 
       setLoading(false);
