@@ -58,20 +58,22 @@ export default function DashboardLayout({ children }) {
         </div>
 
         {/* BOTTOM: user + logout */}
-        <div className="so-sidebar-footer">
-          <div className="so-sidebar-user">
-            <div className="so-user-avatar">R</div>
-            <div className="so-user-meta">
-              <span className="so-user-name">Operator</span>
-              <span className="so-user-tag">Live workspace</span>
-            </div>
-          </div>
+{/* BOTTOM: user + logout */}
+<div className="so-sidebar-footer">
+  <div className="so-sidebar-user">
+    <div className="so-user-avatar">R</div>
+    <div className="so-user-meta">
+      <span className="so-user-name">Operator</span>
+      <span className="so-user-tag">Live workspace</span>
+    </div>
+  </div>
 
-          {/* TODO: wire real logout logic */}
-          <button className="so-logout-btn" type="button">
-            Logout
-          </button>
-        </div>
+  <Link href="/logout">
+    <button className="so-logout-btn" type="button">
+      Logout
+    </button>
+  </Link>
+</div>
       </aside>
 
       {/* MAIN CANVAS */}
