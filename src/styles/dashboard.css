@@ -58,7 +58,6 @@
   padding: 20px 0 16px;
 }
 
-/* pill wrapper if you drop a logo image inside */
 .so-sidebar-logo-inner {
   position: relative;
   width: 180px;   /* tweak to match your logo proportions */
@@ -72,8 +71,6 @@
 }
 
 .so-sidebar-logo-img {
-  width: 100%;
-  height: 100%;
   object-fit: contain;
 }
 
@@ -114,6 +111,7 @@
 }
 
 /* Bottom avatar */
+
 .so-sidebar-bottom {
   margin-top: auto;
 }
@@ -295,33 +293,12 @@
   font-weight: 600;
 }
 
-/* Generic table tweak so all tables in main area behave well */
-.so-main table {
-  width: 100%;
-  border-collapse: collapse;
-}
+/* ====== RESPONSIVE TWEAKS =================================== */
 
-/* ====== RESPONSIVE LAYOUT BREAKPOINTS ======================== */
-
-/* --- Medium screens: soften grid and sidebar width ----------- */
+/* Medium screens: tighten paddings a bit */
 @media (max-width: 1024px) {
-  .so-dashboard-root {
-    grid-template-columns: 64px minmax(0, 1fr);
-  }
-
   .so-main {
     padding: 20px 20px 28px;
-  }
-
-  .so-topbar {
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .so-search {
-    flex: 1 1 100%;
-    max-width: 100%;
-    order: 3;
   }
 
   .so-grid {
@@ -329,98 +306,61 @@
   }
 
   .so-grid-lg {
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
-/* --- Small screens: sidebar becomes bottom nav, grids collapse --- */
+/* Small screens: sidebar becomes bottom dock, content full width */
 @media (max-width: 768px) {
   .so-dashboard-root {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto;
-  }
-
-  .so-main {
-    padding: 16px 14px 80px; /* bottom padding so bottom nav doesn’t cover content */
   }
 
   .so-sidebar {
-    position: fixed;
+    position: sticky;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    height: 64px;
-    padding: 10px 18px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    z-index: 30;
     border-right: none;
     border-top: 1px solid rgba(15, 23, 42, 0.08);
-    background: rgba(240, 238, 230, 0.96);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    z-index: 40;
+    background: rgba(240, 238, 230, 0.95);
+    backdrop-filter: blur(12px);
   }
 
   .so-sidebar-logo {
-    padding: 0;
-  }
-
-  .so-sidebar-logo-inner {
-    width: 120px;
-    height: 40px;
-    box-shadow:
-      0 10px 24px rgba(15, 23, 42, 0.5),
-      0 0 0 1px rgba(148, 163, 184, 0.3);
+    display: none;
   }
 
   .so-sidebar-nav {
     flex-direction: row;
-    gap: 10px;
     margin-top: 0;
+    gap: 8px;
   }
 
   .so-sidebar-bottom {
     margin-top: 0;
   }
 
-  .so-nav-dot {
-    width: 38px;
-    height: 38px;
-    font-size: 17px;
+  .so-main {
+    padding: 16px 16px 80px; /* extra bottom space for sidebar dock */
   }
 
   .so-topbar {
     flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .so-topbar-title {
-    font-size: 20px;
-  }
-
-  .so-topbar-subtitle {
-    font-size: 12px;
+    align-items: stretch;
   }
 
   .so-search {
+    flex: 1;
     width: 100%;
   }
 
   .so-grid {
     grid-template-columns: 1fr;
-  }
-
-  .so-grid-lg {
-    grid-template-columns: 1fr;
-  }
-
-  /* tables: make them scroll horizontally instead of squishing */
-  .so-main table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
   }
 }
