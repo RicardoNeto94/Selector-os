@@ -1,6 +1,4 @@
-/* ====== COLOR SYSTEM ===================== */
-
-/* === SHELL LAYOUT =================================================== */
+/* ====== SHELL LAYOUT & COLOR SYSTEM ===================== */
 
 .so-dashboard-root {
   min-height: 100vh;
@@ -12,82 +10,41 @@
     sans-serif;
 }
 
+/* === SIDEBAR =================================================== */
+
 .so-sidebar {
-  width: 210px;
-  flex-shrink: 0;
+  position: fixed;                         /* Pinned to viewport */
+  top: 0;
+  left: 0;
+  height: 100vh;                           /* Full viewport height */
+  width: 210px;                            /* Slimmer sidebar */
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 18px 14px 18px;
+
   background: radial-gradient(circle at top left, #022c22, #020617 70%);
   border-right: 1px solid rgba(15, 23, 42, 0.95);
   box-shadow: 10px 0 40px rgba(0, 0, 0, 0.75);
   border-top-right-radius: 24px;
   border-bottom-right-radius: 24px;
-
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  height: 100vh;
-  align-start: flex-start;
 }
+
+/* Brand row */
 
 .so-sidebar-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 4px 24px;
-}
-
-.so-sidebar-logo-img {
-  height: 48px;
-  width: auto;
-  display: block;
-}
-/* MAIN CANVAS */
-.so-main {
-  flex: 1;
-  min-height: 100vh;
-  background: radial-gradient(circle at top right, #0b1120, #020617 70%);
-  padding: 28px 32px 40px;
-  overflow: auto;
-}
-
-@media (max-width: 768px) {
-  .so-sidebar {
-    width: 72px;
-    padding-inline: 10px;
-  }
-
-  .so-main {
-    padding: 20px 16px 28px;
-  }
-}
-
-/* === BRAND ========================================================= */
-
-.so-sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 4px 18px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.9);
 }
 
-.so-sidebar-brand-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 0, #4ade80, #065f46);
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(15, 23, 42, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 18px;
-  color: #e5f3ff;
+.so-sidebar-logo-img {
+  height: 48px;           /* Bigger logo */
+  width: auto;
+  display: block;
 }
 
 .so-sidebar-brand-text {
@@ -110,14 +67,7 @@
   color: rgba(191, 219, 254, 0.75);
 }
 
-/* Hide brand text on very narrow sidebar (mobile) */
-@media (max-width: 768px) {
-  .so-sidebar-brand-text {
-    display: none;
-  }
-}
-
-/* === NAV ITEMS ===================================================== */
+/* Nav */
 
 .so-sidebar-nav {
   margin-top: 32px;
@@ -162,12 +112,20 @@
   transform: translateY(-1px);
 }
 
-/* === USER FOOTER =================================================== */
+/* Sidebar footer: user + logout */
+
+.so-sidebar-footer {
+  margin-top: 24px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 .so-sidebar-user {
-  margin-top: 24px;
-  padding: 10px 8px 4px;
-  border-top: 1px solid rgba(15, 23, 42, 0.9);
+  margin-top: 0;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -201,23 +159,53 @@
   color: rgba(148, 163, 184, 0.9);
 }
 
+.so-logout-btn {
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.9);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease,
+    transform 0.08s ease;
+}
 
-/* ====== MAIN AREA ============================================ */
+.so-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.7);
+  transform: translateY(-1px);
+}
+
+.so-logout-btn:active {
+  transform: translateY(0);
+}
+
+/* === MAIN CANVAS =============================================== */
 
 .so-main {
-  padding: 22px 24px 28px;
+  margin-left: 210px;   /* Matches sidebar width */
+
+  flex: 1;
+  min-height: 100vh;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  padding: 28px 32px 40px;
+
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 60%),
     radial-gradient(circle at bottom right, rgba(209, 213, 219, 0.7), transparent 65%),
     var(--so-bg);
+
+  overflow: auto;
 }
 
-/* Generic page topbar inside .so-main is handled by Tailwind in pages. */
-
-/* ====== CARD SYSTEM ========================================== */
+/* ====== CARD / GRID SYSTEM (unchanged logic) ===================== */
 
 .so-grid {
   display: grid;
@@ -269,15 +257,11 @@
   color: var(--so-text-muted);
 }
 
-/* Larger 2-column area */
-
 .so-grid-lg {
   display: grid;
   grid-template-columns: 2fr 1.4fr;
   gap: 18px;
 }
-
-/* Placeholder charts, lists, etc. */
 
 .so-chart-placeholder {
   border-radius: 18px;
@@ -291,15 +275,17 @@
   color: var(--so-text-muted);
 }
 
-/* ====== RESPONSIVE =========================================== */
+/* ====== RESPONSIVE =============================================== */
 
 @media (max-width: 1024px) {
-  .so-dashboard-root {
-    grid-template-columns: 64px minmax(0, 1fr);
+  .so-sidebar {
+    width: 72px;
+    padding-inline: 12px;
   }
 
-  .so-sidebar {
-    padding-inline: 12px;
+  .so-main {
+    margin-left: 72px;                      /* Match reduced sidebar width */
+    padding: 24px 20px 32px;
   }
 
   .so-sidebar-brand-text,
@@ -314,22 +300,6 @@
 }
 
 @media (max-width: 768px) {
-  .so-dashboard-root {
-    grid-template-columns: 1fr;
-  }
-
-  .so-sidebar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding-inline: 16px;
-  }
-
-  .so-sidebar-nav {
-    flex-direction: row;
-    justify-content: center;
-  }
-
   .so-main {
     padding: 18px 14px 22px;
   }
@@ -338,46 +308,4 @@
   .so-grid-lg {
     grid-template-columns: 1fr;
   }
-}
-
-.so-sidebar-footer {
-  margin-top: 24px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(15, 23, 42, 0.9);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Move border from user to the footer container if needed */
-.so-sidebar-user {
-  margin-top: 0;
-  padding: 4px 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.so-logout-btn {
-  width: 100%;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  padding: 8px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  background: transparent;
-  color: rgba(226, 232, 240, 0.9);
-  cursor: pointer;
-  transition: background 0.16s ease, border-color 0.16s ease,
-    transform 0.08s ease;
-}
-
-.so-logout-btn:hover {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.7);
-  transform: translateY(-1px);
-}
-
-.so-logout-btn:active {
-  transform: translateY(0);
 }
