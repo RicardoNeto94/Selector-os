@@ -149,39 +149,36 @@ export default function GuestMenu({ slug }) {
       <div className="guest-shell">
         {/* Header */}
         <header className="guest-header">
-          <div className="guest-header-main">
-            {logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={logoUrl}
-                alt={displayName}
-                className="guest-logo-img"
-              />
-            ) : (
-              {restaurantLogoUrl ? (
-  <div className="guest-logo-wrapper">
-    <img src={restaurantLogoUrl} alt="Restaurant logo" />
+  <div className="guest-header-main">
+    {restaurantLogoUrl ? (
+      <div className="guest-logo-wrapper">
+        <img
+          src={restaurantLogoUrl}
+          alt="Restaurant logo"
+          className="guest-logo-img"
+        />
+      </div>
+    ) : (
+      <div className="guest-logo-circle">S</div>
+    )}
+
+    <div>
+      <div className="guest-header-title">
+        Safe dishes for{" "}
+        <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
+      </div>
+      <p className="guest-header-subtitle">
+        Live view of your configured dishes. Filters never delete data – they
+        only change what’s visible.
+      </p>
+    </div>
   </div>
-) : (
-  <div className="guest-logo-circle">S</div>
-)}
 
-            <div>
-              <div className="guest-header-title">
-                Safe dishes for <span>{displayName}</span>
-              </div>
-              <p className="guest-header-subtitle">
-                Live view of your configured dishes. Filters never delete data –
-                they only change what’s visible.
-              </p>
-            </div>
-          </div>
-
-          <div className="guest-meta">
-            <div>SELECTOROS • GUEST VIEW</div>
-            <div>LIVE DATA FROM YOUR COCKPIT</div>
-          </div>
-        </header>
+  <div className="guest-meta">
+    <div>SELECTOROS • GUEST VIEW</div>
+    <div>LIVE DATA FROM YOUR COCKPIT</div>
+  </div>
+</header>
 
         {/* Content */}
         {loading ? (
