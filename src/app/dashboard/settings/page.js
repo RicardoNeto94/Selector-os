@@ -1,66 +1,85 @@
 // src/app/dashboard/settings/page.js
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import '../../styles/dashboard.css';
+import AppearanceSettingsForm from './AppearanceSettingsForm';
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import LogoUploader from "./LogoUploader";
-
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
   const supabase = createServerComponentClient({ cookies });
 
+  // 1) Auth guard
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/sign-in");
+    redirect('/sign-in');
   }
 
+  // 2) Load this user's restaurant
   const { data: restaurant, error } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("owner_id", user.id)
+    .from('restaurants')
+    .select('*')
+    .eq('owner_id', user.id)
     .maybeSingle();
 
   if (error || !restaurant) {
-    console.error("No restaurant for this user", error);
+    console.error('Settings: no restaurant found', error);
     return (
-      <main className="page-fade px-6 py-10 text-slate-200">
-        <h1 className="text-2xl font-semibold mb-2">Settings</h1>
-        <p className="text-sm text-slate-400">
-          We couldn’t find a restaurant linked to this account.
-        </p>
+      <main className="so-main">
+        <div className="so-card">
+          <h1 className="so-metric-main">Settings</h1>
+          <p className="so-metric-sub">
+            No restaurant is linked to this account yet. Create one first.
+          </p>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="page-fade px-6 py-10 text-slate-100">
-      <div className="max-w-3xl space-y-8">
-        <header>
-          <h1 className="text-2xl font-semibold mb-1">
-            {restaurant.name} – Settings
-          </h1>
-          <p className="text-sm text-slate-400">
-            Manage branding and guest-facing options for your live allergen
-            view.
-          </p>
-        </header>
+    <main className="so-main page-fade">
+      <div className="so-card" style={{ marginBottom: '18px' }}>
+        <h1 className="so-metric-main">Settings</h1>
+        <p className="so-metric-sub">
+          Tune how SelectorOS looks and behaves for this restaurant.
+        </p>
+      </div>
 
-        <section className="rounded-2xl bg-slate-950/80 border border-slate-800/70 shadow-[0_22px_60px_rgba(0,0,0,0.75)] p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Restaurant logo</h2>
-          <p className="text-sm text-slate-400">
-            Upload a logo that will appear on your guest view page. PNG or SVG
-            with a transparent background works best.
-          </p>
+      <div className="so-grid-lg">
+        {/* Left: Appearance settings */}
+        <div className="so-card">
+          <div className="so-card-header">
+            <div className="so-card-title">
+              <span className="so-card-pill">Appearance</span>
+              <span>Theme & layout</span>
+            </div>
+          </div>
 
-          <LogoUploader
+          <AppearanceSettingsForm
             restaurantId={restaurant.id}
-            initialLogoUrl={restaurant.logo_url}
+            initialPrimaryColor={restaurant.theme_primary_color}
+            initialBackgroundStyle={restaurant.theme_background_style}
+            initialCardStyle={restaurant.theme_card_style}
+            initialDensity={restaurant.theme_density}
           />
-        </section>
+        </div>
+
+        {/* Right: placeholder for future sections */}
+        <div className="so-card">
+          <div className="so-card-header">
+            <div className="so-card-title">
+              <span className="so-card-pill">Coming soon</span>
+              <span>Branding & staff</span>
+            </div>
+          </div>
+          <p className="so-metric-sub">
+            Logo upload, staff roles, QR codes and integrations will live here.
+          </p>
+        </div>
       </div>
     </main>
   );
