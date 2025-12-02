@@ -1,5 +1,5 @@
 // src/app/dashboard/layout.js
-import "../styles/dashboard.css";
+import "../../styles/dashboard.css";
 import Link from "next/link";
 import {
   Squares2X2Icon,
