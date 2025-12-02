@@ -43,6 +43,26 @@
   align-items: center;
 }
 
+.guest-logo-image-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: #020617;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.7),
+    inset 0 3px 6px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.guest-logo-img {
+  max-width: 64px;
+  max-height: 64px;
+  object-fit: contain;
+}
+
 .guest-logo-circle {
   width: 72px;
   height: 72px;
