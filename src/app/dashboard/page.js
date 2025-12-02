@@ -252,33 +252,39 @@ export default function DashboardHome() {
         </div>
       </section>
 
-      {/* BOTTOM STRIP: MARKETING-STYLE CARDS */}
+           {/* BOTTOM STRIP: OPERATIONS CARDS */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: “Optimize workflow” */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500/20 via-emerald-400/10 to-slate-950 border border-emerald-400/20 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7">
-          <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-emerald-300/30 blur-3xl" />
-          <div className="relative space-y-3">
-            <p className="text-xs font-medium text-emerald-200/90 uppercase tracking-[0.18em]">
-              Optimize workflow
+        {/* Left: Staff view status */}
+        <div className="rounded-3xl bg-slate-900/80 border border-slate-800 p-6 md:p-7 shadow-[0_18px_50px_rgba(0,0,0,0.65)] flex flex-col justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+              Staff view
             </p>
-            <h3 className="text-lg font-semibold">
-              Turn your allergen sheet into a live service companion.
+            <h3 className="text-lg font-semibold mt-2">
+              Keep front-of-house in sync with one source of truth.
             </h3>
-            <p className="text-sm text-emerald-50/80 max-w-md">
-              Connect all dishes and allergens once. From there, FOH staff uses
-              a clean, touch-friendly view that filters in one tap.
+            <p className="text-sm text-slate-400 mt-2 max-w-md">
+              Every update you make here flows directly into the live SelectorOS
+              guest/staff view. Use it as the single place to maintain dishes
+              and allergens.
             </p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-3 text-xs">
             <a
               href="/dashboard/menu"
-              className="inline-flex items-center gap-2 mt-3 text-xs font-semibold px-4 py-2 rounded-full bg-emerald-400 text-slate-950 hover:bg-emerald-300 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-400 text-slate-950 font-semibold hover:bg-emerald-300 transition"
             >
-              Configure live staff tool
+              Open staff tool setup
             </a>
+            <span className="inline-flex items-center px-3 py-1 rounded-full border border-slate-700/70 text-slate-300/80">
+              Live link: /r/{restaurant.slug || "your-restaurant"}
+            </span>
           </div>
         </div>
 
         {/* Right: System health */}
-        <div className="rounded-3xl bg-slate-950/85 border border-slate-800/70 shadow-[0_24px_70px_rgba(0,0,0,0.8)] p-6 md:p-7 flex flex-col justify-between">
+        <div className="rounded-3xl bg-slate-950/85 border border-slate-800/70 shadow-[0_18px_50px_rgba(0,0,0,0.65)] p-6 md:p-7 flex flex-col justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
               System health
@@ -287,8 +293,9 @@ export default function DashboardHome() {
               Data completeness snapshot
             </h3>
             <p className="text-sm text-slate-400 mt-2">
-              This is where we’ll later plug charts (per-category coverage,
-              allergen frequency, etc.). For now, you get a quick summary:
+              Quick view of how safe your data is for staff use. As long as
+              everything is labelled, your team never has to guess at allergens
+              during service.
             </p>
           </div>
 
