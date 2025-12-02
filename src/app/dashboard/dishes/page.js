@@ -94,7 +94,7 @@ export default function DishesPage() {
     setDeletingId(dishId);
 
     try {
-      // Delete dish_allergens first (if exists)
+      // Delete join rows first (if they exist)
       const { error: daError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -102,6 +102,7 @@ export default function DishesPage() {
 
       if (daError) {
         console.error("Failed to delete dish_allergens", daError);
+        // still try dish delete
       }
 
       const { error: dishError } = await supabase
@@ -197,8 +198,6 @@ export default function DishesPage() {
                         ? `${Number(d.price).toFixed(2)} €`
                         : "—"}
                     </td>
-
-                    {/* Actions: Edit + Delete */}
                     <td className="py-2 pl-4 text-right space-x-2">
                       <Link
                         href={`/dashboard/dishes/${d.id}`}
@@ -206,7 +205,6 @@ export default function DishesPage() {
                       >
                         Edit
                       </Link>
-
                       <button
                         type="button"
                         onClick={() => handleDeleteDish(d.id)}
@@ -226,4 +224,3 @@ export default function DishesPage() {
     </div>
   );
 }
-
