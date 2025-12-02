@@ -54,7 +54,7 @@
   opacity: 0.45;
 }
 
-/* === TOP LEFT LOGO ========================================= */
+/* === TOP LEFT LOGO (you can delete this block if not used) == */
 
 .auth-logo {
   position: absolute;
@@ -88,15 +88,16 @@
 
 /* === CARD =================================================== */
 
-/* === CARD =================================================== */
-
 .auth-card {
   position: relative;
-  z-index: 2;
+  z-index: 2;          /* above gradients */
   width: 100%;
   max-width: 420px;
   border-radius: 28px;
-  padding: 80px 32px 28px;  /* ⬅️ was 36px 32px 28px */
+
+  /* extra top padding so logo + title sit inside the card */
+  padding: 88px 32px 28px;
+
   background: radial-gradient(
     circle at 0 0,
     rgba(255, 255, 255, 0.95),
@@ -112,18 +113,20 @@
   align-items: stretch;
 }
 
+/* === FLOATING LOGO ABOVE CARD (NO PILL) =================== */
+
 .auth-card-logo-floating {
   position: absolute;
-  top: -35px;              /* same vertical spot as the old pill */
+  top: -32px;              /* move up/down as you like */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
 }
 
 .auth-card-logo-img-only {
-  width: 260px;             /* bigger logo */
+  width: 260px;            /* main size control */
+  max-width: 80%;
   height: auto;
-  max-width: 300px;
   object-fit: contain;
   display: block;
 
