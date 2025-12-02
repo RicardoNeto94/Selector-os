@@ -204,6 +204,12 @@
 
   overflow: auto;
 }
+/* Wraps page content inside .so-main for nicer width */
+.so-main-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  width: 100%;
+}
 
 /* ====== CARD / GRID SYSTEM (unchanged logic) ===================== */
 
