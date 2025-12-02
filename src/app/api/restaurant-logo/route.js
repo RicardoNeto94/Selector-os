@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-// ⚠️ service role key – server only
+// ⚠️ service role key – SERVER ONLY
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
@@ -13,6 +13,7 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
+// This runs only server-side
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
 });
@@ -41,22 +42,29 @@ export async function POST(req) {
       );
     }
 
-    // build file path
-    const ext = file.name.split(".").pop();
-    const path = `restaurant-${restaurantId}-${Date.now()}.${ext || "png"}`;
+    // Convert the File/Blob into a Node Buffer (safer in Vercel's Node runtime)
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    // upload to bucket "restaurant-logos"
+    const ext = file.name.split(".").pop() || "png";
+    const path = `restaurant-${restaurantId}-${Date.now()}.${ext}`;
+
+    // ⬇️ Make sure bucket name matches your Supabase bucket
     const { error: uploadError } = await supabase.storage
       .from("restaurant-logos")
-      .upload(path, file, {
+      .upload(path, buffer, {
         cacheControl: "3600",
         upsert: true,
+        contentType: file.type,
       });
 
     if (uploadError) {
-      console.error("Logo upload error", uploadError);
+      console.error("Logo upload error:", uploadError);
       return NextResponse.json(
-        { error: "Failed to upload to storage" },
+        {
+          error: "Failed to upload to storage",
+          details: uploadError.message || uploadError,
+        },
         { status: 500 }
       );
     }
@@ -65,7 +73,6 @@ export async function POST(req) {
       data: { publicUrl },
     } = supabase.storage.from("restaurant-logos").getPublicUrl(path);
 
-    // save URL in restaurants.logo_url
     const { data, error: updateError } = await supabase
       .from("restaurants")
       .update({ logo_url: publicUrl })
@@ -74,9 +81,12 @@ export async function POST(req) {
       .maybeSingle();
 
     if (updateError) {
-      console.error("Update restaurant.logo_url error", updateError);
+      console.error("Update restaurant.logo_url error:", updateError);
       return NextResponse.json(
-        { error: "Failed to update restaurant logo" },
+        {
+          error: "Failed to update restaurant logo",
+          details: updateError.message || updateError,
+        },
         { status: 500 }
       );
     }
@@ -86,9 +96,9 @@ export async function POST(req) {
       { status: 200 }
     );
   } catch (err) {
-    console.error("Unexpected logo upload error", err);
+    console.error("Unexpected logo upload error:", err);
     return NextResponse.json(
-      { error: "Unexpected error uploading logo" },
+      { error: "Unexpected error uploading logo", details: String(err) },
       { status: 500 }
     );
   }
