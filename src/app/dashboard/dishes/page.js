@@ -93,7 +93,7 @@ export default function DishesPage() {
     setDeletingId(dishId);
 
     try {
-      // delete join rows (if any)
+      // delete links from dish_allergens first
       const { error: daError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -160,51 +160,59 @@ export default function DishesPage() {
         </div>
       )}
 
-) : (
-  <div className="rounded-2xl bg-slate-950/80 border border-slate-800/80 p-4 overflow-x-auto">
-    <table className="min-w-full text-sm text-slate-200">
-      <thead className="text-xs uppercase tracking-wide text-slate-400 border-b border-slate-800">
-        <tr>
-          <th className="text-left py-2">Name</th>
-          <th className="text-left py-2">Menu</th>
-          <th className="text-left py-2">Category</th>
-          <th className="text-right py-2">Price</th>
-          <th className="text-right py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {dishes.map((d) => {
-          const menu = menus.find((m) => m.id === d.menu_id);
-          return (
-            <tr
-              key={d.id}
-              className="border-b border-slate-900/80 hover:bg-slate-900/50"
-            >
-              <td className="py-2 pr-4 font-medium">{d.name}</td>
-              <td className="py-2 pr-4 text-slate-300">
-                {menu?.name || "—"}
-              </td>
-              <td className="py-2 pr-4 text-slate-400 text-xs">
-                {d.category || "—"}
-              </td>
-              <td className="py-2 pl-4 text-right">
-                {d.price != null ? `${Number(d.price).toFixed(2)} €` : "—"}
-              </td>
-              <td className="py-2 pl-4 text-right">
-                <button
-                  type="button"
-                  onClick={() => handleDeleteDish(d.id)}
-                  disabled={deletingId === d.id}
-                  className="text-[11px] rounded-full px-3 py-1 border border-red-500/60 text-red-200 hover:bg-red-500/10 disabled:opacity-50"
-                >
-                  {deletingId === d.id ? "Deleting…" : "Delete"}
-                </button>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
-)}
-
+      {dishes.length === 0 ? (
+        <div className="rounded-2xl bg-slate-950/80 border border-slate-800/80 p-6 text-sm text-slate-300">
+          No dishes yet. Start by adding your first dish.
+        </div>
+      ) : (
+        <div className="rounded-2xl bg-slate-950/80 border border-slate-800/80 p-4 overflow-x-auto">
+          <table className="min-w-full text-sm text-slate-200">
+            <thead className="text-xs uppercase tracking-wide text-slate-400 border-b border-slate-800">
+              <tr>
+                <th className="text-left py-2">Name</th>
+                <th className="text-left py-2">Menu</th>
+                <th className="text-left py-2">Category</th>
+                <th className="text-right py-2">Price</th>
+                <th className="text-right py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dishes.map((d) => {
+                const menu = menus.find((m) => m.id === d.menu_id);
+                return (
+                  <tr
+                    key={d.id}
+                    className="border-b border-slate-900/80 hover:bg-slate-900/50"
+                  >
+                    <td className="py-2 pr-4 font-medium">{d.name}</td>
+                    <td className="py-2 pr-4 text-slate-300">
+                      {menu?.name || "—"}
+                    </td>
+                    <td className="py-2 pr-4 text-slate-400 text-xs">
+                      {d.category || "—"}
+                    </td>
+                    <td className="py-2 pl-4 text-right">
+                      {d.price != null
+                        ? `${Number(d.price).toFixed(2)} €`
+                        : "—"}
+                    </td>
+                    <td className="py-2 pl-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDish(d.id)}
+                        disabled={deletingId === d.id}
+                        className="text-[11px] rounded-full px-3 py-1 border border-red-500/60 text-red-200 hover:bg-red-500/10 disabled:opacity-50"
+                      >
+                        {deletingId === d.id ? "Deleting…" : "Delete"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
