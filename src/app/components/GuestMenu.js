@@ -5,7 +5,7 @@ import "../../styles/guest.css";
 
 export default function GuestMenu({ slug }) {
   const [dishes, setDishes] = useState([]);
-  const [restaurant, setRestaurant] = useState(null);
+  const [restaurantMeta, setRestaurantMeta] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -16,44 +16,39 @@ export default function GuestMenu({ slug }) {
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Load menu + restaurant info from public APIs
+  // Load menu + restaurant meta
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
         setError("");
 
-        // 1) Dishes
-        const res = await fetch(`/api/public-menu/${slug}`);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+        const [menuRes, metaRes] = await Promise.all([
+          fetch(`/api/public-menu/${slug}`),
+          fetch(`/api/restaurant-meta/${slug}`),
+        ]);
+
+        if (!menuRes.ok) {
+          throw new Error(`Menu HTTP ${menuRes.status}`);
         }
 
-        const json = await res.json();
-
+        const json = await menuRes.json();
         const normalized = (json || []).map((d) => ({
           ...d,
           allergens: Array.isArray(d.allergens)
             ? d.allergens.map((a) => String(a).trim().toUpperCase())
             : [],
         }));
-
         setDishes(normalized);
 
-        // 2) Restaurant info (name, logo_url)
-        try {
-          const rRes = await fetch(`/api/public-restaurant/${slug}`);
-          if (rRes.ok) {
-            const rJson = await rRes.json();
-            setRestaurant(rJson);
-          } else {
-            console.warn("Failed to load restaurant info", await rRes.text());
-          }
-        } catch (err) {
-          console.warn("Error loading restaurant info", err);
+        if (metaRes.ok) {
+          const meta = await metaRes.json();
+          setRestaurantMeta(meta);
+        } else {
+          console.warn("restaurant-meta request failed", metaRes.status);
         }
       } catch (err) {
-        console.error("Failed to load public menu", err);
+        console.error("Failed to load public menu / meta", err);
         setError("Failed to load menu. Please try again.");
       } finally {
         setLoading(false);
@@ -82,14 +77,10 @@ export default function GuestMenu({ slug }) {
   const hasFilters = selectedAllergens.size > 0;
   const hasAnyDish = dishes.length > 0;
 
-  // === MAIN FILTERING LOGIC =====================================
-  //  - no allergens selected  → show all (respecting category only)
-  //  - allergens selected & containsMode = false → ONLY SAFE dishes
-  //  - allergens selected & containsMode = true  → ONLY CONTAINING dishes
+  // MAIN FILTERING LOGIC
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
-    // category filter
     if (selectedCategory) {
       list = list.filter((d) => d.category === selectedCategory);
     }
@@ -145,12 +136,13 @@ export default function GuestMenu({ slug }) {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
-  // IMPORTANT: no fallback to full dishes when filter is empty
   const listToRender = filteredDishes;
 
-  const restaurantName =
-    restaurant?.name ||
+  const displayName =
+    restaurantMeta?.name ||
     (slug ? slug.replace(/-/g, " ") : "this restaurant");
+
+  const logoUrl = restaurantMeta?.logo_url || null;
 
   return (
     <div className="guest-root">
@@ -158,20 +150,20 @@ export default function GuestMenu({ slug }) {
         {/* Header */}
         <header className="guest-header">
           <div className="guest-header-main">
-            <div className="guest-logo-circle">
-              {restaurant?.logo_url ? (
-                <img
-                  src={restaurant.logo_url}
-                  alt={restaurantName}
-                  className="guest-logo-img"
-                />
-              ) : (
-                "S"
-              )}
-            </div>
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt={displayName}
+                className="guest-logo-img"
+              />
+            ) : (
+              <div className="guest-logo-circle">S</div>
+            )}
+
             <div>
               <div className="guest-header-title">
-                Safe dishes for <span>{restaurantName}</span>
+                Safe dishes for <span>{displayName}</span>
               </div>
               <p className="guest-header-subtitle">
                 Live view of your configured dishes. Filters never delete data –
@@ -207,9 +199,6 @@ export default function GuestMenu({ slug }) {
                 hasFilters &&
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
-              // === BADGE LOGIC =====================================
-              // show SAFE only if dish is really safe
-              // show CONTAINS only if dish really contains selection
               let badgeLabel = null;
               let badgeClass = "";
               if (hasFilters) {
