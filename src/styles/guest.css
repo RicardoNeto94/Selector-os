@@ -58,9 +58,10 @@
 }
 
 .guest-logo-img {
-  max-width: 64px;
-  max-height: 64px;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  border-radius: inherit;
 }
 
 .guest-logo-circle {
