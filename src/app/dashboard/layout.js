@@ -16,13 +16,13 @@ export default function DashboardLayout({ children }) {
       {/* LEFT SIDEBAR */}
       <aside className="so-sidebar">
         {/* Brand */}
-       <div className="so-sidebar-brand">
-  <img
-    src="/selectoros-logo.png"
-    alt="SelectorOS"
-    className="so-sidebar-logo-img"
-  />
-</div>
+        <div className="so-sidebar-brand">
+          <img
+            src="/selectoros-logo.png"
+            alt="SelectorOS"
+            className="so-sidebar-logo-img"
+          />
+        </div>
 
         {/* NAV */}
         <nav className="so-sidebar-nav">
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }) {
           </Link>
         </nav>
 
-        {/* USER FOOTER – you can wire this later to real user data */}
+        {/* USER FOOTER */}
         <div className="so-sidebar-user">
           <div className="so-user-avatar">R</div>
           <div className="so-user-meta">
@@ -66,9 +66,7 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       {/* MAIN CANVAS */}
-      <main className="so-main">
-        {children}
-      </main>
+      <main className="so-main">{children}</main>
     </div>
   );
 }
