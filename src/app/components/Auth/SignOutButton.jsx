@@ -1,24 +1,32 @@
-"use client";
+'use client';
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 
-export default function SignOutButton({ className = "" }) {
+export default function SignOut() {
   const supabase = createClientComponentClient();
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/sign-in");
-  };
+  async function handleSignOut() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error('ERROR:', error);
+      return;
+    }
+
+    // ✅ After logging out, send the user to the new sign-in page
+    router.push('/sign-in');
+  }
 
   return (
     <button
       type="button"
+      className="auth-primary-btn" // or any new-style class you prefer
       onClick={handleSignOut}
-      className={className || "text-xs text-slate-300 hover:text-white"}
     >
-      Log out
+      Sign out
     </button>
   );
 }
