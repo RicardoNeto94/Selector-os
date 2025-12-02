@@ -1,15 +1,25 @@
-export const dynamic = "force-dynamic";
+'use client';
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export default async function LogoutPage() {
-  const supabase = createServerComponentClient({ cookies });
+export default function LogoutPage() {
+  const router = useRouter();
+  const supabase = createClientComponentClient();
 
-  // Clear Supabase session
-  await supabase.auth.signOut();
+  useEffect(() => {
+    async function doLogout() {
+      await supabase.auth.signOut();
+      router.push('/sign-in');  // redirect after logout
+    }
 
-  // Always send user to login after logout
-  redirect("/sign-in");
+    doLogout();
+  }, [router, supabase]);
+
+  return (
+    <div style={{ padding: '20px', color: '#fff' }}>
+      Logging out…
+    </div>
+  );
 }
