@@ -5,8 +5,7 @@ import "../../styles/guest.css";
 
 export default function GuestMenu({ slug }) {
   const [dishes, setDishes] = useState([]);
-  const [restaurantMeta, setRestaurantMeta] = useState(null);
-
+  const [restaurantLogoUrl, setRestaurantLogoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -16,39 +15,45 @@ export default function GuestMenu({ slug }) {
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Load menu + restaurant meta
+  // Load menu JSON from public API
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
         setError("");
 
-        const [menuRes, metaRes] = await Promise.all([
-          fetch(`/api/public-menu/${slug}`),
-          fetch(`/api/restaurant-meta/${slug}`),
-        ]);
-
-        if (!menuRes.ok) {
-          throw new Error(`Menu HTTP ${menuRes.status}`);
+        const res = await fetch(`/api/public-menu/${slug}`);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
         }
 
-        const json = await menuRes.json();
-        const normalized = (json || []).map((d) => ({
+        const json = await res.json();
+
+        // Support both shapes:
+        // 1) old: [ { ...dish } ]
+        // 2) new: { logo_url, dishes: [ { ...dish } ] }
+        let logo = null;
+        let dishData = [];
+
+        if (Array.isArray(json)) {
+          dishData = json;
+        } else if (json && Array.isArray(json.dishes)) {
+          logo = json.logo_url || null;
+          dishData = json.dishes;
+        }
+
+        setRestaurantLogoUrl(logo);
+
+        const normalized = (dishData || []).map((d) => ({
           ...d,
           allergens: Array.isArray(d.allergens)
             ? d.allergens.map((a) => String(a).trim().toUpperCase())
             : [],
         }));
-        setDishes(normalized);
 
-        if (metaRes.ok) {
-          const meta = await metaRes.json();
-          setRestaurantMeta(meta);
-        } else {
-          console.warn("restaurant-meta request failed", metaRes.status);
-        }
+        setDishes(normalized);
       } catch (err) {
-        console.error("Failed to load public menu / meta", err);
+        console.error("Failed to load public menu", err);
         setError("Failed to load menu. Please try again.");
       } finally {
         setLoading(false);
@@ -77,10 +82,14 @@ export default function GuestMenu({ slug }) {
   const hasFilters = selectedAllergens.size > 0;
   const hasAnyDish = dishes.length > 0;
 
-  // MAIN FILTERING LOGIC
+  // === MAIN FILTERING LOGIC =====================================
+  //  - no allergens selected  → show all (respecting category only)
+  //  - allergens selected & containsMode = false → ONLY SAFE dishes
+  //  - allergens selected & containsMode = true  → ONLY CONTAINING dishes
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
+    // category filter
     if (selectedCategory) {
       list = list.filter((d) => d.category === selectedCategory);
     }
@@ -136,49 +145,44 @@ export default function GuestMenu({ slug }) {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
+  // IMPORTANT: no fallback to full dishes when filter is empty
   const listToRender = filteredDishes;
-
-  const displayName =
-    restaurantMeta?.name ||
-    (slug ? slug.replace(/-/g, " ") : "this restaurant");
-
-  const logoUrl = restaurantMeta?.logo_url || null;
 
   return (
     <div className="guest-root">
       <div className="guest-shell">
         {/* Header */}
         <header className="guest-header">
-  <div className="guest-header-main">
-    {restaurantLogoUrl ? (
-      <div className="guest-logo-wrapper">
-        <img
-          src={restaurantLogoUrl}
-          alt="Restaurant logo"
-          className="guest-logo-img"
-        />
-      </div>
-    ) : (
-      <div className="guest-logo-circle">S</div>
-    )}
+          <div className="guest-header-main">
+            {restaurantLogoUrl ? (
+              <div className="guest-logo-image-wrap">
+                <img
+                  src={restaurantLogoUrl}
+                  alt="Restaurant logo"
+                  className="guest-logo-img"
+                />
+              </div>
+            ) : (
+              <div className="guest-logo-circle">S</div>
+            )}
 
-    <div>
-      <div className="guest-header-title">
-        Safe dishes for{" "}
-        <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
-      </div>
-      <p className="guest-header-subtitle">
-        Live view of your configured dishes. Filters never delete data – they
-        only change what’s visible.
-      </p>
-    </div>
-  </div>
+            <div>
+              <div className="guest-header-title">
+                Safe dishes for{" "}
+                <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
+              </div>
+              <p className="guest-header-subtitle">
+                Live view of your configured dishes. Filters never delete data –
+                they only change what’s visible.
+              </p>
+            </div>
+          </div>
 
-  <div className="guest-meta">
-    <div>SELECTOROS • GUEST VIEW</div>
-    <div>LIVE DATA FROM YOUR COCKPIT</div>
-  </div>
-</header>
+          <div className="guest-meta">
+            <div>SELECTOROS • GUEST VIEW</div>
+            <div>LIVE DATA FROM YOUR COCKPIT</div>
+          </div>
+        </header>
 
         {/* Content */}
         {loading ? (
@@ -201,6 +205,9 @@ export default function GuestMenu({ slug }) {
                 hasFilters &&
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
+              // === BADGE LOGIC =====================================
+              // show SAFE only if dish is really safe
+              // show CONTAINS only if dish really contains selection
               let badgeLabel = null;
               let badgeClass = "";
               if (hasFilters) {
