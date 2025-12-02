@@ -346,43 +346,53 @@ export default function EditDishPage() {
         </div>
 
         {/* ALLERGENS */}
-        <div className="pt-4 border-t border-slate-800/80">
-          <p className="text-xs text-slate-400 mb-2">
-            Allergens linked to this dish
-          </p>
+<div className="pt-4 border-t border-slate-800/80">
+  <p className="text-xs text-slate-400 mb-2">
+    Allergens linked to this dish
+  </p>
 
-          {allergens.length === 0 ? (
-            <p className="text-xs text-slate-500">
-              No allergens configured yet. Add them in your allergen library.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {allergens.map((a) => {
-                const idNum = Number(a.id);
-                const checked = selectedAllergenIds.includes(idNum);
-                return (
-                  <label
-                    key={a.id}
-                    className="flex items-center gap-2 text-xs text-slate-200 bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:border-emerald-400/70"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleAllergen(idNum)}
-                      className="h-3 w-3 rounded border-slate-500 bg-slate-900"
-                    />
-                    <span>
-                      <span className="font-semibold">
-                        {a.code || "A"}
-                      </span>{" "}
-                      – {a.name}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-        </div>
+  {allergens.length === 0 ? (
+    <p className="text-xs text-slate-500">
+      No allergens configured yet. Add them in your allergen library.
+    </p>
+  ) : (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {allergens.map((a) => {
+        const idNum = Number(a.id);
+        const active = selectedAllergenIds.includes(idNum);
+
+        return (
+          <button
+            key={a.id}
+            type="button"
+            onClick={() => toggleAllergen(idNum)}
+            className={
+              "flex items-center justify-between gap-2 text-xs rounded-lg px-3 py-2 border transition " +
+              (active
+                ? "bg-emerald-500/10 border-emerald-400/70 text-emerald-100"
+                : "bg-slate-900/80 border-slate-700 text-slate-200 hover:border-emerald-400/70")
+            }
+          >
+            <span>
+              <span className="font-semibold">{a.code || "A"}</span> –{" "}
+              {a.name}
+            </span>
+
+            {/* fake checkbox indicator */}
+            <span
+              className={
+                "w-3 h-3 rounded-sm border " +
+                (active
+                  ? "bg-emerald-400 border-emerald-300"
+                  : "border-slate-500")
+              }
+            />
+          </button>
+        );
+      })}
+    </div>
+  )}
+</div>
 
         <div className="flex justify-end gap-3 pt-2">
           <button
