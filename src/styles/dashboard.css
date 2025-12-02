@@ -309,3 +309,73 @@
     grid-template-columns: 1fr;
   }
 }
+
+.so-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.so-settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.so-settings-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.so-settings-hint {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.so-settings-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.so-color-input {
+  width: 40px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  padding: 0;
+  background: transparent;
+}
+
+.so-text-input,
+.so-select-input {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  padding: 7px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.so-text-input:focus,
+.so-select-input:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.4);
+}
+
+.so-settings-footer {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.so-settings-message {
+  font-size: 12px;
+  color: #16a34a;
+}
+
