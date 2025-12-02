@@ -26,7 +26,7 @@ export default function EditDishPage() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
 
-  // ARRAY of allergen IDs (numbers)
+  // ARRAY OF STRING IDS
   const [selectedAllergenIds, setSelectedAllergenIds] = useState([]);
 
   useEffect(() => {
@@ -123,8 +123,8 @@ export default function EditDishPage() {
 
       if (dishAllergens && dishAllergens.length > 0) {
         const ids = dishAllergens
-          .map((row) => Number(row.allergen_id))
-          .filter((id) => !Number.isNaN(id));
+          .map((row) => String(row.allergen_id))
+          .filter((id) => !!id);
         setSelectedAllergenIds(ids);
       } else {
         setSelectedAllergenIds([]);
@@ -138,15 +138,14 @@ export default function EditDishPage() {
     }
   };
 
-  // Toggle ONE allergen id in the array
+  // Toggle ONE allergen id in the array (string IDs)
   const toggleAllergen = (allergenId) => {
+    const idStr = String(allergenId);
     setSelectedAllergenIds((prev) => {
-      const idNum = Number(allergenId);
-      const exists = prev.includes(idNum);
-      if (exists) {
-        return prev.filter((id) => id !== idNum);
+      if (prev.includes(idStr)) {
+        return prev.filter((id) => id !== idStr);
       }
-      return [...prev, idNum];
+      return [...prev, idStr];
     });
   };
 
@@ -202,9 +201,8 @@ export default function EditDishPage() {
         return;
       }
 
-      const idsArray = Array.from(selectedAllergenIds);
-      if (idsArray.length > 0) {
-        const insertRows = idsArray.map((aid) => ({
+      if (selectedAllergenIds.length > 0) {
+        const insertRows = selectedAllergenIds.map((aid) => ({
           dish_id: dishId,
           allergen_id: aid,
         }));
@@ -357,14 +355,14 @@ export default function EditDishPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {allergens.map((a) => {
-                const idNum = Number(a.id);
-                const active = selectedAllergenIds.includes(idNum);
+                const idStr = String(a.id);
+                const active = selectedAllergenIds.includes(idStr);
 
                 return (
                   <button
                     key={a.id}
                     type="button"
-                    onClick={() => toggleAllergen(idNum)}
+                    onClick={() => toggleAllergen(idStr)}
                     className={
                       "flex items-center justify-between gap-2 text-xs rounded-lg px-3 py-2 border transition " +
                       (active
