@@ -142,26 +142,27 @@
 .guest-grid {
   margin-top: 32px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
   padding: 0 16px;
 }
 
-/* “Rounded square” dish cards */
-.guest-card {
-  border-radius: 28px;
-  padding: 20px 24px 18px;
+/* === NEW SQUARE LIGHT DISH CARD ===================== */
 
-  background: #020617;
-  border: 1px solid rgba(30, 64, 175, 0.4);
+.guest-card {
+  background: #ffffff;
+  border-radius: 18px;          /* rounded square */
+  padding: 18px 20px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
 
   box-shadow:
-    0 8px 28px rgba(0, 0, 0, 0.25);
+    0 10px 26px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.03);
 
-  color: #e5e7eb;
-
-  width: 100%;
-  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #0f172a;
 }
 
 .guest-card-header {
@@ -190,7 +191,7 @@
   letter-spacing: 0.06em;
   text-transform: capitalize;
   border: none;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 3px 6px rgba(15, 23, 42, 0.18);
 }
 
 /* Blue category pill (Starters / Mains / etc) */
@@ -215,53 +216,69 @@
   margin-top: 4px;
   font-size: 18px;
   font-weight: 600;
-  color: #f9fafb;
+  color: #0f172a;
 }
 
 .guest-card-price {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #e5e7eb;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
+
+/* description */
 
 .guest-card-desc {
-  margin-top: 8px;
-  font-size: 13px;
-  color: rgba(156, 163, 175, 0.96);
+  margin-top: 14px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.45;
 }
+
+/* bottom area */
 
 .guest-card-footer {
-  margin-top: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
   font-size: 11px;
-  color: rgba(148, 163, 184, 0.96);
+  color: #64748b;
 }
 
-/* allergens line in card footer */
 .guest-card-allergens {
   font-size: 11px;
-  color: rgba(148, 163, 184, 0.9);
-}
-
-/* not used right now, but harmless to keep */
-.guest-safe-tag {
-  border-radius: 999px;
-  padding: 4px 12px;
-  border: 1px solid rgba(34, 197, 94, 0.8);
-  background: rgba(22, 163, 74, 0.25);
-  color: #bbf7d0;
-  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.14em;
+  color: #64748b;
 }
 
-.guest-footer,
-.guest-summary-text {
-  white-space: normal;
-  display: block;
-  padding-left: 8px;
+/* optional granular display if you use it later */
+.guest-card-allergens-list {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guest-allergen-pill {
+  padding: 4px 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 11px;
+  color: #334155;
+}
+
+.guest-card-allergens-none {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #94a3b8;
 }
 
 /* === EMPTY STATE =================================== */
@@ -403,6 +420,8 @@
   line-height: 1;
 }
 
+/* FILTER BAR ABOVE DOCK */
+
 .guest-filterbar {
   position: fixed;
   left: 0;
@@ -417,7 +436,7 @@
 
 .guest-filterbar-inner {
   pointer-events: auto;
-  display: inline-flex;              /* shrink to content */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 6px 10px;
@@ -430,7 +449,7 @@
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 
-  max-width: 100%;                  /* still safe on small screens */
+  max-width: 100%;
 }
 
 /* reuse guest-pill layout but remove the top border / margin */
@@ -448,13 +467,6 @@
   .guest-dock-inner {
     flex-wrap: wrap;
     justify-content: center;
-  }
-
-  .guest-dock-left {
-    max-width: 100%;
-    align-items: center;
-    text-align: center;
-    margin-left: 0;
   }
 
   .guest-filterbar-inner {
