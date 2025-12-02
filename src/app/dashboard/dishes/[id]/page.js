@@ -26,7 +26,7 @@ export default function EditDishPage() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
 
-  // allergen selection: array of allergen.id
+  // ARRAY of allergen IDs (numbers)
   const [selectedAllergenIds, setSelectedAllergenIds] = useState([]);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function EditDishPage() {
       setPrice(dish.price != null ? String(dish.price) : "");
       setDescription(dish.description || "");
 
-      // 5) Dish allergens (join table) → preselect only those
+      // 5) Dish allergens (join table)
       const { data: dishAllergens, error: daError } = await supabase
         .from("dish_allergens")
         .select("allergen_id")
@@ -123,10 +123,8 @@ export default function EditDishPage() {
 
       if (dishAllergens && dishAllergens.length > 0) {
         const ids = dishAllergens
-          .map((row) => row.allergen_id)
-          .filter((x) => x != null)
-          .map((x) => Number(x)); // normalise to number
-
+          .map((row) => Number(row.allergen_id))
+          .filter((id) => !Number.isNaN(id));
         setSelectedAllergenIds(ids);
       } else {
         setSelectedAllergenIds([]);
@@ -140,6 +138,7 @@ export default function EditDishPage() {
     }
   };
 
+  // Toggle ONE allergen id in the array
   const toggleAllergen = (allergenId) => {
     setSelectedAllergenIds((prev) => {
       const idNum = Number(allergenId);
@@ -203,7 +202,7 @@ export default function EditDishPage() {
         return;
       }
 
-      const idsArray = selectedAllergenIds.map((id) => Number(id));
+      const idsArray = Array.from(selectedAllergenIds);
       if (idsArray.length > 0) {
         const insertRows = idsArray.map((aid) => ({
           dish_id: dishId,
@@ -346,53 +345,52 @@ export default function EditDishPage() {
         </div>
 
         {/* ALLERGENS */}
-<div className="pt-4 border-t border-slate-800/80">
-  <p className="text-xs text-slate-400 mb-2">
-    Allergens linked to this dish
-  </p>
+        <div className="pt-4 border-t border-slate-800/80">
+          <p className="text-xs text-slate-400 mb-2">
+            Allergens linked to this dish
+          </p>
 
-  {allergens.length === 0 ? (
-    <p className="text-xs text-slate-500">
-      No allergens configured yet. Add them in your allergen library.
-    </p>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      {allergens.map((a) => {
-        const idNum = Number(a.id);
-        const active = selectedAllergenIds.includes(idNum);
+          {allergens.length === 0 ? (
+            <p className="text-xs text-slate-500">
+              No allergens configured yet. Add them in your allergen library.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {allergens.map((a) => {
+                const idNum = Number(a.id);
+                const active = selectedAllergenIds.includes(idNum);
 
-        return (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => toggleAllergen(idNum)}
-            className={
-              "flex items-center justify-between gap-2 text-xs rounded-lg px-3 py-2 border transition " +
-              (active
-                ? "bg-emerald-500/10 border-emerald-400/70 text-emerald-100"
-                : "bg-slate-900/80 border-slate-700 text-slate-200 hover:border-emerald-400/70")
-            }
-          >
-            <span>
-              <span className="font-semibold">{a.code || "A"}</span> –{" "}
-              {a.name}
-            </span>
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => toggleAllergen(idNum)}
+                    className={
+                      "flex items-center justify-between gap-2 text-xs rounded-lg px-3 py-2 border transition " +
+                      (active
+                        ? "bg-emerald-500/10 border-emerald-400/70 text-emerald-100"
+                        : "bg-slate-900/80 border-slate-700 text-slate-200 hover:border-emerald-400/70")
+                    }
+                  >
+                    <span>
+                      <span className="font-semibold">{a.code || "A"}</span> –{" "}
+                      {a.name}
+                    </span>
 
-            {/* fake checkbox indicator */}
-            <span
-              className={
-                "w-3 h-3 rounded-sm border " +
-                (active
-                  ? "bg-emerald-400 border-emerald-300"
-                  : "border-slate-500")
-              }
-            />
-          </button>
-        );
-      })}
-    </div>
-  )}
-</div>
+                    <span
+                      className={
+                        "w-3 h-3 rounded-sm border " +
+                        (active
+                          ? "bg-emerald-400 border-emerald-300"
+                          : "border-slate-500")
+                      }
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <div className="flex justify-end gap-3 pt-2">
           <button
