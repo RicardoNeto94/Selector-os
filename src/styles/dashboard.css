@@ -23,6 +23,13 @@
   box-shadow: 10px 0 40px rgba(0, 0, 0, 0.75);
 }
 
+.so-sidebar-brand {
+  padding: 10px 6px 24px;
+}
+
+.so-sidebar {
+  padding: 20px 14px 20px;
+}
 /* MAIN CANVAS */
 .so-main {
   flex: 1;
