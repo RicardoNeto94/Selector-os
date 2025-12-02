@@ -158,8 +158,13 @@ export default function GuestMenu({ slug }) {
                 className="guest-logo-img"
               />
             ) : (
-              <div className="guest-logo-circle">S</div>
-            )}
+              {restaurantLogoUrl ? (
+  <div className="guest-logo-wrapper">
+    <img src={restaurantLogoUrl} alt="Restaurant logo" />
+  </div>
+) : (
+  <div className="guest-logo-circle">S</div>
+)}
 
             <div>
               <div className="guest-header-title">
