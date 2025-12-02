@@ -1,8 +1,10 @@
+// src/app/api/public-menu/[slug]/route.js
+
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-// ⚠️ service role key – SERVER SIDE ONLY
+// SERVER-SIDE ONLY service role key
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
@@ -11,53 +13,70 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-// This code runs only on the server, so the service key is not exposed to the browser.
+// Runs only on the server, so the service key is not exposed to the browser.
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
 });
 
 export async function GET(_req, { params }) {
-  const slug = params?.slug;
+  try {
+    const slug = params?.slug;
 
-  if (!slug) {
-    return NextResponse.json(
-      { error: "Missing restaurant slug" },
-      { status: 400 }
+    if (!slug) {
+      return NextResponse.json(
+        { error: "Missing restaurant slug" },
+        { status: 400 }
+      );
+    }
+
+    // 1) Get restaurant so we can read logo_url
+    const { data: restaurant, error: restaurantError } = await supabase
+      .from("restaurants")
+      .select("id, logo_url")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (restaurantError) {
+      console.error("Error fetching restaurant for public menu", restaurantError);
+      return NextResponse.json(
+        { error: "Failed to load restaurant" },
+        { status: 500 }
+      );
+    }
+
+    if (!restaurant) {
+      return NextResponse.json(
+        { error: "Restaurant not found" },
+        { status: 404 }
+      );
+    }
+
+    // 2) Get dishes (existing RPC)
+    const { data: dishes, error: dishesError } = await supabase.rpc(
+      "menu_for_slug",
+      { slug_input: slug }
     );
-  }
 
-  const { data, error } = await supabase.rpc("menu_for_slug", {
-    slug_input: slug,
-  });
+    if (dishesError) {
+      console.error("menu_for_slug error", dishesError);
+      return NextResponse.json(
+        {
+          error: dishesError.message || "Failed to load menu",
+        },
+        { status: 500 }
+      );
+    }
 
-  if (error) {
-    console.error("menu_for_slug error", error);
+    // 3) Return both logo URL + dishes
+    return NextResponse.json({
+      logo_url: restaurant.logo_url ?? null,
+      dishes: dishes ?? [],
+    });
+  } catch (err) {
+    console.error("Unexpected error in public-menu route", err);
     return NextResponse.json(
-      {
-        error: error.message || "Failed to load menu",
-        details: error,
-      },
+      { error: "Unexpected server error" },
       { status: 500 }
     );
   }
-
-  // --- Normalize shape for GuestMenu --------------------------
-  const raw = data ?? [];
-
-  let logoUrl = null;
-  let dishes = [];
-
-  // If in future menu_for_slug returns { logo_url, dishes }
-  if (raw && !Array.isArray(raw) && Array.isArray(raw.dishes)) {
-    logoUrl = raw.logo_url ?? null;
-    dishes = raw.dishes;
-  } else {
-    // current behaviour: just an array of dishes
-    dishes = Array.isArray(raw) ? raw : [];
-  }
-
-  return NextResponse.json({
-    logo_url: logoUrl,
-    dishes,
-  });
 }
