@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import Link from "next/link";
 
 export default function DishesPage() {
   const supabase = createClientComponentClient();
@@ -176,6 +177,7 @@ export default function DishesPage() {
                 <th className="text-left py-2">Category</th>
                 <th className="text-right py-2">Price</th>
                 <th className="text-right py-2">Actions</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -204,7 +206,11 @@ export default function DishesPage() {
                         onClick={() => handleDeleteDish(d.id)}
                         disabled={deletingId === d.id}
                         className="text-[11px] rounded-full px-3 py-1 border border-red-500/60 text-red-200 hover:bg-red-500/10 disabled:opacity-50"
-                      >
+                      <td className="text-right">
+        <Link
+          href={`/dashboard/dishes/${dish.id}`}
+          className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-400 hover:text-slate-950 transition"
+        >
                         {deletingId === d.id ? "Deleting…" : "Delete"}
                       </button>
                     </td>
