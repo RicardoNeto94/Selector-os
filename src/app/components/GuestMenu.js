@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../styles/guest.css";
 
-export default function GuestMenu({ slug, restaurantName, logoUrl }) {
+export default function GuestMenu({ slug }) {
   const [dishes, setDishes] = useState([]);
+  const [restaurant, setRestaurant] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -14,18 +16,14 @@ export default function GuestMenu({ slug, restaurantName, logoUrl }) {
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // helper for nice name in header
-  const prettyRestaurantName =
-    restaurantName ||
-    (slug ? slug.replace(/-/g, " ") : "this restaurant");
-
-  // Load menu JSON from public API
+  // Load menu + restaurant info from public APIs
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
         setError("");
 
+        // 1) Dishes
         const res = await fetch(`/api/public-menu/${slug}`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
@@ -41,6 +39,19 @@ export default function GuestMenu({ slug, restaurantName, logoUrl }) {
         }));
 
         setDishes(normalized);
+
+        // 2) Restaurant info (name, logo_url)
+        try {
+          const rRes = await fetch(`/api/public-restaurant/${slug}`);
+          if (rRes.ok) {
+            const rJson = await rRes.json();
+            setRestaurant(rJson);
+          } else {
+            console.warn("Failed to load restaurant info", await rRes.text());
+          }
+        } catch (err) {
+          console.warn("Error loading restaurant info", err);
+        }
       } catch (err) {
         console.error("Failed to load public menu", err);
         setError("Failed to load menu. Please try again.");
@@ -72,6 +83,9 @@ export default function GuestMenu({ slug, restaurantName, logoUrl }) {
   const hasAnyDish = dishes.length > 0;
 
   // === MAIN FILTERING LOGIC =====================================
+  //  - no allergens selected  → show all (respecting category only)
+  //  - allergens selected & containsMode = false → ONLY SAFE dishes
+  //  - allergens selected & containsMode = true  → ONLY CONTAINING dishes
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
@@ -134,29 +148,30 @@ export default function GuestMenu({ slug, restaurantName, logoUrl }) {
   // IMPORTANT: no fallback to full dishes when filter is empty
   const listToRender = filteredDishes;
 
+  const restaurantName =
+    restaurant?.name ||
+    (slug ? slug.replace(/-/g, " ") : "this restaurant");
+
   return (
     <div className="guest-root">
       <div className="guest-shell">
         {/* Header */}
         <header className="guest-header">
           <div className="guest-header-main">
-            {logoUrl ? (
-              <div className="guest-logo-image-wrap">
+            <div className="guest-logo-circle">
+              {restaurant?.logo_url ? (
                 <img
-                  src={logoUrl}
-                  alt={`${prettyRestaurantName} logo`}
+                  src={restaurant.logo_url}
+                  alt={restaurantName}
                   className="guest-logo-img"
                 />
-              </div>
-            ) : (
-              <div className="guest-logo-circle">
-                {(prettyRestaurantName || "S").charAt(0).toUpperCase()}
-              </div>
-            )}
-
+              ) : (
+                "S"
+              )}
+            </div>
             <div>
               <div className="guest-header-title">
-                Safe dishes for <span>{prettyRestaurantName}</span>
+                Safe dishes for <span>{restaurantName}</span>
               </div>
               <p className="guest-header-subtitle">
                 Live view of your configured dishes. Filters never delete data –
@@ -193,6 +208,8 @@ export default function GuestMenu({ slug, restaurantName, logoUrl }) {
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
               // === BADGE LOGIC =====================================
+              // show SAFE only if dish is really safe
+              // show CONTAINS only if dish really contains selection
               let badgeLabel = null;
               let badgeClass = "";
               if (hasFilters) {
