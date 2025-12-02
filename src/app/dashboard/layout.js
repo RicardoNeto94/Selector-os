@@ -16,13 +16,13 @@ export default function DashboardLayout({ children }) {
       {/* LEFT SIDEBAR */}
       <aside className="so-sidebar">
         {/* Brand */}
-        <div className="so-sidebar-brand">
-          <div className="so-sidebar-brand-mark">S</div>
-          <div className="so-sidebar-brand-text">
-            <span className="so-sidebar-brand-name">SelectorOS</span>
-            <span className="so-sidebar-brand-sub">Operator</span>
-          </div>
-        </div>
+       <div className="so-sidebar-brand">
+  <img
+    src="/selectoros-logo.png"
+    alt="SelectorOS"
+    className="so-sidebar-logo-img"
+  />
+</div>
 
         {/* NAV */}
         <nav className="so-sidebar-nav">
