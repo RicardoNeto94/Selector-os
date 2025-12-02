@@ -331,7 +331,7 @@
 .so-settings-label {
   font-size: 13px;
   font-weight: 500;
-  color: #0f172a;
+  color: #e5e7eb;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -339,7 +339,7 @@
 
 .so-settings-hint {
   font-size: 11px;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .so-settings-control {
@@ -348,23 +348,31 @@
   align-items: center;
 }
 
+/* Color swatch – round, premium */
 .so-color-input {
   width: 40px;
-  height: 32px;
+  height: 40px;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(148, 163, 184, 0.5);
   padding: 0;
   background: transparent;
 }
 
+/* Dark-mode pill inputs */
 .so-text-input,
 .so-select-input {
   flex: 1;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
-  padding: 7px 12px;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 8px 14px;
   font-size: 13px;
   outline: none;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+}
+
+.so-text-input::placeholder {
+  color: rgba(156, 163, 175, 0.7);
 }
 
 .so-text-input:focus,
@@ -373,8 +381,9 @@
   box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.4);
 }
 
+/* Footer row */
 .so-settings-footer {
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -382,6 +391,5 @@
 
 .so-settings-message {
   font-size: 12px;
-  color: #16a34a;
+  color: #22c55e;
 }
-
