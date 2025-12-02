@@ -26,7 +26,7 @@ export default function EditDishPage() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
 
-  // allergen selection (set of allergen_id)
+  // allergen selection (set of allergen.id)
   const [selectedAllergenIds, setSelectedAllergenIds] = useState(new Set());
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function EditDishPage() {
         return;
       }
 
-      // 1) Restaurant for this owner
+      // 1) Restaurant
       const { data: r, error: rError } = await supabase
         .from("restaurants")
         .select("*")
@@ -65,7 +65,7 @@ export default function EditDishPage() {
       }
       setRestaurant(r);
 
-      // 2) Menus for this restaurant
+      // 2) Menus
       const { data: menusData, error: mError } = await supabase
         .from("menus")
         .select("*")
@@ -78,7 +78,7 @@ export default function EditDishPage() {
       }
       setMenus(menusData || []);
 
-      // 3) All allergens (for checkboxes)
+      // 3) All allergens
       const { data: allergenData, error: aError } = await supabase
         .from("allergen")
         .select("*")
@@ -92,7 +92,7 @@ export default function EditDishPage() {
       }
       setAllergens(allergenData || []);
 
-      // 4) Dish itself
+      // 4) Dish
       const { data: dish, error: dError } = await supabase
         .from("dishes")
         .select("*")
@@ -111,7 +111,7 @@ export default function EditDishPage() {
       setPrice(dish.price != null ? String(dish.price) : "");
       setDescription(dish.description || "");
 
-      // 5) Current dish allergens
+      // 5) Dish allergens (join table)
       const { data: dishAllergens, error: daError } = await supabase
         .from("dish_allergens")
         .select("allergen_id")
@@ -119,13 +119,13 @@ export default function EditDishPage() {
 
       if (daError) {
         console.error("Failed to load dish allergens", daError);
-        // not fatal – user can still edit basic fields
       }
 
       if (dishAllergens && dishAllergens.length > 0) {
-        setSelectedAllergenIds(
-          new Set(dishAllergens.map((row) => row.allergen_id))
-        );
+        const ids = dishAllergens
+          .map((row) => row.allergen_id)
+          .filter((x) => x != null);
+        setSelectedAllergenIds(new Set(ids));
       }
 
       setLoading(false);
@@ -154,7 +154,6 @@ export default function EditDishPage() {
     setSaving(true);
 
     try {
-      // Basic validation
       if (!name.trim()) {
         setError("Name is required.");
         setSaving(false);
@@ -166,10 +165,10 @@ export default function EditDishPage() {
         return;
       }
 
-      // 1) Update dish row
       const priceNumber =
         price === "" || price == null ? null : Number.parseFloat(price);
 
+      // 1) Update dish
       const { error: updateError } = await supabase
         .from("dishes")
         .update({
@@ -188,7 +187,7 @@ export default function EditDishPage() {
         return;
       }
 
-      // 2) Reset dish_allergens → insert new selection
+      // 2) Reset allergens for this dish
       const { error: deleteError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -220,7 +219,6 @@ export default function EditDishPage() {
         }
       }
 
-      // back to dishes list
       router.push("/dashboard/dishes");
     } catch (err) {
       console.error(err);
@@ -271,7 +269,7 @@ export default function EditDishPage() {
         onSubmit={handleSave}
         className="rounded-2xl bg-slate-950/80 border border-slate-800/80 p-6 space-y-6 shadow-[0_22px_60px_rgba(0,0,0,0.75)]"
       >
-        {/* Basic fields */}
+        {/* BASIC FIELDS */}
         <div className="space-y-4">
           <div>
             <label className="block text-xs text-slate-400 mb-1">
@@ -282,16 +280,12 @@ export default function EditDishPage() {
               className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-400"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="E.g. Steamed Sea Bass with Ginger"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Menu select */}
             <div>
-              <label className="block text-xs text-slate-400 mb-1">
-                Menu
-              </label>
+              <label className="block text-xs text-slate-400 mb-1">Menu</label>
               <select
                 className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                 value={menuId || ""}
@@ -306,7 +300,6 @@ export default function EditDishPage() {
               </select>
             </div>
 
-            {/* Category */}
             <div>
               <label className="block text-xs text-slate-400 mb-1">
                 Category (optional)
@@ -321,25 +314,21 @@ export default function EditDishPage() {
             </div>
           </div>
 
-          {/* Price */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-slate-400 mb-1">
-                Price (€)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="e.g. 24.50"
-              />
-            </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">
+              Price (€)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="e.g. 24.50"
+            />
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-xs text-slate-400 mb-1">
               Description (optional)
@@ -353,41 +342,44 @@ export default function EditDishPage() {
           </div>
         </div>
 
-        {/* Allergens */}
+        {/* ALLERGENS */}
         <div className="pt-4 border-t border-slate-800/80">
           <p className="text-xs text-slate-400 mb-2">
             Allergens linked to this dish
           </p>
+
           {allergens.length === 0 ? (
             <p className="text-xs text-slate-500">
-              No allergens configured yet. Add them in your main allergen
-              library.
+              No allergens configured yet. Add them in your allergen library.
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {allergens.map((a) => {
                 const checked = selectedAllergenIds.has(a.id);
                 return (
-                  <button
+                  <label
                     key={a.id}
-                    type="button"
-                    onClick={() => toggleAllergen(a.id)}
-                    className={
-                      "px-3 py-1 rounded-full text-xs border transition " +
-                      (checked
-                        ? "bg-emerald-500/20 border-emerald-400 text-emerald-200"
-                        : "bg-slate-900 border-slate-600 text-slate-200")
-                    }
+                    className="flex items-center gap-2 text-xs text-slate-200 bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 cursor-pointer hover:border-emerald-400/70"
                   >
-                    {a.code || "A"} – {a.name}
-                  </button>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleAllergen(a.id)}
+                      className="h-3 w-3 rounded border-slate-500 bg-slate-900"
+                    />
+                    <span>
+                      <span className="font-semibold">
+                        {a.code || "A"}
+                      </span>{" "}
+                      – {a.name}
+                    </span>
+                  </label>
                 );
               })}
             </div>
           )}
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"
