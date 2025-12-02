@@ -99,10 +99,10 @@
 /* === NAV ITEMS ===================================================== */
 
 .so-sidebar-nav {
-  margin-top: 18px;
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 14px;
 }
 
 .so-nav-item {
