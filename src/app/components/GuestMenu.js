@@ -345,17 +345,6 @@ export default function GuestMenu({ slug }) {
               >
                 <span className="dock-icon-label">▦</span>
               </button>
-
-              {/* Select all allergens / clear */}
-              <button
-                type="button"
-                className="dock-icon dock-icon-gold"
-                onClick={handleSelectAllAllergens}
-                disabled={allergenList.length === 0}
-              >
-                <span className="dock-icon-label">+</span>
-              </button>
-
               {/* Reset all */}
               <button
                 type="button"
