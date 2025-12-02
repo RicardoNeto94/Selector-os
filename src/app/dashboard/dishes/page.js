@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import Link from "next/link";
 
 export default function DishesPage() {
   const supabase = createClientComponentClient();
@@ -94,7 +93,7 @@ export default function DishesPage() {
     setDeletingId(dishId);
 
     try {
-      // Delete join rows first (if they exist)
+      // delete join rows (if any)
       const { error: daError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -102,7 +101,6 @@ export default function DishesPage() {
 
       if (daError) {
         console.error("Failed to delete dish_allergens", daError);
-        // still try dish delete
       }
 
       const { error: dishError } = await supabase
@@ -198,13 +196,7 @@ export default function DishesPage() {
                         ? `${Number(d.price).toFixed(2)} €`
                         : "—"}
                     </td>
-                    <td className="py-2 pl-4 text-right space-x-2">
-                      <Link
-                        href={`/dashboard/dishes/${d.id}`}
-                        className="inline-flex items-center px-3 py-1 text-[11px] font-medium rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-400 hover:text-slate-950 transition"
-                      >
-                        Edit
-                      </Link>
+                    <td className="py-2 pl-4 text-right">
                       <button
                         type="button"
                         onClick={() => handleDeleteDish(d.id)}
