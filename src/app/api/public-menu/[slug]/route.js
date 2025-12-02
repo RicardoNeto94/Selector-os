@@ -20,11 +20,10 @@ export async function GET(_req, { params }) {
   const slug = params?.slug;
 
   if (!slug) {
-    return NextResponse.json(
-      { error: "Missing restaurant slug" },
-      { status: 400 }
-    );
-  }
+   return NextResponse.json({
+  logo_url: data?.logo_url ?? null,
+  dishes: data?.dishes ?? data ?? []
+});
 
   const { data, error } = await supabase.rpc("menu_for_slug", {
     slug_input: slug,
