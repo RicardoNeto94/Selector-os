@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../styles/guest.css";
 
-export default function GuestMenu({ slug }) {
+export default function GuestMenu({ slug, restaurantName, logoUrl }) {
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,6 +13,11 @@ export default function GuestMenu({ slug }) {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+
+  // helper for nice name in header
+  const prettyRestaurantName =
+    restaurantName ||
+    (slug ? slug.replace(/-/g, " ") : "this restaurant");
 
   // Load menu JSON from public API
   useEffect(() => {
@@ -67,9 +72,6 @@ export default function GuestMenu({ slug }) {
   const hasAnyDish = dishes.length > 0;
 
   // === MAIN FILTERING LOGIC =====================================
-  //  - no allergens selected  → show all (respecting category only)
-  //  - allergens selected & containsMode = false → ONLY SAFE dishes
-  //  - allergens selected & containsMode = true  → ONLY CONTAINING dishes
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
@@ -138,11 +140,23 @@ export default function GuestMenu({ slug }) {
         {/* Header */}
         <header className="guest-header">
           <div className="guest-header-main">
-            <div className="guest-logo-circle">S</div>
+            {logoUrl ? (
+              <div className="guest-logo-image-wrap">
+                <img
+                  src={logoUrl}
+                  alt={`${prettyRestaurantName} logo`}
+                  className="guest-logo-img"
+                />
+              </div>
+            ) : (
+              <div className="guest-logo-circle">
+                {(prettyRestaurantName || "S").charAt(0).toUpperCase()}
+              </div>
+            )}
+
             <div>
               <div className="guest-header-title">
-                Safe dishes for{" "}
-                <span>{slug ? slug.replace(/-/g, " ") : "this restaurant"}</span>
+                Safe dishes for <span>{prettyRestaurantName}</span>
               </div>
               <p className="guest-header-subtitle">
                 Live view of your configured dishes. Filters never delete data –
@@ -179,8 +193,6 @@ export default function GuestMenu({ slug }) {
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
               // === BADGE LOGIC =====================================
-              // show SAFE only if dish is really safe
-              // show CONTAINS only if dish really contains selection
               let badgeLabel = null;
               let badgeClass = "";
               if (hasFilters) {
