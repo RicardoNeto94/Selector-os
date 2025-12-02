@@ -1,9 +1,8 @@
-// src/app/api/public-menu/[slug]/route.js
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-// SERVER-ONLY key – safe here because this code never runs in the browser
+// ⚠️ service role key – SERVER SIDE ONLY
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
@@ -12,6 +11,7 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
+// This code runs only on the server, so the service key is not exposed to the browser.
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
 });
@@ -41,6 +41,23 @@ export async function GET(_req, { params }) {
     );
   }
 
-  // For now: keep returning just the dishes array
-  return NextResponse.json(data ?? []);
+  // --- Normalize shape for GuestMenu --------------------------
+  const raw = data ?? [];
+
+  let logoUrl = null;
+  let dishes = [];
+
+  // If in future menu_for_slug returns { logo_url, dishes }
+  if (raw && !Array.isArray(raw) && Array.isArray(raw.dishes)) {
+    logoUrl = raw.logo_url ?? null;
+    dishes = raw.dishes;
+  } else {
+    // current behaviour: just an array of dishes
+    dishes = Array.isArray(raw) ? raw : [];
+  }
+
+  return NextResponse.json({
+    logo_url: logoUrl,
+    dishes,
+  });
 }
