@@ -117,14 +117,14 @@
 
 .auth-card-logo-floating {
   position: absolute;
-  top: -32px;              /* move up/down as you like */
+  top: -45px;              /* move up/down as you like */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
 }
 
 .auth-card-logo-img-only {
-  width: 260px;            /* main size control */
+  width: 300px;            /* main size control */
   max-width: 80%;
   height: auto;
   object-fit: contain;
