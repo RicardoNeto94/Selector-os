@@ -34,15 +34,16 @@
 /* Brand row */
 
 .so-sidebar-brand {
+  height: 96px;             /* Fixed brand zone */
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 20px 14px 28px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+  justify-content: flex-start;
+  padding: 0 18px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.4);
 }
 
 .so-sidebar-logo-img {
-  height: 120px;           /* Bigger logo */
+  height: 52px;           /* Bigger logo */
   width: auto;
   display: block;
 }
