@@ -152,7 +152,8 @@ export default function GuestMenu({ slug }) {
     <div className="guest-root">
       <div className="guest-shell">
         {/* Header */}
-       <header className="guest-header glass-header">
+    
+      <header className="guest-header glass-header">
   <div className="guest-header-logo-wrap">
     {restaurantLogoUrl ? (
       <img
@@ -165,6 +166,7 @@ export default function GuestMenu({ slug }) {
     )}
   </div>
 </header>
+
 
         {/* Content */}
         {loading ? (
