@@ -39,7 +39,7 @@ export default function NewDishPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedAllergens, setSelectedAllergens] = useState([]);
 
   const [error, setError] = useState("");
 
@@ -96,13 +96,13 @@ export default function NewDishPage() {
     setLoading(false);
   };
 
-  const toggleAllergen = (code: string) => {
+  const toggleAllergen = (code) => {
     setSelectedAllergens((prev) =>
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -153,7 +153,7 @@ export default function NewDishPage() {
 
       // 3) Go back to dishes list
       router.push("/dashboard/dishes");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError(err.message || "Failed to save dish.");
       setSaving(false);
