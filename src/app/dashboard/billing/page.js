@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function BillingPage() {
   const supabase = createServerComponentClient({ cookies });
 
-  // Auth guard
+  // 1) Auth guard
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -18,105 +18,176 @@ export default async function BillingPage() {
     redirect("/sign-in");
   }
 
-  // Load restaurant – mainly to show the name
-  const { data: restaurant, error: restaurantError } = await supabase
+  // 2) Load this user's restaurant (only to show the name)
+  const { data: restaurant } = await supabase
     .from("restaurants")
     .select("*")
     .eq("owner_id", user.id)
     .maybeSingle();
 
-  if (restaurantError || !restaurant) {
-    console.error("No restaurant for user", restaurantError);
-    return (
-      <main className="page-fade px-6 pt-4 pb-8 text-slate-900">
-        <div className="max-w-3xl mx-auto rounded-3xl border border-red-500/30 bg-red-50/80 p-6 shadow-lg">
-          <h1 className="text-lg font-semibold mb-2 text-red-800">
-            No restaurant found
-          </h1>
-          <p className="text-sm text-red-700/90">
-            We couldn&apos;t find a restaurant linked to your account yet.
-            Finish onboarding or contact support.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="page-fade px-6 pt-4 pb-8 text-slate-900">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <main className="page-fade px-6 py-10 text-slate-900">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* HEADER */}
-        <section className="rounded-[28px] bg-white/90 backdrop-blur-xl shadow-[0_20px_60px_rgba(15,23,42,0.16)] border border-slate-200/70 px-7 py-4 flex flex-col gap-1">
-          <h1 className="text-2xl md:text-[26px] font-semibold text-slate-900">
-            Billing
-          </h1>
-          <p className="text-sm text-slate-500 max-w-xl">
-            Manage your SelectorOS plan and invoices for{" "}
-            <span className="font-medium text-slate-800">
-              {restaurant.name || "your restaurant"}
-            </span>
-            .
+        <header className="rounded-3xl bg-white/75 backdrop-blur-2xl shadow-[0_24px_80px_rgba(15,23,42,0.35)] border border-white/60 px-6 py-5 md:px-8 md:py-6">
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-500/80 mb-1">
+            SELECTOROS • BILLING
           </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900">
+            Plans &amp; billing
+          </h1>
+          <p className="mt-2 text-sm text-slate-500 max-w-xl">
+            Stripe billing is not live yet.{" "}
+            <span className="font-medium">All workspaces are currently in free beta</span>{" "}
+            while we build out subscription logic. Your restaurant will not be
+            charged.
+          </p>
+          {restaurant && (
+            <p className="mt-2 text-xs text-slate-400">
+              Current workspace:{" "}
+              <span className="font-semibold text-slate-600">
+                {restaurant.name}
+              </span>
+            </p>
+          )}
+        </header>
+
+        {/* PLANS GRID */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+          {/* Starter – current / free beta */}
+          <PlanCard
+            name="Starter"
+            badge="Current plan"
+            badgeTone="success"
+            price="Free during beta"
+            description="For single restaurants getting started with live allergen visibility."
+            features={[
+              "1 live workspace",
+              "Unlimited dishes & allergens",
+              "Guest & staff allergen views",
+              "Email support",
+            ]}
+            primaryLabel="Current plan"
+            primaryDisabled
+          />
+
+          {/* Pro – coming soon */}
+          <PlanCard
+            name="Pro"
+            badge="Coming soon"
+            price="€39 / month (est.)"
+            description="For growing groups that want more control and tools for staff training."
+            features={[
+              "Up to 5 workspaces",
+              "Role-based staff access",
+              "Advanced analytics",
+              "Priority support",
+            ]}
+            primaryLabel="Upgrade to Pro"
+            primaryDisabled
+          />
+
+          {/* Enterprise – coming soon */}
+          <PlanCard
+            name="Enterprise"
+            badge="Coming soon"
+            price="Let’s talk"
+            description="For hotel groups and multi-country operations that need custom rollouts."
+            features={[
+              "Unlimited workspaces",
+              "Custom onboarding & training",
+              "SSO & security reviews",
+              "Dedicated account partner",
+            ]}
+            primaryLabel="Talk to us"
+            primaryDisabled
+          />
         </section>
 
-        {/* MAIN GRID */}
-        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)] gap-5 items-start">
-          {/* LEFT: Plan card */}
-          <div className="rounded-[28px] bg-white/90 backdrop-blur-xl border border-slate-200/70 shadow-[0_18px_50px_rgba(15,23,42,0.15)] px-6 py-6 flex flex-col gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-emerald-500 mb-1">
-                Current plan
-              </p>
-              <div className="flex items-baseline gap-3">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Starter (placeholder)
-                </h2>
-                <span className="text-sm text-slate-500">— free beta</span>
-              </div>
-              <p className="text-sm text-slate-500 mt-1 max-w-md">
-                During beta your SelectorOS workspace is free. When paid plans
-                launch, they&apos;ll appear here with upgrade options.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-slate-50/90 border border-slate-200 px-4 py-3 text-xs text-slate-500">
-              No billing is active on this account yet. You won&apos;t be
-              charged until you connect a payment method and pick a plan.
-            </div>
-
-            <div className="flex flex-wrap gap-3 pt-1">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-full bg-slate-900 text-slate-50 text-xs font-semibold px-5 py-2 opacity-60 cursor-not-allowed"
-              >
-                Upgrade plan (soon)
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-700 px-4 py-2"
-              >
-                Contact sales
-              </button>
-            </div>
+        {/* INFO / CONTACT CARD */}
+        <section className="rounded-3xl bg-slate-900/90 backdrop-blur-2xl border border-white/10 shadow-[0_26px_80px_rgba(15,23,42,0.75)] px-6 py-5 md:px-8 md:py-6 text-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+              Early access
+            </p>
+            <h2 className="mt-1 text-lg font-semibold">
+              Need multi-site or chain pricing?
+            </h2>
+            <p className="mt-1 text-sm text-slate-300/90 max-w-xl">
+              We&apos;re shaping SelectorOS pricing with our first partners.
+              If you run multiple restaurants or a hotel group, reach out and
+              we&apos;ll set up a tailored plan.
+            </p>
           </div>
 
-          {/* RIGHT: Invoices / usage placeholder */}
-          <aside className="rounded-[28px] bg-white/85 backdrop-blur-xl border border-slate-200/70 shadow-[0_18px_50px_rgba(15,23,42,0.15)] px-6 py-6 flex flex-col gap-3">
-            <h2 className="text-base font-semibold text-slate-900">
-              Invoices & usage
-            </h2>
-            <p className="text-sm text-slate-500">
-              When billing goes live, this block will show a list of invoices,
-              subscription status and basic usage (restaurants, menus, seats).
-            </p>
-
-            <div className="mt-2 rounded-2xl border border-dashed border-slate-300/80 bg-slate-50/80 px-4 py-3 text-xs text-slate-500">
-              For now, everything in SelectorOS is on a free developer plan.
-              Perfect for setting up dishes, menus and staff flows.
-            </div>
-          </aside>
+          <a
+            href="mailto:hello@selectoros.app?subject=SelectorOS%20billing"
+            className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 transition shadow-[0_14px_40px_rgba(45,212,191,0.45)]"
+          >
+            Email the team
+          </a>
         </section>
       </div>
     </main>
+  );
+}
+
+/**
+ * Simple presentational card component for plans.
+ * This is local to this file.
+ */
+function PlanCard({
+  name,
+  badge,
+  badgeTone = "neutral",
+  price,
+  description,
+  features = [],
+  primaryLabel,
+  primaryDisabled = false,
+}) {
+  const badgeClasses =
+    badgeTone === "success"
+      ? "bg-emerald-500/10 text-emerald-600 border-emerald-400/60"
+      : "bg-slate-100/60 text-slate-500 border-slate-200/80";
+
+  return (
+    <div className="rounded-3xl bg-white/80 backdrop-blur-2xl border border-white/70 shadow-[0_22px_70px_rgba(15,23,42,0.25)] px-5 py-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-base font-semibold text-slate-900">{name}</h2>
+        {badge && (
+          <span className={`px-2.5 py-1 rounded-full text-[11px] border ${badgeClasses}`}>
+            {badge}
+          </span>
+        )}
+      </div>
+
+      <p className="text-sm font-semibold text-slate-800">{price}</p>
+      <p className="text-xs text-slate-500">{description}</p>
+
+      <ul className="mt-2 space-y-1.5 text-xs text-slate-500">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-2">
+            <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-4">
+        <button
+          type="button"
+          disabled={primaryDisabled}
+          className="w-full inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold border border-slate-200 bg-slate-900/5 text-slate-500 disabled:text-slate-400 disabled:bg-slate-100 hover:bg-slate-900/10 transition"
+        >
+          {primaryLabel}
+        </button>
+        {primaryDisabled && (
+          <p className="mt-1 text-[11px] text-slate-400 text-center">
+            Stripe subscriptions will unlock this soon.
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
