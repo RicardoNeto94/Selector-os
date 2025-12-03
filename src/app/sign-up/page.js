@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import "../../styles/auth.css";
 
 export default function SignUpPage() {
   const supabase = createClientComponentClient();
@@ -11,182 +13,176 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [birthday, setBirthday] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setMessage("");
+    setError("");
 
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
-      setMessage("Please fill in name, email and password.");
+    if (!fullName || !email || !password || !confirm) {
+      setError("Please fill in all required fields.");
       return;
     }
 
-    if (password !== passwordConfirm) {
-      setMessage("Passwords do not match.");
+    if (password !== confirm) {
+      setError("Passwords do not match.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password: password,
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
         options: {
-          // Store extra info in user_metadata
           data: {
-            full_name: fullName.trim(),
-            birthday: birthday || null,
-            location: location || null,
+            full_name: fullName,
+            birthday,
+            location,
           },
-          emailRedirectTo:
-            typeof window !== "undefined"
-              ? `${window.location.origin}/sign-in`
-              : undefined,
         },
       });
 
-      if (error) throw error;
-
-      // If email confirmation is ON, there is no active session yet.
-      // We ask user to check their inbox.
-      if (!data.session) {
-        setMessage(
-          "Registration successful. Check your email to confirm your account, then sign in to continue onboarding."
-        );
-        return;
+      if (signUpError) {
+        throw signUpError;
       }
 
-      // If you ever disable email confirmation, you can send them straight
-      // to onboarding when a session exists:
-      router.push("/onboarding");
+      // After sign up, send them to sign-in or onboarding
+      router.push("/sign-in");
     } catch (err) {
-      console.error("Sign-up error:", err);
-      setMessage(err.message || "Failed to register. Please try again.");
-    } finally {
+      console.error(err);
+      setError(err.message || "Failed to sign up.");
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-[0_24px_60px_rgba(0,0,0,0.75)] backdrop-blur-2xl">
-        <h1 className="text-2xl font-semibold text-slate-50 mb-2 text-center">
-          Create your Selector<span className="text-emerald-400">OS</span> account
+    <div className="auth-root">
+      <div className="auth-card">
+        {/* floating SelectorOS logo inside the card */}
+        <div className="auth-card-logo-floating">
+          <img
+            src="/selectoros-logo.png"
+            alt="SelectorOS logo"
+            className="auth-card-logo-img-only"
+          />
+        </div>
+
+        <h1 className="auth-title">
+          Create your <span className="auth-title-accent">SelectorOS</span> account
         </h1>
-        <p className="text-xs text-slate-400 mb-6 text-center">
-          Register once. After sign in, we&apos;ll guide you through
-          onboarding to set up your first restaurant.
+        <p className="auth-subtitle">
+          Register once. After sign in, we&apos;ll guide you through onboarding to set
+          up your first restaurant.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Full name
-            </label>
+        <form onSubmit={handleSubmit} className="auth-form">
+          {/* FULL NAME */}
+          <div className="auth-field">
+            <span className="auth-field-icon">👤</span>
             <input
+              className="auth-input"
               type="text"
+              placeholder="Full name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="input"
-              placeholder="Ex: Ricardo Neto"
+              required
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Email
-            </label>
+          {/* EMAIL */}
+          <div className="auth-field">
+            <span className="auth-field-icon">✉️</span>
             <input
+              className="auth-input"
               type="email"
+              placeholder="Email (you@restaurant.com)"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input"
-              placeholder="you@restaurant.com"
+              required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Password
-              </label>
+          {/* PASSWORD ROW */}
+          <div className="auth-field-row">
+            <div className="auth-field">
+              <span className="auth-field-icon">🔒</span>
               <input
+                className="auth-input"
                 type="password"
+                placeholder="Password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input"
-                placeholder="••••••••"
+                required
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Confirm password
-              </label>
+            <div className="auth-field">
+              <span className="auth-field-icon">🔒</span>
               <input
+                className="auth-input"
                 type="password"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                className="input"
-                placeholder="••••••••"
+                placeholder="Confirm password"
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Birthday
-              </label>
+          {/* BIRTHDAY + LOCATION */}
+          <div className="auth-field-row">
+            <div className="auth-field">
+              <span className="auth-field-icon">🎂</span>
               <input
+                className="auth-input"
                 type="date"
+                placeholder="Birthday"
                 value={birthday}
                 onChange={(e) => setBirthday(e.target.value)}
-                className="input"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Location
-              </label>
+            <div className="auth-field">
+              <span className="auth-field-icon">📍</span>
               <input
+                className="auth-input"
                 type="text"
+                placeholder="Location (City, Country)"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="input"
-                placeholder="City, Country"
               />
             </div>
           </div>
-
-          {message && (
-            <p className="text-xs text-emerald-300/90 mt-1">{message}</p>
-          )}
 
           <button
             type="submit"
+            className="auth-primary-btn"
             disabled={loading}
-            className="w-full button mt-4 disabled:opacity-50"
           >
             {loading ? "Creating account…" : "Sign up"}
           </button>
         </form>
 
-        <p className="mt-6 text-[11px] text-slate-400 text-center">
-          Already have an account?{" "}
-          <a
-            href="/sign-in"
-            className="text-emerald-400 hover:text-emerald-300 font-semibold"
-          >
+        {error && (
+          <p className="auth-footer-text" style={{ color: "#b91c1c" }}>
+            {error}
+          </p>
+        )}
+
+        <div className="auth-alt">
+          <span>Already have an account?</span>
+          <Link href="/sign-in" className="auth-alt-link">
             Sign in
-          </a>
-        </p>
+          </Link>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
