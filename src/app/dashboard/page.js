@@ -80,17 +80,16 @@ export default function DashboardHome() {
 
   if (loading || !restaurant || !stats) {
     return (
-      <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
+      <div className="flex items-center justify-center h-[70vh] text-slate-500 text-sm">
         Loading your SelectorOS workspace…
       </div>
     );
   }
 
   return (
-    return (
-  <div className="so-main-inner space-y-8">
+    <div className="so-main-inner space-y-8">
       {/* TOP GREETING + SUMMARY */}
-     <section className="so-card relative overflow-hidden so-card-hero">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-8 shadow-[0_32px_80px_rgba(0,0,0,0.65)] text-slate-100">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -left-10 -top-10 w-56 h-56 rounded-full bg-emerald-500/10 blur-3xl" />
           <div className="absolute right-0 bottom-0 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl" />
@@ -101,14 +100,14 @@ export default function DashboardHome() {
             <p className="text-xs uppercase tracking-[0.25em] text-emerald-400/80">
               SelectorOS • Live cockpit
             </p>
-            <h1 className="text-3xl md:text-4xl font-semibold">
+            <h1 className="text-3xl md:text-4xl font-semibold text-slate-50">
               Welcome back,{" "}
               <span className="text-emerald-400">
                 {restaurant.name || "your restaurant"}
               </span>
               .
             </h1>
-            <p className="text-sm text-slate-300/70 max-w-xl">
+            <p className="text-sm text-slate-300/80 max-w-xl">
               Manage dishes, allergens and menu visibility from a single control
               panel. Your staff view updates in real time with every change.
             </p>
@@ -125,18 +124,20 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          {/* Right small summary card */}
+          {/* Right small summary card – dark frosted glass */}
           <div className="w-full max-w-sm">
-            <div className="rounded-2xl bg-slate-900/80 border border-white/5 px-6 py-5 backdrop-blur-xl">
+            <div className="glass-dark px-6 py-5 rounded-2xl">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs text-slate-400 mb-1">
+                  <p className="text-xs text-slate-300/80 mb-1">
                     Last added dish
                   </p>
-                  <p className="text-sm font-medium">{stats.lastDish}</p>
+                  <p className="text-sm font-medium text-slate-50">
+                    {stats.lastDish}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-400 mb-1">
+                  <p className="text-xs text-slate-300/80 mb-1">
                     Label coverage
                   </p>
                   <p className="text-lg font-semibold text-emerald-400">
@@ -153,7 +154,7 @@ export default function DashboardHome() {
 
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <QuickButton
-                  href="/dashboard/dishes/new"   // 🔥 go straight to creation form
+                  href="/dashboard/dishes/new"
                   label="Add dish"
                   icon={<PlusIcon className="w-4 h-4" />}
                 />
@@ -189,7 +190,7 @@ export default function DashboardHome() {
             title="Dishes missing allergen labels"
             value={stats.missingLabels}
             icon={
-              <ExclamationTriangleIcon className="w-6 h-6 text-amber-400" />
+              <ExclamationTriangleIcon className="w-6 h-6 text-amber-500" />
             }
             tone={stats.missingLabels ? "warning" : "default"}
             description={
@@ -202,25 +203,25 @@ export default function DashboardHome() {
 
         {/* Right: “Tasks list” style card */}
         <div className="xl:col-span-2">
-          <div className="rounded-3xl bg-slate-950/80 border border-white/5 shadow-[0_22px_60px_rgba(0,0,0,0.75)] p-6 md:p-7">
+          <div className="so-card p-6 md:p-7">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 Tasks list
               </h2>
-              <span className="text-[11px] px-3 py-1 rounded-full bg-slate-800/80 text-slate-300/80 border border-slate-700/70">
+              <span className="text-[11px] px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                 Live from your dishes table
               </span>
             </div>
 
             {activity.length === 0 ? (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-500">
                 No recent dishes yet. Start by adding your first dish in the
                 Dishes tab.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-xs md:text-sm">
-                  <thead className="text-slate-400 border-b border-slate-800/80">
+                  <thead className="text-slate-500 border-b border-slate-200">
                     <tr>
                       <th className="text-left py-2 pr-4 font-normal">
                         Dish name
@@ -233,14 +234,19 @@ export default function DashboardHome() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/70">
+                  <tbody className="divide-y divide-slate-200">
                     {activity.map((d) => (
-                      <tr key={d.id} className="hover:bg-slate-900/60">
-                        <td className="py-2 pr-4 font-medium">{d.name}</td>
-                        <td className="py-2 pr-4 text-slate-300/80">
+                      <tr
+                        key={d.id}
+                        className="hover:bg-slate-100/70 transition-colors"
+                      >
+                        <td className="py-2 pr-4 font-medium text-slate-800">
+                          {d.name}
+                        </td>
+                        <td className="py-2 pr-4 text-slate-600">
                           {new Date(d.created_at).toLocaleString()}
                         </td>
-                        <td className="py-2 pr-4 text-slate-300/70 text-xs">
+                        <td className="py-2 pr-4 text-slate-500 text-xs">
                           {restaurant.slug || "—"}
                         </td>
                       </tr>
@@ -253,18 +259,18 @@ export default function DashboardHome() {
         </div>
       </section>
 
-           {/* BOTTOM STRIP: OPERATIONS CARDS */}
+      {/* BOTTOM STRIP: OPERATIONS CARDS */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Staff view status */}
-        <div className="rounded-3xl bg-slate-900/80 border border-slate-800 p-6 md:p-7 shadow-[0_18px_50px_rgba(0,0,0,0.65)] flex flex-col justify-between">
+        <div className="so-card flex flex-col justify-between p-6 md:p-7">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Staff view
             </p>
-            <h3 className="text-lg font-semibold mt-2">
+            <h3 className="text-lg font-semibold mt-2 text-slate-900">
               Keep front-of-house in sync with one source of truth.
             </h3>
-            <p className="text-sm text-slate-400 mt-2 max-w-md">
+            <p className="text-sm text-slate-500 mt-2 max-w-md">
               Every update you make here flows directly into the live SelectorOS
               guest/staff view. Use it as the single place to maintain dishes
               and allergens.
@@ -278,22 +284,22 @@ export default function DashboardHome() {
             >
               Open staff tool setup
             </a>
-            <span className="inline-flex items-center px-3 py-1 rounded-full border border-slate-700/70 text-slate-300/80">
+            <span className="inline-flex items-center px-3 py-1 rounded-full border border-slate-200 text-slate-600 bg-slate-50/80">
               Live link: /r/{restaurant.slug || "your-restaurant"}
             </span>
           </div>
         </div>
 
         {/* Right: System health */}
-        <div className="rounded-3xl bg-slate-950/85 border border-slate-800/70 shadow-[0_18px_50px_rgba(0,0,0,0.65)] p-6 md:p-7 flex flex-col justify-between">
+        <div className="so-card flex flex-col justify-between p-6 md:p-7">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               System health
             </p>
-            <h3 className="text-lg font-semibold mt-2">
+            <h3 className="text-lg font-semibold mt-2 text-slate-900">
               Data completeness snapshot
             </h3>
-            <p className="text-sm text-slate-400 mt-2">
+            <p className="text-sm text-slate-500 mt-2">
               Quick view of how safe your data is for staff use. As long as
               everything is labelled, your team never has to guess at allergens
               during service.
@@ -323,10 +329,10 @@ export default function DashboardHome() {
 function Tag({ label, value, tone = "default" }) {
   const toneClass =
     tone === "warning"
-      ? "bg-amber-500/10 text-amber-200 border-amber-400/40"
+      ? "bg-amber-100 text-amber-800 border-amber-300"
       : tone === "success"
-      ? "bg-emerald-500/10 text-emerald-200 border-emerald-400/40"
-      : "bg-slate-800/60 text-slate-200 border-slate-600/40";
+      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+      : "bg-slate-100 text-slate-700 border-slate-200";
 
   return (
     <span
@@ -340,19 +346,19 @@ function Tag({ label, value, tone = "default" }) {
 
 function KPICard({ title, value, description, icon, tone = "default" }) {
   const borderClass =
-    tone === "warning"
-      ? "border-amber-400/40"
-      : "border-slate-700/70";
+    tone === "warning" ? "border-amber-300" : "border-transparent";
 
   return (
-    <div className={`rounded-2xl bg-slate-950/80 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.6)] flex items-start gap-4`}>
-      <div className="p-2.5 rounded-xl bg-slate-800/80 text-slate-100">
+    <div
+      className={`so-card flex items-start gap-4 ${borderClass}`}
+    >
+      <div className="p-2.5 rounded-xl bg-slate-100 text-slate-900">
         {icon}
       </div>
       <div>
-        <p className="text-xs text-slate-400 mb-1">{title}</p>
-        <p className="text-2xl font-semibold mb-1">{value}</p>
-        <p className="text-xs text-slate-400">{description}</p>
+        <p className="text-xs text-slate-500 mb-1">{title}</p>
+        <p className="text-2xl font-semibold mb-1 text-slate-900">{value}</p>
+        <p className="text-xs text-slate-500">{description}</p>
       </div>
     </div>
   );
@@ -378,8 +384,8 @@ function QuickButton({ href, label, icon, variant = "solid" }) {
 function HealthPill({ label, value, tone = "default" }) {
   const color =
     tone === "warning"
-      ? "text-amber-300 bg-amber-500/10 border-amber-400/40"
-      : "text-emerald-300 bg-emerald-500/5 border-emerald-400/30";
+      ? "text-amber-800 bg-amber-100 border-amber-300"
+      : "text-emerald-800 bg-emerald-100 border-emerald-300";
 
   return (
     <div
