@@ -3,10 +3,24 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { stripe } from "@/lib/stripe";
+import Stripe from "stripe";
+
+let stripe = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-06-20",
+  });
+}
 
 export async function POST(request) {
   try {
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe is not configured in this environment." },
+        { status: 500 }
+      );
+    }
+
     const supabase = createRouteHandlerClient({ cookies });
 
     const {
