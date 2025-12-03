@@ -87,9 +87,10 @@ export default function DashboardHome() {
   }
 
   return (
-    <div className="space-y-8 text-slate-100">
+    return (
+  <div className="so-main-inner space-y-8">
       {/* TOP GREETING + SUMMARY */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-8 shadow-[0_32px_80px_rgba(0,0,0,0.65)]">
+     <section className="so-card relative overflow-hidden so-card-hero">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -left-10 -top-10 w-56 h-56 rounded-full bg-emerald-500/10 blur-3xl" />
           <div className="absolute right-0 bottom-0 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl" />
