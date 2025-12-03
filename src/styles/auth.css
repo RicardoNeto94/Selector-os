@@ -2,31 +2,13 @@
 
 .auth-root {
   min-height: 100vh;
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--so-bg-page-light);
   padding: 24px;
-  box-sizing: border-box;
-
-  /* soft sky gradient */
-  background: radial-gradient(
-    circle at 20% 0%,
-    #e7f3ff 0,
-    #c9e3ff 30%,
-    #b4d9ff 45%,
-    #9fc8f8 60%,
-    #8bb7f0 75%,
-    #76a3e6 100%
-  );
-  position: relative;
-  overflow: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    sans-serif;
-
-  z-index: 0;
+  box-shadow: inset 0 0 120px rgba(15, 23, 42, 0.18);
 }
-
 /* subtle arcs / rings – behind everything + no pointer events */
 .auth-root::before,
 .auth-root::after {
@@ -91,17 +73,11 @@
 .auth-card {
   width: 100%;
   max-width: 520px;
-  border-radius: 32px;
+  border-radius: var(--so-card-radius);
   padding: 36px 40px 32px;
-
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--so-card-bg);
   backdrop-filter: blur(18px);
-
-  /* softer shadow: less spread, less opacity */
-  box-shadow:
-    0 22px 40px rgba(15, 23, 42, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.7);
-
+  box-shadow: var(--so-card-shadow);
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -198,18 +174,15 @@
 
 .auth-primary-btn {
   width: 100%;
-  border-radius: 999px;
+  border-radius: var(--so-radius-pill);
   border: none;
   padding: 11px 18px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-
-  background: radial-gradient(circle at 0% 0%, #0f172a, #020617 70%);
-  color: #f9fafb;
-
+  background: radial-gradient(circle at 0% 0%, var(--so-primary), #020617 70%);
+  color: var(--so-primary-text-on);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
 
 .auth-primary-btn:hover:not(:disabled) {
