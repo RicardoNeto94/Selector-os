@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // ⬅️ add this
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "../../styles/auth.css";
 
@@ -47,73 +48,4 @@ export default function SignInPage() {
     <div className="auth-root">
       {/* center card */}
       <div className="auth-card">
-        {/* floating SelectorOS logo inside the card */}
-        <div className="auth-card-logo-floating">
-          <img
-            src="/selectoros-logo.png"
-            alt="SelectorOS logo"
-            className="auth-card-logo-img-only"
-          />
-        </div>
-
-        <h1 className="auth-title">Sign in with email</h1>
-        <p className="auth-subtitle">
-          Access your SelectorOS cockpit to manage dishes, menus and allergens.
-        </p>
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          {/* EMAIL */}
-          <div className="auth-field">
-            <span className="auth-field-icon">✉️</span>
-            <input
-              className="auth-input"
-              type="email"
-              placeholder="Email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          {/* PASSWORD */}
-          <div className="auth-field">
-            <span className="auth-field-icon">🔒</span>
-            <input
-              className="auth-input"
-              type="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="auth-password-row">
-            <span />
-            <a href="/forgot-password" className="auth-link">
-              Forgot password?
-            </a>
-          </div>
-
-          <button
-            type="submit"
-            className="auth-primary-btn"
-            disabled={loading}
-          >
-            {loading ? "Signing in…" : "Get Started"}
-          </button>
-        </form>
-
-        {error ? (
-          <p className="auth-footer-text" style={{ color: "#b91c1c" }}>
-            {error}
-          </p>
-        ) : (
-          <p className="auth-footer-text">
-            Protected access for restaurant operators only.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
+        {/* floating SelectorOS logo i*
