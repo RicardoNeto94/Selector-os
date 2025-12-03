@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }) {
           />
         </div>
 
-        {/* NAV */}
+        {/* NAVIGATION */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-item">
             <span className="so-nav-icon-wrap">
@@ -48,7 +48,7 @@ export default function DashboardLayout({ children }) {
             <span className="so-nav-label">Menu editor</span>
           </Link>
 
-          {/* NEW: Billing */}
+          {/* Billing now visible in sidebar */}
           <Link href="/dashboard/billing" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <CreditCardIcon className="so-nav-icon" />
@@ -74,20 +74,16 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          <button
-            className="so-logout-btn"
-            type="button"
-            onClick={() => {
-              // Client-side redirect to logout route
-              window.location.href = "/logout";
-            }}
-          >
-            Logout
-          </button>
+          {/* IMPORTANT: no window / hooks here, just a plain POST form */}
+          <form action="/auth/sign-out" method="post">
+            <button type="submit" className="so-logout-btn">
+              Logout
+            </button>
+          </form>
         </div>
       </aside>
 
-      {/* MAIN CANVAS */}
+      {/* MAIN CONTENT */}
       <main className="so-main">{children}</main>
     </div>
   );
