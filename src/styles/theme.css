@@ -1,27 +1,46 @@
 :root {
-  /* Brand */
-  --so-primary: #020617;              /* deep navy for buttons */
-  --so-primary-text-on: #f9fafb;      /* text on primary */
+  /* === BRAND COLORS ======================================== */
+  --so-primary: #020617;          /* deep navy for main CTAs */
+  --so-primary-soft: #0b1220;
+  --so-accent: #0f766e;           /* teal accent */
+  --so-accent-soft: #22c55e;
 
-  --so-accent: #0f766e;               /* subtle teal accent */
-  --so-bg-page-light: radial-gradient(
+  /* === BACKGROUND ========================================== */
+  --so-bg-page: radial-gradient(
     circle at 20% 0%,
     #e6f3ff 0,
     #c7e2ff 30%,
     #98c6ff 70%,
     #79aaf0 100%
   );
+  --so-vignette: inset 0 0 120px rgba(15, 23, 42, 0.18);
 
-  /* Surfaces */
-  --so-card-bg: rgba(255, 255, 255, 0.9);
-  --so-card-border: rgba(255, 255, 255, 0.7);
-  --so-card-radius: 32px;
-  --so-card-shadow: 
+  /* === GLASS SURFACES ====================================== */
+  /* light frosted glass (cards, main panels) */
+  --so-glass-light-bg: rgba(255, 255, 255, 0.85);
+  --so-glass-light-border: rgba(255, 255, 255, 0.7);
+  --so-glass-light-shadow:
     0 22px 40px rgba(15, 23, 42, 0.18),
     0 0 0 1px rgba(255, 255, 255, 0.7);
 
-  /* General */
-  --so-radius-pill: 999px;
+  /* dark frosted glass (sidebar, dark widgets) */
+  --so-glass-dark-bg: rgba(15, 23, 42, 0.78);
+  --so-glass-dark-border: rgba(15, 23, 42, 0.8);
+  --so-glass-dark-shadow:
+    0 22px 40px rgba(15, 23, 42, 0.6),
+    0 0 0 1px rgba(15, 23, 42, 0.7);
+
+  /* === TYPOGRAPHY ========================================== */
   --so-text-main: #020617;
   --so-text-muted: #6b7280;
+  --so-text-soft: #9ca3af;
+  --so-text-on-dark: #e5e7eb;
+
+  /* === RADII & ELEVATION =================================== */
+  --so-radius-card: 28px;
+  --so-radius-card-lg: 32px;
+  --so-radius-pill: 999px;
+
+  /* === MISC ================================================ */
+  --so-border-subtle: rgba(148, 163, 184, 0.35);
 }
