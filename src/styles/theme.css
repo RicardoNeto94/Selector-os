@@ -1,98 +1,27 @@
 :root {
-  --accent: #f5d986; /* Satin Gold Glow */
-  --accent-soft: rgba(245, 217, 134, 0.35);
-  
-  --bg-main: #0f0f12;
-  --bg-panel: #151519;
-  --bg-matte: #1b1b22;
-  --bg-glass: rgba(255, 255, 255, 0.06);
+  /* Brand */
+  --so-primary: #020617;              /* deep navy for buttons */
+  --so-primary-text-on: #f9fafb;      /* text on primary */
 
-  --text-main: #ffffff;
-  --text-soft: #b4b4c2;
-  --text-faint: #6d6d7a;
+  --so-accent: #0f766e;               /* subtle teal accent */
+  --so-bg-page-light: radial-gradient(
+    circle at 20% 0%,
+    #e6f3ff 0,
+    #c7e2ff 30%,
+    #98c6ff 70%,
+    #79aaf0 100%
+  );
 
-  --radius-lg: 22px;
-  --radius-sm: 14px;
-  
-  --shadow-soft: 0 4px 20px rgba(0,0,0,0.3);
-  --shadow-glow: 0 0 25px var(--accent-soft);
+  /* Surfaces */
+  --so-card-bg: rgba(255, 255, 255, 0.9);
+  --so-card-border: rgba(255, 255, 255, 0.7);
+  --so-card-radius: 32px;
+  --so-card-shadow: 
+    0 22px 40px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.7);
 
-  font-family: 'Satoshi', sans-serif;
-}
-
-/* Full dark background */
-body {
-  background: radial-gradient(circle at top left,
-      rgba(255, 212, 120, 0.08),
-      rgba(0, 0, 0, 0.85));
-  color: var(--text-main);
-}
-
-/* CARD BASE — hybrid matte + glass  */
-.card {
-  background: linear-gradient(
-        to bottom right,
-        var(--bg-glass),
-        var(--bg-matte)
-      );
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-/* Glowing accent text */
-.accent {
-  color: var(--accent);
-}
-
-/* Soft icon buttons */
-.icon-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-matte);
-  color: var(--text-soft);
-  transition: 0.2s;
-}
-.icon-btn:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-/* Sidebar */
-.sidebar {
-  width: 88px;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(18px);
-  padding: 28px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  border-right: 1px solid rgba(255,255,255,0.05);
-}
-
-.sidebar a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 58px;
-  border-radius: var(--radius-lg);
-  color: var(--text-faint);
-  transition: 0.2s;
-}
-
-.sidebar a:hover {
-  background: var(--bg-glass);
-  color: var(--accent);
-}
-
-.sidebar .active {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: var(--shadow-glow);
+  /* General */
+  --so-radius-pill: 999px;
+  --so-text-main: #020617;
+  --so-text-muted: #6b7280;
 }
