@@ -1,214 +1,122 @@
-"use client";
+// src/app/dashboard/billing/page.js
 
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
-export default function BillingPage() {
-  const supabase = createClientComponentClient();
+export const dynamic = "force-dynamic";
 
-  const [user, setUser] = useState(null);
-  const [restaurant, setRestaurant] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [portalLoading, setPortalLoading] = useState(false);
+export default async function BillingPage() {
+  const supabase = createServerComponentClient({ cookies });
 
-  useEffect(() => {
-    loadBilling();
-  }, []);
+  // Auth guard
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  async function loadBilling() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) throw userError;
-      if (!user) {
-        setError("You must be signed in to see billing.");
-        setLoading(false);
-        return;
-      }
-
-      setUser(user);
-
-      const { data: restaurantData, error: restaurantError } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (restaurantError) throw restaurantError;
-
-      setRestaurant(restaurantData);
-    } catch (err) {
-      console.error("Billing load error:", err);
-      setError(err.message || "Failed to load billing information.");
-    } finally {
-      setLoading(false);
-    }
+  if (!user) {
+    redirect("/sign-in");
   }
 
-  async function openStripePortal() {
-    try {
-      setPortalLoading(true);
-      setError(null);
+  // Load restaurant – mainly to show the name
+  const { data: restaurant, error: restaurantError } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("owner_id", user.id)
+    .maybeSingle();
 
-      const res = await fetch("/api/create-portal", {
-        method: "POST",
-      });
-
-      const json = await res.json().catch(() => ({}));
-
-      if (!res.ok || !json.url) {
-        throw new Error(json.error || "Failed to open Stripe billing portal.");
-      }
-
-      // Redirect to Stripe portal
-      window.location.href = json.url;
-    } catch (err) {
-      console.error("Billing portal error (client):", err);
-      setError(err.message || "Could not open Stripe billing portal.");
-      setPortalLoading(false);
-    }
-  }
-
-  if (loading) {
+  if (restaurantError || !restaurant) {
+    console.error("No restaurant for user", restaurantError);
     return (
-      <div className="flex items-center justify-center h-[60vh] text-slate-300 text-sm">
-        Loading billing details…
-      </div>
+      <main className="page-fade px-6 pt-4 pb-8 text-slate-900">
+        <div className="max-w-3xl mx-auto rounded-3xl border border-red-500/30 bg-red-50/80 p-6 shadow-lg">
+          <h1 className="text-lg font-semibold mb-2 text-red-800">
+            No restaurant found
+          </h1>
+          <p className="text-sm text-red-700/90">
+            We couldn&apos;t find a restaurant linked to your account yet.
+            Finish onboarding or contact support.
+          </p>
+        </div>
+      </main>
     );
   }
 
-  const currentPlan =
-    restaurant?.subscription_plan && restaurant.subscription_plan !== ""
-      ? restaurant.subscription_plan
-      : "free";
-
-  const isFree = currentPlan === "free";
-
   return (
-    <div className="space-y-8 max-w-4xl text-slate-100">
-      {/* ERROR */}
-      {error && (
-        <div className="rounded-2xl border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200">
-          {error}
-        </div>
-      )}
-
-      {/* HEADER */}
-      <section className="bg-slate-950/80 shadow-[0_24px_60px_rgba(0,0,0,0.7)] border border-white/10 rounded-2xl p-8 space-y-3">
-        <h1 className="text-3xl font-bold">Billing</h1>
-        <p className="text-slate-400">
-          Manage your subscription and payment details.
-        </p>
-
-        {restaurant?.name && (
-          <p className="text-sm text-slate-400">
-            Restaurant:{" "}
-            <span className="font-semibold text-slate-100">
-              {restaurant.name}
+    <main className="page-fade px-6 pt-4 pb-8 text-slate-900">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* HEADER */}
+        <section className="rounded-[28px] bg-white/90 backdrop-blur-xl shadow-[0_20px_60px_rgba(15,23,42,0.16)] border border-slate-200/70 px-7 py-4 flex flex-col gap-1">
+          <h1 className="text-2xl md:text-[26px] font-semibold text-slate-900">
+            Billing
+          </h1>
+          <p className="text-sm text-slate-500 max-w-xl">
+            Manage your SelectorOS plan and invoices for{" "}
+            <span className="font-medium text-slate-800">
+              {restaurant.name || "your restaurant"}
             </span>
+            .
           </p>
-        )}
-      </section>
+        </section>
 
-      {/* CURRENT PLAN */}
-      <section className="bg-slate-950/80 border border-white/10 rounded-2xl p-8 shadow-[0_18px_45px_rgba(0,0,0,0.55)] space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-slate-400">
-              Current plan
-            </p>
-            <p className="mt-1 text-2xl font-bold capitalize">
-              {currentPlan}
-            </p>
-            <p className="mt-2 text-sm text-slate-400 max-w-md">
-              {isFree
-                ? "You are currently on the Free plan. Upgrade to unlock multiple restaurants, more menu slots, and advanced analytics."
-                : "Your subscription is active. You can manage payment methods and invoices via the Stripe billing portal."}
-            </p>
+        {/* MAIN GRID */}
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)] gap-5 items-start">
+          {/* LEFT: Plan card */}
+          <div className="rounded-[28px] bg-white/90 backdrop-blur-xl border border-slate-200/70 shadow-[0_18px_50px_rgba(15,23,42,0.15)] px-6 py-6 flex flex-col gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-emerald-500 mb-1">
+                Current plan
+              </p>
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Starter (placeholder)
+                </h2>
+                <span className="text-sm text-slate-500">— free beta</span>
+              </div>
+              <p className="text-sm text-slate-500 mt-1 max-w-md">
+                During beta your SelectorOS workspace is free. When paid plans
+                launch, they&apos;ll appear here with upgrade options.
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-slate-50/90 border border-slate-200 px-4 py-3 text-xs text-slate-500">
+              No billing is active on this account yet. You won&apos;t be
+              charged until you connect a payment method and pick a plan.
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-1">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-full bg-slate-900 text-slate-50 text-xs font-semibold px-5 py-2 opacity-60 cursor-not-allowed"
+              >
+                Upgrade plan (soon)
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-700 px-4 py-2"
+              >
+                Contact sales
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col items-start md:items-end gap-3">
-            <p className="text-xs text-slate-400">Billing owner</p>
-            <p className="text-sm font-semibold">
-              {user?.email ?? "Unknown email"}
+          {/* RIGHT: Invoices / usage placeholder */}
+          <aside className="rounded-[28px] bg-white/85 backdrop-blur-xl border border-slate-200/70 shadow-[0_18px_50px_rgba(15,23,42,0.15)] px-6 py-6 flex flex-col gap-3">
+            <h2 className="text-base font-semibold text-slate-900">
+              Invoices & usage
+            </h2>
+            <p className="text-sm text-slate-500">
+              When billing goes live, this block will show a list of invoices,
+              subscription status and basic usage (restaurants, menus, seats).
             </p>
 
-            <button
-              type="button"
-              onClick={openStripePortal}
-              disabled={portalLoading}
-              className={`
-                inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold
-                ${
-                  portalLoading
-                    ? "bg-emerald-900/70 text-emerald-200 cursor-wait"
-                    : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"
-                }
-                transition disabled:opacity-50 disabled:cursor-not-allowed
-              `}
-            >
-              {portalLoading ? "Opening portal…" : "Manage / Upgrade plan"}
-            </button>
-          </div>
-        </div>
-
-        <div className="grid gap-4 text-xs text-slate-400 md:grid-cols-3">
-          <div>
-            <p className="font-semibold text-slate-200">Status</p>
-            <p className="mt-1">{isFree ? "Trial / Free" : "Active"}</p>
-          </div>
-          <div>
-            <p className="font-semibold text-slate-200">Seats</p>
-            <p className="mt-1">
-              {restaurant?.seats ?? 1} staff access (configurable later)
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-slate-200">Next invoice</p>
-            <p className="mt-1">
-              {isFree ? "None – on Free plan" : "Managed in Stripe portal"}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* INVOICE HISTORY – placeholder for now */}
-      <section className="bg-slate-950/80 border border-white/10 rounded-2xl p-8 shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
-        <h2 className="text-xl font-semibold mb-4">Invoice History</h2>
-
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-slate-400 border-b border-white/10">
-              <th className="py-2 text-left">Date</th>
-              <th className="py-2 text-left">Invoice ID</th>
-              <th className="py-2 text-left">Amount</th>
-              <th className="py-2 text-right">Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr className="border-b border-white/5">
-              <td className="py-2 text-slate-400">—</td>
-              <td className="py-2 text-slate-400">—</td>
-              <td className="py-2 text-slate-400">—</td>
-              <td className="py-2 text-right text-slate-400">—</td>
-            </tr>
-            <tr>
-              <td colSpan={4} className="py-4 text-xs text-slate-500">
-                Stripe invoice history will appear here once webhooks are
-                connected.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-    </div>
+            <div className="mt-2 rounded-2xl border border-dashed border-slate-300/80 bg-slate-50/80 px-4 py-3 text-xs text-slate-500">
+              For now, everything in SelectorOS is on a free developer plan.
+              Perfect for setting up dishes, menus and staff flows.
+            </div>
+          </aside>
+        </section>
+      </div>
+    </main>
   );
 }
