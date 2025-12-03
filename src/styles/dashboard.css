@@ -4,33 +4,36 @@
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
-  background: radial-gradient(circle at top left, #020617, #020617 70%);
-  color: #e5f3ff;
+  background: var(--so-bg-page-light);  /* same as auth */
+  color: var(--so-text-main);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
+
+  box-shadow: inset 0 0 120px rgba(15, 23, 42, 0.18); /* same vignette */
 }
 
 /* === SIDEBAR =================================================== */
 
 .so-sidebar {
-  position: fixed;                         /* Pinned to viewport */
-  top: 0;
-  left: 0;
-  height: 100vh;                           /* Full viewport height */
-  width: 210px;                            /* Slimmer sidebar */
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  height: calc(100vh - 32px);
+  width: 220px;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 18px 14px 18px;
+  padding: 18px 16px 18px;
 
-  background: radial-gradient(circle at top left, #022c22, #020617 70%);
-  border-right: 1px solid rgba(15, 23, 42, 0.95);
-  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.75);
-  border-top-right-radius: 24px;
-  border-bottom-right-radius: 24px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(18px);
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.45),
+    0 0 0 1px rgba(15, 23, 42, 0.6);
 }
-
 /* Brand row */
 
 .so-sidebar-brand {
@@ -186,23 +189,13 @@
 /* === MAIN CANVAS =============================================== */
 
 .so-main {
-  margin-left: 210px;   /* Matches sidebar width */
-
-  flex: 1;
+  margin-left: 260px; /* sidebar width + gap */
+  padding: 32px 40px 40px;
   min-height: 100vh;
-
   display: flex;
   flex-direction: column;
   gap: 20px;
-
-  padding: 28px 32px 40px;
-
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 60%),
-    radial-gradient(circle at bottom right, rgba(209, 213, 219, 0.7), transparent 65%),
-    var(--so-bg);
-
-  overflow: auto;
+  background: transparent; /* page bg comes from root */
 }
 /* Wraps page content inside .so-main for nicer width */
 .so-main-inner {
@@ -220,10 +213,10 @@
 }
 
 .so-card {
-  border-radius: var(--so-radius-lg);
-  background: var(--so-surface);
-  box-shadow: var(--so-shadow-soft);
-  border: 1px solid var(--so-border-subtle);
+  border-radius: var(--so-card-radius);
+  background: var(--so-card-bg);
+  box-shadow: var(--so-card-shadow);
+  border: 1px solid var(--so-card-border);
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
@@ -392,4 +385,28 @@
 .so-settings-message {
   font-size: 12px;
   color: #22c55e;
+}
+
+.so-logout-btn {
+  width: 100%;
+  border-radius: var(--so-radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: transparent;
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: background 0.16s ease, box-shadow 0.16s ease, transform 0.08s ease;
+}
+
+.so-logout-btn:hover {
+  background: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
+  transform: translateY(-1px);
+}
+
+.so-logout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.35);
 }
