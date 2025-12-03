@@ -96,19 +96,12 @@
 }
 
 .so-nav-icon-wrap {
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 0, #020617, #020617 70%);
-  border: 1px solid rgba(51, 65, 85, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(15, 23, 42, 0.2);
 }
 
-.so-nav-icon {
-  width: 18px;
-  height: 18px;
+.so-nav-item {
+  color: #0f172a;
 }
 
 .so-nav-item:hover {
