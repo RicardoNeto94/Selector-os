@@ -1,4 +1,7 @@
-/* ====== SHELL LAYOUT & COLOR SYSTEM ===================== */
+/* src/styles/dashboard.css */
+/* SelectorOS – Frosted Glass Dashboard Theme */
+
+/* === LAYOUT SHELL ======================================= */
 
 .so-dashboard-root {
   min-height: 100vh;
@@ -11,7 +14,7 @@
     sans-serif;
 }
 
-/* === SIDEBAR =================================================== */
+/* === SIDEBAR ============================================ */
 
 .so-sidebar {
   position: fixed;
@@ -25,23 +28,24 @@
   justify-content: space-between;
   padding: 22px 18px 22px;
 
-  background: var(--so-glass-dark-bg);
+  /* frosted light glass */
+  background: var(--so-glass-light-bg);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
 
   border-radius: var(--so-radius-card-lg);
-  border: 1px solid var(--so-glass-dark-border);
-  box-shadow: var(--so-glass-dark-shadow);
+  border: 1px solid var(--so-glass-light-border);
+  box-shadow: var(--so-glass-light-shadow);
 }
 
-/* Brand row */
+/* BRAND AREA */
 
 .so-sidebar-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 4px 20px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.6);
+  padding: 4px 4px 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
 }
 
 .so-sidebar-logo-img {
@@ -50,32 +54,13 @@
   display: block;
 }
 
-.so-sidebar-brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  transform: translateY(4px);
-}
-
-.so-sidebar-brand-name {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: #e5f3ff;
-}
-
-.so-sidebar-brand-sub {
-  font-size: 11px;
-  opacity: 0,7;
-}
-
-/* Nav */
+/* NAVIGATION */
 
 .so-sidebar-nav {
   margin-top: 26px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .so-nav-item {
@@ -86,7 +71,7 @@
   border-radius: var(--so-radius-pill);
   text-decoration: none;
   font-size: 13px;
-  color: var(--so-text-on-dark);
+  color: var(--so-text-main);
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -97,8 +82,8 @@
   width: 30px;
   height: 30px;
   border-radius: var(--so-radius-pill);
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(51, 65, 85, 0.9);
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,22 +95,23 @@
 }
 
 .so-nav-item:hover {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(248, 250, 252, 0.9);
   transform: translateY(-1px);
 }
 
-/* active state (you can wire with aria-current or a class) */
+/* optional active state (wire with className) */
 .so-nav-item--active {
   background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.5);
+  color: var(--so-text-on-dark);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.4);
 }
 
-/* Sidebar footer: user + logout */
+/* === SIDEBAR FOOTER (USER + LOGOUT) ===================== */
 
 .so-sidebar-footer {
   margin-top: 24px;
   padding-top: 12px;
-  border-top: 1px solid rgba(15, 23, 42, 0.6);
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -150,26 +136,31 @@
   color: #020617;
 }
 
+.so-user-meta {
+  display: flex;
+  flex-direction: column;
+}
+
 .so-user-name {
   font-size: 12px;
   font-weight: 500;
-  color: var(--so-text-on-dark);
+  color: var(--so-text-main);
 }
 
 .so-user-tag {
   font-size: 10px;
-  color: rgba(148, 163, 184, 0.9);
+  color: var(--so-text-muted);
 }
 
 .so-logout-btn {
   width: 100%;
   border-radius: var(--so-radius-pill);
-  border: 1px solid rgba(248, 250, 252, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.6);
   padding: 9px 12px;
   font-size: 13px;
   font-weight: 500;
   background: transparent;
-  color: var(--so-text-on-dark);
+  color: var(--so-text-main);
   cursor: pointer;
   transition:
     background 0.16s ease,
@@ -180,18 +171,18 @@
 
 .so-logout-btn:hover {
   background: rgba(15, 23, 42, 0.9);
+  color: var(--so-text-on-dark);
   border-color: rgba(248, 250, 252, 0.9);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.6);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.45);
   transform: translateY(-1px);
 }
 
 .so-logout-btn:active {
   transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.4);
 }
 
-
-/* === MAIN CANVAS =============================================== */
+/* === MAIN CONTENT AREA =================================== */
 
 .so-main {
   margin-left: 270px; /* sidebar width + gap */
@@ -209,7 +200,7 @@
   margin: 0 auto;
 }
 
-/* ====== CARD / GRID SYSTEM (unchanged logic) ===================== */
+/* === CARDS & GRID ======================================== */
 
 .so-card {
   border-radius: var(--so-radius-card);
@@ -238,6 +229,7 @@
   gap: 18px;
 }
 
+/* CARD HEADER / METRICS – reuse your existing semantics */
 
 .so-card-header {
   display: flex;
@@ -258,7 +250,7 @@
   border-radius: var(--so-radius-pill);
   font-size: 11px;
   background: #eef5ef;
-  color: var(--so-primary-strong);
+  color: var(--so-accent);
   font-weight: 600;
 }
 
@@ -272,51 +264,21 @@
   color: var(--so-text-muted);
 }
 
-.so-grid-lg {
-  display: grid;
-  grid-template-columns: 2fr 1.4fr;
-  gap: 18px;
-}
-
-.so-chart-placeholder {
-  border-radius: 18px;
-  background: var(--so-surface-soft);
-  border: 1px dashed rgba(148, 163, 184, 0.5);
-  min-height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: var(--so-text-muted);
-}
-
-/* ====== RESPONSIVE =============================================== */
+/* === RESPONSIVE ========================================== */
 
 @media (max-width: 1024px) {
   .so-sidebar {
-    width: 72px;
-    padding-inline: 12px;
+    position: static;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
   }
 
   .so-main {
-    margin-left: 72px;                      /* Match reduced sidebar width */
-    padding: 24px 20px 32px;
-  }
-
-  .so-sidebar-brand-text,
-  .so-nav-label,
-  .so-user-meta {
-    display: none;
-  }
-
-  .so-sidebar-user {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .so-main {
-    padding: 18px 14px 22px;
+    margin-left: 0;
+    padding: 20px 16px 28px;
   }
 
   .so-grid,
@@ -325,104 +287,13 @@
   }
 }
 
-.so-settings-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
+@media (max-width: 640px) {
+  .so-sidebar {
+    padding-inline: 14px;
+  }
 
-.so-settings-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.so-settings-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.so-settings-hint {
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-.so-settings-control {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-/* Color swatch – round, premium */
-.so-color-input {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.5);
-  padding: 0;
-  background: transparent;
-}
-
-/* Dark-mode pill inputs */
-.so-text-input,
-.so-select-input {
-  flex: 1;
-  border-radius: 999px;
-  border: 1px solid rgba(31, 41, 55, 0.9);
-  padding: 8px 14px;
-  font-size: 13px;
-  outline: none;
-  background: rgba(15, 23, 42, 0.9);
-  color: #e5e7eb;
-}
-
-.so-text-input::placeholder {
-  color: rgba(156, 163, 175, 0.7);
-}
-
-.so-text-input:focus,
-.so-select-input:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.4);
-}
-
-/* Footer row */
-.so-settings-footer {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.so-settings-message {
-  font-size: 12px;
-  color: #22c55e;
-}
-
-.so-logout-btn {
-  width: 100%;
-  border-radius: var(--so-radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  padding: 9px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  background: transparent;
-  color: #e5e7eb;
-  cursor: pointer;
-  transition: background 0.16s ease, box-shadow 0.16s ease, transform 0.08s ease;
-}
-
-.so-logout-btn:hover {
-  background: rgba(15, 23, 42, 0.85);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
-  transform: translateY(-1px);
-}
-
-.so-logout-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.35);
+  .so-sidebar-brand-text,
+  .so-user-meta {
+    display: none;
+  }
 }
