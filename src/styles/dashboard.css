@@ -4,12 +4,11 @@
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
-  background: var(--so-bg-page-light);  /* same as auth */
+  background: var(--so-bg-page);
+  box-shadow: var(--so-vignette);
   color: var(--so-text-main);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
-
-  box-shadow: inset 0 0 120px rgba(15, 23, 42, 0.18); /* same vignette */
 }
 
 /* === SIDEBAR =================================================== */
@@ -26,28 +25,27 @@
   justify-content: space-between;
   padding: 22px 18px 22px;
 
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 32px;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: var(--so-glass-dark-bg);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 
-  box-shadow:
-    0 22px 40px rgba(15, 23, 42, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.65);
+  border-radius: var(--so-radius-card-lg);
+  border: 1px solid var(--so-glass-dark-border);
+  box-shadow: var(--so-glass-dark-shadow);
 }
+
 /* Brand row */
 
 .so-sidebar-brand {
-  height: 96px;             /* Fixed brand zone */
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0 18px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.4);
+  gap: 12px;
+  padding: 6px 4px 20px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.6);
 }
 
 .so-sidebar-logo-img {
-  height: 52px;           /* Bigger logo */
+  height: 52px;
   width: auto;
   display: block;
 }
@@ -74,7 +72,7 @@
 /* Nav */
 
 .so-sidebar-nav {
-  margin-top: 32px;
+  margin-top: 26px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -85,10 +83,10 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: 999px;
+  border-radius: var(--so-radius-pill);
   text-decoration: none;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.92);
+  color: var(--so-text-on-dark);
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -96,33 +94,44 @@
 }
 
 .so-nav-icon-wrap {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(15, 23, 42, 0.2);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--so-radius-pill);
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.so-nav-item {
-  color: #0f172a;
+.so-nav-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .so-nav-item:hover {
-  background: radial-gradient(circle at 30% 0, #0f766e, #022c22);
+  background: rgba(148, 163, 184, 0.2);
   transform: translateY(-1px);
+}
+
+/* active state (you can wire with aria-current or a class) */
+.so-nav-item--active {
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.5);
 }
 
 /* Sidebar footer: user + logout */
 
 .so-sidebar-footer {
   margin-top: 24px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(15, 23, 42, 0.9);
+  padding-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.6);
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 .so-sidebar-user {
-  margin-top: 0;
-  padding: 4px 8px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -131,8 +140,8 @@
 .so-user-avatar {
   width: 30px;
   height: 30px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 0, #f97316, #92400e);
+  border-radius: var(--so-radius-pill);
+  background: linear-gradient(135deg, #f97316, #facc15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,14 +150,10 @@
   color: #020617;
 }
 
-.so-user-meta {
-  display: flex;
-  flex-direction: column;
-}
-
 .so-user-name {
   font-size: 12px;
   font-weight: 500;
+  color: var(--so-text-on-dark);
 }
 
 .so-user-tag {
@@ -158,47 +163,68 @@
 
 .so-logout-btn {
   width: 100%;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  padding: 8px 10px;
+  border-radius: var(--so-radius-pill);
+  border: 1px solid rgba(248, 250, 252, 0.7);
+  padding: 9px 12px;
   font-size: 13px;
   font-weight: 500;
   background: transparent;
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--so-text-on-dark);
   cursor: pointer;
-  transition: background 0.16s ease, border-color 0.16s ease,
-    transform 0.08s ease;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.08s ease,
+    border-color 0.16s ease;
 }
 
 .so-logout-btn:hover {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.7);
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(248, 250, 252, 0.9);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.6);
   transform: translateY(-1px);
 }
 
 .so-logout-btn:active {
   transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.5);
 }
+
 
 /* === MAIN CANVAS =============================================== */
 
 .so-main {
-  margin-left: 260px; /* sidebar width + gap */
+  margin-left: 270px; /* sidebar width + gap */
   padding: 32px 40px 40px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: transparent; /* page bg comes from root */
+  background: transparent;
 }
-/* Wraps page content inside .so-main for nicer width */
+
 .so-main-inner {
-  max-width: 1040px;
-  margin: 0 auto;
+  max-width: 1160px;
   width: 100%;
+  margin: 0 auto;
 }
 
 /* ====== CARD / GRID SYSTEM (unchanged logic) ===================== */
+
+.so-card {
+  border-radius: var(--so-radius-card);
+  background: var(--so-glass-light-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--so-glass-light-border);
+  box-shadow: var(--so-glass-light-shadow);
+
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--so-text-main);
+}
 
 .so-grid {
   display: grid;
@@ -206,20 +232,10 @@
   gap: 18px;
 }
 
-.so-card {
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    0 18px 32px rgba(15, 23, 42, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.7);
-
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  color: #0f172a; /* TEXT MATCHES SIGN-IN */
+.so-grid-lg {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr;
+  gap: 18px;
 }
 
 
