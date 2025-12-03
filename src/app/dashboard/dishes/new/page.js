@@ -39,7 +39,7 @@ export default function NewDishPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [selectedAllergens, setSelectedAllergens] = useState([]);
+  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
 
   const [error, setError] = useState("");
 
@@ -96,13 +96,13 @@ export default function NewDishPage() {
     setLoading(false);
   };
 
-  const toggleAllergen = (code) => {
+  const toggleAllergen = (code: string) => {
     setSelectedAllergens((prev) =>
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -130,7 +130,6 @@ export default function NewDishPage() {
           name: name.trim(),
           description: description.trim() || null,
           price: Number(price),
-          // optional: category column if you added it to dishes
           category: category.trim() || null,
         })
         .select("*")
@@ -152,9 +151,9 @@ export default function NewDishPage() {
         if (daError) throw daError;
       }
 
-      // 3) Go back to dishes list (or dashboard)
+      // 3) Go back to dishes list
       router.push("/dashboard/dishes");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to save dish.");
       setSaving(false);
@@ -163,180 +162,193 @@ export default function NewDishPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[70vh] text-slate-300 text-sm">
-        Loading dish editor…
-      </div>
+      <main className="page-fade">
+        <div className="so-main-inner flex h-[70vh] items-center justify-center text-sm text-slate-500">
+          Loading dish editor…
+        </div>
+      </main>
     );
   }
 
   // No menu yet: force them to create one first
   if (!menus.length) {
     return (
-      <div className="max-w-xl mx-auto mt-16 rounded-2xl bg-slate-950/80 border border-slate-800 p-8 text-sm text-slate-200">
-        <h1 className="text-xl font-semibold mb-3">No menus yet</h1>
-        <p className="mb-4">
-          You need at least one menu before you can add dishes to your guest
-          allergen tool.
-        </p>
-        <a
-          href="/dashboard/menu"
-          className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 transition"
-        >
-          Create your first menu
-        </a>
-      </div>
+      <main className="page-fade">
+        <div className="so-main-inner max-w-xl mx-auto">
+          <div className="so-card text-sm text-slate-700">
+            <h1 className="mb-3 text-xl font-semibold text-slate-900">
+              No menus yet
+            </h1>
+            <p className="mb-4">
+              You need at least one menu before you can add dishes to your guest
+              allergen tool.
+            </p>
+            <a
+              href="/dashboard/menu"
+              className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+            >
+              Create your first menu
+            </a>
+          </div>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 mb-20">
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.25em] text-emerald-400/80 mb-2">
-          SelectorOS • Dishes
-        </p>
-        <h1 className="text-2xl font-semibold text-slate-50">
-          Add a new dish
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          This dish will sync automatically to your live allergen view.
-        </p>
-      </div>
+    <main className="page-fade">
+      <div className="so-main-inner max-w-3xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-600">
+            SELECTOROS • DISHES
+          </p>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            Add a new dish
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            This dish will sync automatically to your live allergen view.
+          </p>
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-3xl bg-slate-950/80 border border-slate-800/80 shadow-[0_22px_60px_rgba(0,0,0,0.75)] p-6 md:p-7 space-y-6"
-      >
-        {error && (
-          <div className="rounded-xl border border-red-500/60 bg-red-500/10 px-4 py-2 text-xs text-red-200">
-            {error}
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="so-card space-y-6">
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50/90 px-4 py-2 text-xs text-red-800">
+              {error}
+            </div>
+          )}
+
+          {/* Menu + Category */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-700">
+                Menu
+              </label>
+              <select
+                value={menuId}
+                onChange={(e) => setMenuId(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              >
+                {menus.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name || "Untitled menu"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-700">
+                Category (optional)
+              </label>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Dim Sum, Starters, Mains…"
+                className="w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              />
+            </div>
           </div>
-        )}
 
-        {/* Menu + Category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Name */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Menu
-            </label>
-            <select
-              value={menuId}
-              onChange={(e) => setMenuId(e.target.value)}
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50"
-            >
-              {menus.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name || "Untitled menu"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Category (optional)
+            <label className="mb-1 block text-xs font-semibold text-slate-700">
+              Dish name
             </label>
             <input
               type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Dim Sum, Starters, Mains…"
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Steamed Dim Sum Assortment"
+              className="w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
-        </div>
 
-        {/* Name + Description */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Dish name
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Test dumpling"
-            className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Description (optional)
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="Juicy pork dumpling with ginger"
-            className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 resize-none"
-          />
-        </div>
-
-        {/* Price */}
-        <div className="max-w-xs">
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Price (EUR)
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="12.50"
-            className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500"
-          />
-        </div>
-
-        {/* Allergens */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-2">
-            Allergens in this dish
-          </label>
-          <p className="text-[11px] text-slate-400 mb-3">
-            Tap all codes that this dish <span className="font-semibold">contains</span>. 
-            The guest allergen tool will hide this dish when those allergens are selected.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {ALLERGENS.map((a) => {
-              const active = selectedAllergens.includes(a.code);
-              return (
-                <button
-                  key={a.code}
-                  type="button"
-                  onClick={() => toggleAllergen(a.code)}
-                  className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition ${
-                    active
-                      ? "bg-emerald-400 text-slate-950 border-emerald-300"
-                      : "bg-slate-900/70 text-slate-200 border-slate-700 hover:border-slate-500"
-                  }`}
-                >
-                  {a.code} <span className="opacity-70 ml-1">{a.label}</span>
-                </button>
-              );
-            })}
+          {/* Description */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-700">
+              Description (optional)
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder="Juicy pork dumpling with ginger"
+              className="w-full resize-none rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            />
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-2">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="text-xs text-slate-400 hover:text-slate-200"
-          >
-            Cancel
-          </button>
+          {/* Price */}
+          <div className="max-w-xs">
+            <label className="mb-1 block text-xs font-semibold text-slate-700">
+              Price (EUR)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="40.00"
+              className="w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            />
+          </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:opacity-50 transition"
-          >
-            {saving ? "Saving…" : "Save dish"}
-          </button>
-        </div>
-      </form>
-    </div>
+          {/* Allergens */}
+          <div>
+            <label className="mb-2 block text-xs font-semibold text-slate-700">
+              Allergens in this dish
+            </label>
+            <p className="mb-3 text-[11px] text-slate-500">
+              Tap all codes that this dish{" "}
+              <span className="font-semibold">contains</span>. The guest
+              allergen tool will hide this dish when those allergens are
+              selected.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {ALLERGENS.map((a) => {
+                const active = selectedAllergens.includes(a.code);
+                return (
+                  <button
+                    key={a.code}
+                    type="button"
+                    onClick={() => toggleAllergen(a.code)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      active
+                        ? "border-emerald-300 bg-emerald-400 text-slate-950 shadow-sm"
+                        : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {a.code}
+                    <span className="ml-1 opacity-70">{a.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="text-xs text-slate-500 transition hover:text-slate-700"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save dish"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }
