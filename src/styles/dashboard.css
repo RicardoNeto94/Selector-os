@@ -213,15 +213,21 @@
 }
 
 .so-card {
-  border-radius: var(--so-card-radius);
-  background: var(--so-card-bg);
-  box-shadow: var(--so-card-shadow);
-  border: 1px solid var(--so-card-border);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 18px 32px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.7);
+
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  color: #0f172a; /* TEXT MATCHES SIGN-IN */
 }
+
 
 .so-card-header {
   display: flex;
