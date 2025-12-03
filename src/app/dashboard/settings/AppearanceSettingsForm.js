@@ -1,8 +1,7 @@
-// src/app/dashboard/settings/AppearanceSettingsForm.js
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function AppearanceSettingsForm({
   restaurantId,
@@ -13,10 +12,14 @@ export default function AppearanceSettingsForm({
 }) {
   const supabase = createClientComponentClient();
 
-  const [primaryColor, setPrimaryColor] = useState(initialPrimaryColor || '#d4af37');
-  const [backgroundStyle, setBackgroundStyle] = useState(initialBackgroundStyle || 'dark');
-  const [cardStyle, setCardStyle] = useState(initialCardStyle || 'glass');
-  const [density, setDensity] = useState(initialDensity || 'cozy');
+  const [primaryColor, setPrimaryColor] = useState(
+    initialPrimaryColor || "#d4af37"
+  );
+  const [backgroundStyle, setBackgroundStyle] = useState(
+    initialBackgroundStyle || "dark"
+  );
+  const [cardStyle, setCardStyle] = useState(initialCardStyle || "glass");
+  const [density, setDensity] = useState(initialDensity || "cozy");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -26,48 +29,59 @@ export default function AppearanceSettingsForm({
     setMessage(null);
 
     const { error } = await supabase
-      .from('restaurants')
+      .from("restaurants")
       .update({
         theme_primary_color: primaryColor,
         theme_background_style: backgroundStyle,
         theme_card_style: cardStyle,
         theme_density: density,
       })
-      .eq('id', restaurantId);
+      .eq("id", restaurantId);
 
     setSaving(false);
 
     if (error) {
       console.error(error);
-      setMessage('Could not save changes. Try again.');
+      setMessage("Could not save changes. Try again.");
       return;
     }
 
-    setMessage('Appearance updated.');
-    // If you have an applyTheme() running globally, the changes will reflect
-    // next time the layout mounts or on refresh.
+    setMessage("Appearance updated.");
   }
 
   return (
     <form onSubmit={handleSubmit} className="so-settings-form">
+      {/* Tabs header */}
+      <div className="so-settings-tabs">
+        <button
+          type="button"
+          className="so-settings-tab so-settings-tab--active"
+        >
+          Appearance
+        </button>
+        <button type="button" className="so-settings-tab so-settings-tab--ghost">
+          Theme & layout
+        </button>
+      </div>
+
       {/* Primary color */}
       <div className="so-settings-row">
-        <label className="so-settings-label">
-          Primary color
-          <span className="so-settings-hint">
-            Used for highlights, buttons and key accents.
-          </span>
-        </label>
-        <div className="so-settings-control">
+        <div className="so-settings-label-wrap">
+          <div className="so-settings-label-title">Primary color</div>
+          <p className="so-settings-hint">
+            Used for highlights, buttons and key accents across SelectorOS.
+          </p>
+        </div>
+        <div className="so-settings-control so-settings-control--color">
           <input
             type="color"
-            value={primaryColor || '#d4af37'}
+            value={primaryColor || "#d4af37"}
             onChange={(e) => setPrimaryColor(e.target.value)}
             className="so-color-input"
           />
           <input
             type="text"
-            value={primaryColor || ''}
+            value={primaryColor || ""}
             onChange={(e) => setPrimaryColor(e.target.value)}
             className="so-text-input"
             placeholder="#d4af37"
@@ -77,12 +91,13 @@ export default function AppearanceSettingsForm({
 
       {/* Background style */}
       <div className="so-settings-row">
-        <label className="so-settings-label">
-          Background style
-          <span className="so-settings-hint">
-            Light is brighter for tablets; Dark feels more cinematic.
-          </span>
-        </label>
+        <div className="so-settings-label-wrap">
+          <div className="so-settings-label-title">Background style</div>
+          <p className="so-settings-hint">
+            Light is brighter for tablets; Dark feels more cinematic for night
+            service.
+          </p>
+        </div>
         <div className="so-settings-control">
           <select
             value={backgroundStyle}
@@ -97,12 +112,13 @@ export default function AppearanceSettingsForm({
 
       {/* Card style */}
       <div className="so-settings-row">
-        <label className="so-settings-label">
-          Card style
-          <span className="so-settings-hint">
-            Glass feels premium; Solid is simpler and higher contrast.
-          </span>
-        </label>
+        <div className="so-settings-label-wrap">
+          <div className="so-settings-label-title">Card style</div>
+          <p className="so-settings-hint">
+            Glass gives a frosted, premium feel. Solid is higher contrast and
+            easier to scan quickly.
+          </p>
+        </div>
         <div className="so-settings-control">
           <select
             value={cardStyle}
@@ -117,12 +133,13 @@ export default function AppearanceSettingsForm({
 
       {/* Density */}
       <div className="so-settings-row">
-        <label className="so-settings-label">
-          Layout density
-          <span className="so-settings-hint">
-            Cozy for fine dining; Compact to see more at once.
-          </span>
-        </label>
+        <div className="so-settings-label-wrap">
+          <div className="so-settings-label-title">Layout density</div>
+          <p className="so-settings-hint">
+            Cozy keeps things airy for fine dining. Compact lets you see more
+            rows at once on busier services.
+          </p>
+        </div>
         <div className="so-settings-control">
           <select
             value={density}
@@ -137,8 +154,8 @@ export default function AppearanceSettingsForm({
 
       {/* Footer */}
       <div className="so-settings-footer">
-        <button type="submit" className="so-logout-btn" disabled={saving}>
-          {saving ? 'Saving…' : 'Save appearance'}
+        <button type="submit" className="so-settings-primary-btn" disabled={saving}>
+          {saving ? "Saving…" : "Save appearance"}
         </button>
         {message && <span className="so-settings-message">{message}</span>}
       </div>
