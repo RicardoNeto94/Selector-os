@@ -48,7 +48,6 @@ export default function DashboardLayout({ children }) {
             <span className="so-nav-label">Menu editor</span>
           </Link>
 
-          {/* Billing now visible in sidebar */}
           <Link href="/dashboard/billing" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <CreditCardIcon className="so-nav-icon" />
@@ -74,12 +73,10 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* IMPORTANT: no window / hooks here, just a plain POST form */}
-          <form action="/auth/sign-out" method="post">
-            <button type="submit" className="so-logout-btn">
-              Logout
-            </button>
-          </form>
+          {/* Logout goes to /logout (client page that calls supabase.auth.signOut) */}
+          <Link href="/logout" className="so-logout-btn">
+            Logout
+          </Link>
         </div>
       </aside>
 
