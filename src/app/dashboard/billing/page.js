@@ -1,5 +1,5 @@
 // src/app/dashboard/billing/page.js
-
+import "../../styles/dashboard.css";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
