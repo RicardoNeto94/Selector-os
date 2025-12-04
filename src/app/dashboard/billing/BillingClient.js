@@ -13,7 +13,8 @@ export default function BillingClient({ restaurant }) {
     restaurant.plan === "pro" ||
     restaurant.subscription_plan === "pro" ||
     restaurant.stripe_subscription_status === "active" ||
-    restaurant.stripe_price_id === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY;
+    restaurant.stripe_price_id ===
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY;
 
   const currentPlanLabel = isPro ? "Pro" : "Starter";
   const currentPlanDescription = isPro
@@ -21,7 +22,7 @@ export default function BillingClient({ restaurant }) {
     : "Basic tools to manage a single restaurant and allergen list.";
 
   async function handleUpgrade() {
-    if (isPro) return; // nothing to do
+    if (isPro) return;
 
     try {
       setError("");
@@ -82,22 +83,22 @@ export default function BillingClient({ restaurant }) {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <header className="mb-2">
-        <p className="text-xs uppercase tracking-[0.25em] text-emerald-400/80 mb-2">
-          SelectorOS • Billing
+      {/* Hero header band – matches Settings layout */}
+      <section className="rounded-[32px] bg-white/80 border border-white/60 shadow-[0_24px_80px_rgba(15,23,42,0.55)] px-6 py-5 md:px-10 md:py-7 text-slate-900">
+        <p className="text-xs uppercase tracking-[0.25em] text-emerald-500/80 mb-2">
+          SELECTOROS • BILLING
         </p>
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
-          Your billing & plan
+        <h1 className="text-2xl md:text-3xl font-semibold">
+          Your billing &amp; plan
         </h1>
-        <p className="text-sm text-slate-400 mt-1 max-w-xl">
+        <p className="text-sm text-slate-500 mt-1 max-w-xl">
           Manage subscription, invoices and plan for{" "}
-          <span className="text-emerald-300 font-medium">
+          <span className="text-emerald-600 font-medium">
             {restaurant.name}
           </span>
           .
         </p>
-      </header>
+      </section>
 
       {/* Current plan summary */}
       <section className="rounded-3xl bg-slate-950/80 border border-slate-800/80 shadow-[0_22px_60px_rgba(0,0,0,0.75)] p-6 md:p-7 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -167,20 +168,16 @@ export default function BillingClient({ restaurant }) {
         <div className="rounded-3xl bg-slate-950/70 border border-slate-800/80 p-6 flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold text-slate-50">
-                Starter 
-              </h2>
+              <h2 className="text-lg font-semibold text-slate-50">Starter</h2>
               <p className="text-xs text-slate-400 mt-1">
                 Ideal for testing SelectorOS with one restaurant.
               </p>
             </div>
-            <p className="text-sm font-semibold text-slate-200">
-              €0 / month
-            </p>
+            <p className="text-sm font-semibold text-slate-200">€0 / month</p>
           </div>
           <ul className="mt-2 text-xs text-slate-300 space-y-1">
             <li>• 1 restaurant workspace</li>
-            <li>• Allergen editor & live staff view</li>
+            <li>• Allergen editor &amp; live staff view</li>
             <li>• Basic theme controls</li>
           </ul>
           {!isPro && (
@@ -194,9 +191,7 @@ export default function BillingClient({ restaurant }) {
         <div className="rounded-3xl bg-emerald-500/10 border border-emerald-400/60 p-6 flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold text-emerald-200">
-                Pro
-              </h2>
+              <h2 className="text-lg font-semibold text-emerald-200">Pro</h2>
               <p className="text-xs text-emerald-100/80 mt-1">
                 Designed for live restaurant service with full control.
               </p>
@@ -207,8 +202,8 @@ export default function BillingClient({ restaurant }) {
           </div>
           <ul className="mt-2 text-xs text-emerald-50/90 space-y-1">
             <li>• Everything in Starter</li>
-            <li>• Unlimited dishes & menus</li>
-            <li>• Stripe-powered billing & invoices</li>
+            <li>• Unlimited dishes &amp; menus</li>
+            <li>• Stripe-powered billing &amp; invoices</li>
           </ul>
 
           {isPro ? (
@@ -235,8 +230,8 @@ export default function BillingClient({ restaurant }) {
       )}
 
       <p className="text-[11px] text-slate-500 mt-4">
-        All payments are processed securely by Stripe. You can cancel anytime
-        in the customer portal.
+        All payments are processed securely by Stripe. You can cancel anytime in
+        the customer portal.
       </p>
     </div>
   );
