@@ -1,92 +1,87 @@
-// src/app/api/billing/checkout/route.js
-
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import Stripe from "stripe";
+import { cookies } from "next/headers";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
-let stripe = null;
-if (process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2024-06-20",
-  });
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-06-20",
+});
 
-export async function POST(request) {
-  try {
-    if (!stripe) {
-      return NextResponse.json(
-        { error: "Stripe is not configured in this environment." },
-        { status: 500 }
-      );
-    }
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-    const supabase = createRouteHandlerClient({ cookies });
+export async function POST() {
+  const supabase = createServerComponentClient({ cookies });
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+  // 1) Get logged-in user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
+  if (userError || !user) {
+    return new NextResponse("Not authenticated", { status: 401 });
+  }
 
-    const { data: restaurant, error: rError } = await supabase
-      .from("restaurants")
-      .select("*")
-      .eq("owner_id", user.id)
-      .maybeSingle();
+  // 2) Find restaurant for this owner
+  const { data: restaurant, error: rError } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("owner_id", user.id)
+    .maybeSingle();
 
-    if (rError || !restaurant) {
-      return NextResponse.json(
-        { error: "No restaurant for this account" },
-        { status: 400 }
-      );
-    }
+  if (rError || !restaurant) {
+    console.error("No restaurant for user", user.id, rError);
+    return new NextResponse("Restaurant not found", { status: 400 });
+  }
 
-    // Ensure Stripe customer exists
-    let customerId = restaurant.stripe_customer_id;
+  // 3) Decide which price to use (Pro monthly for now)
+  const priceId = process.env.STRIPE_PRICE_PRO_MONTHLY;
+  if (!priceId) {
+    console.error("STRIPE_PRICE_PRO_MONTHLY is not set");
+    return new NextResponse("Stripe price not configured", { status: 500 });
+  }
 
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email || undefined,
-        metadata: {
-          supabase_user_id: user.id,
-          restaurant_id: restaurant.id,
-        },
-      });
+  // 4) Reuse existing customer if we have it
+  let customerId = restaurant.stripe_customer_id;
 
-      customerId = customer.id;
-
-      await supabase
-        .from("restaurants")
-        .update({ stripe_customer_id: customerId })
-        .eq("id", restaurant.id);
-    }
-
-    const priceId = process.env.STRIPE_PRICE_PRO_MONTHLY;
-    if (!priceId) {
-      throw new Error("STRIPE_PRICE_PRO_MONTHLY env var is missing");
-    }
-
-    const origin =
-      request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL;
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/dashboard/billing?success=1`,
-      cancel_url: `${origin}/dashboard/billing?canceled=1`,
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: user.email ?? undefined,
+      metadata: {
+        restaurant_id: restaurant.id,
+        user_id: user.id,
+      },
     });
 
-    return NextResponse.json({ url: session.url });
-  } catch (err) {
-    console.error("Stripe checkout error", err);
-    return NextResponse.json(
-      { error: "Unable to start checkout" },
-      { status: 500 }
-    );
+    customerId = customer.id;
+
+    // Persist on restaurant
+    await supabase
+      .from("restaurants")
+      .update({ stripe_customer_id: customerId })
+      .eq("id", restaurant.id);
   }
+
+  // 5) Create checkout session
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=1`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?canceled=1`,
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      restaurant_id: restaurant.id.toString(),
+      user_id: user.id,
+      plan: "pro",
+      price_id: priceId,
+    },
+  });
+
+  return NextResponse.json({ url: session.url });
 }
