@@ -168,7 +168,7 @@ export default function BillingClient({ restaurant }) {
           <div className="flex items-baseline justify-between gap-2">
             <div>
               <h2 className="text-lg font-semibold text-slate-50">
-                Starter (current?)
+                Starter 
               </h2>
               <p className="text-xs text-slate-400 mt-1">
                 Ideal for testing SelectorOS with one restaurant.
