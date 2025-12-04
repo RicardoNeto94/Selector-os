@@ -74,9 +74,9 @@ export default function DashboardLayout({ children }) {
           </div>
 
           {/* Logout goes to /logout (client page that calls supabase.auth.signOut) */}
-          <Link href="/logout" className="so-logout-btn">
-            Logout
-          </Link>
+         <Link href="/logout" className="so-logout-btn so-logout-apple">
+  Logout
+</Link>  
         </div>
       </aside>
 
