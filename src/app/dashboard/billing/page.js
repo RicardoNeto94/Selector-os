@@ -41,8 +41,9 @@ export default async function BillingPage() {
   }
 
   // Normal state – **no extra header here**, BillingClient handles it
+  // src/app/dashboard/billing/page.js
   return (
-    <main className="page-fade px-6 pt-10 pb-20 text-slate-100">
+    <main className="page-fade px-6 pt-6 pb-20 text-slate-100">
       <div className="max-w-6xl mx-auto">
         <BillingClient restaurant={restaurant} />
       </div>
