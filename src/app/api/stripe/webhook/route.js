@@ -1,153 +1,113 @@
-// src/app/api/stripe/webhook/route.js
-
-import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 import Stripe from "stripe";
+import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../../lib/supabaseAdmin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2024-06-20",
 });
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function POST(req) {
-  const body = await req.text();
-  const sig = headers().get("stripe-signature");
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const sig = req.headers.get("stripe-signature");
+  const buf = await req.text();
 
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(
+      buf,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
-    console.error("❌ Stripe webhook signature failed:", err.message);
+    console.error("❌ Stripe webhook signature verify error:", err.message);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
   try {
     switch (event.type) {
-      // Fired right after checkout succeeds
       case "checkout.session.completed": {
         const session = event.data.object;
 
-        const restaurantId = session.metadata?.restaurant_id;
-        const stripeCustomerId = session.customer;
-        const stripeSubscriptionId = session.subscription;
+        // We set these when creating the checkout session
+        const restaurantId = session.metadata?.restaurant_id || null;
+        const plan = session.metadata?.plan || "pro";
+
+        const customerId = session.customer;
+        const subscriptionId = session.subscription;
+
+        // We also stored price_id in metadata when creating session
+        const priceId =
+          session.metadata?.price_id ||
+          (Array.isArray(session.display_items) &&
+            session.display_items[0]?.price?.id) ||
+          null;
 
         if (!restaurantId) {
-          console.warn("No restaurant_id in session.metadata");
+          console.warn(
+            "⚠️ checkout.session.completed without restaurant_id metadata"
+          );
           break;
         }
 
-        let priceId = null;
-        let status = null;
-
-        if (stripeSubscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(
-            stripeSubscriptionId
-          );
-          priceId = subscription.items?.data?.[0]?.price?.id || null;
-          status = subscription.status;
-        }
-
-        const plan =
-          status === "active" &&
-          priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
-            ? "pro"
-            : "starter";
-
-        const { error } = await supabaseAdmin
+        await supabaseAdmin
           .from("restaurants")
           .update({
-            stripe_customer_id: stripeCustomerId,
-            stripe_subscription_id: stripeSubscriptionId,
-            stripe_subscription_status: status,
+            plan: plan, // "pro"
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
             stripe_price_id: priceId,
-            plan,
+            stripe_subscription_status: "active",
           })
           .eq("id", restaurantId);
 
-        if (error) {
-          console.error("❌ Supabase update error (checkout.session):", error);
-          return new NextResponse("Supabase error", { status: 500 });
-        }
-
-        console.log("✅ Restaurant updated after checkout", {
-          restaurantId,
-          plan,
-        });
+        console.log(
+          `✅ Updated restaurant ${restaurantId} to plan ${plan} (customer ${customerId})`
+        );
         break;
       }
 
-      // Keep subscription in sync if Stripe changes it
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object;
-        const subscriptionId = subscription.id;
+        const customerId = subscription.customer;
+        const status = subscription.status; // active, canceled, past_due etc.
 
-        const priceId = subscription.items?.data?.[0]?.price?.id || null;
-        const status = subscription.status;
+        // Get first price on the subscription
+        const item = subscription.items?.data?.[0];
+        const priceId = item?.price?.id || null;
 
-        const { data, error } = await supabaseAdmin
-          .from("restaurants")
-          .select("id")
-          .eq("stripe_subscription_id", subscriptionId)
-          .limit(1);
-
-        if (error) {
-          console.error("❌ Supabase lookup error (subscription.updated):", error);
-          break;
+        // Decide plan based on price
+        let plan = "starter";
+        if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY) {
+          plan = "pro";
         }
 
-        if (!data || !data.length) {
-          console.warn(
-            "Subscription event for unknown restaurant",
-            subscriptionId
-          );
-          break;
-        }
-
-        const restaurantId = data[0].id;
-
-        const plan =
-          status === "active" &&
-          priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
-            ? "pro"
-            : "starter";
-
-        const { error: updateError } = await supabaseAdmin
+        await supabaseAdmin
           .from("restaurants")
           .update({
+            plan,
             stripe_subscription_status: status,
             stripe_price_id: priceId,
-            plan,
           })
-          .eq("id", restaurantId);
+          .eq("stripe_customer_id", customerId);
 
-        if (updateError) {
-          console.error(
-            "❌ Supabase update error (subscription.updated):",
-            updateError
-          );
-        } else {
-          console.log("✅ Restaurant subscription updated", {
-            restaurantId,
-            status,
-            plan,
-          });
-        }
-
+        console.log(
+          `🔄 Subscription update for customer ${customerId}: status=${status}, plan=${plan}`
+        );
         break;
       }
 
       default:
-        // Ignore all other events for now
-        console.log(`ℹ️ Ignoring Stripe event: ${event.type}`);
-        break;
+        // For now we ignore other events
+        console.log(`➡️  Ignoring Stripe event type: ${event.type}`);
     }
 
-    return new NextResponse("OK", { status: 200 });
+    return NextResponse.json({ received: true });
   } catch (err) {
-    console.error("❌ Stripe webhook handler error:", err);
+    console.error("❌ Error handling Stripe webhook:", err);
     return new NextResponse("Webhook handler error", { status: 500 });
   }
 }
