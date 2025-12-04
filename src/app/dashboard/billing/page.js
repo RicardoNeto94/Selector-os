@@ -1,5 +1,4 @@
 // src/app/dashboard/billing/page.js
-import "../../../styles/dashboard.css";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -10,32 +9,43 @@ export const dynamic = "force-dynamic";
 export default async function BillingPage() {
   const supabase = createServerComponentClient({ cookies });
 
+  // 1) Auth guard
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/sign-in");
+  if (!user) {
+    redirect("/sign-in");
+  }
 
-  const { data: restaurant } = await supabase
+  // 2) Load current user's restaurant
+  const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("*")
     .eq("owner_id", user.id)
     .maybeSingle();
 
-  return (
-    <div className="so-dashboard-root">
-      <div className="so-dashboard-main">
-        <div className="so-dashboard-hero">
-          <p className="so-hero-eyebrow">SELECTOROS • BILLING</p>
-          <h1 className="so-hero-title">Your billing & plan</h1>
-          <p className="so-hero-desc">
-            Manage subscription, invoices and plan for{" "}
-            <span className="text-emerald-500">{restaurant.name}</span>.
+  if (error || !restaurant) {
+    console.error("Billing: no restaurant for user", error);
+    return (
+      <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
+        <div className="max-w-xl mx-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-6">
+          <h1 className="text-lg font-semibold mb-2">No restaurant found</h1>
+          <p className="text-sm text-red-100/80">
+            We couldn&apos;t find a restaurant linked to your account. Finish
+            onboarding first.
           </p>
         </div>
+      </main>
+    );
+  }
 
+  // Normal state – **no extra header here**, BillingClient handles it
+  return (
+    <main className="page-fade px-6 pt-10 pb-20 text-slate-100">
+      <div className="max-w-6xl mx-auto">
         <BillingClient restaurant={restaurant} />
       </div>
-    </div>
+    </main>
   );
 }
