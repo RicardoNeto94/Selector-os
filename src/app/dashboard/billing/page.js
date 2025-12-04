@@ -29,7 +29,7 @@ export default async function BillingPage() {
   if (error || !restaurant) {
     console.error("Billing: no restaurant for user", error);
     return (
-      <main className="page-fade px-6 py-10 text-slate-100">
+      <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
         <div className="max-w-xl mx-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-6">
           <h1 className="text-lg font-semibold mb-2">No restaurant found</h1>
           <p className="text-sm text-red-100/80">
@@ -42,8 +42,8 @@ export default async function BillingPage() {
   }
 
   return (
-    <main className="page-fade px-6 py-10 text-slate-100">
-      <div className="max-w-4xl mx-auto">
+    <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
+      <div className="max-w-6xl mx-auto space-y-8">
         <BillingClient restaurant={restaurant} />
       </div>
     </main>
