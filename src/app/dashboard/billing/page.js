@@ -1,4 +1,5 @@
 // src/app/dashboard/billing/page.js
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -28,7 +29,7 @@ export default async function BillingPage() {
   if (error || !restaurant) {
     console.error("Billing: no restaurant for user", error);
     return (
-      <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
+      <main className="page-fade px-8 pt-10 pb-16 text-slate-100">
         <div className="max-w-xl mx-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-6">
           <h1 className="text-lg font-semibold mb-2">No restaurant found</h1>
           <p className="text-sm text-red-100/80">
@@ -40,11 +41,11 @@ export default async function BillingPage() {
     );
   }
 
-  // Normal state – **no extra header here**, BillingClient handles it
-  // src/app/dashboard/billing/page.js
+  // Normal billing view
   return (
-    <main className="page-fade px-6 pt-6 pb-20 text-slate-100">
-      <div className="max-w-6xl mx-auto">
+    <main className="page-fade px-8 pt-6 pb-16 text-slate-100">
+      {/* same content width as dashboard/settings */}
+      <div className="max-w-5xl mx-auto">
         <BillingClient restaurant={restaurant} />
       </div>
     </main>
