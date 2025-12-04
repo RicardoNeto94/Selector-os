@@ -42,10 +42,9 @@ export default async function BillingPage() {
   }
 
   return (
-    <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <BillingClient restaurant={restaurant} />
-      </div>
-    </main>
-  );
-}
+  <div className="so-dashboard-root">
+    <div className="so-dashboard-main">
+      <BillingClient restaurant={restaurant} />
+    </div>
+  </div>
+);
