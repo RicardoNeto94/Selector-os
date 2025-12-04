@@ -1,82 +1,153 @@
 // src/app/api/stripe/webhook/route.js
 
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-// Init Stripe (server-side only)
-const stripe = process.env.STRIPE_SECRET_KEY
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2024-06-20",
-    })
-  : null;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
 
-// Admin Supabase client using service role key
-const supabaseAdmin =
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
-    ? createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY,
-        {
-          auth: { persistSession: false },
-        }
-      )
-    : null;
-
-export async function POST(request) {
-  const sig = request.headers.get("stripe-signature");
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!stripe || !supabaseAdmin || !webhookSecret) {
-    console.error("Stripe webhook misconfigured");
-    return NextResponse.json({ error: "Misconfigured" }, { status: 500 });
-  }
+export async function POST(req) {
+  const body = await req.text();
+  const sig = headers().get("stripe-signature");
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   let event;
 
-  // Stripe needs the RAW body for signature verification
-  const body = await request.text();
-
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err.message);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    console.error("❌ Stripe webhook signature failed:", err.message);
+    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
   try {
     switch (event.type) {
-      case "customer.subscription.created":
+      // Fired right after checkout succeeds
+      case "checkout.session.completed": {
+        const session = event.data.object;
+
+        const restaurantId = session.metadata?.restaurant_id;
+        const stripeCustomerId = session.customer;
+        const stripeSubscriptionId = session.subscription;
+
+        if (!restaurantId) {
+          console.warn("No restaurant_id in session.metadata");
+          break;
+        }
+
+        let priceId = null;
+        let status = null;
+
+        if (stripeSubscriptionId) {
+          const subscription = await stripe.subscriptions.retrieve(
+            stripeSubscriptionId
+          );
+          priceId = subscription.items?.data?.[0]?.price?.id || null;
+          status = subscription.status;
+        }
+
+        const plan =
+          status === "active" &&
+          priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
+            ? "pro"
+            : "starter";
+
+        const { error } = await supabaseAdmin
+          .from("restaurants")
+          .update({
+            stripe_customer_id: stripeCustomerId,
+            stripe_subscription_id: stripeSubscriptionId,
+            stripe_subscription_status: status,
+            stripe_price_id: priceId,
+            plan,
+          })
+          .eq("id", restaurantId);
+
+        if (error) {
+          console.error("❌ Supabase update error (checkout.session):", error);
+          return new NextResponse("Supabase error", { status: 500 });
+        }
+
+        console.log("✅ Restaurant updated after checkout", {
+          restaurantId,
+          plan,
+        });
+        break;
+      }
+
+      // Keep subscription in sync if Stripe changes it
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object;
-        const customerId = subscription.customer;
-        const status = subscription.status; // 'active', 'trialing', 'canceled', 'past_due', etc.
+        const subscriptionId = subscription.id;
 
-        console.log(
-          `🔁 Subscription event: ${event.type} – ${customerId} → ${status}`
-        );
+        const priceId = subscription.items?.data?.[0]?.price?.id || null;
+        const status = subscription.status;
 
-        await supabaseAdmin
+        const { data, error } = await supabaseAdmin
           .from("restaurants")
-          .update({ stripe_subscription_status: status })
-          .eq("stripe_customer_id", customerId);
+          .select("id")
+          .eq("stripe_subscription_id", subscriptionId)
+          .limit(1);
+
+        if (error) {
+          console.error("❌ Supabase lookup error (subscription.updated):", error);
+          break;
+        }
+
+        if (!data || !data.length) {
+          console.warn(
+            "Subscription event for unknown restaurant",
+            subscriptionId
+          );
+          break;
+        }
+
+        const restaurantId = data[0].id;
+
+        const plan =
+          status === "active" &&
+          priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
+            ? "pro"
+            : "starter";
+
+        const { error: updateError } = await supabaseAdmin
+          .from("restaurants")
+          .update({
+            stripe_subscription_status: status,
+            stripe_price_id: priceId,
+            plan,
+          })
+          .eq("id", restaurantId);
+
+        if (updateError) {
+          console.error(
+            "❌ Supabase update error (subscription.updated):",
+            updateError
+          );
+        } else {
+          console.log("✅ Restaurant subscription updated", {
+            restaurantId,
+            status,
+            plan,
+          });
+        }
 
         break;
       }
 
       default:
-        // We ignore other event types for now
-        console.log(`➡️ Ignoring Stripe event type: ${event.type}`);
+        // Ignore all other events for now
+        console.log(`ℹ️ Ignoring Stripe event: ${event.type}`);
         break;
     }
 
-    return NextResponse.json({ received: true }, { status: 200 });
-  } catch (error) {
-    console.error("🔥 Error handling webhook:", error);
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
+    return new NextResponse("OK", { status: 200 });
+  } catch (err) {
+    console.error("❌ Stripe webhook handler error:", err);
+    return new NextResponse("Webhook handler error", { status: 500 });
   }
 }
