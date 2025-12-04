@@ -1,5 +1,5 @@
 // src/app/dashboard/billing/page.js
-import "../../styles/dashboard.css";
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -41,10 +41,12 @@ export default async function BillingPage() {
     );
   }
 
+  // 3) Normal billing page render
   return (
-  <div className="so-dashboard-root">
-    <div className="so-dashboard-main">
-      <BillingClient restaurant={restaurant} />
-    </div>
-  </div>
-);
+    <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
+      <div className="max-w-5xl mx-auto">
+        <BillingClient restaurant={restaurant} />
+      </div>
+    </main>
+  );
+}
