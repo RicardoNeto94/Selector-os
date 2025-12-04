@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "../../../../lib/supabaseAdmin";
+import { supabaseAdmin } from "@/lib/supabaseAdmin"; // use the alias to be safe
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-06-20",
@@ -26,46 +26,68 @@ export async function POST(req) {
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
+  console.log("➡️  Stripe webhook event received:", event.type);
+
   try {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
 
-        // We set these when creating the checkout session
-        const restaurantId = session.metadata?.restaurant_id || null;
+        const restaurantId = session.metadata?.restaurant_id;
         const plan = session.metadata?.plan || "pro";
-
         const customerId = session.customer;
         const subscriptionId = session.subscription;
 
-        // We also stored price_id in metadata when creating session
         const priceId =
           session.metadata?.price_id ||
           (Array.isArray(session.display_items) &&
             session.display_items[0]?.price?.id) ||
           null;
 
+        console.log("checkout.session.completed payload metadata:", {
+          restaurantId,
+          plan,
+          customerId,
+          subscriptionId,
+          priceId,
+        });
+
         if (!restaurantId) {
           console.warn(
-            "⚠️ checkout.session.completed without restaurant_id metadata"
+            "⚠️ checkout.session.completed WITHOUT restaurant_id metadata – cannot link subscription to restaurant."
           );
           break;
         }
 
-        await supabaseAdmin
+        const { data, error } = await supabaseAdmin
           .from("restaurants")
           .update({
-            plan: plan, // "pro"
+            plan,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             stripe_price_id: priceId,
             stripe_subscription_status: "active",
           })
-          .eq("id", restaurantId);
+          .eq("id", restaurantId)
+          .select("id, name, plan, stripe_customer_id, stripe_subscription_status")
+          .maybeSingle();
 
-        console.log(
-          `✅ Updated restaurant ${restaurantId} to plan ${plan} (customer ${customerId})`
-        );
+        if (error) {
+          console.error(
+            "❌ Supabase error updating restaurant on checkout.session.completed:",
+            error
+          );
+        } else if (!data) {
+          console.warn(
+            "⚠️ No restaurant row updated on checkout.session.completed. restaurant_id:",
+            restaurantId
+          );
+        } else {
+          console.log(
+            `✅ Updated restaurant ${data.id} (${data.name}) to plan ${data.plan} – customer=${data.stripe_customer_id} status=${data.stripe_subscription_status}`
+          );
+        }
+
         break;
       }
 
@@ -75,33 +97,52 @@ export async function POST(req) {
         const customerId = subscription.customer;
         const status = subscription.status; // active, canceled, past_due etc.
 
-        // Get first price on the subscription
         const item = subscription.items?.data?.[0];
         const priceId = item?.price?.id || null;
 
-        // Decide plan based on price
         let plan = "starter";
         if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY) {
           plan = "pro";
         }
 
-        await supabaseAdmin
+        console.log("customer.subscription.* payload:", {
+          customerId,
+          status,
+          priceId,
+          resolvedPlan: plan,
+        });
+
+        const { data, error } = await supabaseAdmin
           .from("restaurants")
           .update({
             plan,
             stripe_subscription_status: status,
             stripe_price_id: priceId,
           })
-          .eq("stripe_customer_id", customerId);
+          .eq("stripe_customer_id", customerId)
+          .select("id, name, plan, stripe_subscription_status")
+          .maybeSingle();
 
-        console.log(
-          `🔄 Subscription update for customer ${customerId}: status=${status}, plan=${plan}`
-        );
+        if (error) {
+          console.error(
+            "❌ Supabase error updating restaurant on subscription event:",
+            error
+          );
+        } else if (!data) {
+          console.warn(
+            "⚠️ No restaurant row found for subscription event – stripe_customer_id:",
+            customerId
+          );
+        } else {
+          console.log(
+            `🔄 Subscription update for restaurant ${data.id} (${data.name}): status=${data.stripe_subscription_status}, plan=${data.plan}`
+          );
+        }
+
         break;
       }
 
       default:
-        // For now we ignore other events
         console.log(`➡️  Ignoring Stripe event type: ${event.type}`);
     }
 
