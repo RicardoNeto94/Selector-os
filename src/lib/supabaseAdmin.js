@@ -10,7 +10,8 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
 }
 
-// ⚠️ This client is for *server-side* use only (webhooks, cron, etc).
+// Server-side Supabase client using the service role key.
+// Only used in API routes / webhooks, NEVER in the browser.
 export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
