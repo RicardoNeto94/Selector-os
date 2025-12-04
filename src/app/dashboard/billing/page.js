@@ -41,10 +41,10 @@ export default async function BillingPage() {
     );
   }
 
-  // 3) Normal billing page render
+  // ✅ This is the same pattern as Dashboard / Dishes / Settings
   return (
     <main className="page-fade px-6 pt-10 pb-16 text-slate-100">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <BillingClient restaurant={restaurant} />
       </div>
     </main>
