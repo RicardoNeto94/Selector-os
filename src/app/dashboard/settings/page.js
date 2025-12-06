@@ -45,7 +45,6 @@ export default async function SettingsPage() {
 
   return (
     <main className="page-fade px-6 pt-4 pb-8 text-slate-900">
-        {/* PAGE HEADER — slightly tighter padding so it sits higher */}
         <section className="rounded-[28px] bg-white/90 backdrop-blur-xl shadow-[0_20px_60px_rgba(15,23,42,0.16)] border border-slate-200/70 px-7 py-4 flex flex-col gap-1">
           <h1 className="text-2xl md:text-[26px] font-semibold text-slate-900">
             Settings
