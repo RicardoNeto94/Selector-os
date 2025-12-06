@@ -4,16 +4,15 @@
 
 .guest-root {
   min-height: 100vh;
-  padding: 40px 24px 96px;
+  background: #0A0D10;
+  color: #f8fafc;
+  padding: 32px 20px 80px;
   display: flex;
-  justify-content: center;
-
-  background: #f4f4f0;
-
-  color: #0f172a;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    sans-serif;
+  flex-direction: column;
+  align-items: center;
+  font-family: system-ui, -apple-system, sans-serif;
 }
+
 
 /* acts just as a frame, not a big card anymore */
 .guest-shell {
