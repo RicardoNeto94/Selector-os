@@ -1,348 +1,386 @@
+// src/app/r/[slug]/menu/Tool.js
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function Tool() {
-  const supabase = createClientComponentClient();
-  const params = useParams();
-  const slug = params?.slug;
+const ALLERGENS = [
+  { code: "GL", label: "Gluten" },
+  { code: "CE", label: "Celery" },
+  { code: "CR", label: "Crustaceans" },
+  { code: "EG", label: "Eggs" },
+  { code: "FL", label: "Fish" },
+  { code: "LU", label: "Lupin" },
+  { code: "MO", label: "Molluscs" },
+  { code: "MI", label: "Milk" },
+  { code: "MU", label: "Mustard" },
+  { code: "NU", label: "Nuts" },
+  { code: "PE", label: "Peanuts" },
+  { code: "SE", label: "Sesame" },
+  { code: "SO", label: "Soya" },
+  { code: "SU", label: "Sulphites" },
+  { code: "GA", label: "Garlic" },
+  { code: "ON", label: "Onion" },
+  { code: "MR", label: "Mushrooms" },
+];
 
+const CATEGORIES = [
+  "Dim Sum",
+  "Starters",
+  "Soup",
+  "Mains",
+  "Rice & Noodles",
+  "Side dishes",
+  "Dessert",
+];
+
+export default function Tool({ slug }) {
+  // === VIEW MODE: staff vs guest ============================================
+  const [viewMode, setViewMode] = useState("staff"); // "staff" | "guest"
+
+  // === DATA STATE ===========================================================
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
-  const [allergens, setAllergens] = useState([]);
-  const [dishAllergenMap, setDishAllergenMap] = useState({});
+  const [error, setError] = useState("");
 
-  const [mode, setMode] = useState<"staff" | "guest">("staff");
-  const [selectedAllergens, setSelectedAllergens] = useState([]); // list of allergen codes
-  const [selectedDishId, setSelectedDishId] = useState(null);
-  const [selectionCount, setSelectionCount] = useState(0);
+  // === FILTER STATE =========================================================
+  const [selectedAllergens, setSelectedAllergens] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [containsMode, setContainsMode] = useState(false);
+  const [pinnedDishIds, setPinnedDishIds] = useState(new Set());
 
+  // === LOAD DATA ============================================================
   useEffect(() => {
-    if (!slug) return;
-    loadData(slug);
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const baseUrl =
+          process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+
+        const [metaRes, dishesRes, allergensRes] = await Promise.all([
+          fetch(`${baseUrl}/api/restaurant-meta/${slug}`),
+          fetch(`${baseUrl}/api/public-menu/${slug}`),
+          fetch(`${baseUrl}/api/allergens`),
+        ]);
+
+        if (!metaRes.ok) {
+          throw new Error("Failed to load restaurant meta");
+        }
+        if (!dishesRes.ok) {
+          throw new Error("Failed to load dishes");
+        }
+
+        const metaJson = await metaRes.json();
+        const dishesJson = await dishesRes.json();
+
+        setRestaurant(metaJson.restaurant || null);
+
+        const dishData = dishesJson.dishes || [];
+        setDishes(dishData);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Failed to load menu.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, [slug]);
 
-  async function loadData(slugValue) {
-    try {
-      setLoading(true);
-      setError("");
-
-      // 1) Find restaurant by slug
-      const { data: restaurantRow, error: restaurantError } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("slug", slugValue)
-        .maybeSingle();
-
-      if (restaurantError) throw restaurantError;
-      if (!restaurantRow) {
-        setError("Restaurant not found.");
-        setLoading(false);
-        return;
-      }
-
-      setRestaurant(restaurantRow);
-
-      // 2) Load dishes for this restaurant
-      const { data: dishesRows, error: dishesError } = await supabase
-        .from("dishes")
-        .select("*")
-        .eq("restaurant_id", restaurantRow.id)
-        .order("category", { ascending: true })
-        .order("name", { ascending: true });
-
-      if (dishesError) throw dishesError;
-
-      const safeDishes = dishesRows || [];
-
-      // 3) Load allergens
-      const { data: allergenRows, error: allergenError } = await supabase
-        .from("allergen")
-        .select("*")
-        .order("code", { ascending: true });
-
-      if (allergenError) throw allergenError;
-
-      const safeAllergens = allergenRows || [];
-
-      // 4) Load dish_allergens link table for these dishes
-      const dishIds = safeDishes.map((d) => d.id);
-      let links = [];
-      if (dishIds.length > 0) {
-        const { data: linkRows, error: linkError } = await supabase
-          .from("dish_allergens")
-          .select("*")
-          .in("dish_id", dishIds);
-
-        if (linkError) throw linkError;
-        links = linkRows || [];
-      }
-
-      // Build allergen lookup by id and code
-      const allergenById = {};
-      const allergenByCode = {};
-      for (const a of safeAllergens) {
-        if (a.id) allergenById[a.id] = a;
-        if (a.code) allergenByCode[a.code] = a;
-      }
-
-      // Map dish -> list of allergen codes
-      const map = {};
-      for (const link of links) {
-        const dishId = link.dish_id;
-        let code = link.allergen_code || null;
-
-        // If schema uses allergen_id instead of allergen_code, derive it
-        if (!code && link.allergen_id && allergenById[link.allergen_id]) {
-          code =
-            allergenById[link.allergen_id].code ||
-            allergenById[link.allergen_id].short_code ||
-            null;
-        }
-
-        if (!code) continue;
-
-        if (!map[dishId]) map[dishId] = [];
-        if (!map[dishId].includes(code)) {
-          map[dishId].push(code);
-        }
-      }
-
-      setDishes(safeDishes);
-      setAllergens(safeAllergens);
-      setDishAllergenMap(map);
-    } catch (err) {
-      console.error("Public tool load error:", err);
-      setError(err.message || "Failed to load menu.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function toggleAllergen(code) {
-    setSelectedDishId(null);
+  // === FILTER HELPERS =======================================================
+  const toggleAllergen = (code) => {
     setSelectedAllergens((prev) =>
-      prev.includes(code)
-        ? prev.filter((c) => c !== code)
-        : [...prev, code]
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
-  }
+  };
 
-  function resetFilters() {
+  const resetFilters = () => {
     setSelectedAllergens([]);
-    setSelectedDishId(null);
-    setSelectionCount(0);
-  }
+    setSelectedCategory(null);
+  };
 
-  function handleDishClick(dishId) {
-    if (mode === "guest") {
-      // In guest mode: only highlight, no popup logic (for future)
-      setSelectedDishId((current) => (current === dishId ? null : dishId));
-      setSelectionCount((count) =>
-        selectedDishId === dishId ? count : count + 1
-      );
-      return;
+  const filteredDishes = dishes.filter((dish) => {
+    const matchesCategory =
+      !selectedCategory || dish.category === selectedCategory;
+
+    if (!matchesCategory) return false;
+
+    if (selectedAllergens.length === 0) return true;
+
+    const dishAllergens = dish.allergens || [];
+
+    if (containsMode) {
+      // "Contains" mode – only show dishes that contain ANY of the selected allergens
+      return dishAllergens.some((a) => selectedAllergens.includes(a));
+    } else {
+      // "Avoid" mode – hide dishes that contain ANY of the selected allergens
+      return !dishAllergens.some((a) => selectedAllergens.includes(a));
     }
+  });
 
-    // Staff mode: same behaviour for now – later we can add a side panel
-    setSelectedDishId((current) => (current === dishId ? null : dishId));
-    setSelectionCount((count) =>
-      selectedDishId === dishId ? count : count + 1
-    );
-  }
+  const groupedByCategory = CATEGORIES.map((cat) => ({
+    category: cat,
+    dishes: filteredDishes.filter((d) => d.category === cat),
+  })).filter((group) => group.dishes.length > 0);
 
-  const filteredDishes = useMemo(() => {
-    if (selectedAllergens.length === 0) return dishes;
-
-    // Show only dishes that DO NOT contain any selected allergen
-    return dishes.filter((dish) => {
-      const codes = dishAllergenMap[dish.id] || [];
-      return !codes.some((code) => selectedAllergens.includes(code));
+  const togglePin = (dishId) => {
+    setPinnedDishIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(dishId)) {
+        next.delete(dishId);
+      } else {
+        next.add(dishId);
+      }
+      return next;
     });
-  }, [dishes, dishAllergenMap, selectedAllergens]);
+  };
+
+  const isPinned = (dishId) => pinnedDishIds.has(dishId);
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-sm text-slate-200">
-        Loading live menu…
+      <div className="guest-root">
+        <div className="guest-shell">
+          <div className="guest-header-row">
+            <div className="guest-logo-pulse" />
+            <div className="guest-header-text">
+              <div className="guest-title-skeleton" />
+              <div className="guest-subtitle-skeleton" />
+            </div>
+          </div>
+          <div className="guest-skeleton-grid">
+            <div className="guest-skeleton-card" />
+            <div className="guest-skeleton-card" />
+            <div className="guest-skeleton-card" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !restaurant) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center text-sm text-red-200">
-        <p>{error || "Restaurant not found."}</p>
+      <div className="guest-root">
+        <div className="guest-shell">
+          <div className="guest-error-card">
+            <h1>Something went wrong</h1>
+            <p>{error || "Restaurant not found or not published."}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const primaryColor = restaurant.theme_primary_color || "#d4af37";
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-4">
+    <div className="guest-root">
       <div
-        className="w-full rounded-[22px] border shadow-2xl backdrop-blur-2xl px-5 py-6 md:px-8 md:py-8"
+        className="guest-shell"
         style={{
-          background: "var(--card-bg)",
-          borderColor: "var(--card-border)",
-          borderRadius: "var(--card-radius)",
-          color: "var(--text)",
+          backgroundColor: "#0A0D10", // unified dark background
         }}
       >
-        {/* HEADER */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div>
-            <h1
-              className="text-2xl md:text-3xl font-semibold tracking-[0.15em] uppercase"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              {restaurant.name}
-            </h1>
-            <p
-              className="mt-2 text-xs md:text-sm opacity-80"
-              style={{ fontFamily: "var(--font-secondary)" }}
-            >
-              Live allergen-filtered menu view • Powered by SelectorOS
-            </p>
+        {/* TOP BAR: restaurant + view toggle */}
+        <header className="guest-header-row">
+          <div className="guest-header-main">
+            <div className="guest-logo-circle">
+              {restaurant.theme_logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={restaurant.theme_logo_url}
+                  alt={restaurant.name}
+                  className="guest-logo-img"
+                />
+              ) : (
+                <span className="guest-logo-initial">
+                  {restaurant.name?.[0] || "S"}
+                </span>
+              )}
+            </div>
+            <div className="guest-header-text">
+              <h1>{restaurant.name || "Restaurant"}</h1>
+              <p>Live allergen view for guests & staff.</p>
+            </div>
           </div>
 
-          {/* Mode toggle */}
-          <div className="inline-flex items-center justify-between gap-2 rounded-full bg-black/40 border border-white/20 px-2 py-1 text-[11px]">
+          <div className="guest-view-toggle">
             <button
               type="button"
-              onClick={() => setMode("staff")}
-              className={`px-3 py-1 rounded-full transition ${
-                mode === "staff" ? "bg-white text-black" : "text-white/70"
-              }`}
-            >
-              Staff mode
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("guest")}
-              className={`px-3 py-1 rounded-full transition ${
-                mode === "guest" ? "bg-white text-black" : "text-white/70"
+              onClick={() => setViewMode("guest")}
+              className={`guest-view-pill ${
+                viewMode === "guest" ? "guest-view-pill-active" : ""
               }`}
             >
               Guest mode
             </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("staff")}
+              className={`guest-view-pill ${
+                viewMode === "staff" ? "guest-view-pill-active" : ""
+              }`}
+            >
+              Staff mode
+            </button>
           </div>
         </header>
 
-        {/* ALLERGEN FILTER STRIP */}
-        <section className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              className="text-xs uppercase tracking-[0.18em] opacity-80"
-              style={{ fontFamily: "var(--font-secondary)" }}
-            >
-              Filter by allergen
-            </h2>
+        {/* FILTER BAR */}
+        <section className="guest-filter-dock">
+          <div className="guest-filter-left">
+            <div className="guest-allergen-chips">
+              {ALLERGENS.map((a) => {
+                const active = selectedAllergens.includes(a.code);
+                return (
+                  <button
+                    key={a.code}
+                    type="button"
+                    onClick={() => toggleAllergen(a.code)}
+                    className={`guest-chip ${active ? "guest-chip-active" : ""}`}
+                  >
+                    <span className="guest-chip-code">{a.code}</span>
+                    <span className="guest-chip-label">{a.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             <button
               type="button"
               onClick={resetFilters}
-              className="text-[11px] underline underline-offset-2 opacity-80 hover:opacity-100"
+              className="guest-reset-btn"
             >
               Reset
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {allergens.map((a) => {
-              const code = a.code || a.short_code || a.id;
-              const label = a.name || a.label || a.description || code;
-              const active = selectedAllergens.includes(code);
-
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => toggleAllergen(code)}
-                  className={`px-3 py-1.5 rounded-full border text-[11px] md:text-xs transition ${
-                    active
-                      ? "bg-white text-black border-white"
-                      : "bg-black/40 text-white/85 border-white/30 hover:border-white/70"
-                  }`}
-                >
-                  <span className="font-semibold mr-1">{code}</span>
-                  <span className="opacity-80">{label}</span>
-                </button>
-              );
-            })}
+          <div className="guest-filter-right">
+            <label className="guest-toggle-label">
+              <span>Show dishes that contain selected allergens</span>
+              <button
+                type="button"
+                onClick={() => setContainsMode((prev) => !prev)}
+                className={`guest-toggle ${containsMode ? "on" : "off"}`}
+              >
+                <span className="guest-toggle-thumb" />
+              </button>
+            </label>
           </div>
         </section>
 
+        {/* CATEGORY ROW */}
+        <section className="guest-category-row">
+          {CATEGORIES.map((cat) => {
+            const active = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() =>
+                  setSelectedCategory(active ? null : cat)
+                }
+                className={`guest-category-pill ${
+                  active ? "guest-category-pill-active" : ""
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </section>
+
         {/* DISH GRID */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between text-[11px] opacity-80 mb-1">
-            <span>
-              Showing{" "}
-              <strong>{filteredDishes.length}</strong> of{" "}
-              <strong>{dishes.length}</strong> dishes
-              {selectedAllergens.length > 0 && " (safe for selected allergies)"}
-            </span>
-            <span>Selections: {selectionCount}</span>
-          </div>
+        <section className="guest-dish-grid">
+          {groupedByCategory.length === 0 ? (
+            <div className="guest-empty-state">
+              <p>No dishes match these filters.</p>
+            </div>
+          ) : (
+            groupedByCategory.map((group) => (
+              <div key={group.category} className="guest-category-group">
+                <div className="guest-category-header">
+                  <h2>{group.category}</h2>
+                  <span className="guest-category-count">
+                    {group.dishes.length}{" "}
+                    {group.dishes.length === 1 ? "dish" : "dishes"}
+                  </span>
+                </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {filteredDishes.map((dish) => {
-              const selected = selectedDishId === dish.id;
-              const codes = dishAllergenMap[dish.id] || [];
+                <div className="guest-dish-list">
+                  {group.dishes.map((dish) => {
+                    const hasSelected =
+                      selectedAllergens.length > 0 &&
+                      dish.allergens?.some((a) =>
+                        selectedAllergens.includes(a)
+                      );
 
-              return (
-                <button
-                  key={dish.id}
-                  type="button"
-                  onClick={() => handleDishClick(dish.id)}
-                  className={`relative text-left p-4 rounded-2xl border transition transform ${
-                    selected
-                      ? "border-[var(--accent)] shadow-[0_0_25px_rgba(244,215,124,0.65)] scale-[1.01]"
-                      : "border-white/18 hover:border-[var(--accent)] hover:scale-[1.01]"
-                  }`}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(0,0,0,0.85), rgba(255,255,255,0.05))",
-                  }}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <h3
-                        className="text-sm md:text-[15px] font-semibold"
-                        style={{ fontFamily: "var(--font-primary)" }}
-                      >
-                        {dish.name}
-                      </h3>
-                      {dish.price && (
-                        <span className="text-[11px] opacity-80">
-                          {dish.price}
-                        </span>
-                      )}
-                    </div>
-                    {dish.description && (
-                      <p className="text-[11px] md:text-xs opacity-80">
-                        {dish.description}
-                      </p>
-                    )}
+                    return (
+                      <article key={dish.id} className="guest-dish-card">
+                        <header className="guest-dish-header">
+                          <div>
+                            <h3>{dish.name}</h3>
+                            {dish.description && (
+                              <p>{dish.description}</p>
+                            )}
+                          </div>
+                          <div className="guest-dish-price">
+                            {dish.price != null
+                              ? `${Number(dish.price).toFixed(2)} €`
+                              : ""}
+                          </div>
+                        </header>
 
-                    {codes.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {codes.map((c) => (
-                          <span
-                            key={c}
-                            className="px-2 py-0.5 rounded-full border border-white/30 text-[10px] uppercase tracking-wide opacity-80"
-                          >
-                            {c}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                        <footer className="guest-dish-footer">
+                          <div className="guest-dish-allergens">
+                            {dish.allergens?.length ? (
+                              dish.allergens.map((code) => (
+                                <span
+                                  key={code}
+                                  className={`guest-allergen-tag ${
+                                    selectedAllergens.includes(code)
+                                      ? "guest-allergen-tag-highlight"
+                                      : ""
+                                  }`}
+                                >
+                                  {code}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="guest-allergen-none">
+                                No allergens marked
+                              </span>
+                            )}
+                          </div>
+
+                          {hasSelected && (
+                            <div className="guest-safe-pill">
+                              Contains selected allergen
+                            </div>
+                          )}
+
+                          {viewMode === "staff" && (
+                            <button
+                              type="button"
+                              onClick={() => togglePin(dish.id)}
+                              className={`guest-pin-btn ${
+                                isPinned(dish.id) ? "pinned" : ""
+                              }`}
+                            >
+                              {isPinned(dish.id) ? "Pinned" : "Pin for service"}
+                            </button>
+                          )}
+                        </footer>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
         </section>
       </div>
     </div>
