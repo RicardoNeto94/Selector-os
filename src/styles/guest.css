@@ -56,6 +56,22 @@
   padding-bottom: 10px;
 }
 
+/* Wrap for whatever you render inside the glass header */
+.guest-header {
+  display: flex;
+  justify-content: center;   /* ⬅ center horizontally */
+  align-items: center;
+}
+
+/* Make the shell inside the sticky header act as a flex container */
+.glass-header .guest-shell {
+  padding-top: 18px;
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: center;   /* center content inside the shell */
+  align-items: center;
+}
+
 
 /* === LOGO ========================================== */
 
