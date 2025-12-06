@@ -13,7 +13,6 @@
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-
 /* acts just as a frame, not a big card anymore */
 .guest-shell {
   width: 100%;
@@ -25,26 +24,40 @@
   box-shadow: none;
 }
 
-/* === HEADER ======================================== */
+/* === FROSTED GLASS HEADER ========================== */
 
+.glass-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+  padding: 10px 0;
+}
+
+/* inner header just for logo alignment */
 .guest-header {
+  max-width: 1240px;
+  width: 100%;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  text-align: center;
-  gap: 12px;
-  margin-bottom: 24px;
 }
 
-.guest-header-main {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
+/* === LOGO ========================================== */
 
 .guest-logo-image-wrap {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 999px;
   background: #020617;
   display: flex;
@@ -57,7 +70,7 @@
 }
 
 .guest-header-logo-img {
-  height: 56px;
+  height: 48px;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
@@ -65,40 +78,17 @@
 
 /* fallback circle if no logo uploaded */
 .guest-logo-circle {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
   background: #facc15;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   color: #111827;
   box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-}
-
-.guest-header-title {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.guest-header-title span {
-  color: #22c55e;
-}
-
-.guest-header-subtitle {
-  margin-top: 2px;
-  font-size: 13px;
-  color: rgba(148, 163, 184, 0.9);
-}
-
-.guest-meta {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.22em;
-  color: rgba(148, 163, 184, 0.95);
 }
 
 /* === ALLERGEN PILLS ROW ============================ */
@@ -158,22 +148,20 @@
 
 /* === DISH GRID ===================================== */
 
-/* === DISH GRID ===================================== */
-
 .guest-grid {
   margin-top: 32px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
   padding: 0 16px;
-  justify-items: center;     /* keep cards centered */
+  justify-items: center; /* keep cards centered */
 }
 
 /* “Rounded square” dish cards */
 .guest-card {
   width: 100%;
-  max-width: 340px;           /* ⬅️ this prevents giant 1000px cards */
-  min-height: 260px;          /* optional: keeps proportions square-ish */
+  max-width: 340px;   /* prevents giant 1000px cards */
+  min-height: 260px;  /* keeps proportions square-ish */
 
   border-radius: 26px;
   padding: 20px 24px 18px;
@@ -181,8 +169,7 @@
   background: #ffffff;
   border: 1px solid rgba(30, 64, 175, 0.4);
 
-  box-shadow:
-    0 8px 28px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 
   color: #e5e7eb;
 
@@ -197,7 +184,7 @@
   gap: 16px;
 }
 
-/* === DISH PILLS (CATEGORY + STATUS) ================= */
+/* === DISH PILLS (CATEGORY + STATUS) ================ */
 
 .dish-chip-row {
   display: flex;
@@ -319,13 +306,17 @@
 
 .guest-dock {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 24px;
-  padding: 0 16px;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
-  pointer-events: none;
+  gap: 16px;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(14px) saturate(1.8);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   z-index: 40;
 }
 
@@ -501,22 +492,4 @@
   .guest-chips-row--floating {
     justify-content: flex-start;
   }
-}
-
-/* === FROSTED GLASS HEADER ====================================== */
-
-.glass-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-
-  padding: 18px 0;
-  display: flex;
-  justify-content: center;
 }
