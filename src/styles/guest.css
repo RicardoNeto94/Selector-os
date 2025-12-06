@@ -6,7 +6,7 @@
   min-height: 100vh;
   background: #0A0D10;
   color: #f8fafc;
-  padding: 32px 20px 80px;
+  padding: 24px 20px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,27 +24,24 @@
   box-shadow: none;
 }
 
-/* === FROSTED GLASS HEADER ========================== */
+/* === HEADER (LOGO ONLY, TRANSPARENT) =============== */
 
 .glass-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-
   width: 100%;
   display: flex;
   justify-content: center;
+  padding: 12px 0 6px;
+  position: relative;
+  top: 0;
+  z-index: 10;
 
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-
-  padding: 10px 0;
+  /* no band / blur, fully transparent */
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-/* inner header just for logo alignment */
 .guest-header {
   max-width: 1240px;
   width: 100%;
@@ -56,42 +53,42 @@
 /* === LOGO ========================================== */
 
 .guest-logo-image-wrap {
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   border-radius: 999px;
   background: #020617;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 16px 30px rgba(0, 0, 0, 0.7),
+    0 20px 40px rgba(0, 0, 0, 0.85),
     inset 0 3px 6px rgba(255, 255, 255, 0.2);
   overflow: hidden;
 }
 
 .guest-header-logo-img {
-  height: 48px;
+  height: 72px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.7));
 }
 
 /* fallback circle if no logo uploaded */
 .guest-logo-circle {
-  width: 48px;
-  height: 48px;
+  width: 72px;
+  height: 72px;
   border-radius: 999px;
   background: #facc15;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 700;
   color: #111827;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.7);
 }
 
-/* === ALLERGEN PILLS ROW ============================ */
+/* === ALLERGEN PILLS ROW (IF USED INLINE) =========== */
 
 .guest-chips-row {
   margin-top: 12px;
@@ -149,7 +146,7 @@
 /* === DISH GRID ===================================== */
 
 .guest-grid {
-  margin-top: 32px;
+  margin-top: 24px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
@@ -157,19 +154,20 @@
   justify-items: center; /* keep cards centered */
 }
 
-/* “Rounded square” dish cards */
+/* Dark “rounded square” dish cards like screenshot */
 .guest-card {
   width: 100%;
-  max-width: 340px;   /* prevents giant 1000px cards */
-  min-height: 260px;  /* keeps proportions square-ish */
+  max-width: 340px;
+  min-height: 260px;
 
   border-radius: 26px;
   padding: 20px 24px 18px;
 
-  background: #ffffff;
-  border: 1px solid rgba(30, 64, 175, 0.4);
+  background: #020617;
+  border: 1px solid rgba(30, 64, 175, 0.55);
 
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.9);
 
   color: #e5e7eb;
 
@@ -203,7 +201,7 @@
   letter-spacing: 0.06em;
   text-transform: capitalize;
   border: none;
-  box-shadow: 0 3px 6px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 3px 6px rgba(15, 23, 42, 0.35);
 }
 
 /* Blue category pill (Starters / Mains / etc) */
@@ -228,7 +226,7 @@
   margin-top: 4px;
   font-size: 18px;
   font-weight: 600;
-  color: #0f172a;
+  color: #e5e7eb;
 }
 
 .guest-card-price {
@@ -236,9 +234,9 @@
   font-weight: 600;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.5);
 }
 
 /* description */
@@ -246,7 +244,7 @@
 .guest-card-desc {
   margin-top: 14px;
   font-size: 14px;
-  color: #475569;
+  color: #cbd5f5;
   line-height: 1.45;
 }
 
@@ -255,19 +253,19 @@
 .guest-card-footer {
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  border-top: 1px solid rgba(15, 23, 42, 0.7);
   display: flex;
   flex-direction: column;
   gap: 6px;
   font-size: 11px;
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .guest-card-allergens {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #64748b;
+  color: #9ca3af;
 }
 
 /* optional granular display if you use it later */
@@ -280,17 +278,17 @@
 
 .guest-allergen-pill {
   padding: 4px 10px;
-  background: #f8fafc;
+  background: #0b1120;
   border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.7);
   font-size: 11px;
-  color: #334155;
+  color: #e2e8f0;
 }
 
 .guest-card-allergens-none {
   margin-top: 6px;
   font-size: 11px;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 /* === EMPTY STATE =================================== */
