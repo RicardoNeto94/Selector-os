@@ -3,6 +3,28 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../styles/guest.css";
 
+// 🔹 Master allergen list (full set, independent of dishes)
+const ALLERGENS = [
+  "GL", // Gluten
+  "CR", // Crustaceans
+  "EG", // Eggs
+  "FL", // Fish
+  "PE", // Peanuts
+  "SO", // Soya
+  "MI", // Milk
+  "NU", // Nuts
+  "SE", // Sesame
+  "CE", // Celery
+  "MU", // Mustard
+  "SU", // Sulphites
+  "LU", // Lupin
+  "MO", // Molluscs
+  "GA", // Garlic
+  "ON", // Onion
+  "MR", // Mushrooms
+  "CL", // Chilli / Custom
+];
+
 export default function GuestMenu({ slug }) {
   const [dishes, setDishes] = useState([]);
   const [restaurantLogoUrl, setRestaurantLogoUrl] = useState(null);
@@ -63,14 +85,10 @@ export default function GuestMenu({ slug }) {
     if (slug) load();
   }, [slug]);
 
-  // Unique sorted allergen codes
-  const allergenList = useMemo(() => {
-    const set = new Set();
-    dishes.forEach((d) => (d.allergens || []).forEach((a) => set.add(a)));
-    return Array.from(set).sort();
-  }, [dishes]);
+  // 🔹 Use fixed master allergen list (not derived from dishes)
+  const allergenList = useMemo(() => ALLERGENS, []);
 
-  // Unique sorted category list
+  // Unique sorted category list (still derived from dishes)
   const categoryList = useMemo(() => {
     const set = new Set();
     dishes.forEach((d) => {
@@ -122,7 +140,7 @@ export default function GuestMenu({ slug }) {
   };
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory((prev) => (prev === category ? null : category));
+    setSelectedCategory((prev) => (prev === category ? null : prev = category));
   };
 
   const handleResetAll = () => {
@@ -150,25 +168,27 @@ export default function GuestMenu({ slug }) {
 
   return (
     <div className="guest-root">
+      {/* 🔹 Sticky frosted header */}
+      <header className="glass-header">
+        <div className="guest-shell">
+          <div className="guest-header">
+            <div className="guest-logo-image-wrap">
+              {restaurantLogoUrl ? (
+                <img
+                  src={restaurantLogoUrl}
+                  alt="Restaurant logo"
+                  className="guest-header-logo-img"
+                />
+              ) : (
+                <div className="guest-logo-circle">S</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 🔹 Main content frame */}
       <div className="guest-shell">
-        {/* Header */}
-    
-      <header className="guest-header glass-header">
-  <div className="guest-header-logo-wrap">
-    {restaurantLogoUrl ? (
-      <img
-        src={restaurantLogoUrl}
-        alt="Restaurant logo"
-        className="guest-header-logo-img"
-      />
-    ) : (
-      <div className="guest-logo-circle">S</div>
-    )}
-  </div>
-</header>
-
-
-        {/* Content */}
         {loading ? (
           <div className="guest-empty">Loading menu…</div>
         ) : error ? (
@@ -190,8 +210,6 @@ export default function GuestMenu({ slug }) {
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
               // === BADGE LOGIC =====================================
-              // show SAFE only if dish is really safe
-              // show CONTAINS only if dish really contains selection
               let badgeLabel = null;
               let badgeClass = "";
               if (hasFilters) {
@@ -345,6 +363,7 @@ export default function GuestMenu({ slug }) {
               >
                 <span className="dock-icon-label">▦</span>
               </button>
+
               {/* Reset all */}
               <button
                 type="button"
