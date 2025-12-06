@@ -1,8 +1,8 @@
-// src/app/api/menus/create/route.js
+// src/app/api/menu/publish/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { getRestaurantPlan, getMenuLimitForPlan } from "@/lib/planLimits";
+import { getRestaurantPlan, getMenuLimitForPlan } from "../../../../lib/planLimits";
 
 export async function POST(req) {
   const supabase = createRouteHandlerClient({ cookies });
@@ -15,6 +15,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  // 1) Load restaurant for this user
   const { data: restaurant, error: restaurantError } = await supabase
     .from("restaurants")
     .select("*")
@@ -22,40 +23,53 @@ export async function POST(req) {
     .maybeSingle();
 
   if (restaurantError || !restaurant) {
-    return NextResponse.json({ error: "Restaurant not found" }, { status: 400 });
+    console.error("No restaurant found for user", restaurantError);
+    return NextResponse.json(
+      { error: "No restaurant found for this account." },
+      { status: 400 }
+    );
   }
 
+  // 2) Figure out the restaurant's plan
   const plan = getRestaurantPlan(restaurant);
-  const limit = getMenuLimitForPlan(plan);
+  const maxMenus = getMenuLimitForPlan(plan);
 
-  // Count how many menus this restaurant already has
+  // 3) Count current menus for this restaurant
   const { data: menus, error: menusError } = await supabase
     .from("menus")
-    .select("id", { count: "exact", head: true })
+    .select("id")
     .eq("restaurant_id", restaurant.id);
 
   if (menusError) {
-    console.error("Menu count error", menusError);
-    return NextResponse.json({ error: "Failed to check menu limit" }, { status: 500 });
+    console.error("Error loading menus", menusError);
+    return NextResponse.json(
+      { error: "Failed to load menus for this restaurant." },
+      { status: 500 }
+    );
   }
 
-  const currentCount = menus?.length ?? menus?.count ?? 0;
+  const currentCount = menus?.length ?? 0;
 
-  if (limit !== Infinity && currentCount >= limit) {
+  // 4) Enforce the limit
+  if (maxMenus !== null && currentCount >= maxMenus) {
     return NextResponse.json(
       {
-        error: "menu_limit_reached",
-        message:
-          plan === "starter"
-            ? "Starter plan includes 1 menu. Upgrade to Pro to add more."
-            : "Pro plan includes 3 menus. Contact us for an Enterprise plan to add more.",
+        error: `Menu limit reached for plan "${plan}".`,
+        plan,
+        maxMenus,
+        currentCount,
       },
       { status: 403 }
     );
   }
 
-  // OK, below the limit → create menu
-  const body = await req.json();
+  // 5) Parse body and insert new menu
+  let body = {};
+  try {
+    body = await req.json();
+  } catch {
+    body = {};
+  }
 
   const { data: newMenu, error: insertError } = await supabase
     .from("menus")
@@ -69,7 +83,10 @@ export async function POST(req) {
 
   if (insertError) {
     console.error("Insert menu error", insertError);
-    return NextResponse.json({ error: "Failed to create menu" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create menu" },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ menu: newMenu });
