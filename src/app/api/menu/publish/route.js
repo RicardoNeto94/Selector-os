@@ -1,84 +1,76 @@
-// src/app/api/menu/publish/route.js
-
+// src/app/api/menus/create/route.js
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-function generateSlug() {
-  // simple: 8-char random slug
-  return Math.random().toString(36).slice(2, 10);
-}
+import { getRestaurantPlan, getMenuLimitForPlan } from "@/lib/planLimits";
 
 export async function POST(req) {
-  try {
-    const supabase = createRouteHandlerClient({ cookies });
+  const supabase = createRouteHandlerClient({ cookies });
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      console.error("User error:", userError);
-      return Response.json({ error: "Not logged in" }, { status: 401 });
-    }
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
-    const body = await req.json();
-    const menuId = body.menuId;
+  const { data: restaurant, error: restaurantError } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("owner_id", user.id)
+    .maybeSingle();
 
-    if (!menuId) {
-      return Response.json({ error: "menuId is required" }, { status: 400 });
-    }
+  if (restaurantError || !restaurant) {
+    return NextResponse.json({ error: "Restaurant not found" }, { status: 400 });
+  }
 
-    // Check menu belongs to this user's restaurant
-    const { data: menu, error: menuError } = await supabase
-      .from("menus")
-      .select("id, restaurant_id, public_slug")
-      .eq("id", menuId)
-      .maybeSingle();
+  const plan = getRestaurantPlan(restaurant);
+  const limit = getMenuLimitForPlan(plan);
 
-    if (menuError || !menu) {
-      console.error("Menu not found or error:", menuError);
-      return Response.json({ error: "Menu not found" }, { status: 404 });
-    }
+  // Count how many menus this restaurant already has
+  const { data: menus, error: menusError } = await supabase
+    .from("menus")
+    .select("id", { count: "exact", head: true })
+    .eq("restaurant_id", restaurant.id);
 
-    const { data: restaurant, error: restaurantError } = await supabase
-      .from("restaurants")
-      .select("id, owner_id")
-      .eq("id", menu.restaurant_id)
-      .maybeSingle();
+  if (menusError) {
+    console.error("Menu count error", menusError);
+    return NextResponse.json({ error: "Failed to check menu limit" }, { status: 500 });
+  }
 
-    if (restaurantError || !restaurant || restaurant.owner_id !== user.id) {
-      console.error("Restaurant ownership error:", restaurantError);
-      return Response.json({ error: "Not allowed to publish this menu" }, { status: 403 });
-    }
+  const currentCount = menus?.length ?? menus?.count ?? 0;
 
-    // Generate or reuse slug
-    let slug = menu.public_slug;
-    if (!slug) {
-      slug = generateSlug();
-      const { error: updateError } = await supabase
-        .from("menus")
-        .update({ public_slug: slug })
-        .eq("id", menu.id);
-
-      if (updateError) {
-        console.error("Failed to save public_slug:", updateError);
-        return Response.json(
-          { error: "Failed to save public slug" },
-          { status: 500 }
-        );
-      }
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://selector-os.vercel.app";
-    const publicUrl = `${baseUrl}/selector/${slug}`;
-
-    return Response.json({ url: publicUrl, slug }, { status: 200 });
-  } catch (err) {
-    console.error("Unexpected error in /api/menu/publish:", err);
-    return Response.json(
-      { error: "Unexpected error while publishing menu" },
-      { status: 500 }
+  if (limit !== Infinity && currentCount >= limit) {
+    return NextResponse.json(
+      {
+        error: "menu_limit_reached",
+        message:
+          plan === "starter"
+            ? "Starter plan includes 1 menu. Upgrade to Pro to add more."
+            : "Pro plan includes 3 menus. Contact us for an Enterprise plan to add more.",
+      },
+      { status: 403 }
     );
   }
+
+  // OK, below the limit → create menu
+  const body = await req.json();
+
+  const { data: newMenu, error: insertError } = await supabase
+    .from("menus")
+    .insert({
+      restaurant_id: restaurant.id,
+      name: body.name ?? "New menu",
+      // any other fields...
+    })
+    .select("*")
+    .single();
+
+  if (insertError) {
+    console.error("Insert menu error", insertError);
+    return NextResponse.json({ error: "Failed to create menu" }, { status: 500 });
+  }
+
+  return NextResponse.json({ menu: newMenu });
 }
