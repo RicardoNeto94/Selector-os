@@ -34,8 +34,8 @@ export default async function SelectPlanPage() {
     restaurant &&
     (restaurant.plan === "standard" ||
       restaurant.plan === "pro" ||
-      restaurant.subscription_plan === "standard" ||
-      restaurant.subscription_plan === "pro") &&
+      restaurant.subscription_plan === "Standard" ||
+      restaurant.subscription_plan === "Pro") &&
     (restaurant.onboarding_complete || restaurant.onboarding_completed)
   ) {
     redirect("/dashboard");
