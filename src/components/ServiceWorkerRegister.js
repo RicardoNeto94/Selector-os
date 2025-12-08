@@ -1,4 +1,3 @@
-// src/components/ServiceWorkerRegister.js
 "use client";
 
 import { useEffect } from "react";
@@ -10,7 +9,12 @@ export default function ServiceWorkerRegister() {
 
     navigator.serviceWorker
       .register("/sw.js")
-      .catch((err) => console.error("Service worker registration failed:", err));
+      .then((reg) => {
+        console.log("SW registered:", reg.scope);
+      })
+      .catch((err) => {
+        console.error("SW registration failed:", err);
+      });
   }, []);
 
   return null;
