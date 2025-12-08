@@ -5,20 +5,19 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export const dynamic = "force-dynamic";
 
-export default async function RootPage() {
+export default async function HomePage() {
   const supabase = createServerComponentClient({ cookies });
 
+  // 1) Auth guard
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 1) Not logged in → send to marketing / sign-in
   if (!user) {
-    // if you use /selector as landing, use that instead
     redirect("/sign-in");
   }
 
-  // 2) Find restaurant for this user
+  // 2) Restaurant for this owner
   const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("*")
@@ -26,28 +25,42 @@ export default async function RootPage() {
     .maybeSingle();
 
   if (error) {
-    console.error("RootPage: restaurant lookup error", error);
+    console.error("Home: error loading restaurant", error);
   }
 
-  // 3) No restaurant yet → must finish onboarding
+  // No restaurant yet → send to onboarding (it will create one)
   if (!restaurant) {
     redirect("/onboarding");
   }
 
+  const hasPaidPlan =
+    restaurant &&
+    (
+      restaurant.plan === "standard" ||
+      restaurant.plan === "pro" ||
+      restaurant.subscription_plan === "starter" ||   // Standard internal
+      restaurant.subscription_plan === "standard" ||
+      restaurant.subscription_plan === "pro"
+    );
+
   const onboardingDone =
-    restaurant.onboarding_complete || restaurant.onboarding_completed;
+    restaurant &&
+    (restaurant.onboarding_complete || restaurant.onboarding_completed);
 
-  if (!onboardingDone) {
-    redirect("/onboarding");
-  }
-
-  // 4) Onboarding done but no active subscription → paywall
-  const isActiveSub = restaurant.stripe_subscription_status === "active";
-
-  if (!isActiveSub) {
+  // Has restaurant but no plan → must pick one
+  if (!hasPaidPlan) {
     redirect("/select-plan");
   }
 
-  // 5) All good → go to dashboard
+  // Has plan but onboarding not finished → return to onboarding
+  if (!onboardingDone) {
+    redirect(`/onboarding?plan=${encodeURIComponent(
+      restaurant.subscription_plan ||
+        (restaurant.plan === "standard" ? "starter" : restaurant.plan) ||
+        "starter"
+    )}`);
+  }
+
+  // Everything is fine → go to dashboard
   redirect("/dashboard");
 }
