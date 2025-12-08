@@ -34,16 +34,16 @@ export default async function SelectPlanPage() {
     restaurant &&
     (restaurant.plan === "standard" ||
       restaurant.plan === "pro" ||
-      restaurant.subscription_plan === "Standard" ||
-      restaurant.subscription_plan === "Pro") &&
+      restaurant.subscription_plan === "standard" ||
+      restaurant.subscription_plan === "pro") &&
     (restaurant.onboarding_complete || restaurant.onboarding_completed)
   ) {
     redirect("/dashboard");
   }
 
   return (
-    <main className="page-fade px-6 py-10 text-slate-100">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-5xl">
         <SelectPlanClient restaurantName={restaurant?.name || null} />
       </div>
     </main>
