@@ -2,13 +2,14 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-// ...other imports
+// add other imports if you had some (icons, components, etc.)
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const supabase = createServerComponentClient({ cookies });
 
+  // 1) Auth guard
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -17,9 +18,38 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-// AFTER hasPaidPlan check, still inside DashboardPage:
+  // 2) Load restaurant for this owner
+  const { data: restaurant, error } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("owner_id", user.id)
+    .maybeSingle();
 
-  // Load menus for this restaurant
+  if (error) {
+    console.error("Dashboard: error loading restaurant", error);
+  }
+
+  // No restaurant yet → onboarding
+  if (!restaurant) {
+    redirect("/onboarding");
+  }
+
+  // 3) Check paid plan
+  const hasPaidPlan =
+    restaurant &&
+    (
+      restaurant.plan === "standard" ||
+      restaurant.plan === "pro" ||
+      restaurant.subscription_plan === "starter" ||
+      restaurant.subscription_plan === "standard" ||
+      restaurant.subscription_plan === "pro"
+    );
+
+  if (!hasPaidPlan) {
+    redirect("/select-plan");
+  }
+
+  // 4) Load menus for this restaurant
   const { data: menus, error: menusError } = await supabase
     .from("menus")
     .select("id, name")
@@ -31,7 +61,7 @@ export default async function DashboardPage() {
 
   const menuIds = (menus || []).map((m) => m.id);
 
-  // Load dishes for those menus
+  // 5) Load dishes for those menus
   let dishes = [];
   if (menuIds.length > 0) {
     const { data: dishesData, error: dishesError } = await supabase
@@ -49,11 +79,13 @@ export default async function DashboardPage() {
   const totalDishes = dishes.length;
   const totalMenus = menuIds.length;
 
-  // latest dish (if any)
-  const latestDish = dishes
-    .slice()
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0] || null;
+  const latestDish =
+    dishes
+      .slice()
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0] ||
+    null;
 
+  // 6) Render dashboard
   return (
     <main className="so-main">
       <div className="so-main-inner page-fade">
@@ -81,12 +113,8 @@ export default async function DashboardPage() {
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            <span className="so-card-pill">
-              Dishes {totalDishes}
-            </span>
-            <span className="so-card-pill">
-              Menus {totalMenus}
-            </span>
+            <span className="so-card-pill">Dishes {totalDishes}</span>
+            <span className="so-card-pill">Menus {totalMenus}</span>
           </div>
         </section>
 
@@ -135,3 +163,4 @@ export default async function DashboardPage() {
       </div>
     </main>
   );
+}
