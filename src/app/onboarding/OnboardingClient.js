@@ -125,30 +125,63 @@ export default function OnboardingClient({ existingRestaurant }) {
   }
 
   // STEP 2: mark onboarding as complete
-  async function handleFinish() {
-    if (!restaurant?.id) return;
+ async function handleFinish() {
+  if (!restaurant) return;
 
-    setError("");
-    setFinishing(true);
+  setError("");
+  setFinishing(true);
 
-    try {
-      const { error } = await supabase
-        .from("restaurants")
-        .update({
-          onboarding_complete: true,
-          onboarding_completed: true,
-        })
-        .eq("id", restaurant.id);
+  try {
+    // 1) does this restaurant already have any menus?
+    const { data: existingMenus, error: fetchMenusError } = await supabase
+      .from("menus")
+      .select("id")
+      .eq("restaurant_id", restaurant.id)   // <-- column name MUST match your table
+      .limit(1);
 
-      if (error) throw error;
-
-      router.push("/dashboard");
-    } catch (err) {
-      console.error("Onboarding finish error", err);
-      setError(err.message || "Failed to finish onboarding.");
-      setFinishing(false);
+    if (fetchMenusError) {
+      console.error("Onboarding: fetch menus error", fetchMenusError);
+      throw fetchMenusError;
     }
+
+    // 2) if no menus, create a default one
+    if (!existingMenus || existingMenus.length === 0) {
+      const { error: insertMenuError } = await supabase
+        .from("menus")
+        .insert({
+          restaurant_id: restaurant.id,
+          name: "Main menu",
+        });
+
+      if (insertMenuError) {
+        console.error("Onboarding: insert menu error", insertMenuError);
+        throw insertMenuError;
+      }
+    }
+
+    // 3) mark onboarding as complete
+    const { error: updateRestaurantError } = await supabase
+      .from("restaurants")
+      .update({
+        onboarding_complete: true,
+        onboarding_completed: true,
+      })
+      .eq("id", restaurant.id);
+
+    if (updateRestaurantError) {
+      console.error("Onboarding: update restaurant error", updateRestaurantError);
+      throw updateRestaurantError;
+    }
+
+    // 4) go to dashboard
+    router.push("/dashboard");
+  } catch (err) {
+    console.error("Onboarding finish error", err);
+    setError(err.message || "Failed to finish onboarding.");
+    setFinishing(false);
   }
+}
+
 
   // ================== RENDER ====================
 
