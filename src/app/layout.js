@@ -15,4 +15,10 @@ export default function RootLayout({ children }) {
       <body>{children}</body>
     </html>
   );
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 }
