@@ -18,7 +18,7 @@ export default async function SelectPlanPage() {
     redirect("/sign-in");
   }
 
-  // 2) Try to load restaurant
+  // 2) Load restaurant for this owner (if any)
   const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("*")
@@ -29,21 +29,39 @@ export default async function SelectPlanPage() {
     console.error("select-plan: error loading restaurant", error);
   }
 
-  // 3) If they already have a plan + finished onboarding → send them to dashboard
-  if (
-    restaurant &&
-    (restaurant.plan === "standard" ||
+  const hasPaidPlan =
+    !!restaurant &&
+    (
+      restaurant.plan === "standard" ||
       restaurant.plan === "pro" ||
       restaurant.subscription_plan === "standard" ||
-      restaurant.subscription_plan === "pro") &&
-    (restaurant.onboarding_complete || restaurant.onboarding_completed)
-  ) {
+      restaurant.subscription_plan === "starter" || // ⬅️ IMPORTANT
+      restaurant.subscription_plan === "pro"
+    );
+
+  const onboardingDone =
+    !!restaurant &&
+    (restaurant.onboarding_complete || restaurant.onboarding_completed);
+
+  // If they already paid AND finished onboarding → straight to dashboard
+  if (hasPaidPlan && onboardingDone) {
     redirect("/dashboard");
   }
 
+  // If they already paid BUT didn't finish onboarding → send them there
+  if (hasPaidPlan && !onboardingDone) {
+    const planKey =
+      restaurant.subscription_plan ||
+      (restaurant.plan === "standard" ? "starter" : restaurant.plan) ||
+      "starter";
+
+    redirect(`/onboarding?plan=${encodeURIComponent(planKey)}`);
+  }
+
+  // Otherwise: show the SelectPlan screen
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-5xl">
+    <main className="page-fade px-6 py-10 text-slate-100">
+      <div className="max-w-4xl mx-auto">
         <SelectPlanClient restaurantName={restaurant?.name || null} />
       </div>
     </main>
