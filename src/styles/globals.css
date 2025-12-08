@@ -124,14 +124,10 @@
 html,
 body {
   min-height: 100vh;
-  /* full-page blue → teal gradient */
-  background:
-    radial-gradient(circle at top right, #2df0e0 0%, #0bbfd0 30%, #063a63 80%),
-    radial-gradient(circle at bottom left, #021222 0%, #020813 55%, #000000 100%);
-  color: #e5e5e5;
+  background: var(--so-bg-page);
+  color: var(--so-text-main);
   overflow-x: hidden;
 }
-
 
 /* Enable hover underline expansion */
 nav a {
