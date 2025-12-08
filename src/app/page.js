@@ -33,34 +33,21 @@ export default async function HomePage() {
     redirect("/onboarding");
   }
 
+  // Has restaurant, check plan only
   const hasPaidPlan =
     restaurant &&
     (
       restaurant.plan === "standard" ||
       restaurant.plan === "pro" ||
-      restaurant.subscription_plan === "starter" ||   // Standard internal
+      restaurant.subscription_plan === "starter" ||
       restaurant.subscription_plan === "standard" ||
       restaurant.subscription_plan === "pro"
     );
 
-  const onboardingDone =
-    restaurant &&
-    (restaurant.onboarding_complete || restaurant.onboarding_completed);
-
-  // Has restaurant but no plan → must pick one
   if (!hasPaidPlan) {
     redirect("/select-plan");
   }
 
-  // Has plan but onboarding not finished → return to onboarding
-  if (!onboardingDone) {
-    redirect(`/onboarding?plan=${encodeURIComponent(
-      restaurant.subscription_plan ||
-        (restaurant.plan === "standard" ? "starter" : restaurant.plan) ||
-        "starter"
-    )}`);
-  }
-
-  // Everything is fine → go to dashboard
+  // Restaurant + plan → always let them into dashboard
   redirect("/dashboard");
 }
