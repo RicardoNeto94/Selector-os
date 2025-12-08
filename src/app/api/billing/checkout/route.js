@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-// IMPORTANT: correct relative path from /src/app/api/billing/checkout/route.js
 import { stripe } from "../../../../lib/stripe";
 
 export async function POST(req) {
@@ -26,7 +25,6 @@ export async function POST(req) {
     body = {};
   }
 
-  // "starter" or "pro" – default to pro if anything else
   const planKey = body.plan === "starter" ? "starter" : "pro";
 
   // 3) Map plan -> Stripe price
@@ -37,14 +35,13 @@ export async function POST(req) {
 
   if (!priceId) {
     return NextResponse.json(
-      { error: `Missing Stripe price env for plan ${planKey}` },
+      { error: `Missing Stripe price env for plan "${planKey}".` },
       { status: 500 }
     );
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-  // 4) Create checkout session – NO restaurant required here
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -67,8 +64,15 @@ export async function POST(req) {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error("Stripe checkout session error", err);
+
+    // 👇 TEMP: show real Stripe error
     return NextResponse.json(
-      { error: "Failed to create Stripe checkout session" },
+      {
+        error:
+          err?.message ||
+          err?.error?.message ||
+          "Failed to create Stripe checkout session",
+      },
       { status: 500 }
     );
   }
