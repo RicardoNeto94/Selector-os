@@ -5,8 +5,8 @@ import {
   Squares2X2Icon,
   RectangleStackIcon,
   SwatchIcon,
-  Cog6ToothIcon,
   CreditCardIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -14,18 +14,16 @@ export const dynamic = "force-dynamic";
 export default function DashboardLayout({ children }) {
   return (
     <div className="so-dashboard-root">
-  <aside className="so-sidebar hidden md:flex">
-    { /* desktop sidebar */ }
-  </aside>
-
-  <header className="so-mobile-nav md:hidden">
-    { /* mobile bottom navigation */ }
-  </header>
-
-  <main className="so-content">
-    {children}
-  </main>
-</div>
+      {/* LEFT SIDEBAR – desktop & tablet */}
+      <aside className="so-sidebar">
+        {/* Brand */}
+        <div className="so-sidebar-brand">
+          <img
+            src="/selectoros-logo.svg"
+            alt="SelectorOS"
+            className="so-sidebar-logo-img"
+          />
+        </div>
 
         {/* NAVIGATION */}
         <nav className="so-sidebar-nav">
@@ -33,39 +31,39 @@ export default function DashboardLayout({ children }) {
             <span className="so-nav-icon-wrap">
               <Squares2X2Icon className="so-nav-icon" />
             </span>
-            <span className="so-nav-label">Dashboard</span>
+            <span>Dashboard</span>
           </Link>
 
-          <Link href="/dashboard/dishes" className="so-nav-item">
+          <Link href="/dishes" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <RectangleStackIcon className="so-nav-icon" />
             </span>
-            <span className="so-nav-label">Dishes</span>
+            <span>Dishes</span>
           </Link>
 
-          <Link href="/dashboard/menu" className="so-nav-item">
+          <Link href="/menu-editor" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <SwatchIcon className="so-nav-icon" />
             </span>
-            <span className="so-nav-label">Menu editor</span>
+            <span>Menu editor</span>
           </Link>
 
-          <Link href="/dashboard/billing" className="so-nav-item">
+          <Link href="/billing" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <CreditCardIcon className="so-nav-icon" />
             </span>
-            <span className="so-nav-label">Billing</span>
+            <span>Billing</span>
           </Link>
 
-          <Link href="/dashboard/settings" className="so-nav-item">
+          <Link href="/settings" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <Cog6ToothIcon className="so-nav-icon" />
             </span>
-            <span className="so-nav-label">Settings</span>
+            <span>Settings</span>
           </Link>
         </nav>
 
-        {/* USER FOOTER */}
+        {/* FOOTER */}
         <div className="so-sidebar-footer">
           <div className="so-sidebar-user">
             <div className="so-user-avatar">R</div>
@@ -75,15 +73,18 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* Logout goes to /logout (client page that calls supabase.auth.signOut) */}
-         <Link href="/logout" className="so-logout-btn so-logout-apple">
-  Logout
-</Link>  
+          <form action="/auth/sign-out" method="post">
+            <button type="submit" className="so-logout-btn">
+              Logout
+            </button>
+          </form>
         </div>
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="so-main">{children}</main>
+      <main className="so-main">
+        <div className="so-main-inner page-fade">{children}</div>
+      </main>
     </div>
   );
 }
