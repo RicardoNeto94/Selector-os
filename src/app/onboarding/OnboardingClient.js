@@ -63,7 +63,6 @@ export default function OnboardingClient({ existingRestaurant }) {
 
     setSaving(true);
 
-    try:
     try {
       const {
         data: { user },
@@ -157,10 +156,7 @@ export default function OnboardingClient({ existingRestaurant }) {
   if (step === 1) {
     return (
       <div className="w-full max-w-xl">
-        <form
-          onSubmit={handleStepOneSubmit}
-          className="space-y-4"
-        >
+        <form onSubmit={handleStepOneSubmit} className="space-y-4">
           {error && (
             <div className="rounded-xl border border-red-500/60 bg-red-50 px-4 py-2 text-xs text-red-700 mb-1">
               {error}
@@ -227,13 +223,13 @@ export default function OnboardingClient({ existingRestaurant }) {
     );
   }
 
-  // STEP 2 – no restaurant (safety net)
+  // STEP 2 – safety net (no restaurant)
   if (!restaurant?.id) {
     return (
       <div className="w-full max-w-xl space-y-4">
         <div className="rounded-xl border border-red-500/60 bg-red-50 px-4 py-3 text-xs text-red-700">
-          Something went wrong: no restaurant record was created.
-          Please go back and save your restaurant details again.
+          Something went wrong: no restaurant record was created. Please go back
+          and save your restaurant details again.
         </div>
         <button
           type="button"
