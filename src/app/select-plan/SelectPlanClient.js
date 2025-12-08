@@ -98,11 +98,11 @@ export default function SelectPlanClient({ restaurantName }) {
 
           <button
             type="button"
-            onClick={() => startCheckout("starter")}
-            disabled={loadingPlan === "starter"}
+            onClick={() => startCheckout("Standard")}
+            disabled={loadingPlan === "Standard"}
             className="mt-3 inline-flex items-center justify-center rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-900 hover:bg-white disabled:opacity-60 transition"
           >
-            {loadingPlan === "starter" ? "Redirecting…" : "Choose Standard"}
+            {loadingPlan === "Standard" ? "Redirecting…" : "Choose Standard"}
           </button>
         </div>
 
