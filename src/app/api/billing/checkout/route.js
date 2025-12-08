@@ -37,8 +37,11 @@ export async function POST(req) {
   }
 
   const rawPlan = body.plan;
-  const plan =
-    rawPlan === "starter" || rawPlan === "pro" ? rawPlan : "pro";
+  // ✅ explicit, no operator-precedence trap
+  let plan = rawPlan;
+  if (plan !== "starter" && plan !== "pro") {
+    plan = "pro";
+  }
 
   // Map plan -> price ID
   const priceId =
