@@ -20,10 +20,11 @@ export default function DashboardLayout({ children }) {
         <div className="so-sidebar-brand">
           {/* Logo image */}
           <img
-            src="/logo.png"            {/* ⬅ change if your file is /selectoros-logo.svg etc */}
+            src="/logo.png"
             alt="SelectorOS logo"
             className="so-sidebar-logo-img"
           />
+
           <div className="so-sidebar-brand-text">
             <span className="so-sidebar-brand-name">SelectorOS</span>
             <span className="so-sidebar-brand-sub">Operator</span>
@@ -86,7 +87,7 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT – each page renders its own <main className="so-main"> */}
+      {/* MAIN CONTENT – each page renders its own <main> wrapper */}
       {children}
     </div>
   );
