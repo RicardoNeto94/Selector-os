@@ -1,6 +1,7 @@
+// src/app/onboarding/OnboardingClient.js
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import LogoUploader from "../dashboard/settings/LogoUploader";
@@ -26,12 +27,21 @@ export default function OnboardingClient({ existingRestaurant }) {
   const [name, setName] = useState(existingRestaurant?.name || "");
   const [location, setLocation] = useState(existingRestaurant?.location || "");
   const [cuisine, setCuisine] = useState(existingRestaurant?.cuisine || "");
+
   const [saving, setSaving] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState("");
 
-  const selectedPlan = searchParams.get("plan") || "starter";
+  // Plan selection: prefer DB value, then URL, then fallback
+  const planFromUrl = searchParams.get("plan");
+  const selectedPlan =
+    existingRestaurant?.subscription_plan ||
+    existingRestaurant?.plan ||
+    (planFromUrl === "starter" || planFromUrl === "pro"
+      ? planFromUrl
+      : "starter");
 
+  // Keep state in sync if server sends updated restaurant
   useEffect(() => {
     if (existingRestaurant) {
       setRestaurant(existingRestaurant);
@@ -41,6 +51,7 @@ export default function OnboardingClient({ existingRestaurant }) {
     }
   }, [existingRestaurant]);
 
+  // STEP 1: create / update restaurant
   async function handleStepOneSubmit(e) {
     e.preventDefault();
     setError("");
@@ -52,6 +63,7 @@ export default function OnboardingClient({ existingRestaurant }) {
 
     setSaving(true);
 
+    try:
     try {
       const {
         data: { user },
@@ -62,18 +74,19 @@ export default function OnboardingClient({ existingRestaurant }) {
         throw new Error("Not authenticated.");
       }
 
-      // Prepare payload
       const payload = {
         name: name.trim(),
         location: location.trim() || null,
         cuisine: cuisine.trim() || null,
         slug: slugify(name),
-        subscription_plan: selectedPlan, // so you can see what they chose
+        subscription_plan: selectedPlan,
+        plan: selectedPlan, // keep both in sync for now
       };
 
-      let upserted;
+      let upserted = null;
 
-      if (restaurant) {
+      if (restaurant?.id) {
+        // Update existing restaurant
         const { data, error } = await supabase
           .from("restaurants")
           .update(payload)
@@ -84,6 +97,7 @@ export default function OnboardingClient({ existingRestaurant }) {
         if (error) throw error;
         upserted = data;
       } else {
+        // Create new restaurant
         const { data, error } = await supabase
           .from("restaurants")
           .insert({
@@ -97,6 +111,10 @@ export default function OnboardingClient({ existingRestaurant }) {
         upserted = data;
       }
 
+      if (!upserted || !upserted.id) {
+        throw new Error("Restaurant could not be created. Please try again.");
+      }
+
       setRestaurant(upserted);
       setStep(2);
     } catch (err) {
@@ -107,8 +125,10 @@ export default function OnboardingClient({ existingRestaurant }) {
     }
   }
 
+  // STEP 2: mark onboarding as complete
   async function handleFinish() {
-    if (!restaurant) return;
+    if (!restaurant?.id) return;
+
     setError("");
     setFinishing(true);
 
@@ -131,35 +151,24 @@ export default function OnboardingClient({ existingRestaurant }) {
     }
   }
 
-  // --- UI ---
+  // ================== RENDER ====================
 
+  // STEP 1 – basic restaurant info
   if (step === 1) {
     return (
       <div className="w-full max-w-xl">
-        <div className="mb-4 text-center">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-slate-200/80 mb-1">
-            SelectorOS • Onboarding
-          </p>
-          <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
-            Let&apos;s set up your restaurant
-          </h1>
-          <p className="text-sm text-slate-300 mt-1">
-            We&apos;ll use this information to personalize your workspace.
-          </p>
-        </div>
-
         <form
           onSubmit={handleStepOneSubmit}
-          className="rounded-3xl bg-slate-950/85 border border-slate-800/80 shadow-[0_24px_70px_rgba(0,0,0,0.8)] px-6 py-6 space-y-4"
+          className="space-y-4"
         >
           {error && (
-            <div className="rounded-xl border border-red-500/60 bg-red-500/10 px-4 py-2 text-xs text-red-200 mb-2">
+            <div className="rounded-xl border border-red-500/60 bg-red-50 px-4 py-2 text-xs text-red-700 mb-1">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1">
+            <label className="block text-xs font-semibold text-slate-800 mb-1">
               Restaurant name
             </label>
             <input
@@ -167,12 +176,12 @@ export default function OnboardingClient({ existingRestaurant }) {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Shang Shi"
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1">
+            <label className="block text-xs font-semibold text-slate-800 mb-1">
               Location (optional)
             </label>
             <input
@@ -180,12 +189,12 @@ export default function OnboardingClient({ existingRestaurant }) {
               value={location}
               onChange={e => setLocation(e.target.value)}
               placeholder="Tallinn, Estonia"
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1">
+            <label className="block text-xs font-semibold text-slate-800 mb-1">
               Cuisine (optional)
             </label>
             <input
@@ -193,14 +202,14 @@ export default function OnboardingClient({ existingRestaurant }) {
               value={cuisine}
               onChange={e => setCuisine(e.target.value)}
               placeholder="Cantonese, Japanese Omakase…"
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
             />
           </div>
 
           <div className="flex items-center justify-between pt-3">
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               Plan selected:{" "}
-              <span className="font-semibold capitalize text-slate-100">
+              <span className="font-semibold capitalize text-slate-900">
                 {selectedPlan}
               </span>
             </p>
@@ -208,7 +217,7 @@ export default function OnboardingClient({ existingRestaurant }) {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:opacity-50 transition"
+              className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-60 transition"
             >
               {saving ? "Saving…" : "Continue"}
             </button>
@@ -218,53 +227,68 @@ export default function OnboardingClient({ existingRestaurant }) {
     );
   }
 
-  // STEP 2 – LOGO UPLOAD
+  // STEP 2 – no restaurant (safety net)
+  if (!restaurant?.id) {
+    return (
+      <div className="w-full max-w-xl space-y-4">
+        <div className="rounded-xl border border-red-500/60 bg-red-50 px-4 py-3 text-xs text-red-700">
+          Something went wrong: no restaurant record was created.
+          Please go back and save your restaurant details again.
+        </div>
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="text-xs text-slate-600 hover:text-slate-900"
+        >
+          ← Back to details
+        </button>
+      </div>
+    );
+  }
+
+  // STEP 2 – logo upload
   return (
-    <div className="w-full max-w-xl">
-      <div className="mb-4 text-center">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-slate-200/80 mb-1">
-          SelectorOS • Onboarding
-        </p>
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
-          Add your logo
-        </h1>
-        <p className="text-sm text-slate-300 mt-1">
-          This logo appears on your public allergen page and staff dashboard.
-        </p>
+    <div className="w-full max-w-xl space-y-4">
+      {error && (
+        <div className="rounded-xl border border-red-500/60 bg-red-50 px-4 py-2 text-xs text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="mb-1 text-sm text-slate-600">
+        Add a logo for{" "}
+        <span className="font-semibold text-slate-900">
+          {restaurant.name}
+        </span>
+        . This will appear on your public guest view and staff tools.
       </div>
 
-      <div className="rounded-3xl bg-slate-950/85 border border-slate-800/80 shadow-[0_24px_70px_rgba(0,0,0,0.8)] px-6 py-6 space-y-5">
-        {error && (
-          <div className="rounded-xl border border-red-500/60 bg-red-500/10 px-4 py-2 text-xs text-red-200 mb-2">
-            {error}
-          </div>
-        )}
-
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4">
         <LogoUploader
           restaurantId={restaurant.id}
           initialLogoUrl={
             restaurant.theme_logo_url || restaurant.logo_url || ""
           }
         />
+      </div>
 
-        <div className="flex items-center justify-between pt-3">
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            className="text-xs text-slate-400 hover:text-slate-200"
-          >
-            ← Back
-          </button>
+      <div className="flex items-center justify-between pt-2">
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="text-xs text-slate-500 hover:text-slate-800"
+        >
+          ← Back
+        </button>
 
-          <button
-            type="button"
-            onClick={handleFinish}
-            disabled={finishing}
-            className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:opacity-50 transition"
-          >
-            {finishing ? "Finishing…" : "Finish & go to dashboard"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleFinish}
+          disabled={finishing}
+          className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-60 transition"
+        >
+          {finishing ? "Finishing…" : "Finish & go to dashboard"}
+        </button>
       </div>
     </div>
   );
