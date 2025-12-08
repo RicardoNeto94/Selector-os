@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { stripe } from "../../../../lib/stripe";
 
-
 export async function POST(req) {
   const supabase = createRouteHandlerClient({ cookies });
 
@@ -23,13 +22,13 @@ export async function POST(req) {
     .maybeSingle();
 
   if (error || !restaurant) {
-    console.error("checkout: restaurant missing", error);
     return NextResponse.json(
       { error: "Restaurant not found" },
       { status: 400 }
     );
   }
 
+  // Read requested plan from body
   let body = {};
   try {
     body = await req.json();
@@ -37,54 +36,48 @@ export async function POST(req) {
     body = {};
   }
 
-  // 🔹 Normalise plan names
-  const rawPlan = body.plan || "pro"; // default to pro if missing
-  let plan;
+  const rawPlan = body.plan;
+  const plan =
+    rawPlan === "starter" || rawPlan === "pro" ? rawPlan : "pro";
 
-  if (rawPlan === "standard" || rawPlan === "starter") {
-    plan = "standard";
-  } else if (rawPlan === "pro") {
-    plan = "pro";
-  } else {
-    plan = "pro";
-  }
-
-  // 🔹 Map plan -> env var
+  // Map plan -> price ID
   const priceId =
-    plan === "standard"
-      ? process.env.STRIPE_PRICE_STANDARD
-      : process.env.STRIPE_PRICE_PRO;
+    plan === "starter"
+      ? process.env.STRIPE_PRICE_STARTER_MONTHLY
+      : process.env.STRIPE_PRICE_PRO_MONTHLY;
 
   if (!priceId) {
-    console.error("Missing Stripe price env", {
-      plan,
-      hasStandard: !!process.env.STRIPE_PRICE_STANDARD,
-      hasPro: !!process.env.STRIPE_PRICE_PRO,
-    });
-
     return NextResponse.json(
       { error: `Missing Stripe price env for plan ${plan}` },
       { status: 500 }
     );
   }
 
-  // 🔹 Ensure Stripe customer
+  // Ensure Stripe customer
   let customerId = restaurant.stripe_customer_id;
   if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email ?? undefined,
-      metadata: {
-        user_id: user.id,
-        restaurant_id: restaurant.id,
-      },
-    });
+    try {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: {
+          user_id: user.id,
+          restaurant_id: restaurant.id,
+        },
+      });
 
-    customerId = customer.id;
+      customerId = customer.id;
 
-    await supabase
-      .from("restaurants")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", restaurant.id);
+      await supabase
+        .from("restaurants")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", restaurant.id);
+    } catch (err) {
+      console.error("Stripe customer create error", err);
+      return NextResponse.json(
+        { error: "Failed to create Stripe customer." },
+        { status: 500 }
+      );
+    }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -113,7 +106,7 @@ export async function POST(req) {
   } catch (err) {
     console.error("Stripe checkout error", err);
     return NextResponse.json(
-      { error: "Stripe checkout failed" },
+      { error: err.message || "Stripe checkout failed." },
       { status: 500 }
     );
   }
