@@ -14,16 +14,18 @@ export const dynamic = "force-dynamic";
 export default function DashboardLayout({ children }) {
   return (
     <div className="so-dashboard-root">
-      {/* LEFT SIDEBAR */}
-      <aside className="so-sidebar">
-        {/* Brand */}
-        <div className="so-sidebar-brand">
-          <img
-            src="/selectoros-logo.png"
-            alt="SelectorOS"
-            className="so-sidebar-logo-img"
-          />
-        </div>
+  <aside className="so-sidebar hidden md:flex">
+    { /* desktop sidebar */ }
+  </aside>
+
+  <header className="so-mobile-nav md:hidden">
+    { /* mobile bottom navigation */ }
+  </header>
+
+  <main className="so-content">
+    {children}
+  </main>
+</div>
 
         {/* NAVIGATION */}
         <nav className="so-sidebar-nav">
