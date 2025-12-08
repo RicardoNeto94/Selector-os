@@ -58,13 +58,19 @@ export async function POST(req) {
 
   // If there is NO restaurant yet, create a minimal one
   if (!restaurant) {
+    const fallbackName =
+      body.restaurantName?.trim() ||
+      `New SelectorOS workspace for ${user.email || "operator"}`;
+
     const { data: inserted, error: insertError } = await supabase
       .from("restaurants")
       .insert({
         owner_id: user.id,
-        name: body.restaurantName || null, // optional for now
+        name: fallbackName,
         plan: subscriptionPlan,
         subscription_plan: subscriptionPlan,
+        onboarding_complete: false,
+        onboarding_completed: false,
       })
       .select("*")
       .single();
@@ -72,21 +78,29 @@ export async function POST(req) {
     if (insertError) {
       console.error("checkout: failed to create restaurant", insertError);
       return NextResponse.json(
-        { error: "Could not create restaurant for this account." },
+        { error: insertError.message || "Could not create restaurant." },
         { status: 500 }
       );
     }
 
     restaurant = inserted;
   } else {
-    // If restaurant already exists, pre-set plan fields
-    await supabase
+    // Restaurant already exists → pre-set plan fields
+    const { error: updateError } = await supabase
       .from("restaurants")
       .update({
         plan: subscriptionPlan,
         subscription_plan: subscriptionPlan,
       })
       .eq("id", restaurant.id);
+
+    if (updateError) {
+      console.error("checkout: failed to update restaurant plan", updateError);
+      return NextResponse.json(
+        { error: updateError.message || "Could not update restaurant plan." },
+        { status: 500 }
+      );
+    }
   }
 
   // 5) Ensure Stripe customer
@@ -102,10 +116,25 @@ export async function POST(req) {
 
     customerId = customer.id;
 
-    await supabase
+    const { error: customerUpdateError } = await supabase
       .from("restaurants")
       .update({ stripe_customer_id: customerId })
       .eq("id", restaurant.id);
+
+    if (customerUpdateError) {
+      console.error(
+        "checkout: failed to attach stripe_customer_id",
+        customerUpdateError
+      );
+      return NextResponse.json(
+        {
+          error:
+            customerUpdateError.message ||
+            "Could not attach Stripe customer to restaurant.",
+        },
+        { status: 500 }
+      );
+    }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
