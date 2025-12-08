@@ -38,8 +38,25 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#e0f2fe_0,_#c7d2fe_35%,_#0f172a_100%)] flex items-center justify-center px-4 py-10">
-      <OnboardingClient existingRestaurant={restaurant} />
+    <main className="page-fade min-h-screen flex items-center justify-center px-6 py-10 text-slate-900">
+      <div className="max-w-3xl w-full">
+        <div className="rounded-[32px] bg-white/90 backdrop-blur-2xl border border-slate-200/70 shadow-[0_24px_70px_rgba(15,23,42,0.22)] px-7 py-6">
+          <header className="mb-4">
+            <p className="text-xs uppercase tracking-[0.28em] text-emerald-500/80 mb-1">
+              SelectorOS • Onboarding
+            </p>
+            <h1 className="text-2xl md:text-[26px] font-semibold text-slate-900">
+              Let&apos;s set up your restaurant
+            </h1>
+            <p className="text-sm text-slate-500 mt-1 max-w-xl">
+              We&apos;ll use this information to build your SelectorOS workspace
+              and your first live menu cockpit.
+            </p>
+          </header>
+
+          <OnboardingClient existingRestaurant={restaurant || null} />
+        </div>
+      </div>
     </main>
   );
 }
