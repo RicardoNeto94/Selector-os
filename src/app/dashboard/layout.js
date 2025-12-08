@@ -14,15 +14,20 @@ export const dynamic = "force-dynamic";
 export default function DashboardLayout({ children }) {
   return (
     <div className="so-dashboard-root">
-      {/* LEFT SIDEBAR – desktop & tablet */}
+      {/* LEFT SIDEBAR */}
       <aside className="so-sidebar">
         {/* Brand */}
         <div className="so-sidebar-brand">
+          {/* Logo image */}
           <img
-            src="/selectoros-logo.svg"
-            alt="SelectorOS"
+            src="/logo.png"            {/* ⬅ change if your file is /selectoros-logo.svg etc */}
+            alt="SelectorOS logo"
             className="so-sidebar-logo-img"
           />
+          <div className="so-sidebar-brand-text">
+            <span className="so-sidebar-brand-name">SelectorOS</span>
+            <span className="so-sidebar-brand-sub">Operator</span>
+          </div>
         </div>
 
         {/* NAVIGATION */}
@@ -34,28 +39,28 @@ export default function DashboardLayout({ children }) {
             <span>Dashboard</span>
           </Link>
 
-          <Link href="/dishes" className="so-nav-item">
+          <Link href="/dashboard/dishes" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <RectangleStackIcon className="so-nav-icon" />
             </span>
             <span>Dishes</span>
           </Link>
 
-          <Link href="/menu-editor" className="so-nav-item">
+          <Link href="/dashboard/menu" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <SwatchIcon className="so-nav-icon" />
             </span>
             <span>Menu editor</span>
           </Link>
 
-          <Link href="/billing" className="so-nav-item">
+          <Link href="/dashboard/billing" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <CreditCardIcon className="so-nav-icon" />
             </span>
             <span>Billing</span>
           </Link>
 
-          <Link href="/settings" className="so-nav-item">
+          <Link href="/dashboard/settings" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <Cog6ToothIcon className="so-nav-icon" />
             </span>
@@ -68,8 +73,8 @@ export default function DashboardLayout({ children }) {
           <div className="so-sidebar-user">
             <div className="so-user-avatar">R</div>
             <div className="so-user-meta">
-              <span className="so-user-name">Operator</span>
-              <span className="so-user-tag">Live workspace</span>
+              <div className="so-user-name">Operator</div>
+              <div className="so-user-tag">Live workspace</div>
             </div>
           </div>
 
@@ -81,10 +86,8 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="so-main">
-        <div className="so-main-inner page-fade">{children}</div>
-      </main>
+      {/* MAIN CONTENT – each page renders its own <main className="so-main"> */}
+      {children}
     </div>
   );
 }
