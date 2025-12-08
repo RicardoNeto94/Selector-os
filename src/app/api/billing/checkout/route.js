@@ -5,159 +5,150 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { stripe } from "src/lib/stripe";
 
 export async function POST(req) {
-  const supabase = createRouteHandlerClient({ cookies });
-
-  // 1) Auth guard
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  // 2) Read body – which plan they clicked
-  let body = {};
   try {
-    body = await req.json();
-  } catch {
-    body = {};
-  }
+    const supabase = createRouteHandlerClient({ cookies });
 
-  // front-end sends "starter" or "pro"
-  const rawPlan =
-    body.plan === "starter" || body.plan === "pro" ? body.plan : "pro";
+    // 1) Auth guard
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  // DB values we actually want to store
-  // "starter" in UI → "standard" in DB
-  const subscriptionPlan = rawPlan === "starter" ? "standard" : "pro";
+    if (authError || !user) {
+      console.error("checkout: not authenticated", authError);
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
 
-  // 3) Map plan -> Stripe price ID
-  const priceId =
-    subscriptionPlan === "standard"
-      ? process.env.STRIPE_PRICE_STARTER_MONTHLY
-      : process.env.STRIPE_PRICE_PRO_MONTHLY;
-
-  if (!priceId) {
-    return NextResponse.json(
-      { error: `Missing Stripe price env for plan ${subscriptionPlan}` },
-      { status: 500 }
-    );
-  }
-
-  // 4) Load or create restaurant row
-  let { data: restaurant, error: restaurantError } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
-
-  if (restaurantError) {
-    console.error("checkout: error loading restaurant", restaurantError);
-  }
-
-  // If there is NO restaurant yet, create a minimal one
-  if (!restaurant) {
-    const fallbackName =
-      body.restaurantName?.trim() ||
-      `New SelectorOS workspace for ${user.email || "operator"}`;
-
-    const { data: inserted, error: insertError } = await supabase
+    // 2) Find this user's restaurant
+    const { data: restaurants, error: restaurantError } = await supabase
       .from("restaurants")
-      .insert({
-        owner_id: user.id,
-        name: fallbackName,
-        plan: subscriptionPlan,
-        subscription_plan: subscriptionPlan,
-        onboarding_complete: false,
-        onboarding_completed: false,
-      })
       .select("*")
-      .single();
+      .eq("owner_id", user.id);
 
-    if (insertError) {
-      console.error("checkout: failed to create restaurant", insertError);
+    if (restaurantError) {
+      console.error("checkout: error loading restaurants", restaurantError);
       return NextResponse.json(
-        { error: insertError.message || "Could not create restaurant." },
+        { error: "Failed to load restaurant for this account." },
         { status: 500 }
       );
     }
 
-    restaurant = inserted;
-  } else {
-    // Restaurant already exists → pre-set plan fields
-    const { error: updateError } = await supabase
-      .from("restaurants")
-      .update({
-        plan: subscriptionPlan,
-        subscription_plan: subscriptionPlan,
-      })
-      .eq("id", restaurant.id);
-
-    if (updateError) {
-      console.error("checkout: failed to update restaurant plan", updateError);
+    if (!restaurants || restaurants.length === 0) {
+      console.error("checkout: no restaurant for user", user.id);
       return NextResponse.json(
-        { error: updateError.message || "Could not update restaurant plan." },
+        { error: "Restaurant not found. Complete onboarding first." },
+        { status: 400 }
+      );
+    }
+
+    // If you accidentally created more than one, just pick the latest by create_at
+    const restaurant = restaurants.sort((a, b) =>
+      (b.create_at || "").localeCompare(a.create_at || "")
+    )[0];
+
+    // 3) Read body (plan)
+    let body = {};
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
+    }
+
+    let plan = body.plan === "starter" || body.plan === "pro"
+      ? body.plan
+      : "pro";
+
+    // 4) Map plan -> Stripe price ID
+    const starterPrice = process.env.STRIPE_PRICE_STARTER_MONTHLY;
+    const proPrice = process.env.STRIPE_PRICE_PRO_MONTHLY;
+
+    const priceId = plan === "starter" ? starterPrice : proPrice;
+
+    if (!priceId) {
+      console.error("checkout: missing price env", {
+        plan,
+        hasStarter: !!starterPrice,
+        hasPro: !!proPrice,
+      });
+      return NextResponse.json(
+        { error: `Missing Stripe price env for plan "${plan}".` },
         { status: 500 }
       );
     }
-  }
 
-  // 5) Ensure Stripe customer
-  let customerId = restaurant.stripe_customer_id;
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email ?? undefined,
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error("checkout: STRIPE_SECRET_KEY is missing");
+      return NextResponse.json(
+        { error: "Stripe is not configured on the server." },
+        { status: 500 }
+      );
+    }
+
+    // 5) Ensure Stripe customer exists for this restaurant
+    let customerId = restaurant.stripe_customer_id;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: {
+          user_id: user.id,
+          restaurant_id: restaurant.id,
+        },
+      });
+
+      customerId = customer.id;
+
+      const { error: updateError } = await supabase
+        .from("restaurants")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", restaurant.id);
+
+      if (updateError) {
+        console.error("checkout: failed to save stripe_customer_id", updateError);
+        // Not fatal for checkout, but log it.
+      }
+    }
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    // 6) Create checkout session
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${baseUrl}/onboarding?success=1&plan=${plan}`,
+      cancel_url: `${baseUrl}/select-plan?canceled=1`,
       metadata: {
-        user_id: user.id,
         restaurant_id: restaurant.id,
+        user_id: user.id,
+        plan,
+        price_id: priceId,
+      },
+      subscription_data: {
+        metadata: {
+          plan,
+          restaurant_id: restaurant.id,
+          user_id: user.id,
+        },
       },
     });
 
-    customerId = customer.id;
-
-    const { error: customerUpdateError } = await supabase
-      .from("restaurants")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", restaurant.id);
-
-    if (customerUpdateError) {
-      console.error(
-        "checkout: failed to attach stripe_customer_id",
-        customerUpdateError
-      );
-      return NextResponse.json(
-        {
-          error:
-            customerUpdateError.message ||
-            "Could not attach Stripe customer to restaurant.",
-        },
-        { status: 500 }
-      );
-    }
-  }
-
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-  // 6) Create checkout session
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    console.error("checkout: unexpected error", err);
+    return NextResponse.json(
       {
-        price: priceId,
-        quantity: 1,
+        error:
+          "Stripe checkout failed: " +
+          (err?.message || "Unknown server error."),
       },
-    ],
-    success_url: `${baseUrl}/onboarding?success=1&plan=${subscriptionPlan}`,
-    cancel_url: `${baseUrl}/select-plan?canceled=1`,
-    metadata: {
-      restaurant_id: restaurant.id,
-      user_id: user.id,
-      plan: subscriptionPlan,
-      price_id: priceId,
-    },
-  });
-
-  return NextResponse.json({ url: session.url });
+      { status: 500 }
+    );
+  }
 }
