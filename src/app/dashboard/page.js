@@ -1,390 +1,68 @@
-"use client";
+// src/app/dashboard/page.js
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import {
-  ChartBarIcon,
-  ClipboardDocumentListIcon,
-  ExclamationTriangleIcon,
-  Bars3Icon,
-} from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/20/solid";
+export const dynamic = "force-dynamic";
 
-export default function DashboardHome() {
-  const supabase = createClientComponentClient();
+export default async function DashboardPage() {
+  const supabase = createServerComponentClient({ cookies });
 
-  const [restaurant, setRestaurant] = useState(null);
-  const [stats, setStats] = useState(null);
-  const [activity, setActivity] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // 1) Auth guard
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    loadDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const loadDashboard = async () => {
-    setLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: r } = await supabase
-      .from("restaurants")
-      .select("*")
-      .eq("owner_id", user.id)
-      .maybeSingle();
-
-    setRestaurant(r);
-
-    const { count: dishCount } = await supabase
-      .from("dishes")
-      .select("*", { count: "exact", head: true });
-
-    const { count: allergenCount } = await supabase
-      .from("allergen")
-      .select("*", { count: "exact", head: true });
-
-    const { data: missing } = await supabase.rpc("dishes_missing_allergens", {
-      rid: r.id,
-    });
-
-    const { data: lastDish } = await supabase
-      .from("dishes")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    setStats({
-      dishes: dishCount || 0,
-      allergens: allergenCount || 0,
-      missingLabels: missing?.count || 0,
-      lastDish: lastDish?.name || "No dishes yet",
-      menus: 1,
-    });
-
-    const { data: recent } = await supabase
-      .from("dishes")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    setActivity(recent || []);
-    setLoading(false);
-  };
-
-  if (loading || !restaurant || !stats) {
-    return (
-      <div className="so-main-inner flex items-center justify-center h-[70vh] text-slate-500 text-sm">
-        Loading your SelectorOS workspace…
-      </div>
-    );
+  if (!user) {
+    redirect("/sign-in");
   }
 
-  const labelCoverage =
-    stats.dishes === 0
-      ? "—"
-      : `${Math.round(
-          ((stats.dishes - stats.missingLabels) / stats.dishes) * 100
-        )}%`;
+  // 2) Load restaurant for this owner
+  const { data: restaurant, error } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("owner_id", user.id)
+    .maybeSingle();
 
+  if (error) {
+    console.error("Dashboard: error loading restaurant", error);
+  }
+
+  // If no restaurant row yet → send them to select-plan
+  if (!restaurant) {
+    redirect("/select-plan");
+  }
+
+  // Decide if user has chosen a plan
+  const hasPlan =
+    restaurant.plan === "standard" ||
+    restaurant.plan === "pro" ||
+    restaurant.subscription_plan === "standard" ||
+    restaurant.subscription_plan === "pro";
+
+  const onboardingDone =
+    restaurant.onboarding_complete || restaurant.onboarding_completed;
+
+  // No plan yet → force paywall
+  if (!hasPlan) {
+    redirect("/select-plan");
+  }
+
+  // Plan chosen but onboarding not done → force onboarding
+  if (!onboardingDone) {
+    redirect("/onboarding");
+  }
+
+  // 3) Normal dashboard render (user has plan + onboarding)
   return (
-    <div className="so-main-inner space-y-8 text-slate-900">
-      {/* HERO */}
-      <section className="relative overflow-hidden rounded-3xl bg-white/90 border border-slate-200/80 p-8 shadow-[0_32px_80px_rgba(15,23,42,0.15)]">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -left-16 -top-16 w-56 h-56 rounded-full bg-emerald-100/60 blur-3xl" />
-          <div className="absolute right-0 bottom-0 w-72 h-72 rounded-full bg-sky-100/70 blur-3xl" />
-        </div>
-
-        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.25em] text-emerald-500/90">
-              SelectorOS • Live cockpit
-            </p>
-            <h1 className="text-3xl md:text-4xl font-semibold">
-              Welcome back,{" "}
-              <span className="text-emerald-600">
-                {restaurant.name || "your restaurant"}
-              </span>
-              .
-            </h1>
-            <p className="text-sm text-slate-500 max-w-xl">
-              Manage dishes, allergens and menu visibility from a single control
-              panel. Your staff view updates in real time with every change.
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-3 text-xs">
-              <Tag label="Dishes" value={stats.dishes} />
-              <Tag label="Allergens" value={stats.allergens} />
-              <Tag
-                label="Missing labels"
-                value={stats.missingLabels}
-                tone={stats.missingLabels ? "warning" : "success"}
-              />
-              <Tag label="Menus" value={stats.menus} />
-            </div>
-          </div>
-
-          <div className="w-full max-w-sm">
-            <div className="rounded-2xl bg-slate-50/90 border border-slate-200 px-6 py-5 backdrop-blur-xl shadow-[0_18px_45px_rgba(15,23,42,0.07)]">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs text-slate-500 mb-1">
-                    Last added dish
-                  </p>
-                  <p className="text-sm font-medium text-slate-900">
-                    {stats.lastDish}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-500 mb-1">
-                    Label coverage
-                  </p>
-                  <p className="text-lg font-semibold text-emerald-600">
-                    {labelCoverage}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                <QuickButton
-                  href="/dashboard/dishes/new"
-                  label="Add dish"
-                  icon={<PlusIcon className="w-4 h-4" />}
-                />
-                <QuickButton
-                  href="/dashboard/menu"
-                  label="Open menu editor"
-                  icon={<ChartBarIcon className="w-4 h-4" />}
-                  variant="ghost"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* KPIs */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <KPICard
-          title="Total dishes in SelectorOS"
-          value={stats.dishes}
-          icon={<ClipboardDocumentListIcon className="w-6 h-6" />}
-          description="Everything synced with your live staff view."
-        />
-        <KPICard
-          title="Allergens in your library"
-          value={stats.allergens}
-          icon={<Bars3Icon className="w-6 h-6" />}
-          description="Central allergen set used by all menus."
-        />
-        <KPICard
-          title="Dishes missing allergen labels"
-          value={stats.missingLabels}
-          icon={<ExclamationTriangleIcon className="w-6 h-6 text-amber-500" />}
-          tone={stats.missingLabels ? "warning" : "default"}
-          description={
-            stats.missingLabels
-              ? "Finish these to keep staff and guests safe."
-              : "All dishes fully labelled. Nice."
-          }
-        />
-      </section>
-
-      {/* LOWER GRID */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Tasks / activity */}
-        <div className="rounded-3xl bg-white/95 border border-slate-200 shadow-[0_22px_60px_rgba(15,23,42,0.12)] p-6 md:p-7 flex flex-col h-full">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              Tasks list
-            </h2>
-            <span className="text-[11px] px-3 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-              Live from your dishes table
-            </span>
-          </div>
-
-          {activity.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              No recent dishes yet. Start by adding your first dish in the
-              Dishes tab.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs md:text-sm">
-                <thead className="text-slate-500 border-b border-slate-200">
-                  <tr>
-                    <th className="text-left py-2 pr-4 font-normal">
-                      Dish name
-                    </th>
-                    <th className="text-left py-2 pr-4 font-normal">
-                      Created at
-                    </th>
-                    <th className="text-left py-2 pr-4 font-normal">
-                      Restaurant
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {activity.map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-50">
-                      <td className="py-2 pr-4 font-medium text-slate-900">
-                        {d.name}
-                      </td>
-                      <td className="py-2 pr-4 text-slate-600">
-                        {new Date(d.created_at).toLocaleString()}
-                      </td>
-                      <td className="py-2 pr-4 text-slate-500 text-xs">
-                        {restaurant.slug || "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Right column: staff view + system health */}
-        <div className="flex flex-col gap-6 h-full">
-          {/* Staff view */}
-          <div className="rounded-3xl bg-white/95 border border-slate-200 shadow-[0_18px_50px_rgba(15,23,42,0.12)] p-6 md:p-7 flex flex-col justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                Staff view
-              </p>
-              <h3 className="text-lg font-semibold mt-2 text-slate-900">
-                Keep front-of-house in sync with one source of truth.
-              </h3>
-              <p className="text-sm text-slate-500 mt-2 max-w-md">
-                Every update you make here flows directly into the live
-                SelectorOS guest/staff view. Use it as the single place to
-                maintain dishes and allergens.
-              </p>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-3 text-xs">
-              <a
-                href="/dashboard/menu"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-400 transition"
-              >
-                Open staff tool setup
-              </a>
-              <span className="inline-flex items-center px-3 py-1 rounded-full border border-slate-200 text-slate-500 bg-slate-50">
-                Live link: /r/{restaurant.slug || "your-restaurant"}
-              </span>
-            </div>
-          </div>
-
-          {/* System health */}
-          <div className="rounded-3xl bg-white/95 border border-slate-200 shadow-[0_18px_50px_rgba(15,23,42,0.12)] p-6 md:p-7 flex flex-col justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                System health
-              </p>
-              <h3 className="text-lg font-semibold mt-2 text-slate-900">
-                Data completeness snapshot
-              </h3>
-              <p className="text-sm text-slate-500 mt-2">
-                Quick view of how safe your data is for staff use. As long as
-                everything is labelled, your team never has to guess at
-                allergens during service.
-              </p>
-            </div>
-
-            <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
-              <HealthPill
-                label="Labelled dishes"
-                value={stats.dishes - stats.missingLabels}
-              />
-              <HealthPill
-                label="Unlabelled"
-                value={stats.missingLabels}
-                tone="warning"
-              />
-              <HealthPill label="Menus live" value={stats.menus} />
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-/* PRESENTATIONAL COMPONENTS */
-
-function Tag({ label, value, tone = "default" }) {
-  const toneClass =
-    tone === "warning"
-      ? "bg-amber-50 text-amber-700 border-amber-200"
-      : tone === "success"
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : "bg-slate-100 text-slate-700 border-slate-200";
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[11px] ${toneClass}`}
-    >
-      <span className="opacity-80">{label}</span>
-      <span className="font-semibold">{value}</span>
-    </span>
-  );
-}
-
-function KPICard({ title, value, description, icon, tone = "default" }) {
-  const borderClass =
-    tone === "warning" ? "border-amber-200" : "border-slate-200";
-
-  return (
-    <div
-      className={`rounded-2xl bg-white/90 border ${borderClass} px-5 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.08)] flex items-start gap-4`}
-    >
-      <div className="p-2.5 rounded-xl bg-slate-100 text-slate-800">
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs text-slate-500 mb-1">{title}</p>
-        <p className="text-2xl font-semibold mb-1 text-slate-900">{value}</p>
-        <p className="text-xs text-slate-500">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-function QuickButton({ href, label, icon, variant = "solid" }) {
-  const base =
-    variant === "solid"
-      ? "bg-emerald-500 text-white hover:bg-emerald-400"
-      : "bg-slate-100 text-slate-800 hover:bg-slate-200";
-
-  return (
-    <a
-      href={href}
-      className={`flex items-center justify-center gap-2 text-xs font-semibold rounded-full px-3 py-2 transition ${base}`}
-    >
-      {icon}
-      <span>{label}</span>
-    </a>
-  );
-}
-
-function HealthPill({ label, value, tone = "default" }) {
-  const color =
-    tone === "warning"
-      ? "text-amber-800 bg-amber-50 border-amber-200"
-      : "text-emerald-800 bg-emerald-50 border-emerald-200";
-
-  return (
-    <div
-      className={`rounded-2xl border px-3 py-2 flex flex-col gap-1 ${color}`}
-    >
-      <span className="text-[11px] uppercase tracking-wide opacity-80">
-        {label}
-      </span>
-      <span className="text-sm font-semibold">{value}</span>
-    </div>
+    <>
+      {/* Put your existing dashboard JSX here.
+          Example if you already had: 
+          <main className="page-fade px-6 py-10 text-slate-100"> ... */}
+      
+      <main className="page-fade px-6 py-10 text-slate-100">
+        {/* YOUR EXISTING DASHBOARD CONTENT GOES HERE */}
+      </main>
+    </>
   );
 }
