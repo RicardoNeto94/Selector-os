@@ -19,20 +19,14 @@ export default function DashboardLayout({ children }) {
       <aside className="so-sidebar">
         {/* BRAND */}
         <div className="so-sidebar-brand">
-          {/* Logo from /public – change src to your real file */}
-          <div className="so-sidebar-logo-wrap">
-            <Image
-              src="/selectoros-logo.png" // <-- or .svg / whatever you actually have
-              alt="SelectorOS logo"
-              width={36}
-              height={36}
-              className="so-sidebar-logo-img"
-            />
-          </div>
-          <div className="so-sidebar-brand-text">
-            <span className="so-sidebar-brand-name">SelectorOS</span>
-            <span className="so-sidebar-brand-sub">Operator</span>
-          </div>
+          {/* bigger clean logo */}
+          <Image
+            src="/selectoros-logo.png"
+            alt="SelectorOS logo"
+            width={64}
+            height={64}
+            className="so-sidebar-logo"
+          />
         </div>
 
         {/* NAVIGATION */}
@@ -89,7 +83,6 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* Uses the /logout route you already built */}
           <a href="/logout" className="so-logout-btn">
             Log out
           </a>
