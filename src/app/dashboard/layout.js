@@ -13,20 +13,13 @@ export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="so-dashboard-root">
-      {/* LEFT SIDEBAR */}
-      <aside className="so-sidebar">
-        {/* Brand */}
-        <div className="so-sidebar-brand">
-          {/* Circular "S" badge – no external image required */}
-          <div className="so-sidebar-brand-mark">S</div>
-
-          <div className="so-sidebar-brand-text">
-            <span className="so-sidebar-brand-name">SelectorOS</span>
-            <span className="so-sidebar-brand-sub">Operator</span>
-          </div>
-        </div>
-
+    <div className="so-sidebar-brand">
+  <img
+    src="/logo-selectoros.png"
+    alt="SelectorOS Logo"
+    className="so-sidebar-logo-img"
+  />
+</div>
         {/* NAVIGATION */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-item">
