@@ -1,3 +1,5 @@
+// src/app/dashboard/dishes/new/page.js  (or wherever this lives)
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -162,7 +164,7 @@ export default function NewDishPage() {
 
   if (loading) {
     return (
-      <main className="page-fade">
+      <main className="so-main page-fade">
         <div className="so-main-inner flex h-[70vh] items-center justify-center text-sm text-slate-500">
           Loading dish editor…
         </div>
@@ -173,7 +175,7 @@ export default function NewDishPage() {
   // No menu yet: force them to create one first
   if (!menus.length) {
     return (
-      <main className="page-fade">
+      <main className="so-main page-fade">
         <div className="so-main-inner max-w-xl mx-auto">
           <div className="so-card text-sm text-slate-700">
             <h1 className="mb-3 text-xl font-semibold text-slate-900">
@@ -196,7 +198,7 @@ export default function NewDishPage() {
   }
 
   return (
-    <main className="page-fade">
+    <main className="so-main page-fade">
       <div className="so-main-inner max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
