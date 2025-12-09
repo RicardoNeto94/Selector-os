@@ -26,21 +26,25 @@ export default async function BillingPage() {
   if (error || !restaurant) {
     console.error("Billing: no restaurant for user", error);
     return (
-      <div className="so-main-inner">
-        <div className="max-w-xl mx-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-6">
-          <h1 className="text-lg font-semibold mb-2">No restaurant found</h1>
-          <p className="text-sm text-red-100/80">
-            We couldn&apos;t find a restaurant linked to your account. Finish
-            onboarding first.
-          </p>
+      <main className="so-main">
+        <div className="so-main-inner">
+          <div className="max-w-xl mx-auto rounded-2xl border border-red-500/40 bg-red-950/40 p-6">
+            <h1 className="text-lg font-semibold mb-2">No restaurant found</h1>
+            <p className="text-sm text-red-100/80">
+              We couldn&apos;t find a restaurant linked to your account. Finish
+              onboarding first.
+            </p>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="so-main-inner">
-      <BillingClient restaurant={restaurant} />
-    </div>
+    <main className="so-main">
+      <div className="so-main-inner">
+        <BillingClient restaurant={restaurant} />
+      </div>
+    </main>
   );
 }
