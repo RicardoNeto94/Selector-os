@@ -13,13 +13,24 @@ export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="so-sidebar-brand">
-  <img
-    src="/logo-selectoros.png"
-    alt="SelectorOS Logo"
-    className="so-sidebar-logo-img"
-  />
-</div>
+    <div className="so-dashboard-root">
+      {/* LEFT SIDEBAR */}
+      <aside className="so-sidebar">
+        {/* Brand */}
+        <div className="so-sidebar-brand">
+          {/* Image logo from /public/selectoros-logo.png */}
+          <img
+            src="/selectoros-logo.png"
+            alt="SelectorOS logo"
+            className="so-sidebar-logo-img"
+          />
+
+          <div className="so-sidebar-brand-text">
+            <span className="so-sidebar-brand-name">SelectorOS</span>
+            <span className="so-sidebar-brand-sub">Operator</span>
+          </div>
+        </div>
+
         {/* NAVIGATION */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-item">
@@ -76,8 +87,10 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT – every dashboard page renders inside this */}
-      {children}
+      {/* MAIN CONTENT AREA */}
+      <main className="so-main">
+        <div className="so-main-inner">{children}</div>
+      </main>
     </div>
   );
 }
