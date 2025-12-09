@@ -24,14 +24,15 @@
   min-height: 100vh;
   background: var(--guest-bg);
   color: var(--guest-text-main);
-  padding: 24px 20px 80px;
+
+  /* top padding leaves space for fixed header */
+  padding: 120px 20px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* acts just as a frame, not a big card anymore */
 .guest-shell {
   width: 100%;
   max-width: 1240px;
@@ -45,8 +46,10 @@
 /* === FROSTED TRANSPARENT HEADER ============================== */
 
 .glass-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   width: 100%;
 
@@ -62,8 +65,10 @@
 
 /* keep header content nicely padded inside the shell */
 .glass-header .guest-shell {
-  padding-top: 14px;
-  padding-bottom: 12px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -172,19 +177,21 @@
 
 .guest-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
-  padding: 12px 12px 120px;   /* bottom space so cards don't hide behind dock */
+  /* more “squarish” cards – narrower columns */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 280px));
+  gap: 20px;
+  padding: 16px 12px 120px;
   max-width: 980px;
-  margin: 0 auto;             /* center the grid on wide screens */
+  margin: 0 auto;
+  justify-content: center;
 }
 
 /* === DISH CARDS ==================================== */
 
 .guest-card {
   width: 100%;
-  max-width: none;        /* let the grid control sizing */
-  min-height: 220px;
+  max-width: 280px;
+  min-height: 320px;   /* taller → more square feel */
 
   border-radius: 28px;
   padding: 20px 20px 16px;
@@ -594,7 +601,7 @@
 
 @media (max-width: 768px) {
   .guest-root {
-    padding: 20px 8px 80px;
+    padding: 110px 8px 80px;
   }
 }
 
@@ -608,6 +615,8 @@
   .guest-card {
     padding: 14px 12px;
     border-radius: 22px;
+    max-width: none;
+    min-height: 260px;
   }
 
   /* hide price chip on phone */
