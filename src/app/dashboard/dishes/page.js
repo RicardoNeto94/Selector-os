@@ -138,9 +138,10 @@ export default function DishesPage() {
 
   return (
     <main className="so-main page-fade">
-      <div className="so-main-inner max-w-5xl mx-auto space-y-6">
+      {/* flex column, full height inside dashboard main */}
+      <div className="so-main-inner max-w-6xl mx-auto flex min-h-[calc(100vh-140px)] flex-col gap-6">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4">
+        <header className="flex items-center justify-between gap-4">
           <div>
             <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-600">
               SELECTOROS • DISHES
@@ -158,7 +159,7 @@ export default function DishesPage() {
           >
             + Add dish
           </a>
-        </div>
+        </header>
 
         {error && (
           <div className="so-card border border-red-200 bg-red-50/90 text-xs text-red-800">
@@ -166,61 +167,64 @@ export default function DishesPage() {
           </div>
         )}
 
-        {dishes.length === 0 ? (
-          <div className="so-card text-sm text-slate-600">
-            No dishes yet. Start by adding your first dish.
-          </div>
-        ) : (
-          <div className="so-card p-4 overflow-x-auto">
-            <table className="min-w-full text-sm text-slate-800">
-              <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="py-2 text-left">Name</th>
-                  <th className="py-2 text-left">Menu</th>
-                  <th className="py-2 text-left">Category</th>
-                  <th className="py-2 text-right">Price</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dishes.map((d) => {
-                  const menu = menus.find((m) => m.id === d.menu_id);
-                  return (
-                    <tr
-                      key={d.id}
-                      className="border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50"
-                    >
-                      <td className="py-2 pr-4 font-medium text-slate-900">
-                        {d.name}
-                      </td>
-                      <td className="py-2 pr-4 text-slate-600">
-                        {menu?.name || "—"}
-                      </td>
-                      <td className="py-2 pr-4 text-xs text-slate-500">
-                        {d.category || "—"}
-                      </td>
-                      <td className="py-2 pl-4 text-right text-slate-800">
-                        {d.price != null
-                          ? `${Number(d.price).toFixed(2)} €`
-                          : "—"}
-                      </td>
-                      <td className="py-2 pl-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteDish(d.id)}
-                          disabled={deletingId === d.id}
-                          className="rounded-full border border-red-300 px-3 py-1 text-[11px] text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                        >
-                          {deletingId === d.id ? "Deleting…" : "Delete"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {/* Main panel fills remaining height */}
+        <section className="flex-1 flex">
+          {dishes.length === 0 ? (
+            <div className="so-card h-full flex items-center justify-center text-sm text-slate-600 w-full">
+              No dishes yet. Start by adding your first dish.
+            </div>
+          ) : (
+            <div className="so-card h-full w-full p-4 overflow-x-auto">
+              <table className="min-w-full text-sm text-slate-800">
+                <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="py-2 text-left">Name</th>
+                    <th className="py-2 text-left">Menu</th>
+                    <th className="py-2 text-left">Category</th>
+                    <th className="py-2 text-right">Price</th>
+                    <th className="py-2 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dishes.map((d) => {
+                    const menu = menus.find((m) => m.id === d.menu_id);
+                    return (
+                      <tr
+                        key={d.id}
+                        className="border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50"
+                      >
+                        <td className="py-2 pr-4 font-medium text-slate-900">
+                          {d.name}
+                        </td>
+                        <td className="py-2 pr-4 text-slate-600">
+                          {menu?.name || "—"}
+                        </td>
+                        <td className="py-2 pr-4 text-xs text-slate-500">
+                          {d.category || "—"}
+                        </td>
+                        <td className="py-2 pl-4 text-right text-slate-800">
+                          {d.price != null
+                            ? `${Number(d.price).toFixed(2)} €`
+                            : "—"}
+                        </td>
+                        <td className="py-2 pl-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDish(d.id)}
+                            disabled={deletingId === d.id}
+                            className="rounded-full border border-red-300 px-3 py-1 text-[11px] text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {deletingId === d.id ? "Deleting…" : "Delete"}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );
