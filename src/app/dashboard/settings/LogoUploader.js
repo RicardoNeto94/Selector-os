@@ -53,31 +53,37 @@ export default function LogoUploader({ restaurantId, initialLogoUrl }) {
       const publicUrl = data.publicUrl;
       console.log("Public logo URL:", publicUrl);
 
-      // 3) Save to restaurants table so guest view can use it
-      const { data: updatedRestaurant, error: updateError } = await supabase
+      // 3) Update restaurants table
+      const { data: updatedRows, error: updateError } = await supabase
         .from("restaurants")
         .update({
           logo_url: publicUrl,
-          theme_logo_url: publicUrl, // so guest view / theme can reuse
+          theme_logo_url: publicUrl,
         })
         .eq("id", restaurantId)
-        .select("id, logo_url, owner_id")
-        .single();
+        .select("id, logo_url, owner_id");
 
       if (updateError) {
         console.error("Restaurant logo update error:", updateError);
         throw updateError;
       }
 
-      console.log("Updated restaurant logo row:", updatedRestaurant);
+      console.log("Updated restaurant rows:", updatedRows);
 
-      setLogoUrl(updatedRestaurant.logo_url);
+      if (!updatedRows || updatedRows.length === 0) {
+        console.warn(
+          "No restaurant row was updated. Check that restaurantId matches restaurants.id. restaurantId =",
+          restaurantId
+        );
+      }
+
+      // Even if no row was returned, keep local preview
+      setLogoUrl(publicUrl);
     } catch (err) {
       console.error("Logo upload error", err);
       setError(err.message || "Failed to upload logo.");
     } finally {
       setUploading(false);
-      // reset input so same file can be chosen again if needed
       e.target.value = "";
     }
   }
