@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }) {
       <aside className="so-sidebar">
         {/* Brand */}
         <div className="so-sidebar-brand">
-          {/* Image logo from /public/logo.png */}
+          {/* Image logo from /public/selectoros-logo.png */}
           <img
             src="/selectoros-logo.png"
             alt="SelectorOS logo"
