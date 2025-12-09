@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../styles/guest.css";
 
-// Master allergen list (fixed)
+// 🔹 Master allergen list (full set, independent of dishes)
 const ALLERGENS = [
   "GL", // Gluten
   "CR", // Crustaceans
@@ -32,14 +32,11 @@ export default function GuestMenu({ slug }) {
   const [error, setError] = useState("");
 
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
-  const [containsMode, setContainsMode] = useState(false);
+  const [containsMode, setContainsMode] = useState(false); // OFF = SAFE, ON = CONTAINS
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // "filters" | "categories" | null
+  // NEW: which bottom sheet is open? "filters" | "categories" | null
   const [activeSheet, setActiveSheet] = useState(null);
-
-  // light / dark theme toggle
-  const [isLightMode, setIsLightMode] = useState(false);
 
   // Load menu JSON from public API
   useEffect(() => {
@@ -55,8 +52,9 @@ export default function GuestMenu({ slug }) {
 
         const json = await res.json();
 
-        // old: [ { ...dish } ]
-        // new: { logo_url, dishes: [ { ...dish } ] }
+        // Support both shapes:
+        // 1) old: [ { ...dish } ]
+        // 2) new: { logo_url, dishes: [ { ...dish } ] }
         let logo = null;
         let dishData = [];
 
@@ -88,8 +86,10 @@ export default function GuestMenu({ slug }) {
     if (slug) load();
   }, [slug]);
 
+  // 🔹 Use fixed master allergen list (not derived from dishes)
   const allergenList = useMemo(() => ALLERGENS, []);
 
+  // Unique sorted category list (still derived from dishes)
   const categoryList = useMemo(() => {
     const set = new Set();
     dishes.forEach((d) => {
@@ -101,15 +101,18 @@ export default function GuestMenu({ slug }) {
   const hasFilters = selectedAllergens.size > 0;
   const hasAnyDish = dishes.length > 0;
 
-  // FILTERED LIST
+  // === MAIN FILTERING LOGIC =====================================
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
+    // category filter
     if (selectedCategory) {
       list = list.filter((d) => d.category === selectedCategory);
     }
 
-    if (!hasFilters) return list;
+    if (!hasFilters) {
+      return list;
+    }
 
     return list.filter((d) => {
       const dishAllergens = d.allergens || [];
@@ -117,6 +120,7 @@ export default function GuestMenu({ slug }) {
         selectedAllergens.has(code)
       );
 
+      // toggle OFF → safe only; toggle ON → containing only
       return containsMode ? hasSelected : !hasSelected;
     });
   }, [dishes, selectedCategory, hasFilters, selectedAllergens, containsMode]);
@@ -124,8 +128,11 @@ export default function GuestMenu({ slug }) {
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) next.delete(code);
-      else next.add(code);
+      if (next.has(code)) {
+        next.delete(code);
+      } else {
+        next.add(code);
+      }
       return next;
     });
   };
@@ -143,7 +150,9 @@ export default function GuestMenu({ slug }) {
 
   const handleSelectAllAllergens = () => {
     setSelectedAllergens((prev) => {
-      if (prev.size === allergenList.length) return new Set();
+      if (prev.size === allergenList.length) {
+        return new Set();
+      }
       return new Set(allergenList);
     });
   };
@@ -164,8 +173,8 @@ export default function GuestMenu({ slug }) {
   const closeSheet = () => setActiveSheet(null);
 
   return (
-    <div className={"guest-root" + (isLightMode ? " guest-root--light" : "")}>
-      {/* Header */}
+    <div className="guest-root">
+      {/* 🔹 Sticky frosted header */}
       <header className="glass-header">
         <div className="guest-shell">
           <div className="guest-header">
@@ -180,19 +189,11 @@ export default function GuestMenu({ slug }) {
                 <div className="guest-logo-circle">S</div>
               )}
             </div>
-
-            <button
-              type="button"
-              className="guest-mode-toggle"
-              onClick={() => setIsLightMode((prev) => !prev)}
-            >
-              {isLightMode ? "☾" : "☀︎"}
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Content */}
+      {/* 🔹 Main content frame */}
       <div className="guest-shell">
         {loading ? (
           <div className="guest-empty">Loading menu…</div>
@@ -214,6 +215,7 @@ export default function GuestMenu({ slug }) {
                 hasFilters &&
                 dishAllergens.some((code) => selectedAllergens.has(code));
 
+              // === BADGE LOGIC =====================================
               let badgeLabel = null;
               let badgeClass = "";
               if (hasFilters) {
@@ -244,14 +246,6 @@ export default function GuestMenu({ slug }) {
 
                       <div className="guest-card-name">{dish.name}</div>
                     </div>
-
-                    {/* price is hidden on phone via CSS */}
-                    <div className="guest-card-price">
-                      {typeof dish.price === "number" &&
-                      !Number.isNaN(dish.price)
-                        ? `${dish.price.toFixed(2)} €`
-                        : ""}
-                    </div>
                   </div>
 
                   {dish.description && (
@@ -273,10 +267,11 @@ export default function GuestMenu({ slug }) {
         )}
       </div>
 
-      {/* Dock */}
+      {/* 🔹 Floating dock – iOS style */}
       {!loading && hasAnyDish && (
         <div className="guest-dock">
           <div className="guest-dock-inner">
+            {/* Contain toggle (green iOS switch) */}
             <button
               type="button"
               className={"ios-switch" + (containsMode ? " ios-switch-on" : "")}
@@ -287,6 +282,7 @@ export default function GuestMenu({ slug }) {
             </button>
 
             <div className="guest-dock-icons">
+              {/* Filter toggle */}
               <button
                 type="button"
                 className={
@@ -298,6 +294,7 @@ export default function GuestMenu({ slug }) {
                 <span className="dock-icon-label">≡</span>
               </button>
 
+              {/* Category toggle */}
               <button
                 type="button"
                 className={
@@ -309,6 +306,7 @@ export default function GuestMenu({ slug }) {
                 <span className="dock-icon-label">▦</span>
               </button>
 
+              {/* Reset all */}
               <button
                 type="button"
                 className="dock-icon"
@@ -322,7 +320,7 @@ export default function GuestMenu({ slug }) {
         </div>
       )}
 
-      {/* Filters sheet */}
+      {/* 🔹 Bottom sheet: Filters */}
       {activeSheet === "filters" && (
         <div className="guest-sheet-backdrop" onClick={closeSheet}>
           <div className="guest-sheet" onClick={(e) => e.stopPropagation()}>
@@ -373,7 +371,7 @@ export default function GuestMenu({ slug }) {
         </div>
       )}
 
-      {/* Categories sheet */}
+      {/* 🔹 Bottom sheet: Categories */}
       {activeSheet === "categories" && (
         <div className="guest-sheet-backdrop" onClick={closeSheet}>
           <div className="guest-sheet" onClick={(e) => e.stopPropagation()}>
@@ -410,7 +408,9 @@ export default function GuestMenu({ slug }) {
               <button
                 type="button"
                 className="guest-sheet-btn ghost"
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => {
+                  setSelectedCategory(null);
+                }}
               >
                 Clear category
               </button>
