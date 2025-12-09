@@ -95,7 +95,6 @@ export default function DishesPage() {
     setDeletingId(dishId);
 
     try {
-      // delete links from dish_allergens first
       const { error: daError } = await supabase
         .from("dish_allergens")
         .delete()
@@ -128,19 +127,19 @@ export default function DishesPage() {
 
   if (loading) {
     return (
-      <main className="so-main page-fade">
-        <div className="so-main-inner flex h-[70vh] items-center justify-center text-sm text-slate-500">
+      <div className="page-fade">
+        <div className="flex h-[70vh] items-center justify-center text-sm text-slate-500">
           Loading dishes…
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="so-main page-fade">
-      {/* Full-width flex column inside dashboard main */}
-      <div className="flex w-full min-h-[calc(100vh-140px)] flex-col gap-6 px-10 py-8">
-        {/* HEADER */}
+    <div className="page-fade">
+      {/* full-width workspace inside so-main-inner */}
+      <div className="flex w-full min-h-[calc(100vh-140px)] flex-col gap-6">
+        {/* Header */}
         <header className="flex items-center justify-between gap-4">
           <div>
             <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-600">
@@ -167,7 +166,7 @@ export default function DishesPage() {
           </div>
         )}
 
-        {/* MAIN PANEL – fills remaining height, card is full-width */}
+        {/* Main panel */}
         <section className="flex-1 flex">
           {dishes.length === 0 ? (
             <div className="so-card w-full h-full flex items-center justify-center text-sm text-slate-600">
@@ -228,6 +227,6 @@ export default function DishesPage() {
           )}
         </section>
       </div>
-    </main>
+    </div>
   );
 }
