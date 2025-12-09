@@ -65,8 +65,8 @@ export default async function SettingsPage() {
 
         {/* MAIN GRID: APPEARANCE + BRANDING */}
         <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] gap-5 items-start">
-          {/* LEFT: Appearance form */}
-          <div>
+          {/* LEFT: Appearance form – now in a card */}
+          <div className="rounded-[28px] bg-white/80 backdrop-blur-xl border border-slate-200/70 shadow-[0_18px_50px_rgba(15,23,42,0.15)] px-6 py-5">
             <AppearanceSettingsForm
               restaurantId={restaurant.id}
               initialPrimaryColor={restaurant.theme_primary_color}
