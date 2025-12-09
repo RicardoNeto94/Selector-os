@@ -153,13 +153,13 @@
 
 /* === DISH GRID ===================================== */
 
+/* === DISH GRID =================================== */
+
 .guest-grid {
-  margin-top: 24px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
-  padding: 0 16px;
-  justify-items: center; /* keep cards centered */
+  padding: 0 24px 120px;  /* bottom space so cards don't hide behind dock */
 }
 
 /* Dark “rounded square” dish cards like screenshot */
