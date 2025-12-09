@@ -28,7 +28,6 @@ export default function LogoUploader({ restaurantId, initialLogoUrl }) {
 
     try {
       setUploading(true);
-      console.log("Uploading logo for restaurantId:", restaurantId);
 
       const ext = file.name.split(".").pop() || "png";
       const path = `restaurant-${restaurantId}-${Date.now()}.${ext}`;
@@ -51,39 +50,38 @@ export default function LogoUploader({ restaurantId, initialLogoUrl }) {
         .getPublicUrl(path);
 
       const publicUrl = data.publicUrl;
-      console.log("Public logo URL:", publicUrl);
 
-      // 3) Update restaurants table
-      const { data: updatedRows, error: updateError } = await supabase
+      // 3) Save to restaurants table so guest view can use it
+      const { data: updatedRestaurant, error: updateError } = await supabase
         .from("restaurants")
         .update({
           logo_url: publicUrl,
-          theme_logo_url: publicUrl,
+          theme_logo_url: publicUrl, // so guest view / theme can reuse
         })
         .eq("id", restaurantId)
-        .select("id, logo_url, owner_id");
+        .select("id, logo_url")
+        .maybeSingle(); // <- no “coerce to single JSON” errors
 
       if (updateError) {
         console.error("Restaurant logo update error:", updateError);
         throw updateError;
       }
 
-      console.log("Updated restaurant rows:", updatedRows);
-
-      if (!updatedRows || updatedRows.length === 0) {
+      if (!updatedRestaurant) {
         console.warn(
-          "No restaurant row was updated. Check that restaurantId matches restaurants.id. restaurantId =",
+          "No restaurant row was updated. Check that restaurantId matches restaurants.id:",
           restaurantId
         );
       }
 
-      // Even if no row was returned, keep local preview
+      // Local preview
       setLogoUrl(publicUrl);
     } catch (err) {
       console.error("Logo upload error", err);
       setError(err.message || "Failed to upload logo.");
     } finally {
       setUploading(false);
+      // reset input so same file can be chosen again if needed
       e.target.value = "";
     }
   }
