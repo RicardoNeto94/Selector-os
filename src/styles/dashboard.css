@@ -270,7 +270,8 @@
 
 /* === RESPONSIVE – TABLET ================================= */
 
-@media (max-width: 1024px) {
+/* === RESPONSIVE – TABLET & MOBILE TOP BAR ================== */
+@media (max-width: 640px) {
   .so-dashboard-root {
     flex-direction: column;
   }
@@ -284,14 +285,25 @@
     width: 100%;
     height: auto;
 
+    display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
 
-    padding: 10px 16px;
+    padding: 8px 10px;
 
-    border-radius: 0 0 24px 24px;
+    border-radius: 0 0 20px 20px;
+
+    /* 🔑 make the whole bar horizontally scrollable */
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  /* Logo area stays fixed on the left, doesn’t shrink */
+  .so-sidebar-brand {
+    flex-shrink: 0;
+    padding: 0 12px 0 0;
+    border-bottom: none;
   }
 
   .so-main {
@@ -299,26 +311,32 @@
     padding: 20px 16px 28px;
   }
 
+  /* Nav becomes a horizontal strip you can swipe */
   .so-sidebar-nav {
     margin-top: 0;
     flex-direction: row;
     align-items: center;
     gap: 8px;
+
+    white-space: nowrap;
+    padding-inline: 4px;
+    flex: 1;
   }
 
   .so-sidebar-section-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--so-text-muted);
+    flex-shrink: 0;
+  }
+
+  /* Hide footer on compact top-bar layout (we can bring it back later as an icon) */
+  .so-sidebar-footer {
     display: none;
   }
+}
 
-  .so-sidebar-footer {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
 
   .so-user-avatar {
     width: 28px;
