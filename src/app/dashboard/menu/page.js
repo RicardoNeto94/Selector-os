@@ -32,8 +32,8 @@ export default async function MenuDashboardPage() {
   if (restaurantError || !restaurant) {
     console.error("No restaurant for user", restaurantError);
     return (
-      <main className="so-main page-fade">
-        <div className="so-main-inner max-w-3xl mx-auto">
+      <div className="page-fade">
+        <div className="max-w-3xl mx-auto">
           <div className="so-card border border-red-200/80 bg-red-50/80">
             <h1 className="mb-2 text-lg font-semibold text-red-800">
               No restaurant found
@@ -44,7 +44,7 @@ export default async function MenuDashboardPage() {
             </p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -63,8 +63,8 @@ export default async function MenuDashboardPage() {
   const publicPath = `/r/${restaurant.slug}`;
 
   return (
-    <main className="so-main page-fade">
-      <div className="so-main-inner max-w-5xl mx-auto space-y-6">
+    <div className="page-fade">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <header className="flex items-center justify-between gap-4">
           <div>
@@ -169,6 +169,6 @@ export default async function MenuDashboardPage() {
           guests see on your allergen page.
         </p>
       </div>
-    </main>
+    </div>
   );
 }
