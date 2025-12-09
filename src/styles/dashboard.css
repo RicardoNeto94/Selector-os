@@ -84,7 +84,7 @@
 /* === MAIN CONTENT AREA =================================== */
 
 .so-main {
-  margin-left: 270px; /* sidebar width + gap */
+  margin-left: 240px; /* sidebar width + gap */
   padding: 32px 40px 40px;
   min-height: 100vh;
   display: flex;
