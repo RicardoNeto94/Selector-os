@@ -1,3 +1,5 @@
+// src/app/dashboard/dishes/page.js
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -126,7 +128,7 @@ export default function DishesPage() {
 
   if (loading) {
     return (
-      <main className="page-fade">
+      <main className="so-main page-fade">
         <div className="so-main-inner flex h-[70vh] items-center justify-center text-sm text-slate-500">
           Loading dishes…
         </div>
@@ -135,7 +137,7 @@ export default function DishesPage() {
   }
 
   return (
-    <main className="page-fade">
+    <main className="so-main page-fade">
       <div className="so-main-inner max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
