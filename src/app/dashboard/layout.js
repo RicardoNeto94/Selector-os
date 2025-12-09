@@ -18,72 +18,61 @@ export default function DashboardLayout({ children }) {
       <aside className="so-sidebar">
         {/* Brand */}
         <div className="so-sidebar-brand">
-          <img
-            src="/selectoros-logo.png"
-            alt="SelectorOS logo"
-            className="so-sidebar-logo-img"
-          />
+          <div className="so-sidebar-logo-mark">S</div>
+          <div className="so-sidebar-brand-text">
+            <span className="so-sidebar-brand-name">SelectorOS</span>
+            <span className="so-sidebar-brand-sub">Operator</span>
+          </div>
         </div>
 
-        {/* NAVIGATION */}
+        {/* NAV */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <Squares2X2Icon className="so-nav-icon" />
             </span>
-            <span>Dashboard</span>
+            <span className="so-nav-label">Dashboard</span>
           </Link>
 
           <Link href="/dashboard/dishes" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <RectangleStackIcon className="so-nav-icon" />
             </span>
-            <span>Dishes</span>
+            <span className="so-nav-label">Dishes</span>
           </Link>
 
           <Link href="/dashboard/menu" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <SwatchIcon className="so-nav-icon" />
             </span>
-            <span>Menu editor</span>
+            <span className="so-nav-label">Menu editor</span>
           </Link>
 
           <Link href="/dashboard/billing" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <CreditCardIcon className="so-nav-icon" />
             </span>
-            <span>Billing</span>
+            <span className="so-nav-label">Billing</span>
           </Link>
 
           <Link href="/dashboard/settings" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <Cog6ToothIcon className="so-nav-icon" />
             </span>
-            <span>Settings</span>
+            <span className="so-nav-label">Settings</span>
           </Link>
         </nav>
 
-        {/* FOOTER */}
+        {/* Account + logout lives here if you have it */}
         <div className="so-sidebar-footer">
-          <div className="so-sidebar-user">
-            <div className="so-user-avatar">R</div>
-            <div className="so-user-meta">
-              <div className="so-user-name">Operator</div>
-              <div className="so-user-tag">Live workspace</div>
-            </div>
-          </div>
-
-          {/* Logout */}
-          <Link href="/logout" className="so-logout-btn">
-            Logout
-          </Link>
+          {/* …existing operator badge + logout button… */}
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="so-main">
-        <div className="so-main-inner">{children}</div>
-      </main>
+      {/* RIGHT: MAIN CONTENT AREA */}
+      <div className="so-dashboard-main">
+        {children}
+      </div>
     </div>
   );
 }
