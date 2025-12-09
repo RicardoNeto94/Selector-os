@@ -32,7 +32,7 @@ export default async function MenuDashboardPage() {
   if (restaurantError || !restaurant) {
     console.error("No restaurant for user", restaurantError);
     return (
-      <main className="page-fade">
+      <main className="so-main page-fade">
         <div className="so-main-inner max-w-3xl mx-auto">
           <div className="so-card border border-red-200/80 bg-red-50/80">
             <h1 className="mb-2 text-lg font-semibold text-red-800">
@@ -59,12 +59,11 @@ export default async function MenuDashboardPage() {
     console.error("Error loading menus", menusError);
   }
 
-  // ✅ Public path for this restaurant's guest allergen page
-  //    Route lives at /r/[slug]
+  // Public path for this restaurant's guest allergen page (/r/[slug])
   const publicPath = `/r/${restaurant.slug}`;
 
   return (
-    <main className="page-fade">
+    <main className="so-main page-fade">
       <div className="so-main-inner max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <header className="flex items-center justify-between gap-4">
