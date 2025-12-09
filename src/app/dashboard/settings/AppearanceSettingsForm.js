@@ -51,17 +51,10 @@ export default function AppearanceSettingsForm({
 
   return (
     <form onSubmit={handleSubmit} className="so-settings-form">
-      {/* Tabs header */}
-      <div className="so-settings-tabs">
-        <button
-          type="button"
-          className="so-settings-tab so-settings-tab--active"
-        >
-          Appearance
-        </button>
-        <button type="button" className="so-settings-tab so-settings-tab--ghost">
-          Theme & layout
-        </button>
+      {/* Section header */}
+      <div className="so-settings-header">
+        <h2 className="so-settings-title">Appearance</h2>
+        <p className="so-settings-subtitle">Theme & layout</p>
       </div>
 
       {/* Primary color */}
@@ -154,7 +147,11 @@ export default function AppearanceSettingsForm({
 
       {/* Footer */}
       <div className="so-settings-footer">
-        <button type="submit" className="so-settings-primary-btn" disabled={saving}>
+        <button
+          type="submit"
+          className="so-settings-primary-btn"
+          disabled={saving}
+        >
           {saving ? "Saving…" : "Save appearance"}
         </button>
         {message && <span className="so-settings-message">{message}</span>}
