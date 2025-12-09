@@ -79,11 +79,10 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          <form action="/auth/sign-out" method="post">
-            <button type="submit" className="so-logout-btn">
-              Logout
-            </button>
-          </form>
+          {/* Logout */}
+          <Link href="/logout" className="so-logout-btn">
+            Logout
+          </Link>
         </div>
       </aside>
 
