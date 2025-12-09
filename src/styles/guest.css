@@ -183,14 +183,16 @@
 
 .guest-grid {
   display: grid;
-  /* smaller, “squarish” cards – narrower columns */
   grid-template-columns: repeat(auto-fit, minmax(200px, 220px));
   gap: 16px;
+
   padding: 16px 12px 120px;
-  max-width: 860px;
+
+  max-width: 1240px;
   margin: 0 auto;
   justify-content: center;
 }
+
 
 /* === DISH CARDS ==================================== */
 
