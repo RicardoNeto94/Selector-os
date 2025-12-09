@@ -33,58 +33,58 @@ export default function GuestMenu({ slug }) {
 
   const [selectedAllergens, setSelectedAllergens] = useState(new Set());
   const [containsMode, setContainsMode] = useState(false); // OFF = SAFE, ON = CONTAINS
-  const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  // NEW: which bottom sheet is open? "filters" | "categories" | null
+  const [activeSheet, setActiveSheet] = useState(null);
+
   // Load menu JSON from public API
- useEffect(() => {
-  async function load() {
-    try {
-      setLoading(true);
-      setError("");
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        setError("");
 
-      const res = await fetch(`/api/public-menu/${slug}`);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+        const res = await fetch(`/api/public-menu/${slug}`);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        // Support both shapes:
+        // 1) old: [ { ...dish } ]
+        // 2) new: { logo_url, dishes: [ { ...dish } ] }
+        let logo = null;
+        let dishData = [];
+
+        if (Array.isArray(json)) {
+          dishData = json;
+        } else if (json && Array.isArray(json.dishes)) {
+          logo = json.logo_url || null;
+          dishData = json.dishes;
+        }
+
+        setRestaurantLogoUrl(logo);
+
+        const normalized = (dishData || []).map((d) => ({
+          ...d,
+          allergens: Array.isArray(d.allergens)
+            ? d.allergens.map((a) => String(a).trim().toUpperCase())
+            : [],
+        }));
+
+        setDishes(normalized);
+      } catch (err) {
+        console.error("Failed to load public menu", err);
+        setError("Failed to load menu. Please try again.");
+      } finally {
+        setLoading(false);
       }
-
-      const json = await res.json();
-
-      // ALWAYS read logo from top-level
-      const logo = json?.logo_url ?? null;
-
-      // Dishes can be either:
-      // - new shape: { dishes: [...] }
-      // - old shape: [ ... ]
-      let dishData = [];
-      if (Array.isArray(json?.dishes)) {
-        dishData = json.dishes;
-      } else if (Array.isArray(json)) {
-        dishData = json;
-      }
-
-      setRestaurantLogoUrl(logo);
-
-      const normalized = (dishData || []).map((d) => ({
-        ...d,
-        allergens: Array.isArray(d.allergens)
-          ? d.allergens.map((a) => String(a).trim().toUpperCase())
-          : [],
-      }));
-
-      setDishes(normalized);
-    } catch (err) {
-      console.error("Failed to load public menu", err);
-      setError("Failed to load menu. Please try again.");
-    } finally {
-      setLoading(false);
     }
-  }
 
-  if (slug) load();
-}, [slug]);
-
+    if (slug) load();
+  }, [slug]);
 
   // 🔹 Use fixed master allergen list (not derived from dishes)
   const allergenList = useMemo(() => ALLERGENS, []);
@@ -102,9 +102,6 @@ export default function GuestMenu({ slug }) {
   const hasAnyDish = dishes.length > 0;
 
   // === MAIN FILTERING LOGIC =====================================
-  //  - no allergens selected  → show all (respecting category only)
-  //  - allergens selected & containsMode = false → ONLY SAFE dishes
-  //  - allergens selected & containsMode = true  → ONLY CONTAINING dishes
   const filteredDishes = useMemo(() => {
     let list = dishes;
 
@@ -141,15 +138,14 @@ export default function GuestMenu({ slug }) {
   };
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory((prev) => (prev === category ? null : prev = category));
+    setSelectedCategory((prev) => (prev === category ? null : category));
   };
 
   const handleResetAll = () => {
     setSelectedAllergens(new Set());
     setContainsMode(false);
     setSelectedCategory(null);
-    setShowFilterPanel(false);
-    setShowCategoryPanel(false);
+    setActiveSheet(null);
   };
 
   const handleSelectAllAllergens = () => {
@@ -164,8 +160,17 @@ export default function GuestMenu({ slug }) {
   const hasAnyActiveFilter =
     hasFilters || containsMode || selectedCategory !== null;
 
-  // IMPORTANT: no fallback to full dishes when filter is empty
   const listToRender = filteredDishes;
+
+  const openFiltersSheet = () => {
+    setActiveSheet((prev) => (prev === "filters" ? null : "filters"));
+  };
+
+  const openCategoriesSheet = () => {
+    setActiveSheet((prev) => (prev === "categories" ? null : "categories"));
+  };
+
+  const closeSheet = () => setActiveSheet(null);
 
   return (
     <div className="guest-root">
@@ -242,6 +247,7 @@ export default function GuestMenu({ slug }) {
                       <div className="guest-card-name">{dish.name}</div>
                     </div>
 
+                    {/* Price visible on desktop, hidden on phone via CSS */}
                     <div className="guest-card-price">
                       {typeof dish.price === "number" &&
                       !Number.isNaN(dish.price)
@@ -269,54 +275,7 @@ export default function GuestMenu({ slug }) {
         )}
       </div>
 
-      {/* FLOATING FILTER BAR (chips) */}
-      {!loading &&
-        hasAnyDish &&
-        (showFilterPanel || showCategoryPanel) && (
-          <div className="guest-filterbar">
-            <div className="guest-filterbar-inner">
-              {showFilterPanel && allergenList.length > 0 && (
-                <div className="guest-chips-row guest-chips-row--floating">
-                  {allergenList.map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      className={
-                        "guest-pill" +
-                        (selectedAllergens.has(code) ? " active" : "")
-                      }
-                      onClick={() => handleToggleAllergen(code)}
-                    >
-                      <span className="guest-pill-dot" />
-                      {code}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {showCategoryPanel && categoryList.length > 0 && (
-                <div className="guest-chips-row guest-chips-row--floating guest-chips-row--categories">
-                  {categoryList.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      className={
-                        "guest-pill" +
-                        (selectedCategory === category ? " active" : "")
-                      }
-                      onClick={() => handleCategoryClick(category)}
-                    >
-                      <span className="guest-pill-dot" />
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-      {/* Floating dock – only switch + icons */}
+      {/* 🔹 Floating dock – iOS style */}
       {!loading && hasAnyDish && (
         <div className="guest-dock">
           <div className="guest-dock-inner">
@@ -335,15 +294,9 @@ export default function GuestMenu({ slug }) {
               <button
                 type="button"
                 className={
-                  "dock-icon" + (showFilterPanel ? " dock-icon-active" : "")
+                  "dock-icon" + (activeSheet === "filters" ? " dock-icon-active" : "")
                 }
-                onClick={() => {
-                  setShowFilterPanel((prev) => {
-                    const next = !prev;
-                    if (next) setShowCategoryPanel(false);
-                    return next;
-                  });
-                }}
+                onClick={openFiltersSheet}
               >
                 <span className="dock-icon-label">≡</span>
               </button>
@@ -352,15 +305,9 @@ export default function GuestMenu({ slug }) {
               <button
                 type="button"
                 className={
-                  "dock-icon" + (showCategoryPanel ? " dock-icon-active" : "")
+                  "dock-icon" + (activeSheet === "categories" ? " dock-icon-active" : "")
                 }
-                onClick={() => {
-                  setShowCategoryPanel((prev) => {
-                    const next = !prev;
-                    if (next) setShowFilterPanel(false);
-                    return next;
-                  });
-                }}
+                onClick={openCategoriesSheet}
               >
                 <span className="dock-icon-label">▦</span>
               </button>
@@ -373,6 +320,118 @@ export default function GuestMenu({ slug }) {
                 disabled={!hasAnyActiveFilter}
               >
                 <span className="dock-icon-label">↻</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔹 Bottom sheet: Filters */}
+      {activeSheet === "filters" && (
+        <div className="guest-sheet-backdrop" onClick={closeSheet}>
+          <div
+            className="guest-sheet"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="guest-sheet-handle" />
+            <div className="guest-sheet-header">
+              <h2>Allergens</h2>
+              <p>Tap all allergens the guest wants to avoid or inspect.</p>
+            </div>
+
+            <div className="guest-sheet-body">
+              <div className="guest-sheet-pills-row">
+                {allergenList.map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    className={
+                      "guest-pill" +
+                      (selectedAllergens.has(code) ? " active" : "")
+                    }
+                    onClick={() => handleToggleAllergen(code)}
+                  >
+                    <span className="guest-pill-dot" />
+                    {code}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="guest-sheet-footer">
+              <button
+                type="button"
+                className="guest-sheet-btn ghost"
+                onClick={handleSelectAllAllergens}
+              >
+                {selectedAllergens.size === allergenList.length
+                  ? "Clear all"
+                  : "Select all"}
+              </button>
+              <button
+                type="button"
+                className="guest-sheet-btn"
+                onClick={closeSheet}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔹 Bottom sheet: Categories */}
+      {activeSheet === "categories" && (
+        <div className="guest-sheet-backdrop" onClick={closeSheet}>
+          <div
+            className="guest-sheet"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="guest-sheet-handle" />
+            <div className="guest-sheet-header">
+              <h2>Categories</h2>
+              <p>Focus on a specific part of the menu.</p>
+            </div>
+
+            <div className="guest-sheet-body">
+              {categoryList.length === 0 ? (
+                <p className="guest-sheet-empty">No categories configured.</p>
+              ) : (
+                <div className="guest-sheet-pills-row">
+                  {categoryList.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={
+                        "guest-pill" +
+                        (selectedCategory === category ? " active" : "")
+                      }
+                      onClick={() => handleCategoryClick(category)}
+                    >
+                      <span className="guest-pill-dot" />
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="guest-sheet-footer">
+              <button
+                type="button"
+                className="guest-sheet-btn ghost"
+                onClick={() => {
+                  setSelectedCategory(null);
+                }}
+              >
+                Clear category
+              </button>
+              <button
+                type="button"
+                className="guest-sheet-btn"
+                onClick={closeSheet}
+              >
+                Done
               </button>
             </div>
           </div>
