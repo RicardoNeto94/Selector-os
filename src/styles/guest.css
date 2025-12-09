@@ -162,6 +162,20 @@
   padding: 0 24px 120px;  /* bottom space so cards don't hide behind dock */
 }
 
+/* iPhone-style grid: 2 cards per row, like your screenshot */
+@media (max-width: 640px) {
+  .guest-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 0 12px 120px; /* a bit tighter on the sides, same bottom gap */
+  }
+
+  /* Slightly tighter cards on mobile so text fits nicely */
+  .guest-card {
+    padding: 16px 14px;
+  }
+}
+
 /* Dark “rounded square” dish cards like screenshot */
 .guest-card {
   width: 100%;
