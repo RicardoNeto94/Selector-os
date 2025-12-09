@@ -42,8 +42,8 @@
 .so-sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 4px 20px;
+  justify-content: flex-start;
+  padding-bottom: 20px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.35);
 }
 
@@ -92,23 +92,10 @@
   color: rgba(100, 116, 139, 0.9);
 }
 
-/* Logo improvements */
-.so-sidebar-logo-wrap {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: white;
-  border: 1px solid rgba(148,163,184,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.so-sidebar-logo-img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
+.so-sidebar-logo {
+  width: 64px;
+  height: auto;
+  display: block;
 }
 
 /* Nav icons softened */
