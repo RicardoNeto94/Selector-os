@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }) {
       <aside className="so-sidebar">
         {/* Brand */}
         <div className="so-sidebar-brand">
-          {/* Logo image */}
+          {/* Image logo – put /public/logo-selectoros.png or /logo.png in your repo */}
           <img
             src="/logo.png"
             alt="SelectorOS logo"
@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT – each page renders its own <main> wrapper */}
+      {/* MAIN CONTENT – every dashboard page renders inside this */}
       {children}
     </div>
   );
