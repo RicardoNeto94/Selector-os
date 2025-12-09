@@ -4,7 +4,13 @@
   --guest-text-main: #f8fafc;
   --guest-card-bg: rgba(255, 255, 255, 0.06);
   --guest-card-border: rgba(255, 255, 255, 0.12);
-  --guest-header-glass: rgba(15, 23, 42, 0.96);
+  --guest-header-glass: linear-gradient(
+    to bottom,
+    rgba(3, 7, 18, 0.98),
+    rgba(3, 7, 18, 0.96),
+    rgba(3, 7, 18, 0.9),
+    rgba(3, 7, 18, 0.8)
+  );
   --guest-dock-bg: rgba(15, 23, 42, 0.9);
 }
 
@@ -25,7 +31,7 @@
   background: var(--guest-bg);
   color: var(--guest-text-main);
 
-  /* leave space for fixed header */
+  /* top padding leaves space for fixed header */
   padding: 120px 20px 80px;
   display: flex;
   flex-direction: column;
@@ -57,12 +63,13 @@
   backdrop-filter: blur(18px) saturate(1.6);
   -webkit-backdrop-filter: blur(18px) saturate(1.6);
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.95);
   box-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 2px 12px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(148, 163, 184, 0.25);
 }
 
+/* keep header content nicely padded inside the shell */
 .glass-header .guest-shell {
   max-width: 1240px;
   margin: 0 auto;
@@ -73,38 +80,14 @@
   align-items: center;
 }
 
+/* Wrap for whatever you render inside the glass header */
 .guest-header {
-  width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 16px;
+  align-items: center;
 }
 
-/* Day / Night toggle button (simple, Shang Shi-style) */
-.guest-mode-toggle {
-  margin-left: 16px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(15, 23, 42, 0.9);
-  color: #e5e7eb;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    background 0.12s ease;
-}
-
-.guest-mode-toggle:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.8);
-  background: rgba(30, 64, 175, 0.9);
-}
-
-/* Logo */
+/* === LOGO ========================================== */
 
 .guest-logo-image-wrap {
   width: 96px;
@@ -141,7 +124,7 @@
   color: #e5e7eb;
 }
 
-/* === ALLERGEN PILLS (generic) ====================== */
+/* === ALLERGEN PILLS ROW (generic) ================== */
 
 .guest-chips-row {
   margin-top: 12px;
@@ -200,10 +183,11 @@
 
 .guest-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 280px));
-  gap: 20px;
+  /* smaller, “squarish” cards – narrower columns */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 220px));
+  gap: 16px;
   padding: 16px 12px 120px;
-  max-width: 980px;
+  max-width: 860px;
   margin: 0 auto;
   justify-content: center;
 }
@@ -212,11 +196,11 @@
 
 .guest-card {
   width: 100%;
-  max-width: 280px;
-  min-height: 320px; /* taller → more square feel */
+  max-width: 220px;
+  min-height: 260px;
 
-  border-radius: 28px;
-  padding: 20px 20px 16px;
+  border-radius: 24px;
+  padding: 16px 16px 14px;
 
   background: var(--guest-card-bg);
   backdrop-filter: blur(22px) saturate(1.8);
@@ -244,12 +228,13 @@
 
 .guest-card-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* no empty space on the right now */
   align-items: flex-start;
   gap: 16px;
 }
 
-/* Dish pills */
+/* === DISH PILLS (CATEGORY + STATUS) ================ */
+
 .dish-chip-row {
   display: flex;
   gap: 8px;
@@ -270,16 +255,19 @@
   box-shadow: 0 3px 6px rgba(15, 23, 42, 0.35);
 }
 
+/* Blue category pill (Starters / Mains / etc) */
 .dish-chip-category {
   background: #60a5fa;
   color: #0b1120;
 }
 
+/* Green SAFE pill */
 .dish-chip-safe {
   background: #22c55e;
   color: #052e16;
 }
 
+/* Red CONTAINS pill */
 .dish-chip-contains {
   background: #f97373;
   color: #450a0a;
@@ -287,11 +275,12 @@
 
 .guest-card-name {
   margin-top: 4px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #e5e7eb;
 }
 
+/* kept in case you re-add price later; currently not used */
 .guest-card-price {
   font-size: 15px;
   font-weight: 600;
@@ -303,17 +292,19 @@
 }
 
 /* description */
+
 .guest-card-desc {
-  margin-top: 14px;
-  font-size: 14px;
+  margin-top: 10px;
+  font-size: 13px;
   color: #cbd5f5;
   line-height: 1.45;
 }
 
-/* footer */
+/* bottom area */
+
 .guest-card-footer {
-  margin-top: 16px;
-  padding-top: 14px;
+  margin-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid rgba(15, 23, 42, 0.7);
   display: flex;
   flex-direction: column;
@@ -323,7 +314,7 @@
 }
 
 .guest-card-allergens {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: #9ca3af;
@@ -368,7 +359,7 @@
   gap: 12px;
 }
 
-/* iOS-style switch */
+/* iOS-style switch for "Contain" mode */
 .ios-switch {
   width: 64px;
   height: 34px;
@@ -411,7 +402,7 @@
   cursor: default;
 }
 
-/* Dock icons */
+/* Icon buttons cluster */
 
 .guest-dock-icons {
   display: flex;
@@ -459,7 +450,39 @@
   line-height: 1;
 }
 
-/* === BOTTOM SHEET ================================ */
+/* Make dock stay pill-shaped on small screens */
+@media (max-width: 640px) {
+  .guest-dock {
+    bottom: 18px;
+    padding: 4px 10px;
+  }
+
+  .guest-dock-inner {
+    gap: 8px;
+  }
+
+  .ios-switch {
+    width: 56px;
+    height: 30px;
+  }
+
+  .ios-switch-knob {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ios-switch-on .ios-switch-knob {
+    transform: translateX(22px);
+  }
+
+  .dock-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+}
+
+/* === BOTTOM SHEET (FILTERS / CATEGORIES) ============ */
 
 .guest-sheet-backdrop {
   position: fixed;
@@ -529,6 +552,7 @@
   overflow-y: auto;
 }
 
+/* pills row inside sheet */
 .guest-sheet-pills-row {
   display: flex;
   flex-wrap: wrap;
@@ -580,7 +604,7 @@
   color: #9ca3af;
 }
 
-/* === RESPONSIVE =================================== */
+/* === RESPONSIVE TWEAKS ============================= */
 
 @media (max-width: 768px) {
   .guest-root {
@@ -602,13 +626,8 @@
     min-height: 260px;
   }
 
-  /* hide price chip on phone */
+  /* hide price chip on phone (still safe even if you reintroduce it later) */
   .guest-card-price {
     display: none;
-  }
-
-  .guest-mode-toggle {
-    font-size: 13px;
-    padding: 5px 9px;
   }
 }
