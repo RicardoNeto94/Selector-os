@@ -38,52 +38,53 @@ export default function GuestMenu({ slug }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   // Load menu JSON from public API
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        setError("");
+ useEffect(() => {
+  async function load() {
+    try {
+      setLoading(true);
+      setError("");
 
-        const res = await fetch(`/api/public-menu/${slug}`);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-
-        const json = await res.json();
-
-        // Support both shapes:
-        // 1) old: [ { ...dish } ]
-        // 2) new: { logo_url, dishes: [ { ...dish } ] }
-        let logo = null;
-        let dishData = [];
-
-        if (Array.isArray(json)) {
-          dishData = json;
-        } else if (json && Array.isArray(json.dishes)) {
-          logo = json.logo_url || null;
-          dishData = json.dishes;
-        }
-
-        setRestaurantLogoUrl(logo);
-
-        const normalized = (dishData || []).map((d) => ({
-          ...d,
-          allergens: Array.isArray(d.allergens)
-            ? d.allergens.map((a) => String(a).trim().toUpperCase())
-            : [],
-        }));
-
-        setDishes(normalized);
-      } catch (err) {
-        console.error("Failed to load public menu", err);
-        setError("Failed to load menu. Please try again.");
-      } finally {
-        setLoading(false);
+      const res = await fetch(`/api/public-menu/${slug}`);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
       }
-    }
 
-    if (slug) load();
-  }, [slug]);
+      const json = await res.json();
+
+      // ALWAYS read logo from top-level
+      const logo = json?.logo_url ?? null;
+
+      // Dishes can be either:
+      // - new shape: { dishes: [...] }
+      // - old shape: [ ... ]
+      let dishData = [];
+      if (Array.isArray(json?.dishes)) {
+        dishData = json.dishes;
+      } else if (Array.isArray(json)) {
+        dishData = json;
+      }
+
+      setRestaurantLogoUrl(logo);
+
+      const normalized = (dishData || []).map((d) => ({
+        ...d,
+        allergens: Array.isArray(d.allergens)
+          ? d.allergens.map((a) => String(a).trim().toUpperCase())
+          : [],
+      }));
+
+      setDishes(normalized);
+    } catch (err) {
+      console.error("Failed to load public menu", err);
+      setError("Failed to load menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (slug) load();
+}, [slug]);
+
 
   // 🔹 Use fixed master allergen list (not derived from dishes)
   const allergenList = useMemo(() => ALLERGENS, []);
