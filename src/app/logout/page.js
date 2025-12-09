@@ -9,13 +9,13 @@ export default function LogoutPage() {
   const supabase = createClientComponentClient();
 
   useEffect(() => {
-    async function doLogout() {
+    const doLogout = async () => {
       await supabase.auth.signOut();
-      router.push('/sign-in');  // redirect after logout
-    }
+      router.push('/sign-in');
+    };
 
     doLogout();
-  }, [router, supabase]);
+  }, []);  // ← EMPTY array, no looping
 
   return (
     <div style={{ padding: '20px', color: '#fff' }}>
