@@ -47,14 +47,8 @@
   border-bottom: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-/* If using an image logo (recommended) */
-.so-sidebar-logo-img {
-  height: 52px;
-  width: auto;
-  display: block;
-}
+/* Text + badge logo (no external image needed) */
 
-/* If using text badge instead of image */
 .so-sidebar-brand-mark {
   width: 44px;
   height: 44px;
@@ -69,7 +63,6 @@
   color: #e5f0ff;
 }
 
-/* Brand text block next to logo */
 .so-sidebar-brand-text {
   display: flex;
   flex-direction: column;
@@ -88,7 +81,8 @@
   color: var(--so-text-muted);
 }
 
-/* MAIN CONTENT AREA – give the center more width */
+/* === MAIN CONTENT AREA =================================== */
+
 .so-main {
   margin-left: 270px; /* sidebar width + gap */
   padding: 32px 40px 40px;
@@ -98,13 +92,12 @@
 }
 
 .so-main-inner {
-  max-width: 1320px; /* was 1160 – this fills more of the screen */
+  max-width: 1400px; /* fills more of the screen than the old 1160px */
   width: 100%;
   margin: 0 auto;
 }
 
-
-/* NAVIGATION */
+/* === NAVIGATION ========================================= */
 
 .so-sidebar-nav {
   margin-top: 26px;
@@ -232,20 +225,6 @@
     0 0 0 1px rgba(255, 255, 255, 0.45) inset;
 }
 
-/* === MAIN CONTENT AREA =================================== */
-
-.so-main {
-  margin-left: 270px; /* Sidebar spacing */
-  padding: 32px 40px 40px;
-  min-height: 100vh;
-}
-
-.so-main-inner {
-  max-width: 1420px;  /* Wider dashboard */
-  width: 100%;
-  margin: 0 auto;
-}
-
 /* === CARDS & GRID ======================================== */
 
 .so-card {
@@ -261,14 +240,10 @@
   gap: 10px;
 }
 
-/* HERO CARD */
-
 .so-card-hero {
   padding: 24px 28px;
   border-radius: var(--so-radius-card-lg);
 }
-
-/* GRID */
 
 .so-grid {
   display: grid;
@@ -276,27 +251,11 @@
   gap: 18px;
 }
 
-@media (max-width: 1024px) {
-  .so-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .so-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* SECONDARY GRID */
-
 .so-grid-lg {
   display: grid;
   grid-template-columns: 2fr 1.4fr;
   gap: 18px;
 }
-
-/* METRICS */
 
 .so-metric-main {
   font-size: 24px;
@@ -321,6 +280,11 @@
   .so-main {
     margin-left: 0;
     padding: 20px 16px 28px;
+  }
+
+  .so-grid,
+  .so-grid-lg {
+    grid-template-columns: 1fr;
   }
 }
 
