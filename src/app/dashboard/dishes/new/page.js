@@ -1,4 +1,4 @@
-// src/app/dashboard/dishes/new/page.js  (or wherever this lives)
+// src/app/dashboard/dishes/new/page.js
 
 "use client";
 
@@ -164,19 +164,19 @@ export default function NewDishPage() {
 
   if (loading) {
     return (
-      <main className="so-main page-fade">
-        <div className="so-main-inner flex h-[70vh] items-center justify-center text-sm text-slate-500">
+      <div className="page-fade">
+        <div className="flex h-[70vh] items-center justify-center text-sm text-slate-500">
           Loading dish editor…
         </div>
-      </main>
+      </div>
     );
   }
 
   // No menu yet: force them to create one first
   if (!menus.length) {
     return (
-      <main className="so-main page-fade">
-        <div className="so-main-inner max-w-xl mx-auto">
+      <div className="page-fade">
+        <div className="max-w-xl mx-auto">
           <div className="so-card text-sm text-slate-700">
             <h1 className="mb-3 text-xl font-semibold text-slate-900">
               No menus yet
@@ -193,13 +193,13 @@ export default function NewDishPage() {
             </a>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="so-main page-fade">
-      <div className="so-main-inner max-w-3xl mx-auto space-y-6">
+    <div className="page-fade">
+      <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
           <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-600">
@@ -344,13 +344,14 @@ export default function NewDishPage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-50"
+              className="inline-flex items
+              center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save dish"}
             </button>
           </div>
         </form>
       </div>
-    </main>
+    </div>
   );
 }
