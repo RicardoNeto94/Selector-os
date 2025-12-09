@@ -294,3 +294,32 @@
     display: none;
   }
 }
+
+/* === SETTINGS – APPEARANCE ============================= */
+
+.so-settings-appearance {
+  border-radius: var(--so-radius-card-lg);
+  background: var(--so-glass-light-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--so-glass-light-border);
+  box-shadow: var(--so-glass-light-shadow);
+  padding: 22px 24px;
+}
+
+.so-settings-header {
+  margin-bottom: 18px;
+}
+
+.so-settings-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.so-settings-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+}
+
