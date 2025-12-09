@@ -42,26 +42,19 @@
 .so-sidebar-brand {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0 0 0 20 0;
+  gap: 12px;
+  padding: 4px 4px 20px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-/* Text + badge logo (no external image needed) */
-
-.so-sidebar-brand-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #0f172a, #020617);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 18px;
-  color: #e5f0ff;
+.so-sidebar-logo {
+  display: block;
+  width: 80px;
+  height: auto;
 }
+
+/* Optional: hide brand text if you don’t want it at all */
+/* .so-sidebar-brand-text { display: none; } */
 
 .so-sidebar-brand-text {
   display: flex;
@@ -80,41 +73,6 @@
   font-weight: 500;
   color: var(--so-text-muted);
 }
-
-/* Section labels */
-.so-sidebar-section-label {
-  margin-top: 18px;
-  margin-bottom: 6px;
-  padding-left: 6px;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(100, 116, 139, 0.9);
-}
-
-.so-sidebar-logo {
-  width: 120px;
-  height: auto;
-  display: block;
-}
-
-/* Nav icons softened */
-.so-nav-icon-wrap {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.4);
-  border: 1px solid rgba(148,163,184,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
-}
-
-.so-nav-item:hover .so-nav-icon-wrap {
-  background: rgba(255,255,255,0.8);
-}
-
 
 /* === MAIN CONTENT AREA =================================== */
 
@@ -139,6 +97,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.so-sidebar-section-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--so-text-muted);
+  margin: 14px 4px 4px;
 }
 
 .so-nav-item {
@@ -302,14 +268,30 @@
   color: var(--so-text-muted);
 }
 
-/* === RESPONSIVE ========================================== */
+/* === RESPONSIVE – TABLET ================================= */
 
 @media (max-width: 1024px) {
+  .so-dashboard-root {
+    flex-direction: column;
+  }
+
   .so-sidebar {
-    position: static;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+
     width: 100%;
     height: auto;
+
     flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 10px 16px;
+
+    border-radius: 0 0 24px 24px;
   }
 
   .so-main {
@@ -317,16 +299,66 @@
     padding: 20px 16px 28px;
   }
 
-  .so-grid,
-  .so-grid-lg {
-    grid-template-columns: 1fr;
+  .so-sidebar-nav {
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .so-sidebar-section-label {
+    display: none;
+  }
+
+  .so-sidebar-footer {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .so-user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .so-logout-btn {
+    width: auto;
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 }
+
+/* === RESPONSIVE – PHONE ================================== */
 
 @media (max-width: 640px) {
   .so-sidebar-brand-text,
   .so-user-meta {
     display: none;
+  }
+
+  .so-sidebar {
+    padding: 8px 12px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .so-nav-item {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .so-nav-icon-wrap {
+    width: 26px;
+    height: 26px;
+  }
+
+  .so-main {
+    padding: 16px 12px 24px;
   }
 }
 
@@ -366,7 +398,6 @@
          focus:outline-none focus:ring-2 focus:ring-emerald-300 
          transition-all;
   
-  /* Remove native arrows (Safari, Chrome, Edge) */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -377,5 +408,3 @@
   background-size: 12px;
   padding-right: 2rem;
 }
-
-
