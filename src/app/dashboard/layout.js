@@ -16,16 +16,14 @@ export default function DashboardLayout({ children }) {
     <div className="so-dashboard-root">
       {/* LEFT SIDEBAR */}
       <aside className="so-sidebar">
-        {/* Brand */}
         <div className="so-sidebar-brand">
-          <div className="so-sidebar-logo-mark">S</div>
+          <div className="so-sidebar-brand-mark">S</div>
           <div className="so-sidebar-brand-text">
             <span className="so-sidebar-brand-name">SelectorOS</span>
             <span className="so-sidebar-brand-sub">Operator</span>
           </div>
         </div>
 
-        {/* NAV */}
         <nav className="so-sidebar-nav">
           <Link href="/dashboard" className="so-nav-item">
             <span className="so-nav-icon-wrap">
@@ -63,16 +61,15 @@ export default function DashboardLayout({ children }) {
           </Link>
         </nav>
 
-        {/* Account + logout lives here if you have it */}
         <div className="so-sidebar-footer">
-          {/* …existing operator badge + logout button… */}
+          {/* user badge + logout go here */}
         </div>
       </aside>
 
-      {/* RIGHT: MAIN CONTENT AREA */}
-      <div className="so-dashboard-main">
-        {children}
-      </div>
+      {/* RIGHT: MAIN AREA */}
+      <main className="so-main">
+        <div className="so-main-inner">{children}</div>
+      </main>
     </div>
   );
 }
