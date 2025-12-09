@@ -81,6 +81,54 @@
   color: var(--so-text-muted);
 }
 
+/* Section labels */
+.so-sidebar-section-label {
+  margin-top: 18px;
+  margin-bottom: 6px;
+  padding-left: 6px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+/* Logo improvements */
+.so-sidebar-logo-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  border: 1px solid rgba(148,163,184,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.so-sidebar-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Nav icons softened */
+.so-nav-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.4);
+  border: 1px solid rgba(148,163,184,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.so-nav-item:hover .so-nav-icon-wrap {
+  background: rgba(255,255,255,0.8);
+}
+
+
 /* === MAIN CONTENT AREA =================================== */
 
 .so-main {
