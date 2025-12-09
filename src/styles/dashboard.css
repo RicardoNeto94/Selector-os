@@ -268,10 +268,8 @@
   color: var(--so-text-muted);
 }
 
-/* === RESPONSIVE – TABLET ================================= */
-
 /* === RESPONSIVE – TABLET & MOBILE TOP BAR ================== */
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
   .so-dashboard-root {
     flex-direction: column;
   }
@@ -290,9 +288,8 @@
     align-items: center;
     gap: 12px;
 
-    padding: 8px 10px;
-
-    border-radius: 0 0 20px 20px;
+    padding: 10px 12px;
+    border-radius: 0 0 24px 24px;
 
     /* 🔑 make the whole bar horizontally scrollable */
     overflow-x: auto;
@@ -331,12 +328,10 @@
     flex-shrink: 0;
   }
 
-  /* Hide footer on compact top-bar layout (we can bring it back later as an icon) */
+  /* Footer is hidden in top-bar layout */
   .so-sidebar-footer {
     display: none;
   }
-}
-
 
   .so-user-avatar {
     width: 28px;
@@ -353,7 +348,6 @@
 }
 
 /* === RESPONSIVE – PHONE ================================== */
-
 @media (max-width: 640px) {
   .so-sidebar-brand-text,
   .so-user-meta {
@@ -361,7 +355,7 @@
   }
 
   .so-sidebar {
-    padding: 8px 12px;
+    padding: 8px 10px;
     border-radius: 0 0 20px 20px;
   }
 
