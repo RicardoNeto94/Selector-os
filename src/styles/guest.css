@@ -327,38 +327,36 @@
 
 /* === FLOATING DOCK (BOTTOM) ======================= */
 
+/* === FLOATING DOCK (BOTTOM) ======================= */
+
 .guest-dock {
   position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-  transform: translateX(-50%);
-  z-index: 40;
-
-  width: min(360px, calc(100% - 32px));
-  padding: 8px 16px;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  z-index: 50;
 
   display: flex;
   justify-content: center;
-
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(14px) saturate(1.8);
-  -webkit-backdrop-filter: blur(14px) saturate(1.8);
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  pointer-events: none; /* dock doesn't block page taps outside */
 }
 
 .guest-dock-inner {
   pointer-events: auto;
-  width: 100%;
+
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+
+  padding: 8px 16px;
   border-radius: 999px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px) saturate(1.7);
+  -webkit-backdrop-filter: blur(16px) saturate(1.7);
+
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
 }
 
 /* iOS-style switch for "Contain" mode */
@@ -464,51 +462,71 @@
 
 /* FILTER BAR ABOVE DOCK */
 
+/* FILTER BAR ABOVE DOCK – SMALL & SCROLLABLE */
+
 .guest-filterbar {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
   padding: 0 16px;
+
   display: flex;
   justify-content: center;
+
   pointer-events: none;
-  z-index: 30;
+  z-index: 40;
 }
 
 .guest-filterbar-inner {
   pointer-events: auto;
+
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 6px 10px;
+  justify-content: flex-start;
+
+  padding: 4px 8px;
   border-radius: 999px;
 
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 
-  max-width: min(480px, 100% - 32px);
+  max-width: min(420px, 100%);
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-y: hidden;
 }
 
-/* reuse guest-pill layout but remove the top border / margin */
+/* reuse guest-pill layout but as a tight row */
 .guest-chips-row--floating {
   margin: 0;
   padding: 0;
   border-top: none;
-  justify-content: flex-start;
+
+  display: inline-flex;
   flex-wrap: nowrap;
+  gap: 6px;
+  justify-content: flex-start;
   white-space: nowrap;
 }
+
+/* optional – thinner pills when floating */
+.guest-chips-row--floating .guest-pill {
+  padding: 4px 10px 4px 16px;
+  font-size: 10px;
+}
+
 
 /* === RESPONSIVE TWEAKS ============================= */
 
 @media (max-width: 768px) {
   .guest-dock-inner {
-    gap: 12px;
+    max-width: 340px;
+  }
+
+  .guest-filterbar-inner {
+    max-width: min(360px, 100%);
   }
 }
