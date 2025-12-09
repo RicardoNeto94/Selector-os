@@ -18,12 +18,8 @@ export default function DashboardLayout({ children }) {
       <aside className="so-sidebar">
         {/* Brand */}
         <div className="so-sidebar-brand">
-          {/* Image logo – put /public/logo-selectoros.png or /logo.png in your repo */}
-          <img
-            src="/logo.png"
-            alt="SelectorOS logo"
-            className="so-sidebar-logo-img"
-          />
+          {/* Circular "S" badge – no external image required */}
+          <div className="so-sidebar-brand-mark">S</div>
 
           <div className="so-sidebar-brand-text">
             <span className="so-sidebar-brand-name">SelectorOS</span>
