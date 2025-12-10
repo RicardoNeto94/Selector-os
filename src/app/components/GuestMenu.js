@@ -35,11 +35,13 @@ export default function GuestMenu({ slug }) {
   const [containsMode, setContainsMode] = useState(false); // OFF = SAFE, ON = CONTAINS
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // NEW: which bottom sheet is open? "filters" | "categories" | null
+  // which bottom sheet is open? "filters" | "categories" | null
   const [activeSheet, setActiveSheet] = useState(null);
 
-  // 🔹 Light / dark mode
-  const [isLightMode, setIsLightMode] = useState(false);
+  // 👇 drag-to-dismiss state for bottom sheets
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
+  const [dragStartY, setDragStartY] = useState(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
 
   // Load menu JSON from public API
   useEffect(() => {
@@ -88,24 +90,6 @@ export default function GuestMenu({ slug }) {
 
     if (slug) load();
   }, [slug]);
-
-  // 🔹 Load saved theme from localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("selectoros_guest_theme");
-    if (stored === "light") {
-      setIsLightMode(true);
-    }
-  }, []);
-
-  // 🔹 Persist theme choice
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      "selectoros_guest_theme",
-      isLightMode ? "light" : "dark"
-    );
-  }, [isLightMode]);
 
   // 🔹 Use fixed master allergen list (not derived from dishes)
   const allergenList = useMemo(() => ALLERGENS, []);
@@ -167,6 +151,9 @@ export default function GuestMenu({ slug }) {
     setContainsMode(false);
     setSelectedCategory(null);
     setActiveSheet(null);
+    setDragOffsetY(0);
+    setIsDraggingSheet(false);
+    setDragStartY(null);
   };
 
   const handleSelectAllAllergens = () => {
@@ -185,42 +172,79 @@ export default function GuestMenu({ slug }) {
 
   const openFiltersSheet = () => {
     setActiveSheet((prev) => (prev === "filters" ? null : "filters"));
+    setDragOffsetY(0);
   };
 
   const openCategoriesSheet = () => {
     setActiveSheet((prev) => (prev === "categories" ? null : "categories"));
+    setDragOffsetY(0);
   };
 
-  const closeSheet = () => setActiveSheet(null);
+  const closeSheet = () => {
+    setActiveSheet(null);
+    setDragOffsetY(0);
+    setIsDraggingSheet(false);
+    setDragStartY(null);
+  };
+
+  // 🔹 Drag helpers (mouse + touch) for bottom sheet
+  const getClientY = (event) => {
+    if ("touches" in event && event.touches[0]) {
+      return event.touches[0].clientY;
+    }
+    if ("changedTouches" in event && event.changedTouches[0]) {
+      return event.changedTouches[0].clientY;
+    }
+    return event.clientY;
+  };
+
+  const handleSheetDragStart = (event) => {
+    const y = getClientY(event);
+    if (y == null) return;
+    setIsDraggingSheet(true);
+    setDragStartY(y);
+  };
+
+  const handleSheetDragMove = (event) => {
+    if (!isDraggingSheet || dragStartY == null) return;
+    const y = getClientY(event);
+    if (y == null) return;
+    const delta = y - dragStartY;
+    // only allow dragging down
+    setDragOffsetY(delta > 0 ? delta : 0);
+  };
+
+  const handleSheetDragEnd = () => {
+    if (!isDraggingSheet) return;
+
+    const threshold = 80; // px — how far user must drag to close
+    if (dragOffsetY > threshold) {
+      closeSheet();
+    } else {
+      // snap back up
+      setDragOffsetY(0);
+    }
+    setIsDraggingSheet(false);
+    setDragStartY(null);
+  };
 
   return (
-    <div className={"guest-root" + (isLightMode ? " guest-root--light" : "")}>
+    <div className="guest-root">
       {/* 🔹 Sticky frosted header */}
       <header className="glass-header">
         <div className="guest-shell">
           <div className="guest-header">
-            <div className="guest-header-logo-area">
-  {restaurantLogoUrl ? (
-    <img
-      src={restaurantLogoUrl}
-      alt="Restaurant logo"
-      className="guest-header-logo-img"
-    />
-  ) : null}
-</div>
-            {/* 🔹 Night / day toggle */}
-            <button
-              type="button"
-              className={
-                "guest-theme-toggle" +
-                (isLightMode ? " guest-theme-toggle--on" : "")
-              }
-              onClick={() => setIsLightMode((prev) => !prev)}
-            >
-              <span className="guest-theme-toggle-icon">
-                {isLightMode ? "☀️" : "🌙"}
-              </span>
-            </button>
+            <div className="guest-logo-image-wrap">
+              {restaurantLogoUrl ? (
+                <img
+                  src={restaurantLogoUrl}
+                  alt="Restaurant logo"
+                  className="guest-header-logo-img"
+                />
+              ) : (
+                <div className="guest-logo-circle">S</div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -355,7 +379,18 @@ export default function GuestMenu({ slug }) {
       {/* 🔹 Bottom sheet: Filters */}
       {activeSheet === "filters" && (
         <div className="guest-sheet-backdrop" onClick={closeSheet}>
-          <div className="guest-sheet" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="guest-sheet"
+            style={{ transform: `translateY(${dragOffsetY}px)` }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={handleSheetDragStart}
+            onMouseMove={handleSheetDragMove}
+            onMouseUp={handleSheetDragEnd}
+            onMouseLeave={handleSheetDragEnd}
+            onTouchStart={handleSheetDragStart}
+            onTouchMove={handleSheetDragMove}
+            onTouchEnd={handleSheetDragEnd}
+          >
             <div className="guest-sheet-handle" />
             <div className="guest-sheet-header">
               <h2>Allergens</h2>
@@ -406,7 +441,18 @@ export default function GuestMenu({ slug }) {
       {/* 🔹 Bottom sheet: Categories */}
       {activeSheet === "categories" && (
         <div className="guest-sheet-backdrop" onClick={closeSheet}>
-          <div className="guest-sheet" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="guest-sheet"
+            style={{ transform: `translateY(${dragOffsetY}px)` }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={handleSheetDragStart}
+            onMouseMove={handleSheetDragMove}
+            onMouseUp={handleSheetDragEnd}
+            onMouseLeave={handleSheetDragEnd}
+            onTouchStart={handleSheetDragStart}
+            onTouchMove={handleSheetDragMove}
+            onTouchEnd={handleSheetDragEnd}
+          >
             <div className="guest-sheet-handle" />
             <div className="guest-sheet-header">
               <h2>Categories</h2>
