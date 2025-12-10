@@ -90,17 +90,15 @@
 /* === LOGO ========================================== */
 
 .guest-logo-image-wrap {
-  width: 96px;
-  height: 96px;
-  border-radius: 999px;
-  background: #020617;
+  width: auto;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.85),
-    inset 0 3px 6px rgba(255, 255, 255, 0.2);
-  overflow: hidden;
 }
 
 .guest-header-logo-img {
@@ -112,18 +110,8 @@
 
 /* fallback circle (if no logo yet) */
 .guest-logo-circle {
-  width: 72px;
-  height: 72px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 0, #64748b, #020617);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 32px;
-  color: #e5e7eb;
+  display: none;
 }
-
 /* === ALLERGEN PILLS ROW (generic) ================== */
 
 .guest-chips-row {
