@@ -38,6 +38,9 @@ export default function GuestMenu({ slug }) {
   // NEW: which bottom sheet is open? "filters" | "categories" | null
   const [activeSheet, setActiveSheet] = useState(null);
 
+  // 🔹 Light / dark mode
+  const [isLightMode, setIsLightMode] = useState(false);
+
   // Load menu JSON from public API
   useEffect(() => {
     async function load() {
@@ -85,6 +88,24 @@ export default function GuestMenu({ slug }) {
 
     if (slug) load();
   }, [slug]);
+
+  // 🔹 Load saved theme from localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("selectoros_guest_theme");
+    if (stored === "light") {
+      setIsLightMode(true);
+    }
+  }, []);
+
+  // 🔹 Persist theme choice
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      "selectoros_guest_theme",
+      isLightMode ? "light" : "dark"
+    );
+  }, [isLightMode]);
 
   // 🔹 Use fixed master allergen list (not derived from dishes)
   const allergenList = useMemo(() => ALLERGENS, []);
@@ -173,7 +194,7 @@ export default function GuestMenu({ slug }) {
   const closeSheet = () => setActiveSheet(null);
 
   return (
-    <div className="guest-root">
+    <div className={"guest-root" + (isLightMode ? " guest-root--light" : "")}>
       {/* 🔹 Sticky frosted header */}
       <header className="glass-header">
         <div className="guest-shell">
@@ -189,6 +210,20 @@ export default function GuestMenu({ slug }) {
                 <div className="guest-logo-circle">S</div>
               )}
             </div>
+
+            {/* 🔹 Night / day toggle */}
+            <button
+              type="button"
+              className={
+                "guest-theme-toggle" +
+                (isLightMode ? " guest-theme-toggle--on" : "")
+              }
+              onClick={() => setIsLightMode((prev) => !prev)}
+            >
+              <span className="guest-theme-toggle-icon">
+                {isLightMode ? "☀️" : "🌙"}
+              </span>
+            </button>
           </div>
         </div>
       </header>
