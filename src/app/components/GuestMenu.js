@@ -199,18 +199,15 @@ export default function GuestMenu({ slug }) {
       <header className="glass-header">
         <div className="guest-shell">
           <div className="guest-header">
-            <div className="guest-logo-image-wrap">
-              {restaurantLogoUrl ? (
-                <img
-                  src={restaurantLogoUrl}
-                  alt="Restaurant logo"
-                  className="guest-header-logo-img"
-                />
-              ) : (
-                <div className="guest-logo-circle">S</div>
-              )}
-            </div>
-
+            <div className="guest-header-logo-area">
+  {restaurantLogoUrl ? (
+    <img
+      src={restaurantLogoUrl}
+      alt="Restaurant logo"
+      className="guest-header-logo-img"
+    />
+  ) : null}
+</div>
             {/* 🔹 Night / day toggle */}
             <button
               type="button"
