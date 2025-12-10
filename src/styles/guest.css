@@ -63,7 +63,7 @@
   backdrop-filter: blur(22px) saturate(1.8);
   -webkit-backdrop-filter: blur(22px) saturate(1.8);
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: none;
 }
 /* keep header content nicely padded inside the shell */
 .glass-header .guest-shell {
