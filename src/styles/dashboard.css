@@ -420,3 +420,50 @@
   background-size: 12px;
   padding-right: 2rem;
 }
+
+/* === NESTED SIDEBAR MENUS (PLAN GATING) ================= */
+
+/* Parent wrapper */
+.so-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Submenu container */
+.so-nav-sub {
+  margin-left: 38px; /* aligns under icon */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Submenu item */
+.so-nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 12px;          /* 👈 smaller than main nav */
+  font-weight: 500;
+  color: var(--so-text-muted);
+
+  padding: 4px 6px;
+  border-radius: 8px;
+  line-height: 1.2;
+}
+
+/* Locked state */
+.so-nav-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Lock icon – THIS was the big offender */
+.so-lock-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: #94a3b8; /* slate-400 */
+}
+
