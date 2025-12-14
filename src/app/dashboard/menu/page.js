@@ -22,7 +22,21 @@ export default async function MenuDashboardPage() {
     redirect("/sign-in");
   }
 
-  // 2) Find this user's restaurant
+  // 2) Load profile (plan + limits)
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("plan, max_menus")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Failed to load profile", profileError);
+  }
+
+  const plan = profile?.plan ?? "starter";
+  const maxMenus = profile?.max_menus; // null = unlimited
+
+  // 3) Find this user's restaurant
   const { data: restaurant, error: restaurantError } = await supabase
     .from("restaurants")
     .select("*")
@@ -30,7 +44,6 @@ export default async function MenuDashboardPage() {
     .maybeSingle();
 
   if (restaurantError || !restaurant) {
-    console.error("No restaurant for user", restaurantError);
     return (
       <div className="page-fade">
         <div className="max-w-3xl mx-auto">
@@ -39,8 +52,7 @@ export default async function MenuDashboardPage() {
               No restaurant found
             </h1>
             <p className="text-sm text-red-700">
-              We couldn&apos;t find a restaurant linked to your account. Finish
-              onboarding or contact support.
+              Finish onboarding or contact support.
             </p>
           </div>
         </div>
@@ -48,23 +60,23 @@ export default async function MenuDashboardPage() {
     );
   }
 
-  // 3) Load menus for this restaurant
-  const { data: menus, error: menusError } = await supabase
+  // 4) Load menus
+  const { data: menus = [] } = await supabase
     .from("menus")
     .select("*")
     .eq("restaurant_id", restaurant.id)
     .order("created_at", { ascending: true });
 
-  if (menusError) {
-    console.error("Error loading menus", menusError);
-  }
+  const menuCount = menus.length;
+  const isAtLimit =
+    typeof maxMenus === "number" && menuCount >= maxMenus;
 
-  // Public path for this restaurant's guest allergen page (/r/[slug])
   const publicPath = `/r/${restaurant.slug}`;
 
   return (
     <div className="page-fade">
       <div className="max-w-5xl mx-auto space-y-6">
+
         {/* Header */}
         <header className="flex items-center justify-between gap-4">
           <div>
@@ -72,85 +84,67 @@ export default async function MenuDashboardPage() {
               SELECTOROS • MENUS
             </p>
             <h1 className="mt-2 text-2xl font-semibold text-slate-900 md:text-3xl">
-              Allergen menus for{" "}
-              <span className="text-emerald-600">{restaurant.name}</span>
+              Menus for <span className="text-emerald-600">{restaurant.name}</span>
             </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              Each menu below feeds into your guest-facing allergen page. Share
-              the link or QR code with guests or staff.
+            <p className="mt-1 text-sm text-slate-600">
+              Plan: <strong className="capitalize">{plan}</strong>{" "}
+              {typeof maxMenus === "number" && (
+                <>({menuCount}/{maxMenus} menus)</>
+              )}
             </p>
           </div>
         </header>
 
-        {/* Card */}
+        {/* Limit warning */}
+        {isAtLimit && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            You’ve reached your menu limit for the <strong>{plan}</strong> plan.
+            Upgrade to add more menus.
+          </div>
+        )}
+
+        {/* Table */}
         <section className="so-card p-6 md:p-8">
-          {!menus || menus.length === 0 ? (
-            <div className="text-sm text-slate-600">
-              <p>No menus yet.</p>
-              <p className="mt-1">
-                Your first menu was created during onboarding. If you deleted
-                it, create a new one from the Dishes / Menu tools.
-              </p>
-            </div>
+          {menuCount === 0 ? (
+            <p className="text-sm text-slate-600">No menus yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-xs md:text-sm">
                 <thead className="border-b border-slate-200 text-slate-500">
                   <tr>
-                    <th className="py-2 pr-4 text-left font-normal">Name</th>
-                    <th className="py-2 pr-4 text-left font-normal">Created</th>
-                    <th className="py-2 pr-4 text-left font-normal">Status</th>
-                    <th className="py-2 pr-4 text-left font-normal">
-                      Public allergen link
-                    </th>
-                    <th className="py-2 pr-4 text-left font-normal">Actions</th>
+                    <th className="py-2 pr-4 text-left">Name</th>
+                    <th className="py-2 pr-4 text-left">Created</th>
+                    <th className="py-2 pr-4 text-left">Status</th>
+                    <th className="py-2 pr-4 text-left">Public link</th>
+                    <th className="py-2 pr-4 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {menus.map((m) => (
-                    <tr
-                      key={m.id}
-                      className="transition-colors hover:bg-slate-50"
-                    >
-                      <td className="py-3 pr-4 font-medium text-slate-900">
+                    <tr key={m.id} className="hover:bg-slate-50">
+                      <td className="py-3 pr-4 font-medium">
                         {m.name || "Unnamed menu"}
                       </td>
-
                       <td className="py-3 pr-4 text-slate-600">
-                        {m.created_at
-                          ? new Date(m.created_at).toLocaleString()
-                          : "—"}
+                        {new Date(m.created_at).toLocaleDateString()}
                       </td>
-
                       <td className="py-3 pr-4">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
-                            m.is_active
-                              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                              : "border-slate-300 bg-slate-50 text-slate-600"
-                          }`}
-                        >
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] text-emerald-700">
                           {m.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
-
-                      {/* Public link – same for all menus (per restaurant) in v1 */}
                       <td className="py-3 pr-4 text-slate-600">
                         <div className="flex items-center gap-2">
                           <LinkIcon className="h-4 w-4 opacity-60" />
-                          <span className="max-w-[260px] truncate">
-                            {publicPath}
-                          </span>
+                          {publicPath}
                         </div>
                       </td>
-
-                      {/* Guest view button */}
                       <td className="py-3 pr-4">
                         <a
                           href={publicPath}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-emerald-300"
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-400 px-3 py-1.5 text-xs font-semibold"
                         >
                           <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                           Guest view
@@ -163,11 +157,6 @@ export default async function MenuDashboardPage() {
             </div>
           )}
         </section>
-
-        <p className="max-w-xl text-[11px] text-slate-500">
-          Note: Deactivating or deleting a menu will immediately change what
-          guests see on your allergen page.
-        </p>
       </div>
     </div>
   );
