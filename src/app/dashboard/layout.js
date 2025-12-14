@@ -8,18 +8,31 @@ import {
   SwatchIcon,
   CreditCardIcon,
   Cog6ToothIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * TEMP PLAN FLAG
+ * ----------------
+ * This is intentionally hardcoded for now.
+ * Later this will come from Supabase (profiles / subscriptions).
+ *
+ * Possible values:
+ * "starter" | "pro" | "enterprise"
+ */
+const PLAN = "starter";
+
 export default function DashboardLayout({ children }) {
+  const isPro = PLAN !== "starter";
+
   return (
     <div className="so-dashboard-root">
       {/* SIDEBAR */}
       <aside className="so-sidebar">
         {/* BRAND */}
         <div className="so-sidebar-brand">
-          {/* bigger clean logo */}
           <Image
             src="/selectoros-logo.png"
             alt="SelectorOS logo"
@@ -31,7 +44,7 @@ export default function DashboardLayout({ children }) {
 
         {/* NAVIGATION */}
         <nav className="so-sidebar-nav">
-          {/* Category divider: Overview */}
+          {/* Overview */}
           <div className="so-sidebar-section-label">Overview</div>
           <Link href="/dashboard" className="so-nav-item">
             <span className="so-nav-icon-wrap">
@@ -40,8 +53,9 @@ export default function DashboardLayout({ children }) {
             <span className="so-nav-label">Dashboard</span>
           </Link>
 
-          {/* Category divider: Workspace */}
+          {/* Workspace */}
           <div className="so-sidebar-section-label">Workspace</div>
+
           <Link href="/dashboard/dishes" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <RectangleStackIcon className="so-nav-icon" />
@@ -49,15 +63,46 @@ export default function DashboardLayout({ children }) {
             <span className="so-nav-label">Dishes</span>
           </Link>
 
-          <Link href="/dashboard/menu" className="so-nav-item">
-            <span className="so-nav-icon-wrap">
-              <SwatchIcon className="so-nav-icon" />
-            </span>
-            <span className="so-nav-label">Menus</span>
-          </Link>
+          {/* MENUS – parent */}
+          <div className="so-nav-group">
+            <Link href="/dashboard/menu" className="so-nav-item">
+              <span className="so-nav-icon-wrap">
+                <SwatchIcon className="so-nav-icon" />
+              </span>
+              <span className="so-nav-label">Menus</span>
+            </Link>
 
-          {/* Category divider: Account */}
+            {/* Nested menu items */}
+            <div className="so-nav-sub">
+              <span className="so-nav-sub-item">
+                Primary menu
+              </span>
+
+              <span
+                className={
+                  "so-nav-sub-item " +
+                  (!isPro ? "so-nav-locked" : "")
+                }
+              >
+                {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                Menu 2
+              </span>
+
+              <span
+                className={
+                  "so-nav-sub-item " +
+                  (!isPro ? "so-nav-locked" : "")
+                }
+              >
+                {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                Menu 3
+              </span>
+            </div>
+          </div>
+
+          {/* Account */}
           <div className="so-sidebar-section-label">Account</div>
+
           <Link href="/dashboard/billing" className="so-nav-item">
             <span className="so-nav-icon-wrap">
               <CreditCardIcon className="so-nav-icon" />
@@ -73,13 +118,15 @@ export default function DashboardLayout({ children }) {
           </Link>
         </nav>
 
-        {/* FOOTER: user + logout */}
+        {/* FOOTER */}
         <div className="so-sidebar-footer">
           <div className="so-sidebar-user">
             <div className="so-user-avatar">R</div>
             <div className="so-user-meta">
               <div className="so-user-name">Operator</div>
-              <div className="so-user-tag">SelectorOS</div>
+              <div className="so-user-tag">
+                {PLAN.toUpperCase()} PLAN
+              </div>
             </div>
           </div>
 
@@ -89,7 +136,7 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN AREA */}
+      {/* MAIN */}
       <main className="so-main">
         <div className="so-main-inner">{children}</div>
       </main>
