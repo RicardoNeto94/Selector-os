@@ -1,3 +1,4 @@
+
 :root {
   /* Dark (night) defaults */
   --guest-bg: #0a0d10;
@@ -625,94 +626,5 @@
   .guest-card-price {
     display: none;
   }
-}
-
-/* === CATEGORY COLOR ACCENTS (ADD) ================= */
-
-.guest-card {
-  --card-accent: var(--guest-card-border);
-}
-
-/* Map category slug → color */
-.guest-card.cat-dim-sum { --card-accent: #d4af37; }
-.guest-card.cat-seafood { --card-accent: #38bdf8; }
-.guest-card.cat-meat { --card-accent: #ef4444; }
-.guest-card.cat-vegetarian { --card-accent: #22c55e; }
-.guest-card.cat-dessert { --card-accent: #a855f7; }
-
-/* Apply accent subtly */
-.guest-card {
-  border-color: color-mix(
-    in srgb,
-    var(--card-accent) 45%,
-    var(--guest-card-border)
-  );
-}
-
-/* Make category chip inherit card accent */
-.dish-chip-category {
-  background: color-mix(
-    in srgb,
-    var(--card-accent) 70%,
-    #ffffff
-  );
-  color: #020617;
-}
-
-/* === ALLERGEN GLASS PILLS (ADD) =================== */
-
-.guest-card-allergen-pills {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.alg-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  padding: 6px 10px;
-  border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--guest-text-main);
-}
-
-.alg-code {
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-
-.alg-name {
-  opacity: 0.85;
-}
-
-/* === ALLERGEN COLORS ============================== */
-
-.alg-gl { --alg-color: #facc15; }
-.alg-mi { --alg-color: #60a5fa; }
-.alg-nu { --alg-color: #a855f7; }
-.alg-eg { --alg-color: #f59e0b; }
-.alg-so { --alg-color: #22c55e; }
-
-.alg-pill {
-  background: color-mix(
-    in srgb,
-    var(--alg-color, #ffffff) 18%,
-    transparent
-  );
-  border-color: color-mix(
-    in srgb,
-    var(--alg-color, #ffffff) 45%,
-    transparent
-  );
 }
 
