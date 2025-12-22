@@ -25,7 +25,7 @@ const ALLERGENS = [
   "CL", // Chilli / Custom
 ];
 
-// ✅ Labels shown ONLY in the modal pills
+// ✅ Labels shown ONLY in the modal pills (and chip tooltips)
 const ALLERGEN_LABELS = {
   GL: "Gluten",
   CR: "Crustaceans",
@@ -92,12 +92,18 @@ export default function GuestMenu({ slug }) {
 
         setRestaurantLogoUrl(logo);
 
-        const normalized = (dishData || []).map((d) => ({
-          ...d,
-          allergens: Array.isArray(d.allergens)
-            ? d.allergens.map((a) => String(a).trim().toUpperCase())
-            : [],
-        }));
+        const normalized = (dishData || []).map((d) => {
+          const arr = Array.isArray(d.allergens)
+            ? d.allergens
+                .map((a) => String(a).trim().toUpperCase())
+                .filter(Boolean)
+            : [];
+
+          // ✅ remove duplicates + keep stable order
+          const uniq = Array.from(new Set(arr));
+
+          return { ...d, allergens: uniq };
+        });
 
         setDishes(normalized);
       } catch (err) {
@@ -315,7 +321,7 @@ export default function GuestMenu({ slug }) {
                     <p className="guest-card-desc">{dish.description}</p>
                   )}
 
-                  {/* ✅ Dish card allergens as COLORED CODE PILLS */}
+                  {/* ✅ Dish card allergens as COLORED CODE CHIPS (fixed to match CSS) */}
                   <div className="guest-card-footer">
                     <div className="guest-card-allergens">
                       <span className="guest-card-allergens-label">
@@ -323,12 +329,12 @@ export default function GuestMenu({ slug }) {
                       </span>
 
                       {dishAllergens.length ? (
-                        <div className="guest-card-allergen-pills">
+                        <div className="guest-card-allergens-tags">
                           {dishAllergens.map((code) => (
                             <span
                               key={code}
-                              className={"alg-pill alg-" + code.toLowerCase()}
-                              title={code}
+                              className={`allergen-tag allergen-${code}`}
+                              title={ALLERGEN_LABELS[code] ?? code}
                             >
                               {code}
                             </span>
