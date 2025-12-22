@@ -626,3 +626,209 @@
     display: none;
   }
 }
+
+/* =========================================================
+   PREMIUM MODAL (BOTTOM SHEET) — UI + ANIMATION UPGRADE
+   Paste this at the bottom of guest.css
+   ========================================================= */
+
+/* Backdrop: smooth fade + click enabled only when open */
+.guest-sheet-backdrop {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.guest-sheet-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sheet: premium glass + smooth open/close */
+.guest-sheet--premium {
+  opacity: 0;
+  transform: translateY(24px) scale(0.985);
+  transition:
+    transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.18s ease;
+  will-change: transform, opacity;
+}
+
+.guest-sheet--premium.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Top bar */
+.guest-sheet-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.guest-sheet-title {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.guest-sheet-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(2, 6, 23, 0.35);
+  color: rgba(248, 250, 252, 0.92);
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.guest-sheet-close:hover {
+  transform: translateY(-1px);
+  border-color: rgba(248, 250, 252, 0.7);
+  background: rgba(2, 6, 23, 0.5);
+}
+
+/* Segmented control */
+.guest-segment {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  padding: 6px;
+  border-radius: 16px;
+
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  margin-bottom: 12px;
+}
+
+.guest-seg-btn {
+  position: relative;
+  z-index: 2;
+  height: 34px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.guest-seg-btn.active {
+  color: rgba(2, 6, 23, 0.95);
+}
+
+.guest-seg-indicator {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  left: 6px;
+  width: calc(50% - 3px);
+  height: 34px;
+  border-radius: 12px;
+
+  background: rgba(248, 250, 252, 0.88);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+  transform: translateX(0);
+  transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.guest-seg-indicator.right {
+  transform: translateX(calc(100% + 6px));
+}
+
+/* Body */
+.guest-sheet-body--premium {
+  max-height: 56vh;
+  overflow-y: auto;
+  padding: 6px 2px 8px;
+}
+
+/* Helper text */
+.guest-sheet-sub {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: rgba(203, 213, 225, 0.9);
+}
+
+/* Grid layout for pills */
+.guest-sheet-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 520px) {
+  .guest-sheet-pills-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Premium pill style (does not remove your existing active logic) */
+.guest-pill--premium {
+  width: 100%;
+  justify-content: center;
+  padding: 10px 12px 10px 18px;
+  border-radius: 999px;
+
+  background: rgba(2, 6, 23, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.guest-pill--premium:hover {
+  transform: translateY(-1px);
+  border-color: rgba(248, 250, 252, 0.65);
+}
+
+.guest-pill--premium.active {
+  border-color: #4ade80;
+  background: rgba(34, 197, 94, 0.22);
+}
+
+/* Panel animation when switching tabs */
+.guest-sheet-panel {
+  display: none;
+}
+
+.guest-sheet-panel.show {
+  display: block;
+  animation: sheetPanelIn 0.16s ease-out;
+}
+
+@keyframes sheetPanelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Footer */
+.guest-sheet-footer--premium {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-bottom: 6px;
+}
