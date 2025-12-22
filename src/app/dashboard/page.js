@@ -18,6 +18,40 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
+  // 1.5) PAYWALL / PLAN GUARD (redirect to /select-plan if no active plan)
+  // NOTE: This assumes you have a "subscriptions" table with:
+  // - user_id (uuid)
+  // - status (text) e.g. "active", "trialing", "canceled", etc.
+  //
+  // If your schema differs, this block will NOT crash the page — it will warn and allow access.
+  let planLabel = "Starter"; // fallback label shown in UI
+  try {
+    const { data: subscription, error: subError } = await supabase
+      .from("subscriptions")
+      .select("status, plan, price_id")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
+
+    if (subError) {
+      console.warn("Dashboard: subscription check failed (non-fatal):", subError);
+    } else if (!subscription) {
+      // No active/trialing subscription → send to plan selection
+      redirect("/select-plan");
+    } else {
+      // Optional: derive a nicer label (adjust to your schema if needed)
+      if (subscription.plan) planLabel = String(subscription.plan);
+      else if (subscription.price_id) planLabel = "Pro"; // generic fallback
+      else planLabel = "Active";
+    }
+  } catch (e) {
+    console.warn(
+      "Dashboard: subscription table not available or query threw (non-fatal):",
+      e?.message ?? e
+    );
+    // fail-open: allow dashboard so you don't lock yourself out if schema differs
+  }
+
   // 2) Get restaurant for this owner
   const { data: restaurant, error: restaurantError } = await supabase
     .from("restaurants")
@@ -203,12 +237,10 @@ export default async function DashboardPage() {
             <div className="mt-2 space-y-1 text-sm text-slate-700">
               <div>
                 <span className="font-medium text-slate-900">Plan:</span>{" "}
-                Starter
+                {planLabel}
               </div>
               <div>
-                <span className="font-medium text-slate-900">
-                  Menus live:
-                </span>{" "}
+                <span className="font-medium text-slate-900">Menus live:</span>{" "}
                 {menus.length}
               </div>
               <div>
