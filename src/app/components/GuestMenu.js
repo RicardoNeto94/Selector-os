@@ -73,9 +73,7 @@ export default function GuestMenu({ slug }) {
         setError("");
 
         const res = await fetch(`/api/public-menu/${slug}`);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();
 
@@ -137,9 +135,7 @@ export default function GuestMenu({ slug }) {
       list = list.filter((d) => d.category === selectedCategory);
     }
 
-    if (!hasFilters) {
-      return list;
-    }
+    if (!hasFilters) return list;
 
     return list.filter((d) => {
       const dishAllergens = d.allergens || [];
@@ -155,11 +151,8 @@ export default function GuestMenu({ slug }) {
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
-      } else {
-        next.add(code);
-      }
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   };
@@ -180,9 +173,7 @@ export default function GuestMenu({ slug }) {
 
   const handleSelectAllAllergens = () => {
     setSelectedAllergens((prev) => {
-      if (prev.size === allergenList.length) {
-        return new Set();
-      }
+      if (prev.size === allergenList.length) return new Set();
       return new Set(allergenList);
     });
   };
@@ -211,19 +202,14 @@ export default function GuestMenu({ slug }) {
 
   // 🔹 Drag helpers (mouse + touch) for bottom sheet
   const getClientY = (event) => {
-    if ("touches" in event && event.touches[0]) {
-      return event.touches[0].clientY;
-    }
-    if ("changedTouches" in event && event.changedTouches[0]) {
+    if ("touches" in event && event.touches[0]) return event.touches[0].clientY;
+    if ("changedTouches" in event && event.changedTouches[0])
       return event.changedTouches[0].clientY;
-    }
     return event.clientY;
   };
 
   const handleSheetDragStart = (event) => {
-    // Only allow drag when sheet is actually open
     if (!activeSheet) return;
-
     const y = getClientY(event);
     if (y == null) return;
     setIsDraggingSheet(true);
@@ -235,20 +221,16 @@ export default function GuestMenu({ slug }) {
     const y = getClientY(event);
     if (y == null) return;
     const delta = y - dragStartY;
-    // only allow dragging down
     setDragOffsetY(delta > 0 ? delta : 0);
   };
 
   const handleSheetDragEnd = () => {
     if (!isDraggingSheet) return;
 
-    const threshold = 80; // px — how far user must drag to close
-    if (dragOffsetY > threshold) {
-      closeSheet();
-    } else {
-      // snap back up
-      setDragOffsetY(0);
-    }
+    const threshold = 80;
+    if (dragOffsetY > threshold) closeSheet();
+    else setDragOffsetY(0);
+
     setIsDraggingSheet(false);
     setDragStartY(null);
   };
@@ -333,13 +315,29 @@ export default function GuestMenu({ slug }) {
                     <p className="guest-card-desc">{dish.description}</p>
                   )}
 
+                  {/* ✅ Dish card allergens as COLORED CODE PILLS */}
                   <div className="guest-card-footer">
-                    <span className="guest-card-allergens">
-                      Allergens:{" "}
-                      {dishAllergens.length
-                        ? dishAllergens.join(", ")
-                        : "None"}
-                    </span>
+                    <div className="guest-card-allergens">
+                      <span className="guest-card-allergens-label">
+                        Allergens:
+                      </span>
+
+                      {dishAllergens.length ? (
+                        <div className="guest-card-allergen-pills">
+                          {dishAllergens.map((code) => (
+                            <span
+                              key={code}
+                              className={"alg-pill alg-" + code.toLowerCase()}
+                              title={code}
+                            >
+                              {code}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="guest-card-allergens-none">None</span>
+                      )}
+                    </div>
                   </div>
                 </article>
               );
@@ -405,6 +403,12 @@ export default function GuestMenu({ slug }) {
       <div
         className={"guest-sheet-backdrop" + (activeSheet ? " is-open" : "")}
         onClick={closeSheet}
+        aria-hidden={!activeSheet}
+        style={{
+          // ✅ This is the "dock disappeared" fix:
+          // When closed, don't let the backdrop block clicks/visibility.
+          pointerEvents: activeSheet ? "auto" : "none",
+        }}
       >
         <div
           className={
