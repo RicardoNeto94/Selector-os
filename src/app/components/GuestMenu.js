@@ -51,9 +51,7 @@ export default function GuestMenu({ slug }) {
         setError("");
 
         const res = await fetch(`/api/public-menu/${slug}`);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();
 
@@ -115,9 +113,7 @@ export default function GuestMenu({ slug }) {
       list = list.filter((d) => d.category === selectedCategory);
     }
 
-    if (!hasFilters) {
-      return list;
-    }
+    if (!hasFilters) return list;
 
     return list.filter((d) => {
       const dishAllergens = d.allergens || [];
@@ -133,11 +129,8 @@ export default function GuestMenu({ slug }) {
   const handleToggleAllergen = (code) => {
     setSelectedAllergens((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
-      } else {
-        next.add(code);
-      }
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   };
@@ -158,9 +151,7 @@ export default function GuestMenu({ slug }) {
 
   const handleSelectAllAllergens = () => {
     setSelectedAllergens((prev) => {
-      if (prev.size === allergenList.length) {
-        return new Set();
-      }
+      if (prev.size === allergenList.length) return new Set();
       return new Set(allergenList);
     });
   };
@@ -189,18 +180,19 @@ export default function GuestMenu({ slug }) {
 
   // 🔹 Drag helpers (mouse + touch) for bottom sheet
   const getClientY = (event) => {
-    if ("touches" in event && event.touches[0]) {
-      return event.touches[0].clientY;
-    }
-    if ("changedTouches" in event && event.changedTouches[0]) {
+    if ("touches" in event && event.touches[0]) return event.touches[0].clientY;
+    if ("changedTouches" in event && event.changedTouches[0])
       return event.changedTouches[0].clientY;
-    }
     return event.clientY;
   };
 
   const handleSheetDragStart = (event) => {
+    // Only allow drag when sheet is actually open
+    if (!activeSheet) return;
+
     const y = getClientY(event);
     if (y == null) return;
+
     setIsDraggingSheet(true);
     setDragStartY(y);
   };
@@ -210,20 +202,16 @@ export default function GuestMenu({ slug }) {
     const y = getClientY(event);
     if (y == null) return;
     const delta = y - dragStartY;
-    // only allow dragging down
-    setDragOffsetY(delta > 0 ? delta : 0);
+    setDragOffsetY(delta > 0 ? delta : 0); // only drag down
   };
 
   const handleSheetDragEnd = () => {
     if (!isDraggingSheet) return;
 
-    const threshold = 80; // px — how far user must drag to close
-    if (dragOffsetY > threshold) {
-      closeSheet();
-    } else {
-      // snap back up
-      setDragOffsetY(0);
-    }
+    const threshold = 80;
+    if (dragOffsetY > threshold) closeSheet();
+    else setDragOffsetY(0);
+
     setIsDraggingSheet(false);
     setDragStartY(null);
   };
@@ -376,35 +364,101 @@ export default function GuestMenu({ slug }) {
         </div>
       )}
 
-      {/* 🔹 Bottom sheet: Filters */}
-      {activeSheet === "filters" && (
-        <div className="guest-sheet-backdrop" onClick={closeSheet}>
-          <div
-            className="guest-sheet"
-            style={{ transform: `translateY(${dragOffsetY}px)` }}
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={handleSheetDragStart}
-            onMouseMove={handleSheetDragMove}
-            onMouseUp={handleSheetDragEnd}
-            onMouseLeave={handleSheetDragEnd}
-            onTouchStart={handleSheetDragStart}
-            onTouchMove={handleSheetDragMove}
-            onTouchEnd={handleSheetDragEnd}
-          >
-            <div className="guest-sheet-handle" />
-            <div className="guest-sheet-header">
-              <h2>Allergens</h2>
-              <p>Tap all allergens the guest wants to avoid or inspect.</p>
+      {/* ✅ Premium modal (always mounted) */}
+      <div
+        className={"guest-sheet-backdrop" + (activeSheet ? " is-open" : "")}
+        onClick={closeSheet}
+      >
+        <div
+          className={
+            "guest-sheet guest-sheet--premium" + (activeSheet ? " is-open" : "")
+          }
+          style={{
+            // When closed, keep it slightly down (for smoother open)
+            transform: `translateY(${activeSheet ? dragOffsetY : 24}px)`,
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={handleSheetDragStart}
+          onMouseMove={handleSheetDragMove}
+          onMouseUp={handleSheetDragEnd}
+          onMouseLeave={handleSheetDragEnd}
+          onTouchStart={handleSheetDragStart}
+          onTouchMove={handleSheetDragMove}
+          onTouchEnd={handleSheetDragEnd}
+        >
+          <div className="guest-sheet-handle" />
+
+          {/* Top bar */}
+          <div className="guest-sheet-top">
+            <div className="guest-sheet-title">
+              {activeSheet === "categories"
+                ? "Categories"
+                : activeSheet === "filters"
+                ? "Filters"
+                : "Menu"}
             </div>
 
-            <div className="guest-sheet-body">
-              <div className="guest-sheet-pills-row">
+            <button
+              type="button"
+              className="guest-sheet-close"
+              aria-label="Close"
+              onClick={closeSheet}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Segmented control (switch inside the modal) */}
+          <div className="guest-segment" role="tablist" aria-label="Sheet mode">
+            <button
+              type="button"
+              className={"guest-seg-btn" + (activeSheet === "filters" ? " active" : "")}
+              onClick={() => {
+                setActiveSheet("filters");
+                setDragOffsetY(0);
+              }}
+              role="tab"
+              aria-selected={activeSheet === "filters"}
+            >
+              Filters
+            </button>
+            <button
+              type="button"
+              className={"guest-seg-btn" + (activeSheet === "categories" ? " active" : "")}
+              onClick={() => {
+                setActiveSheet("categories");
+                setDragOffsetY(0);
+              }}
+              role="tab"
+              aria-selected={activeSheet === "categories"}
+            >
+              Categories
+            </button>
+            <div
+              className={
+                "guest-seg-indicator" +
+                (activeSheet === "categories" ? " right" : " left")
+              }
+            />
+          </div>
+
+          {/* Content */}
+          <div className="guest-sheet-body guest-sheet-body--premium">
+            {/* Filters panel */}
+            <div
+              className={"guest-sheet-panel" + (activeSheet === "filters" ? " show" : "")}
+            >
+              <p className="guest-sheet-sub">
+                Tap allergens the guest wants to avoid or inspect.
+              </p>
+
+              <div className="guest-sheet-pills-grid">
                 {allergenList.map((code) => (
                   <button
                     key={code}
                     type="button"
                     className={
-                      "guest-pill" +
+                      "guest-pill guest-pill--premium" +
                       (selectedAllergens.has(code) ? " active" : "")
                     }
                     onClick={() => handleToggleAllergen(code)}
@@ -416,60 +470,22 @@ export default function GuestMenu({ slug }) {
               </div>
             </div>
 
-            <div className="guest-sheet-footer">
-              <button
-                type="button"
-                className="guest-sheet-btn ghost"
-                onClick={handleSelectAllAllergens}
-              >
-                {selectedAllergens.size === allergenList.length
-                  ? "Clear all"
-                  : "Select all"}
-              </button>
-              <button
-                type="button"
-                className="guest-sheet-btn"
-                onClick={closeSheet}
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            {/* Categories panel */}
+            <div
+              className={"guest-sheet-panel" + (activeSheet === "categories" ? " show" : "")}
+            >
+              <p className="guest-sheet-sub">Focus on a specific part of the menu.</p>
 
-      {/* 🔹 Bottom sheet: Categories */}
-      {activeSheet === "categories" && (
-        <div className="guest-sheet-backdrop" onClick={closeSheet}>
-          <div
-            className="guest-sheet"
-            style={{ transform: `translateY(${dragOffsetY}px)` }}
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={handleSheetDragStart}
-            onMouseMove={handleSheetDragMove}
-            onMouseUp={handleSheetDragEnd}
-            onMouseLeave={handleSheetDragEnd}
-            onTouchStart={handleSheetDragStart}
-            onTouchMove={handleSheetDragMove}
-            onTouchEnd={handleSheetDragEnd}
-          >
-            <div className="guest-sheet-handle" />
-            <div className="guest-sheet-header">
-              <h2>Categories</h2>
-              <p>Focus on a specific part of the menu.</p>
-            </div>
-
-            <div className="guest-sheet-body">
               {categoryList.length === 0 ? (
                 <p className="guest-sheet-empty">No categories configured.</p>
               ) : (
-                <div className="guest-sheet-pills-row">
+                <div className="guest-sheet-pills-grid">
                   {categoryList.map((category) => (
                     <button
                       key={category}
                       type="button"
                       className={
-                        "guest-pill" +
+                        "guest-pill guest-pill--premium" +
                         (selectedCategory === category ? " active" : "")
                       }
                       onClick={() => handleCategoryClick(category)}
@@ -481,28 +497,36 @@ export default function GuestMenu({ slug }) {
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="guest-sheet-footer">
+          {/* Footer */}
+          <div className="guest-sheet-footer guest-sheet-footer--premium">
+            {activeSheet === "filters" ? (
               <button
                 type="button"
                 className="guest-sheet-btn ghost"
-                onClick={() => {
-                  setSelectedCategory(null);
-                }}
+                onClick={handleSelectAllAllergens}
+              >
+                {selectedAllergens.size === allergenList.length
+                  ? "Clear all"
+                  : "Select all"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="guest-sheet-btn ghost"
+                onClick={() => setSelectedCategory(null)}
               >
                 Clear category
               </button>
-              <button
-                type="button"
-                className="guest-sheet-btn"
-                onClick={closeSheet}
-              >
-                Done
-              </button>
-            </div>
+            )}
+
+            <button type="button" className="guest-sheet-btn" onClick={closeSheet}>
+              Done
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
