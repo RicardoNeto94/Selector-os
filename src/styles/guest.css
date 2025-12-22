@@ -108,6 +108,7 @@
 .guest-logo-circle {
   display: none;
 }
+
 /* === ALLERGEN PILLS ROW (generic) ================== */
 
 .guest-chips-row {
@@ -176,7 +177,6 @@
   margin: 0 auto;
   justify-content: center;
 }
-
 
 /* === DISH CARDS ==================================== */
 
@@ -278,7 +278,6 @@
 }
 
 /* description */
-
 .guest-card-desc {
   margin-top: 10px;
   font-size: 13px;
@@ -287,24 +286,84 @@
 }
 
 /* bottom area */
-
 .guest-card-footer {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid rgba(15, 23, 42, 0.7);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   font-size: 11px;
   color: #9ca3af;
 }
 
+/* === ALLERGEN TAGS IN DISH CARDS (NEW) ============== */
+
 .guest-card-allergens {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guest-card-allergens-label {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: #9ca3af;
 }
+
+.guest-card-allergens-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guest-card-allergens-none {
+  font-size: 10px;
+  color: #9ca3af;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Base chip */
+.allergen-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.92);
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* === COLOR MAP (one per allergen code) ============== */
+.allergen-GL { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.55); color: #bfdbfe; } /* Gluten */
+.allergen-CR { background: rgba(244,114,182,0.22); border-color: rgba(244,114,182,0.55); color: #fbcfe8; } /* Crustaceans */
+.allergen-EG { background: rgba(250,204,21,0.22); border-color: rgba(250,204,21,0.55); color: #fde68a; } /* Eggs */
+.allergen-FL { background: rgba(56,189,248,0.22); border-color: rgba(56,189,248,0.55); color: #bae6fd; } /* Fish */
+.allergen-PE { background: rgba(251,113,133,0.22); border-color: rgba(251,113,133,0.55); color: #fecdd3; } /* Peanuts */
+.allergen-SO { background: rgba(74,222,128,0.18); border-color: rgba(74,222,128,0.55); color: #bbf7d0; } /* Soya */
+.allergen-MI { background: rgba(248,250,252,0.16); border-color: rgba(248,250,252,0.35); color: #f8fafc; } /* Milk */
+.allergen-NU { background: rgba(245,158,11,0.22); border-color: rgba(245,158,11,0.55); color: #fed7aa; } /* Nuts */
+.allergen-SE { background: rgba(167,139,250,0.22); border-color: rgba(167,139,250,0.55); color: #ddd6fe; } /* Sesame */
+.allergen-CE { background: rgba(34,211,238,0.18); border-color: rgba(34,211,238,0.55); color: #a5f3fc; } /* Celery */
+.allergen-MU { background: rgba(253,186,116,0.22); border-color: rgba(253,186,116,0.55); color: #ffedd5; } /* Mustard */
+.allergen-SU { background: rgba(163,163,163,0.22); border-color: rgba(163,163,163,0.55); color: #e5e7eb; } /* Sulphites */
+.allergen-LU { background: rgba(129,140,248,0.22); border-color: rgba(129,140,248,0.55); color: #c7d2fe; } /* Lupin */
+.allergen-MO { background: rgba(244,63,94,0.18); border-color: rgba(244,63,94,0.55); color: #fecdd3; } /* Molluscs */
+.allergen-GA { background: rgba(217,119,6,0.22); border-color: rgba(217,119,6,0.55); color: #fed7aa; } /* Garlic */
+.allergen-ON { background: rgba(168,85,247,0.18); border-color: rgba(168,85,247,0.55); color: #e9d5ff; } /* Onion */
+.allergen-MR { background: rgba(100,116,139,0.22); border-color: rgba(100,116,139,0.55); color: #e2e8f0; } /* Mushrooms */
+.allergen-CL { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.55); color: #fecaca; } /* Chilli */
 
 /* === EMPTY STATE =================================== */
 
@@ -389,7 +448,6 @@
 }
 
 /* Icon buttons cluster */
-
 .guest-dock-icons {
   display: flex;
   align-items: center;
@@ -468,10 +526,39 @@
   }
 }
 
-/* === BOTTOM SHEET (FILTERS / CATEGORIES) ============ */
+/* === RESPONSIVE TWEAKS ============================= */
 
-/* === BOTTOM SHEET (FILTERS / CATEGORIES) ============ */
+@media (max-width: 768px) {
+  .guest-root {
+    padding: 110px 8px 80px;
+  }
+}
 
+@media (max-width: 640px) {
+  .guest-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 8px 10px 110px;
+  }
+
+  .guest-card {
+    padding: 14px 12px;
+    border-radius: 22px;
+    max-width: none;
+    min-height: 260px;
+  }
+
+  /* hide price chip on phone (still safe even if you reintroduce it later) */
+  .guest-card-price {
+    display: none;
+  }
+}
+
+/* =========================================================
+   PREMIUM MODAL (BOTTOM SHEET) — UI + ANIMATION UPGRADE
+   ========================================================= */
+
+/* Backdrop: merged (layout + fade + click enabled only when open) */
 .guest-sheet-backdrop {
   position: fixed;
   inset: 0;
@@ -486,6 +573,15 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.guest-sheet-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Glassy, almost colorless sheet */
@@ -522,126 +618,6 @@
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.85);
   margin: 4px auto 10px;
-}
-
-.guest-sheet-header {
-  text-align: left;
-  margin-bottom: 8px;
-}
-
-.guest-sheet-header h2 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #e5e7eb;
-  margin-bottom: 4px;
-}
-
-.guest-sheet-header p {
-  font-size: 12px;
-  color: #cbd5e1;
-}
-
-.guest-sheet-body {
-  max-height: 55vh;
-  padding: 8px 0;
-  overflow-y: auto;
-}
-
-.guest-sheet-pills-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-@media (max-width: 640px) {
-  .guest-sheet-pills-row {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-}
-
-.guest-sheet-footer {
-  margin-top: 10px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.guest-sheet-btn {
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  background: #22c55e;
-  color: #022c22;
-  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.guest-sheet-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(34, 197, 94, 0.4);
-}
-
-.guest-sheet-btn.ghost {
-  background: transparent;
-  color: #e5e7eb;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  box-shadow: none;
-}
-
-.guest-sheet-empty {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-
-/* === RESPONSIVE TWEAKS ============================= */
-
-@media (max-width: 768px) {
-  .guest-root {
-    padding: 110px 8px 80px;
-  }
-}
-
-@media (max-width: 640px) {
-  .guest-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    padding: 8px 10px 110px;
-  }
-
-  .guest-card {
-    padding: 14px 12px;
-    border-radius: 22px;
-    max-width: none;
-    min-height: 260px;
-  }
-
-  /* hide price chip on phone (still safe even if you reintroduce it later) */
-  .guest-card-price {
-    display: none;
-  }
-}
-
-/* =========================================================
-   PREMIUM MODAL (BOTTOM SHEET) — UI + ANIMATION UPGRADE
-   Paste this at the bottom of guest.css
-   ========================================================= */
-
-/* Backdrop: smooth fade + click enabled only when open */
-.guest-sheet-backdrop {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-}
-
-.guest-sheet-backdrop.is-open {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 /* Sheet: premium glass + smooth open/close */
