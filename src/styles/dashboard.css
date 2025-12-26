@@ -1,7 +1,57 @@
 /* src/styles/dashboard.css */
-/* SelectorOS – Frosted Glass Dashboard Theme */
+/* SelectorOS – Frosted Glass Dashboard Theme (Upgraded) */
 
-/* === LAYOUT SHELL ======================================= */
+/* =========================================================
+   THEME TOKENS (IMPORTANT)
+   ========================================================= */
+
+:root {
+  /* Page background */
+  --so-bg-page: radial-gradient(
+      1200px 800px at 20% 10%,
+      rgba(56, 189, 248, 0.16),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 700px at 90% 20%,
+      rgba(99, 102, 241, 0.14),
+      transparent 55%
+    ),
+    radial-gradient(
+      800px 600px at 55% 90%,
+      rgba(34, 197, 94, 0.10),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #0b1220 0%, #070b12 100%);
+
+  --so-vignette: inset 0 0 120px rgba(0, 0, 0, 0.55);
+
+  /* Typography */
+  --so-text-main: rgba(248, 250, 252, 0.92);
+  --so-text-muted: rgba(148, 163, 184, 0.85);
+  --so-text-on-dark: rgba(248, 250, 252, 0.92);
+
+  /* Radii */
+  --so-radius-card: 18px;
+  --so-radius-card-lg: 24px;
+  --so-radius-pill: 999px;
+
+  /* Glass surfaces */
+  --so-glass-light-bg: rgba(255, 255, 255, 0.07);
+  --so-glass-light-border: rgba(148, 163, 184, 0.22);
+  --so-glass-light-shadow: 0 18px 50px rgba(0, 0, 0, 0.40);
+
+  /* Accent */
+  --so-accent: rgba(56, 189, 248, 0.9);
+  --so-accent-2: rgba(99, 102, 241, 0.85);
+
+  /* Focus ring */
+  --so-focus: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+/* =========================================================
+   BASE / LAYOUT
+   ========================================================= */
 
 .so-dashboard-root {
   min-height: 100vh;
@@ -14,14 +64,16 @@
     sans-serif;
 }
 
-/* === SIDEBAR ============================================ */
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 
 .so-sidebar {
   position: fixed;
   top: 24px;
   left: 24px;
   height: calc(100vh - 48px);
-  width: 230px;
+  width: 240px;
 
   display: flex;
   flex-direction: column;
@@ -29,8 +81,8 @@
   padding: 22px 18px 22px;
 
   background: var(--so-glass-light-bg);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px) saturate(1.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
 
   border-radius: var(--so-radius-card-lg);
   border: 1px solid var(--so-glass-light-border);
@@ -38,23 +90,20 @@
 }
 
 /* BRAND AREA */
-
 .so-sidebar-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 4px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 4px 4px 18px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 .so-sidebar-logo {
   display: block;
-  width: 80px;
+  width: 86px;
   height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.55));
 }
-
-/* Optional: hide brand text if you don’t want it at all */
-/* .so-sidebar-brand-text { display: none; } */
 
 .so-sidebar-brand-text {
   display: flex;
@@ -64,8 +113,8 @@
 
 .so-sidebar-brand-name {
   font-size: 15px;
-  font-weight: 600;
-  color: #020617;
+  font-weight: 650;
+  color: rgba(248, 250, 252, 0.92);
 }
 
 .so-sidebar-brand-sub {
@@ -74,26 +123,9 @@
   color: var(--so-text-muted);
 }
 
-/* === MAIN CONTENT AREA =================================== */
-
-.so-main {
-  margin-left: 240px; /* sidebar width + gap */
-  padding: 32px 40px 40px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.so-main-inner {
-  max-width: 1400px; /* fills more of the screen than the old 1160px */
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* === NAVIGATION ========================================= */
-
+/* NAV */
 .so-sidebar-nav {
-  margin-top: 26px;
+  margin-top: 22px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -112,22 +144,27 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: var(--so-radius-pill);
+  border-radius: 14px;
   text-decoration: none;
   font-size: 13px;
   color: var(--so-text-main);
+
+  background: rgba(2, 6, 23, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+
   transition:
     background 0.18s ease,
-    color 0.18s ease,
-    transform 0.12s ease;
+    border-color 0.18s ease,
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
 }
 
 .so-nav-icon-wrap {
   width: 30px;
   height: 30px;
-  border-radius: var(--so-radius-pill);
-  background: rgba(248, 250, 252, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.6);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.10);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,25 +173,74 @@
 .so-nav-icon {
   width: 18px;
   height: 18px;
+  color: rgba(226, 232, 240, 0.95);
 }
 
 .so-nav-item:hover {
-  background: rgba(248, 250, 252, 0.9);
   transform: translateY(-1px);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+  background: rgba(2, 6, 23, 0.28);
 }
 
 .so-nav-item--active {
-  background: rgba(15, 23, 42, 0.9);
-  color: var(--so-text-on-dark);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.4);
+  background: linear-gradient(
+    180deg,
+    rgba(56, 189, 248, 0.26),
+    rgba(99, 102, 241, 0.18)
+  );
+  border-color: rgba(56, 189, 248, 0.38);
+  color: rgba(248, 250, 252, 0.95);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.35);
 }
 
-/* === SIDEBAR FOOTER ===================================== */
+/* Nested menus */
+.so-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
+.so-nav-sub {
+  margin-left: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.so-nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--so-text-muted);
+
+  padding: 5px 8px;
+  border-radius: 10px;
+
+  background: rgba(2, 6, 23, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.so-nav-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.so-lock-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* SIDEBAR FOOTER */
 .so-sidebar-footer {
   margin-top: 24px;
   padding-top: 12px;
-  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -170,13 +256,14 @@
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #f97316, #facc15);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 1), rgba(99, 102, 241, 1));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  font-weight: 600;
-  color: #020617;
+  font-weight: 650;
+  color: rgba(2, 6, 23, 0.95);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
 }
 
 .so-user-meta {
@@ -186,7 +273,7 @@
 
 .so-user-name {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 550;
   color: var(--so-text-main);
 }
 
@@ -196,45 +283,73 @@
 }
 
 /* LOGOUT BUTTON */
-
 .so-logout-btn {
   width: 100%;
   padding: 12px 16px;
   border-radius: var(--so-radius-pill);
 
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(248, 250, 252, 0.10);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
 
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(148, 163, 184, 0.22);
 
-  color: #0f172a;
+  color: rgba(248, 250, 252, 0.92);
   text-align: center;
 
   transition:
-    background 0.25s cubic-bezier(.4,0,.2,1),
-    border-color 0.25s cubic-bezier(.4,0,.2,1),
-    box-shadow 0.25s cubic-bezier(.4,0,.2,1),
-    transform 0.18s cubic-bezier(.4,0,.2,1);
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
 
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.45) inset;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
 
-/* === CARDS & GRID ======================================== */
+.so-logout-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(248, 250, 252, 0.14);
+}
+
+.so-logout-btn:focus {
+  outline: none;
+  box-shadow: var(--so-focus);
+}
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.so-main {
+  margin-left: 260px;
+  padding: 32px 40px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.so-main-inner {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   CARDS / GRID
+   ========================================================= */
 
 .so-card {
   border-radius: var(--so-radius-card);
-  background: var(--so-glass-light-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--so-glass-light-border);
-  box-shadow: var(--so-glass-light-shadow);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
@@ -260,7 +375,7 @@
 
 .so-metric-main {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .so-metric-sub {
@@ -268,7 +383,75 @@
   color: var(--so-text-muted);
 }
 
-/* === RESPONSIVE – TABLET & MOBILE TOP BAR ================== */
+/* =========================================================
+   SETTINGS (and FIXED SELECT STYLING - NO @apply)
+   ========================================================= */
+
+.so-settings-appearance {
+  border-radius: var(--so-radius-card-lg);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  padding: 22px 24px;
+}
+
+.so-settings-header {
+  margin-bottom: 18px;
+}
+
+.so-settings-title {
+  font-size: 16px;
+  font-weight: 650;
+  color: rgba(248, 250, 252, 0.92);
+  margin-bottom: 2px;
+}
+
+.so-settings-subtitle {
+  font-size: 13px;
+  color: var(--so-text-muted);
+}
+
+/* ✅ Proper CSS (replaces Tailwind @apply) */
+.so-select {
+  width: 100%;
+  max-width: 180px;
+  padding: 8px 12px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(2, 6, 23, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  color: rgba(248, 250, 252, 0.92);
+  font-size: 13px;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' fill='none' stroke='%23cbd5e1'%3E%3Cpath d='M6 8l4 4 4-4' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 12px;
+  padding-right: 2.2rem;
+}
+
+.so-select:focus {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: var(--so-focus);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 1024px) {
   .so-dashboard-root {
     flex-direction: column;
@@ -291,12 +474,11 @@
     padding: 10px 12px;
     border-radius: 0 0 24px 24px;
 
-    /* 🔑 make the whole bar horizontally scrollable */
     overflow-x: auto;
     overscroll-behavior-inline: contain;
+    z-index: 50;
   }
 
-  /* Logo area stays fixed on the left, doesn’t shrink */
   .so-sidebar-brand {
     flex-shrink: 0;
     padding: 0 12px 0 0;
@@ -308,7 +490,6 @@
     padding: 20px 16px 28px;
   }
 
-  /* Nav becomes a horizontal strip you can swipe */
   .so-sidebar-nav {
     margin-top: 0;
     flex-direction: row;
@@ -320,34 +501,11 @@
     flex: 1;
   }
 
-  .so-sidebar-section-label {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--so-text-muted);
-    flex-shrink: 0;
-  }
-
-  /* Footer is hidden in top-bar layout */
   .so-sidebar-footer {
     display: none;
   }
-
-  .so-user-avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
-
-  .so-logout-btn {
-    width: auto;
-    padding: 8px 14px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
 }
 
-/* === RESPONSIVE – PHONE ================================== */
 @media (max-width: 640px) {
   .so-sidebar-brand-text,
   .so-user-meta {
@@ -373,97 +531,3 @@
     padding: 16px 12px 24px;
   }
 }
-
-/* === SETTINGS – APPEARANCE ============================= */
-
-.so-settings-appearance {
-  border-radius: var(--so-radius-card-lg);
-  background: var(--so-glass-light-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--so-glass-light-border);
-  box-shadow: var(--so-glass-light-shadow);
-  padding: 22px 24px;
-}
-
-.so-settings-header {
-  margin-bottom: 18px;
-}
-
-.so-settings-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 2px;
-}
-
-.so-settings-subtitle {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-/* Sleek SelectorOS dropdown */
-.so-select {
-  @apply w-full max-w-[180px] px-3 py-1.5 rounded-xl 
-         border border-slate-200 bg-white/80 backdrop-blur-md
-         text-sm text-slate-800 shadow-sm 
-         focus:outline-none focus:ring-2 focus:ring-emerald-300 
-         transition-all;
-  
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' fill='none' stroke='%23667'%3E%3Cpath d='M6 8l4 4 4-4' stroke-width='2' stroke-linecap='round'/ %3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 12px;
-  padding-right: 2rem;
-}
-
-/* === NESTED SIDEBAR MENUS (PLAN GATING) ================= */
-
-/* Parent wrapper */
-.so-nav-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* Submenu container */
-.so-nav-sub {
-  margin-left: 38px; /* aligns under icon */
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* Submenu item */
-.so-nav-sub-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  font-size: 12px;          /* 👈 smaller than main nav */
-  font-weight: 500;
-  color: var(--so-text-muted);
-
-  padding: 4px 6px;
-  border-radius: 8px;
-  line-height: 1.2;
-}
-
-/* Locked state */
-.so-nav-locked {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-/* Lock icon – THIS was the big offender */
-.so-lock-icon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  color: #94a3b8; /* slate-400 */
-}
-
