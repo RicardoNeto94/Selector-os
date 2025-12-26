@@ -815,5 +815,54 @@
     display: none;
   }
 }
+/* =========================================================
+   COMPACT RAIL + NAV SCROLL (fix missing items)
+   Paste at the VERY BOTTOM of dashboard.css
+   ========================================================= */
+
+/* Make the nav area scroll if sidebar is shorter than content */
+.so-sidebar-nav{
+  overflow-y: auto;
+  padding-right: 6px; /* room for scrollbar */
+  flex: 1;            /* ✅ nav takes available space between brand + footer */
+}
+
+/* Slim scrollbar */
+.so-sidebar-nav::-webkit-scrollbar{ width: 6px; }
+.so-sidebar-nav::-webkit-scrollbar-thumb{
+  background: rgba(148,163,184,0.22);
+  border-radius: 999px;
+}
+
+/* Compact the rail so more items fit */
+.so-nav-item{
+  padding: 8px 8px;       /* was 10px */
+  border-radius: 16px;    /* was 18px */
+  gap: 10px;              /* was 12px */
+}
+
+/* Smaller icon pills */
+.so-nav-icon-wrap{
+  width: 38px;            /* was 44px */
+  height: 38px;           /* was 44px */
+}
+
+/* Slightly smaller SVG icon */
+.so-nav-icon{
+  width: 18px;            /* was 20px */
+  height: 18px;           /* was 20px */
+}
+
+/* Slightly tighter section labels */
+.so-sidebar-section-label{
+  font-size: 10px;        /* was 11px */
+  margin: 10px 6px 4px;   /* was 14px 4px 4px */
+}
+
+/* Optional: make footer more compact too (helps fit) */
+.so-sidebar-footer{
+  padding-top: 10px;
+  gap: 8px;
+}
 
 
