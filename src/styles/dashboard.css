@@ -634,3 +634,187 @@
   max-height: none;
 }
 
+/* =========================================================
+   SIDEBAR RAIL PATCH (COLLAPSE + HOVER EXPAND + PIN TOGGLE)
+   Paste at the VERY BOTTOM of dashboard.css
+   ========================================================= */
+
+:root{
+  --so-sidebar-collapsed: 86px;
+  --so-sidebar-expanded: 260px;
+  --so-sidebar-gap: 48px; /* left margin + gap baseline */
+}
+
+/* Sidebar becomes a rail by default (pinned state handled by class) */
+.so-sidebar{
+  width: var(--so-sidebar-collapsed);
+  padding: 16px 12px;
+
+  border-radius: 28px;
+
+  /* keep your glass vibe, but tighten it for rail */
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.40);
+
+  overflow: hidden;
+
+  transition: width 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Pinned expanded */
+.so-sidebar.is-expanded{
+  width: var(--so-sidebar-expanded);
+}
+
+/* Hover-expand only when collapsed */
+.so-sidebar.is-collapsed:hover{
+  width: var(--so-sidebar-expanded);
+}
+
+/* Main content margin defaults for rail */
+.so-main{
+  margin-left: calc(var(--so-sidebar-collapsed) + var(--so-sidebar-gap));
+  transition: margin-left 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* When pinned expanded, push main content */
+.so-dashboard-root.sidebar-expanded .so-main{
+  margin-left: calc(var(--so-sidebar-expanded) + var(--so-sidebar-gap));
+}
+
+/* Brand row: compact */
+.so-sidebar-brand{
+  padding: 6px 6px 14px;
+}
+
+/* Logo: rail sized */
+.so-sidebar-logo{
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
+}
+
+/* Nav items become icon-pills like your reference */
+.so-nav-item{
+  padding: 10px 10px;
+  border-radius: 18px;
+  gap: 12px;
+
+  background: rgba(2, 6, 23, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+/* Icon wrapper becomes circular button */
+.so-nav-icon-wrap{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  background: rgba(2, 6, 23, 0.22);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+/* Icon size */
+.so-nav-icon{
+  width: 20px;
+  height: 20px;
+}
+
+/* ACTIVE state still yours, just ensure it looks good in rail */
+.so-nav-item--active{
+  border-color: rgba(56, 189, 248, 0.38);
+}
+
+/* Collapse behavior: hide all text + nested menu by default */
+.so-sidebar-brand-text,
+.so-nav-label,
+.so-sidebar-section-label,
+.so-user-meta,
+.so-nav-sub{
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+/* Reveal text when expanded OR hover-expanded */
+.so-sidebar.is-expanded .so-sidebar-brand-text,
+.so-sidebar.is-expanded .so-nav-label,
+.so-sidebar.is-expanded .so-sidebar-section-label,
+.so-sidebar.is-expanded .so-user-meta,
+.so-sidebar.is-expanded .so-nav-sub,
+.so-sidebar.is-collapsed:hover .so-sidebar-brand-text,
+.so-sidebar.is-collapsed:hover .so-nav-label,
+.so-sidebar.is-collapsed:hover .so-sidebar-section-label,
+.so-sidebar.is-collapsed:hover .so-user-meta,
+.so-sidebar.is-collapsed:hover .so-nav-sub{
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* Make nested menu align nicely when expanded */
+.so-nav-sub{
+  margin-left: 56px; /* align under the circular icon */
+}
+
+/* Footer spacing in rail */
+.so-sidebar-footer{
+  gap: 10px;
+}
+
+/* Toggle button (the pin) */
+.so-sidebar-toggle{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  background: rgba(2, 6, 23, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  color: rgba(226, 232, 240, 0.95);
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.so-sidebar-toggle:hover{
+  transform: translateY(-1px);
+  border-color: rgba(248, 250, 252, 0.28);
+  background: rgba(2, 6, 23, 0.38);
+}
+
+/* Mobile/tablet: keep your current top-bar behavior; disable rail logic */
+@media (max-width: 1024px){
+  .so-sidebar{
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 0 0 24px 24px;
+    overflow-x: auto;
+  }
+
+  .so-main,
+  .so-dashboard-root.sidebar-expanded .so-main{
+    margin-left: 0;
+  }
+
+  .so-sidebar-brand-text,
+  .so-nav-label,
+  .so-sidebar-section-label,
+  .so-user-meta,
+  .so-nav-sub{
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .so-sidebar-toggle{
+    display: none;
+  }
+}
+
+
