@@ -29,6 +29,16 @@ export const dynamic = "force-dynamic";
  */
 const PLAN = "starter";
 
+/**
+ * LOGOS (public/)
+ * ----------------
+ * Put these files in /public:
+ * - /selectoros-logo.png        (full logo)
+ * - /selectoros-logo-small.png  (compact logo for rail)
+ */
+const FULL_LOGO_SRC = "/selectoros-logo.png";
+const SMALL_LOGO_SRC = "/selectoros-logo-small.png";
+
 function NavItem({ href, isActive, icon: Icon, label }) {
   return (
     <Link
@@ -50,6 +60,9 @@ export default function DashboardLayout({ children }) {
   // ✅ Pinned state: when true = expanded always
   const [pinnedExpanded, setPinnedExpanded] = useState(false);
 
+  // ✅ Hover state: used to swap logo when sidebar is collapsed
+  const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
+
   // Active matching
   const isActive = useMemo(() => {
     return (href) => {
@@ -64,23 +77,35 @@ export default function DashboardLayout({ children }) {
   const sidebarClass =
     "so-sidebar " + (pinnedExpanded ? "is-expanded" : "is-collapsed");
 
+  // Show full logo if pinned OR user is hovering the collapsed rail
+  const showFullLogo = pinnedExpanded || isHoveringSidebar;
+
   return (
     <div className={rootClass}>
       {/* SIDEBAR */}
-      <aside className={sidebarClass}>
+      <aside
+        className={sidebarClass}
+        onMouseEnter={() => setIsHoveringSidebar(true)}
+        onMouseLeave={() => setIsHoveringSidebar(false)}
+      >
         {/* TOP: BRAND + PIN TOGGLE */}
         <div>
-          <div className="so-sidebar-brand" style={{ justifyContent: "space-between" }}>
+          <div
+            className="so-sidebar-brand"
+            style={{ justifyContent: "space-between" }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* ✅ Logo swaps: small in rail, full on hover/expand */}
               <Image
-                src="/selectoros-logo.png"
+                src={showFullLogo ? FULL_LOGO_SRC : SMALL_LOGO_SRC}
                 alt="SelectorOS logo"
                 width={64}
                 height={64}
                 className="so-sidebar-logo"
                 priority
               />
-              {/* Optional brand text (will hide in rail automatically via your CSS) */}
+
+              {/* Brand text (CSS will hide in rail; shows on hover/expanded) */}
               <div className="so-sidebar-brand-text">
                 <div className="so-sidebar-brand-name">SelectorOS</div>
                 <div className="so-sidebar-brand-sub">Operator</div>
@@ -132,12 +157,20 @@ export default function DashboardLayout({ children }) {
               <div className="so-nav-sub">
                 <span className="so-nav-sub-item">Primary menu</span>
 
-                <span className={"so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")}>
+                <span
+                  className={
+                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
+                  }
+                >
                   {!isPro && <LockClosedIcon className="so-lock-icon" />}
                   Menu 2
                 </span>
 
-                <span className={"so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")}>
+                <span
+                  className={
+                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
+                  }
+                >
                   {!isPro && <LockClosedIcon className="so-lock-icon" />}
                   Menu 3
                 </span>
@@ -198,7 +231,11 @@ export default function DashboardLayout({ children }) {
               />
             </div>
 
-            <button type="button" className="so-icon-btn" aria-label="Notifications">
+            <button
+              type="button"
+              className="so-icon-btn"
+              aria-label="Notifications"
+            >
               <BellIcon className="so-icon-btn-icon" />
             </button>
           </div>
