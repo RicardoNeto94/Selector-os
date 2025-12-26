@@ -87,15 +87,15 @@ export default function DashboardLayout({ children }) {
         className={sidebarClass}
         onMouseEnter={() => setIsHoveringSidebar(true)}
         onMouseLeave={() => setIsHoveringSidebar(false)}
+        onFocus={() => setIsHoveringSidebar(true)}
+        onBlur={() => setIsHoveringSidebar(false)}
       >
         {/* TOP: BRAND + PIN TOGGLE */}
         <div>
-          <div
-            className="so-sidebar-brand"
-            style={{ justifyContent: "space-between" }}
-          >
+          {/* ✅ IMPORTANT: no inline justifyContent here (CSS must control rail layout) */}
+          <div className="so-sidebar-brand">
+            {/* Left: logo + (optional) text */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              {/* ✅ Logo swaps: small in rail, full on hover/expand */}
               <Image
                 src={showFullLogo ? FULL_LOGO_SRC : SMALL_LOGO_SRC}
                 alt="SelectorOS logo"
@@ -105,14 +105,14 @@ export default function DashboardLayout({ children }) {
                 priority
               />
 
-              {/* Brand text (CSS will hide in rail; shows on hover/expanded) */}
+              {/* Brand text (CSS hides in rail; shows on hover/expanded) */}
               <div className="so-sidebar-brand-text">
                 <div className="so-sidebar-brand-name">SelectorOS</div>
                 <div className="so-sidebar-brand-sub">Operator</div>
               </div>
             </div>
 
-            {/* ✅ Pin / expand toggle */}
+            {/* Right: pin/expand toggle */}
             <button
               type="button"
               className="so-sidebar-toggle"
