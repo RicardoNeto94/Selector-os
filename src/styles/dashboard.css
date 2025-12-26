@@ -65,7 +65,7 @@
 }
 
 /* =========================================================
-   SIDEBAR
+   SIDEBAR (Base shell)
    ========================================================= */
 
 .so-sidebar {
@@ -256,7 +256,11 @@
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 1), rgba(99, 102, 241, 1));
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 1),
+    rgba(99, 102, 241, 1)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -533,7 +537,6 @@
 
 /* =========================================================
    TOP BAR (HUD) — hard size locks to prevent SVG blowing up
-   Paste at the BOTTOM of dashboard.css
    ========================================================= */
 
 .so-topbar{
@@ -634,30 +637,30 @@
 }
 
 /* =========================================================
-   SIDEBAR RAIL PATCH (COLLAPSE + HOVER EXPAND + PIN TOGGLE)
+   SIDEBAR RAIL v2 (single source of truth)
+   - compact icons
+   - nav scroll so items never disappear
+   - hover expand + pinned expand still work with your layout.js classes
    Paste at the VERY BOTTOM of dashboard.css
    ========================================================= */
 
 :root{
   --so-sidebar-collapsed: 86px;
   --so-sidebar-expanded: 260px;
-  --so-sidebar-gap: 48px; /* left margin + gap baseline */
+  --so-sidebar-gap: 48px;
 }
 
-/* Sidebar becomes a rail by default (pinned state handled by class) */
+/* Sidebar becomes rail by default */
 .so-sidebar{
   width: var(--so-sidebar-collapsed);
-  padding: 16px 12px;
-
+  padding: 14px 10px;
   border-radius: 28px;
 
-  /* keep your glass vibe, but tighten it for rail */
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(148, 163, 184, 0.20);
   box-shadow: 0 18px 50px rgba(0,0,0,0.40);
 
   overflow: hidden;
-
   transition: width 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -666,66 +669,78 @@
   width: var(--so-sidebar-expanded);
 }
 
-/* Hover-expand only when collapsed */
+/* Hover expand */
 .so-sidebar.is-collapsed:hover{
   width: var(--so-sidebar-expanded);
 }
 
-/* Main content margin defaults for rail */
+/* Main content offset */
 .so-main{
   margin-left: calc(var(--so-sidebar-collapsed) + var(--so-sidebar-gap));
   transition: margin-left 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* When pinned expanded, push main content */
 .so-dashboard-root.sidebar-expanded .so-main{
   margin-left: calc(var(--so-sidebar-expanded) + var(--so-sidebar-gap));
 }
 
-/* Brand row: compact */
+/* Brand row tighter */
 .so-sidebar-brand{
-  padding: 6px 6px 14px;
+  padding: 8px 6px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
 }
 
-/* Logo: rail sized */
+/* Smaller logo in rail */
 .so-sidebar-logo{
   width: 40px;
   height: 40px;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
 }
 
-/* Nav items become icon-pills like your reference */
-.so-nav-item{
-  padding: 10px 10px;
-  border-radius: 18px;
-  gap: 12px;
-
-  background: rgba(2, 6, 23, 0.14);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+/* ✅ NAV must be allowed to scroll */
+.so-sidebar-nav{
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 12px;
+  padding-right: 6px;
 }
 
-/* Icon wrapper becomes circular button */
-.so-nav-icon-wrap{
-  width: 44px;
-  height: 44px;
+/* Slim scrollbar */
+.so-sidebar-nav::-webkit-scrollbar{ width: 6px; }
+.so-sidebar-nav::-webkit-scrollbar-thumb{
+  background: rgba(148,163,184,0.22);
   border-radius: 999px;
-
-  background: rgba(2, 6, 23, 0.22);
-  border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
-/* Icon size */
+/* ✅ More compact items */
+.so-nav-item{
+  padding: 8px 8px;
+  border-radius: 16px;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+/* ✅ Smaller icon pill */
+.so-nav-icon-wrap{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+}
+
+/* ✅ Smaller SVG */
 .so-nav-icon{
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
-/* ACTIVE state still yours, just ensure it looks good in rail */
-.so-nav-item--active{
-  border-color: rgba(56, 189, 248, 0.38);
+/* Tighter section labels */
+.so-sidebar-section-label{
+  font-size: 10px;
+  margin: 10px 6px 4px;
 }
 
-/* Collapse behavior: hide all text + nested menu by default */
+/* Collapse behavior: hide text and submenu in rail mode */
 .so-sidebar-brand-text,
 .so-nav-label,
 .so-sidebar-section-label,
@@ -737,7 +752,7 @@
   transition: opacity 0.16s ease, transform 0.16s ease;
 }
 
-/* Reveal text when expanded OR hover-expanded */
+/* Reveal when expanded / hover-expanded */
 .so-sidebar.is-expanded .so-sidebar-brand-text,
 .so-sidebar.is-expanded .so-nav-label,
 .so-sidebar.is-expanded .so-sidebar-section-label,
@@ -753,41 +768,24 @@
   pointer-events: auto;
 }
 
-/* Make nested menu align nicely when expanded */
+/* Submenu alignment */
 .so-nav-sub{
-  margin-left: 56px; /* align under the circular icon */
+  margin-left: 52px;
 }
 
-/* Footer spacing in rail */
+/* Footer slightly tighter */
 .so-sidebar-footer{
-  gap: 10px;
+  padding-top: 10px;
+  gap: 8px;
 }
 
-/* Toggle button (the pin) */
+/* Toggle button smaller */
 .so-sidebar-toggle{
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-
-  background: rgba(2, 6, 23, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.20);
-  color: rgba(226, 232, 240, 0.95);
-
-  display: grid;
-  place-items: center;
-
-  cursor: pointer;
-
-  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  width: 38px;
+  height: 38px;
 }
 
-.so-sidebar-toggle:hover{
-  transform: translateY(-1px);
-  border-color: rgba(248, 250, 252, 0.28);
-  background: rgba(2, 6, 23, 0.38);
-}
-
-/* Mobile/tablet: keep your current top-bar behavior; disable rail logic */
+/* Mobile/tablet: keep your existing responsive behavior */
 @media (max-width: 1024px){
   .so-sidebar{
     width: 100%;
@@ -815,54 +813,3 @@
     display: none;
   }
 }
-/* =========================================================
-   COMPACT RAIL + NAV SCROLL (fix missing items)
-   Paste at the VERY BOTTOM of dashboard.css
-   ========================================================= */
-
-/* Make the nav area scroll if sidebar is shorter than content */
-.so-sidebar-nav{
-  overflow-y: auto;
-  padding-right: 6px; /* room for scrollbar */
-  flex: 1;            /* ✅ nav takes available space between brand + footer */
-}
-
-/* Slim scrollbar */
-.so-sidebar-nav::-webkit-scrollbar{ width: 6px; }
-.so-sidebar-nav::-webkit-scrollbar-thumb{
-  background: rgba(148,163,184,0.22);
-  border-radius: 999px;
-}
-
-/* Compact the rail so more items fit */
-.so-nav-item{
-  padding: 8px 8px;       /* was 10px */
-  border-radius: 16px;    /* was 18px */
-  gap: 10px;              /* was 12px */
-}
-
-/* Smaller icon pills */
-.so-nav-icon-wrap{
-  width: 38px;            /* was 44px */
-  height: 38px;           /* was 44px */
-}
-
-/* Slightly smaller SVG icon */
-.so-nav-icon{
-  width: 18px;            /* was 20px */
-  height: 18px;           /* was 20px */
-}
-
-/* Slightly tighter section labels */
-.so-sidebar-section-label{
-  font-size: 10px;        /* was 11px */
-  margin: 10px 6px 4px;   /* was 14px 4px 4px */
-}
-
-/* Optional: make footer more compact too (helps fit) */
-.so-sidebar-footer{
-  padding-top: 10px;
-  gap: 8px;
-}
-
-
