@@ -47,6 +47,11 @@
 
   /* Focus ring */
   --so-focus: 0 0 0 3px rgba(56, 189, 248, 0.25);
+
+  /* Sidebar rail sizes */
+  --so-sidebar-collapsed: 86px;
+  --so-sidebar-expanded: 260px;
+  --so-sidebar-gap: 48px; /* left margin + breathing room */
 }
 
 /* =========================================================
@@ -65,7 +70,7 @@
 }
 
 /* =========================================================
-   SIDEBAR
+   SIDEBAR (single source of truth)
    ========================================================= */
 
 .so-sidebar {
@@ -73,36 +78,55 @@
   top: 24px;
   left: 24px;
   height: calc(100vh - 48px);
-  width: 240px;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 22px 18px 22px;
 
-  background: var(--so-glass-light-bg);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(22px) saturate(1.3);
   -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.40);
 
-  border-radius: var(--so-radius-card-lg);
-  border: 1px solid var(--so-glass-light-border);
-  box-shadow: var(--so-glass-light-shadow);
+  /* rail defaults */
+  width: var(--so-sidebar-collapsed);
+  padding: 16px 12px;
+
+  overflow: hidden;
+
+  transition: width 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 40;
 }
 
-/* BRAND AREA */
+/* Expanded (pinned) */
+.so-sidebar.is-expanded {
+  width: var(--so-sidebar-expanded);
+}
+
+/* Hover expand (only when collapsed) */
+.so-sidebar.is-collapsed:hover {
+  width: var(--so-sidebar-expanded);
+}
+
+/* =========================================================
+   BRAND AREA
+   ========================================================= */
+
 .so-sidebar-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 4px 18px;
+  padding: 6px 6px 14px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 .so-sidebar-logo {
   display: block;
-  width: 86px;
-  height: auto;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.55));
+  width: 40px;  /* rail sized */
+  height: 40px; /* rail sized */
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
 }
 
 .so-sidebar-brand-text {
@@ -123,33 +147,49 @@
   color: var(--so-text-muted);
 }
 
-/* NAV */
+/* =========================================================
+   NAV (scrollable so nothing disappears)
+   ========================================================= */
+
 .so-sidebar-nav {
-  margin-top: 22px;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  flex: 1;               /* ✅ fills available height */
+  overflow-y: auto;      /* ✅ scroll if needed */
+  padding-right: 6px;    /* room for scrollbar */
+}
+
+/* Slim scrollbar */
+.so-sidebar-nav::-webkit-scrollbar { width: 6px; }
+.so-sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.22);
+  border-radius: 999px;
 }
 
 .so-sidebar-section-label {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--so-text-muted);
-  margin: 14px 4px 4px;
+  margin: 10px 6px 4px;
 }
 
+/* Nav item (compact so more fit) */
 .so-nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 14px;
+
+  padding: 8px 8px;
+  border-radius: 16px;
   text-decoration: none;
   font-size: 13px;
   color: var(--so-text-main);
 
-  background: rgba(2, 6, 23, 0.18);
+  background: rgba(2, 6, 23, 0.14);
   border: 1px solid rgba(148, 163, 184, 0.14);
 
   transition:
@@ -160,20 +200,26 @@
 }
 
 .so-nav-icon-wrap {
-  width: 30px;
-  height: 30px;
-  border-radius: 12px;
-  background: rgba(248, 250, 252, 0.10);
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+
+  background: rgba(2, 6, 23, 0.22);
   border: 1px solid rgba(148, 163, 184, 0.18);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  flex: 0 0 auto;
 }
 
 .so-nav-icon {
   width: 18px;
   height: 18px;
   color: rgba(226, 232, 240, 0.95);
+
+  flex: 0 0 auto;
 }
 
 .so-nav-item:hover {
@@ -202,7 +248,7 @@
 }
 
 .so-nav-sub {
-  margin-left: 40px;
+  margin-left: 56px; /* align under circular icon */
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -229,21 +275,61 @@
   cursor: not-allowed;
 }
 
+/* ✅ hard-lock the lock icon so it never explodes again */
 .so-lock-icon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
+  width: 12px !important;
+  height: 12px !important;
+  flex: 0 0 auto;
   color: rgba(148, 163, 184, 0.9);
 }
+.so-nav-sub-item svg {
+  width: 12px !important;
+  height: 12px !important;
+  flex: 0 0 auto;
+}
 
-/* SIDEBAR FOOTER */
+/* =========================================================
+   RAIL HIDE/REVEAL (text + nested)
+   ========================================================= */
+
+.so-sidebar-brand-text,
+.so-nav-label,
+.so-sidebar-section-label,
+.so-user-meta,
+.so-nav-sub {
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.so-sidebar.is-expanded .so-sidebar-brand-text,
+.so-sidebar.is-expanded .so-nav-label,
+.so-sidebar.is-expanded .so-sidebar-section-label,
+.so-sidebar.is-expanded .so-user-meta,
+.so-sidebar.is-expanded .so-nav-sub,
+.so-sidebar.is-collapsed:hover .so-sidebar-brand-text,
+.so-sidebar.is-collapsed:hover .so-nav-label,
+.so-sidebar.is-collapsed:hover .so-sidebar-section-label,
+.so-sidebar.is-collapsed:hover .so-user-meta,
+.so-sidebar.is-collapsed:hover .so-nav-sub {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* =========================================================
+   SIDEBAR FOOTER
+   ========================================================= */
+
 .so-sidebar-footer {
-  margin-top: 24px;
-  padding-top: 12px;
+  margin-top: 16px;
+  padding-top: 10px;
   border-top: 1px solid rgba(148, 163, 184, 0.22);
+
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .so-sidebar-user {
@@ -322,6 +408,33 @@
 }
 
 /* =========================================================
+   SIDEBAR TOGGLE (pin button)
+   ========================================================= */
+
+.so-sidebar-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  background: rgba(2, 6, 23, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  color: rgba(226, 232, 240, 0.95);
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.so-sidebar-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(248, 250, 252, 0.28);
+  background: rgba(2, 6, 23, 0.38);
+}
+
+/* =========================================================
    MAIN CONTENT
    ========================================================= */
 
@@ -330,6 +443,15 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  /* rail spacing */
+  margin-left: calc(var(--so-sidebar-collapsed) + var(--so-sidebar-gap));
+  transition: margin-left 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* When pinned expanded, push main content */
+.so-dashboard-root.sidebar-expanded .so-main {
+  margin-left: calc(var(--so-sidebar-expanded) + var(--so-sidebar-gap));
 }
 
 .so-main-inner {
@@ -448,91 +570,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 1024px) {
-  .so-dashboard-root {
-    flex-direction: column;
-  }
-
-  .so-sidebar {
-    position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
-
-    width: 100%;
-    height: auto;
-
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-
-    padding: 10px 12px;
-    border-radius: 0 0 24px 24px;
-
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    z-index: 50;
-  }
-
-  .so-sidebar-brand {
-    flex-shrink: 0;
-    padding: 0 12px 0 0;
-    border-bottom: none;
-  }
-
-  .so-main {
-    margin-left: 0;
-    padding: 20px 16px 28px;
-  }
-
-  .so-sidebar-nav {
-    margin-top: 0;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-
-    white-space: nowrap;
-    padding-inline: 4px;
-    flex: 1;
-  }
-
-  .so-sidebar-footer {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .so-sidebar-brand-text,
-  .so-user-meta {
-    display: none;
-  }
-
-  .so-sidebar {
-    padding: 8px 10px;
-    border-radius: 0 0 20px 20px;
-  }
-
-  .so-nav-item {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-
-  .so-nav-icon-wrap {
-    width: 26px;
-    height: 26px;
-  }
-
-  .so-main {
-    padding: 16px 12px 24px;
-  }
-}
-
-/* =========================================================
-   TOP BAR (HUD) — hard size locks to prevent SVG blowing up
+   TOP BAR (HUD)
    ========================================================= */
 
 .so-topbar{
@@ -582,7 +620,6 @@
   -webkit-backdrop-filter: blur(18px);
 }
 
-/* lock SVG size so it can’t expand */
 .so-search-icon{
   width:16px !important;
   height:16px !important;
@@ -624,252 +661,105 @@
   height:18px !important;
 }
 
-/* Safety override in case you have global svg rules */
-.so-topbar svg{
-  width: auto;
-  height: auto;
-  max-width: none;
-  max-height: none;
-}
-
 /* =========================================================
-   SIDEBAR RAIL PATCH (COLLAPSE + HOVER EXPAND + PIN TOGGLE)
+   RESPONSIVE (disable rail logic on tablet/mobile)
    ========================================================= */
 
-:root{
-  --so-sidebar-collapsed: 84px;
-  --so-sidebar-expanded: 260px;
-  --so-sidebar-gap: 48px; /* left margin + gap baseline */
-}
+@media (max-width: 1024px) {
+  .so-dashboard-root {
+    flex-direction: column;
+  }
 
-/* Sidebar rail base */
-.so-sidebar{
-  width: var(--so-sidebar-collapsed);
-  padding: 14px 12px;
+  .so-sidebar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
 
-  border-radius: 28px;
+    width: 100% !important;
+    height: auto;
 
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.20);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.40);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
 
-  overflow: hidden;
-
-  transition: width 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-
-/* ✅ IMPORTANT: make the TOP wrapper inside <aside> behave like a column and allow nav scroll */
-.so-sidebar > div{
-  display:flex;
-  flex-direction:column;
-  min-height:0; /* allows children to scroll instead of blowing layout */
-  flex:1;       /* take space between header and footer */
-}
-
-/* Pinned expanded */
-.so-sidebar.is-expanded{
-  width: var(--so-sidebar-expanded);
-}
-
-/* Hover-expand only when collapsed */
-.so-sidebar.is-collapsed:hover{
-  width: var(--so-sidebar-expanded);
-}
-
-/* Main content margin defaults for rail */
-.so-main{
-  margin-left: calc(var(--so-sidebar-collapsed) + var(--so-sidebar-gap));
-  transition: margin-left 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-
-/* When pinned expanded, push main content */
-.so-dashboard-root.sidebar-expanded .so-main{
-  margin-left: calc(var(--so-sidebar-expanded) + var(--so-sidebar-gap));
-}
-
-/* Brand row: compact */
-.so-sidebar-brand{
-  padding: 6px 6px 12px;
-}
-
-/* Logo in rail: small (will “grow” when expanded because container grows) */
-.so-sidebar-logo{
-  width: 34px;
-  height: 34px;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
-  transition: transform 0.18s ease, width 0.18s ease, height 0.18s ease;
-}
-
-/* On expand (pinned or hover), let it breathe a bit */
-.so-sidebar.is-expanded .so-sidebar-logo,
-.so-sidebar.is-collapsed:hover .so-sidebar-logo{
-  width: 42px;
-  height: 42px;
-}
-
-/* ✅ NAV SCROLL + FLEX (fix “missing items”) */
-.so-sidebar-nav{
-  flex:1;
-  min-height:0;          /* required for overflow to work in flex column */
-  overflow-y:auto;
-  padding-right: 6px;
-}
-
-/* Slim scrollbar */
-.so-sidebar-nav::-webkit-scrollbar{ width: 6px; }
-.so-sidebar-nav::-webkit-scrollbar-thumb{
-  background: rgba(148,163,184,0.22);
-  border-radius: 999px;
-}
-
-/* Compact vertical spacing so everything fits */
-.so-sidebar-nav{
-  margin-top: 14px;
-  gap: 10px;
-}
-
-/* NAV items (compact) */
-.so-nav-item{
-  padding: 8px 8px;
-  border-radius: 16px;
-  gap: 10px;
-
-  background: rgba(2, 6, 23, 0.14);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-}
-
-/* Icon pill: smaller */
-.so-nav-icon-wrap{
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-
-  background: rgba(2, 6, 23, 0.22);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-/* Icon size */
-.so-nav-icon{
-  width: 18px;
-  height: 18px;
-}
-
-/* Section labels: tighter */
-.so-sidebar-section-label{
-  font-size: 10px;
-  margin: 10px 6px 4px;
-}
-
-/* ✅ Collapsed rail behavior: center icons, hide all text + nested menu */
-.so-sidebar.is-collapsed .so-nav-item{
-  justify-content:center;
-  padding: 8px 8px;
-}
-
-.so-sidebar.is-collapsed .so-nav-label,
-.so-sidebar.is-collapsed .so-sidebar-brand-text,
-.so-sidebar.is-collapsed .so-sidebar-section-label,
-.so-sidebar.is-collapsed .so-user-meta,
-.so-sidebar.is-collapsed .so-nav-sub{
-  opacity: 0;
-  transform: translateX(-6px);
-  pointer-events: none;
-}
-
-/* ✅ Expanded OR hover-expanded: reveal text + nested menu */
-.so-sidebar.is-expanded .so-sidebar-brand-text,
-.so-sidebar.is-expanded .so-nav-label,
-.so-sidebar.is-expanded .so-sidebar-section-label,
-.so-sidebar.is-expanded .so-user-meta,
-.so-sidebar.is-expanded .so-nav-sub,
-.so-sidebar.is-collapsed:hover .so-sidebar-brand-text,
-.so-sidebar.is-collapsed:hover .so-nav-label,
-.so-sidebar.is-collapsed:hover .so-sidebar-section-label,
-.so-sidebar.is-collapsed:hover .so-user-meta,
-.so-sidebar.is-collapsed:hover .so-nav-sub{
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-  transition: opacity 0.16s ease, transform 0.16s ease;
-}
-
-/* Nested menu alignment when expanded */
-.so-nav-sub{
-  margin-left: 56px;
-}
-
-/* ✅ Fix “giant lock icon” edge cases */
-.so-nav-sub-item svg{
-  width: 14px !important;
-  height: 14px !important;
-  flex: 0 0 auto;
-}
-
-/* Footer: slightly tighter so more space for nav */
-.so-sidebar-footer{
-  padding-top: 10px;
-  gap: 8px;
-}
-
-/* Toggle button (the pin) */
-.so-sidebar-toggle{
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-
-  background: rgba(2, 6, 23, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.20);
-  color: rgba(226, 232, 240, 0.95);
-
-  display: grid;
-  place-items: center;
-
-  cursor: pointer;
-
-  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
-}
-
-.so-sidebar-toggle:hover{
-  transform: translateY(-1px);
-  border-color: rgba(248, 250, 252, 0.28);
-  background: rgba(2, 6, 23, 0.38);
-}
-
-/* Mobile/tablet: keep your current top-bar behavior; disable rail logic */
-@media (max-width: 1024px){
-  .so-sidebar{
-    width: 100%;
     padding: 10px 12px;
     border-radius: 0 0 24px 24px;
+
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    z-index: 50;
   }
 
-  .so-main,
-  .so-dashboard-root.sidebar-expanded .so-main{
-    margin-left: 0;
-  }
-
-  .so-sidebar > div{
-    flex: initial;
-    min-height: initial;
+  .so-sidebar-brand {
+    flex-shrink: 0;
+    padding: 0 12px 0 0;
+    border-bottom: none;
   }
 
   .so-sidebar-nav{
-    overflow: visible;
-    min-height: initial;
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    white-space: nowrap;
+    padding-inline: 4px;
+    flex: 1;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .so-sidebar-footer {
+    display: none;
+  }
+
+  .so-main,
+  .so-dashboard-root.sidebar-expanded .so-main {
+    margin-left: 0;
+    padding: 20px 16px 28px;
   }
 
   .so-sidebar-brand-text,
   .so-nav-label,
   .so-sidebar-section-label,
   .so-user-meta,
-  .so-nav-sub{
+  .so-nav-sub {
     opacity: 1;
     transform: none;
     pointer-events: auto;
   }
 
   .so-sidebar-toggle{
+    display:none;
+  }
+}
+
+@media (max-width: 640px) {
+  .so-sidebar-brand-text,
+  .so-user-meta {
     display: none;
+  }
+
+  .so-sidebar {
+    padding: 8px 10px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .so-nav-item {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .so-nav-icon-wrap {
+    width: 26px;
+    height: 26px;
+  }
+
+  .so-main {
+    padding: 16px 12px 24px;
   }
 }
