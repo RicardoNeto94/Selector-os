@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }) {
   // ✅ Pinned state: when true = expanded always
   const [pinnedExpanded, setPinnedExpanded] = useState(false);
 
-  // ✅ Hover state: used to swap logo when sidebar is collapsed
+  // ✅ Hover state: used to swap logo + shift main content while hovering
   const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
 
   // Active matching
@@ -71,8 +71,11 @@ export default function DashboardLayout({ children }) {
     };
   }, [pathname]);
 
+  // ✅ Treat hover like "expanded" for layout spacing (main content shift)
+  const expandedForLayout = pinnedExpanded || isHoveringSidebar;
+
   const rootClass =
-    "so-dashboard-root" + (pinnedExpanded ? " sidebar-expanded" : "");
+    "so-dashboard-root" + (expandedForLayout ? " sidebar-expanded" : "");
 
   const sidebarClass =
     "so-sidebar " + (pinnedExpanded ? "is-expanded" : "is-collapsed");
@@ -87,15 +90,15 @@ export default function DashboardLayout({ children }) {
         className={sidebarClass}
         onMouseEnter={() => setIsHoveringSidebar(true)}
         onMouseLeave={() => setIsHoveringSidebar(false)}
-        onFocus={() => setIsHoveringSidebar(true)}
-        onBlur={() => setIsHoveringSidebar(false)}
       >
         {/* TOP: BRAND + PIN TOGGLE */}
         <div>
-          {/* ✅ IMPORTANT: no inline justifyContent here (CSS must control rail layout) */}
-          <div className="so-sidebar-brand">
-            {/* Left: logo + (optional) text */}
+          <div
+            className="so-sidebar-brand"
+            style={{ justifyContent: "space-between" }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* ✅ Logo swaps: small in rail, full on hover/expand */}
               <Image
                 src={showFullLogo ? FULL_LOGO_SRC : SMALL_LOGO_SRC}
                 alt="SelectorOS logo"
@@ -112,7 +115,7 @@ export default function DashboardLayout({ children }) {
               </div>
             </div>
 
-            {/* Right: pin/expand toggle */}
+            {/* ✅ Pin / expand toggle */}
             <button
               type="button"
               className="so-sidebar-toggle"
