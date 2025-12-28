@@ -17,7 +17,6 @@ import {
   MagnifyingGlassIcon,
   BellIcon,
   Bars3BottomLeftIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -40,36 +39,35 @@ const PLAN = "starter";
 const FULL_LOGO_SRC = "/selectoros-logo.png";
 const SMALL_LOGO_SRC = "/selectoros-logo-small.png";
 
-/**
- * NavItem
- * - default: behaves like a Link
- * - if `onClick` is provided: behaves like a button (accordion trigger)
- */
-function NavItem({ href, isActive, icon: Icon, label, onClick, right }) {
-  const className = "so-nav-item" + (isActive ? " so-nav-item--active" : "");
-
-  // Button variant (for toggles like Menus)
-  if (typeof onClick === "function") {
-    return (
-      <button type="button" className={className} onClick={onClick}>
-        <span className="so-nav-icon-wrap">
-          <Icon className="so-nav-icon" />
-        </span>
-        <span className="so-nav-label">{label}</span>
-        {right ? <span style={{ marginLeft: "auto", display: "flex" }}>{right}</span> : null}
-      </button>
-    );
-  }
-
-  // Link variant
+function NavItem({ href, isActive, icon: Icon, label }) {
   return (
-    <Link href={href} className={className}>
+    <Link
+      href={href}
+      className={"so-nav-item" + (isActive ? " so-nav-item--active" : "")}
+    >
       <span className="so-nav-icon-wrap">
         <Icon className="so-nav-icon" />
       </span>
       <span className="so-nav-label">{label}</span>
-      {right ? <span style={{ marginLeft: "auto", display: "flex" }}>{right}</span> : null}
     </Link>
+  );
+}
+
+/** Menus toggle (looks like a nav item, but acts like a button) */
+function NavToggle({ isActive, icon: Icon, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={"so-nav-item" + (isActive ? " so-nav-item--active" : "")}
+      style={{ width: "100%", textAlign: "left" }}
+      aria-expanded={isActive}
+    >
+      <span className="so-nav-icon-wrap">
+        <Icon className="so-nav-icon" />
+      </span>
+      <span className="so-nav-label">{label}</span>
+    </button>
   );
 }
 
@@ -80,11 +78,12 @@ export default function DashboardLayout({ children }) {
   // ✅ Pinned state: when true = expanded always
   const [pinnedExpanded, setPinnedExpanded] = useState(false);
 
-  // ✅ Hover state: used to swap logo + shift main content while hovering
+  // ✅ Hover state: used to swap logo when sidebar is collapsed
   const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
 
-  // ✅ Menus accordion open/close
-  const [menusOpen, setMenusOpen] = useState(false);
+  // ✅ Menus submenu open/close
+  const menusRouteActive = !!pathname?.startsWith("/dashboard/menu");
+  const [menusOpen, setMenusOpen] = useState(menusRouteActive);
 
   // Active matching
   const isActive = useMemo(() => {
@@ -94,15 +93,8 @@ export default function DashboardLayout({ children }) {
     };
   }, [pathname]);
 
-  // Auto-open Menus when user is inside /dashboard/menu*
-  const inMenusSection = pathname?.startsWith("/dashboard/menu");
-  const computedMenusOpen = menusOpen || inMenusSection;
-
-  // ✅ Treat hover like "expanded" for layout spacing (main content shift)
-  const expandedForLayout = pinnedExpanded || isHoveringSidebar;
-
   const rootClass =
-    "so-dashboard-root" + (expandedForLayout ? " sidebar-expanded" : "");
+    "so-dashboard-root" + (pinnedExpanded ? " sidebar-expanded" : "");
 
   const sidebarClass =
     "so-sidebar " + (pinnedExpanded ? "is-expanded" : "is-collapsed");
@@ -135,7 +127,6 @@ export default function DashboardLayout({ children }) {
                 priority
               />
 
-              {/* Brand text (CSS hides in rail; shows on hover/expanded) */}
               <div className="so-sidebar-brand-text">
                 <div className="so-sidebar-brand-name">SelectorOS</div>
                 <div className="so-sidebar-brand-sub">Operator</div>
@@ -174,40 +165,44 @@ export default function DashboardLayout({ children }) {
               label="Dishes"
             />
 
-            {/* MENUS (accordion) */}
+            {/* MENUS – toggle + submenu */}
             <div className="so-nav-group">
-              <NavItem
+              <NavToggle
+                isActive={menusRouteActive}
                 icon={SwatchIcon}
                 label="Menus"
-                isActive={inMenusSection}
                 onClick={() => setMenusOpen((v) => !v)}
-                right={
-                  <ChevronDownIcon
-                    className="so-nav-icon"
-                    style={{
-                      width: 18,
-                      height: 18,
-                      transform: computedMenusOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.18s ease",
-                      opacity: 0.9,
-                    }}
-                  />
-                }
               />
 
-              {computedMenusOpen && (
+              {menusOpen && (
                 <div className="so-nav-sub">
-                  <span className="so-nav-sub-item">Primary menu</span>
+                  {/* ✅ Now clickable */}
+                  <Link href="/dashboard/menu" className="so-nav-sub-item">
+                    Primary menu
+                  </Link>
 
-                  <span className={"so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")}>
-                    {!isPro && <LockClosedIcon className="so-lock-icon" />}
-                    Menu 2
-                  </span>
-
-                  <span className={"so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")}>
-                    {!isPro && <LockClosedIcon className="so-lock-icon" />}
-                    Menu 3
-                  </span>
+                  {/* Pro-gated links */}
+                  {isPro ? (
+                    <>
+                      <Link href="/dashboard/menu/2" className="so-nav-sub-item">
+                        Menu 2
+                      </Link>
+                      <Link href="/dashboard/menu/3" className="so-nav-sub-item">
+                        Menu 3
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <span className={"so-nav-sub-item so-nav-locked"}>
+                        <LockClosedIcon className="so-lock-icon" />
+                        Menu 2
+                      </span>
+                      <span className={"so-nav-sub-item so-nav-locked"}>
+                        <LockClosedIcon className="so-lock-icon" />
+                        Menu 3
+                      </span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -260,10 +255,17 @@ export default function DashboardLayout({ children }) {
           <div className="so-topbar-right">
             <div className="so-search">
               <MagnifyingGlassIcon className="so-search-icon" />
-              <input className="so-search-input" placeholder="Search for something…" />
+              <input
+                className="so-search-input"
+                placeholder="Search for something…"
+              />
             </div>
 
-            <button type="button" className="so-icon-btn" aria-label="Notifications">
+            <button
+              type="button"
+              className="so-icon-btn"
+              aria-label="Notifications"
+            >
               <BellIcon className="so-icon-btn-icon" />
             </button>
           </div>
