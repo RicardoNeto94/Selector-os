@@ -17,6 +17,7 @@ import {
   MagnifyingGlassIcon,
   BellIcon,
   Bars3BottomLeftIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -39,16 +40,35 @@ const PLAN = "starter";
 const FULL_LOGO_SRC = "/selectoros-logo.png";
 const SMALL_LOGO_SRC = "/selectoros-logo-small.png";
 
-function NavItem({ href, isActive, icon: Icon, label }) {
+/**
+ * NavItem
+ * - default: behaves like a Link
+ * - if `onClick` is provided: behaves like a button (accordion trigger)
+ */
+function NavItem({ href, isActive, icon: Icon, label, onClick, right }) {
+  const className = "so-nav-item" + (isActive ? " so-nav-item--active" : "");
+
+  // Button variant (for toggles like Menus)
+  if (typeof onClick === "function") {
+    return (
+      <button type="button" className={className} onClick={onClick}>
+        <span className="so-nav-icon-wrap">
+          <Icon className="so-nav-icon" />
+        </span>
+        <span className="so-nav-label">{label}</span>
+        {right ? <span style={{ marginLeft: "auto", display: "flex" }}>{right}</span> : null}
+      </button>
+    );
+  }
+
+  // Link variant
   return (
-    <Link
-      href={href}
-      className={"so-nav-item" + (isActive ? " so-nav-item--active" : "")}
-    >
+    <Link href={href} className={className}>
       <span className="so-nav-icon-wrap">
         <Icon className="so-nav-icon" />
       </span>
       <span className="so-nav-label">{label}</span>
+      {right ? <span style={{ marginLeft: "auto", display: "flex" }}>{right}</span> : null}
     </Link>
   );
 }
@@ -63,6 +83,9 @@ export default function DashboardLayout({ children }) {
   // ✅ Hover state: used to swap logo + shift main content while hovering
   const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
 
+  // ✅ Menus accordion open/close
+  const [menusOpen, setMenusOpen] = useState(false);
+
   // Active matching
   const isActive = useMemo(() => {
     return (href) => {
@@ -70,6 +93,10 @@ export default function DashboardLayout({ children }) {
       return pathname?.startsWith(href);
     };
   }, [pathname]);
+
+  // Auto-open Menus when user is inside /dashboard/menu*
+  const inMenusSection = pathname?.startsWith("/dashboard/menu");
+  const computedMenusOpen = menusOpen || inMenusSection;
 
   // ✅ Treat hover like "expanded" for layout spacing (main content shift)
   const expandedForLayout = pinnedExpanded || isHoveringSidebar;
@@ -147,37 +174,42 @@ export default function DashboardLayout({ children }) {
               label="Dishes"
             />
 
-            {/* MENUS – parent */}
+            {/* MENUS (accordion) */}
             <div className="so-nav-group">
               <NavItem
-                href="/dashboard/menu"
-                isActive={isActive("/dashboard/menu")}
                 icon={SwatchIcon}
                 label="Menus"
+                isActive={inMenusSection}
+                onClick={() => setMenusOpen((v) => !v)}
+                right={
+                  <ChevronDownIcon
+                    className="so-nav-icon"
+                    style={{
+                      width: 18,
+                      height: 18,
+                      transform: computedMenusOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.18s ease",
+                      opacity: 0.9,
+                    }}
+                  />
+                }
               />
 
-              {/* Nested menu items */}
-              <div className="so-nav-sub">
-                <span className="so-nav-sub-item">Primary menu</span>
+              {computedMenusOpen && (
+                <div className="so-nav-sub">
+                  <span className="so-nav-sub-item">Primary menu</span>
 
-                <span
-                  className={
-                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
-                  }
-                >
-                  {!isPro && <LockClosedIcon className="so-lock-icon" />}
-                  Menu 2
-                </span>
+                  <span className={"so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")}>
+                    {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                    Menu 2
+                  </span>
 
-                <span
-                  className={
-                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
-                  }
-                >
-                  {!isPro && <LockClosedIcon className="so-lock-icon" />}
-                  Menu 3
-                </span>
-              </div>
+                  <span className={"so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")}>
+                    {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                    Menu 3
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Account */}
@@ -228,17 +260,10 @@ export default function DashboardLayout({ children }) {
           <div className="so-topbar-right">
             <div className="so-search">
               <MagnifyingGlassIcon className="so-search-icon" />
-              <input
-                className="so-search-input"
-                placeholder="Search for something…"
-              />
+              <input className="so-search-input" placeholder="Search for something…" />
             </div>
 
-            <button
-              type="button"
-              className="so-icon-btn"
-              aria-label="Notifications"
-            >
+            <button type="button" className="so-icon-btn" aria-label="Notifications">
               <BellIcon className="so-icon-btn-icon" />
             </button>
           </div>
