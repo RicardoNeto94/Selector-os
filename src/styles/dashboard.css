@@ -763,3 +763,18 @@
     padding: 16px 12px 24px;
   }
 }
+
+/* =========================================================
+   FIX: MAIN CONTENT SHOULD PUSH ON SIDEBAR HOVER
+   Paste at the VERY BOTTOM of dashboard.css
+   ========================================================= */
+
+/* When the rail hover-expands, also push the main content */
+.so-sidebar.is-collapsed:hover ~ .so-main{
+  margin-left: calc(var(--so-sidebar-expanded) + var(--so-sidebar-gap));
+}
+
+/* Keep transitions smooth (already present, but safe) */
+.so-main{
+  transition: margin-left 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
