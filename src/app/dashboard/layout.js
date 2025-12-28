@@ -53,24 +53,6 @@ function NavItem({ href, isActive, icon: Icon, label }) {
   );
 }
 
-/** Menus toggle (looks like a nav item, but acts like a button) */
-function NavToggle({ isActive, icon: Icon, label, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={"so-nav-item" + (isActive ? " so-nav-item--active" : "")}
-      style={{ width: "100%", textAlign: "left" }}
-      aria-expanded={isActive}
-    >
-      <span className="so-nav-icon-wrap">
-        <Icon className="so-nav-icon" />
-      </span>
-      <span className="so-nav-label">{label}</span>
-    </button>
-  );
-}
-
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const isPro = PLAN !== "starter";
@@ -80,10 +62,6 @@ export default function DashboardLayout({ children }) {
 
   // ✅ Hover state: used to swap logo when sidebar is collapsed
   const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
-
-  // ✅ Menus submenu open/close
-  const menusRouteActive = !!pathname?.startsWith("/dashboard/menu");
-  const [menusOpen, setMenusOpen] = useState(menusRouteActive);
 
   // Active matching
   const isActive = useMemo(() => {
@@ -121,16 +99,11 @@ export default function DashboardLayout({ children }) {
               <Image
                 src={showFullLogo ? FULL_LOGO_SRC : SMALL_LOGO_SRC}
                 alt="SelectorOS logo"
-                width={64}
-                height={64}
+                width={96}
+                height={48}
                 className="so-sidebar-logo"
                 priority
               />
-
-              <div className="so-sidebar-brand-text">
-                <div className="so-sidebar-brand-name">SelectorOS</div>
-                <div className="so-sidebar-brand-sub">Operator</div>
-              </div>
             </div>
 
             {/* ✅ Pin / expand toggle */}
@@ -165,46 +138,37 @@ export default function DashboardLayout({ children }) {
               label="Dishes"
             />
 
-            {/* MENUS – toggle + submenu */}
+            {/* MENUS – parent */}
             <div className="so-nav-group">
-              <NavToggle
-                isActive={menusRouteActive}
+              <NavItem
+                href="/dashboard/menu"
+                isActive={isActive("/dashboard/menu")}
                 icon={SwatchIcon}
                 label="Menus"
-                onClick={() => setMenusOpen((v) => !v)}
               />
 
-              {menusOpen && (
-                <div className="so-nav-sub">
-                  {/* ✅ Now clickable */}
-                  <Link href="/dashboard/menu" className="so-nav-sub-item">
-                    Primary menu
-                  </Link>
+              {/* Nested menu items */}
+              <div className="so-nav-sub">
+                <span className="so-nav-sub-item">Primary menu</span>
 
-                  {/* Pro-gated links */}
-                  {isPro ? (
-                    <>
-                      <Link href="/dashboard/menu/2" className="so-nav-sub-item">
-                        Menu 2
-                      </Link>
-                      <Link href="/dashboard/menu/3" className="so-nav-sub-item">
-                        Menu 3
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <span className={"so-nav-sub-item so-nav-locked"}>
-                        <LockClosedIcon className="so-lock-icon" />
-                        Menu 2
-                      </span>
-                      <span className={"so-nav-sub-item so-nav-locked"}>
-                        <LockClosedIcon className="so-lock-icon" />
-                        Menu 3
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
+                <span
+                  className={
+                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
+                  }
+                >
+                  {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                  Menu 2
+                </span>
+
+                <span
+                  className={
+                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
+                  }
+                >
+                  {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                  Menu 3
+                </span>
+              </div>
             </div>
 
             {/* Account */}
