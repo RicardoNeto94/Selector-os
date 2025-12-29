@@ -39,10 +39,11 @@ const PLAN = "starter";
 const FULL_LOGO_SRC = "/selectoros-logo.png";
 const SMALL_LOGO_SRC = "/selectoros-logo-small.png";
 
-function NavItem({ href, isActive, icon: Icon, label }) {
+function NavItem({ href, isActive, icon: Icon, label, onClick }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={"so-nav-item" + (isActive ? " so-nav-item--active" : "")}
     >
       <span className="so-nav-icon-wrap">
@@ -63,6 +64,9 @@ export default function DashboardLayout({ children }) {
   // ✅ Hover state: used to swap logo when sidebar is collapsed
   const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
 
+  // ✅ Menus submenu open/close
+  const [menusOpen, setMenusOpen] = useState(true);
+
   // Active matching
   const isActive = useMemo(() => {
     return (href) => {
@@ -79,6 +83,19 @@ export default function DashboardLayout({ children }) {
 
   // Show full logo if pinned OR user is hovering the collapsed rail
   const showFullLogo = pinnedExpanded || isHoveringSidebar;
+
+  // ✅ Clicking Menus:
+  // - If you're already on /dashboard/menu*, it toggles open/close (no navigation)
+  // - If you're elsewhere, it opens and navigates to /dashboard/menu
+  const handleMenusClick = (e) => {
+    const onMenusRoute = pathname?.startsWith("/dashboard/menu");
+    if (onMenusRoute) {
+      e.preventDefault();
+      setMenusOpen((v) => !v);
+      return;
+    }
+    setMenusOpen(true);
+  };
 
   return (
     <div className={rootClass}>
@@ -145,30 +162,33 @@ export default function DashboardLayout({ children }) {
                 isActive={isActive("/dashboard/menu")}
                 icon={SwatchIcon}
                 label="Menus"
+                onClick={handleMenusClick}
               />
 
-              {/* Nested menu items */}
-              <div className="so-nav-sub">
-                <span className="so-nav-sub-item">Primary menu</span>
+              {/* ✅ Submenu is now truly collapsible */}
+              {menusOpen && (
+                <div className="so-nav-sub">
+                  <span className="so-nav-sub-item">Primary menu</span>
 
-                <span
-                  className={
-                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
-                  }
-                >
-                  {!isPro && <LockClosedIcon className="so-lock-icon" />}
-                  Menu 2
-                </span>
+                  <span
+                    className={
+                      "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
+                    }
+                  >
+                    {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                    Menu 2
+                  </span>
 
-                <span
-                  className={
-                    "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
-                  }
-                >
-                  {!isPro && <LockClosedIcon className="so-lock-icon" />}
-                  Menu 3
-                </span>
-              </div>
+                  <span
+                    className={
+                      "so-nav-sub-item " + (!isPro ? "so-nav-locked" : "")
+                    }
+                  >
+                    {!isPro && <LockClosedIcon className="so-lock-icon" />}
+                    Menu 3
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Account */}
