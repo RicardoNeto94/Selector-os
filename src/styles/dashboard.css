@@ -347,3 +347,21 @@
   font-size: 11px;
   color: var(--so-text-muted);
 }
+
+/* =========================================================
+   SEARCH ICON SIZE FIX
+   Prevent SVG icons from expanding to container size
+   ========================================================= */
+
+.so-search svg{
+  width:16px !important;
+  height:16px !important;
+  flex:0 0 auto;
+}
+
+.so-search-icon{
+  width:16px !important;
+  height:16px !important;
+  flex:0 0 auto;
+}
+
