@@ -30,11 +30,9 @@ export default async function SettingsPage() {
 
     return (
       <main className="so-main page-fade">
-
         <div className="so-main-inner mx-auto w-full max-w-[900px]">
 
           <div className="so-card border border-red-400/30 bg-red-50/90">
-
             <h1 className="mb-2 text-lg font-semibold text-red-800">
               No restaurant found
             </h1>
@@ -43,11 +41,9 @@ export default async function SettingsPage() {
               We couldn&apos;t find a restaurant linked to your account yet.
               Finish onboarding or contact support.
             </p>
-
           </div>
 
         </div>
-
       </main>
     );
   }
@@ -55,34 +51,33 @@ export default async function SettingsPage() {
   return (
     <main className="so-main page-fade">
 
-      <div className="so-main-inner mx-auto w-full max-w-[1250px] space-y-6">
+      <div className="so-main-inner mx-auto w-full max-w-[1200px]">
 
-        {/* HEADER */}
+        {/* PAGE TITLE */}
 
-        <section className="so-card">
+        <div className="mb-8">
 
           <h1 className="text-xl font-semibold text-white">
             Settings
           </h1>
 
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-400 mt-1 max-w-xl">
             Tune how SelectorOS looks and behaves for{" "}
             <span className="text-white font-medium">
               {restaurant.name || "your restaurant"}
-            </span>
-            .
+            </span>.
           </p>
 
-        </section>
+        </div>
 
 
-        {/* MAIN GRID */}
+        {/* CONTENT GRID */}
 
-        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6 items-start">
+        <section className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6 items-start">
 
-          {/* APPEARANCE */}
+          {/* APPEARANCE PANEL */}
 
-          <div className="so-card">
+          <div className="so-card p-6">
 
             <AppearanceSettingsForm
               restaurantId={restaurant.id}
@@ -95,9 +90,9 @@ export default async function SettingsPage() {
           </div>
 
 
-          {/* LOGO / BRANDING */}
+          {/* BRANDING PANEL */}
 
-          <aside className="so-card flex flex-col gap-4">
+          <aside className="so-card p-6 flex flex-col gap-5">
 
             <h2 className="text-sm font-semibold text-white">
               Logo & branding
