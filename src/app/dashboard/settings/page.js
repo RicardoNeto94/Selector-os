@@ -27,43 +27,63 @@ export default async function SettingsPage() {
 
   if (restaurantError || !restaurant) {
     console.error("No restaurant for user", restaurantError);
+
     return (
-      <div className="page-fade text-slate-900">
-        <div className="max-w-3xl mx-auto">
-          <div className="rounded-3xl border border-red-500/30 bg-red-50/80 p-6 shadow-lg">
+      <main className="so-main page-fade">
+
+        <div className="so-main-inner mx-auto w-full max-w-[900px]">
+
+          <div className="so-card border border-red-400/30 bg-red-50/90">
+
             <h1 className="mb-2 text-lg font-semibold text-red-800">
               No restaurant found
             </h1>
+
             <p className="text-sm text-red-700/90">
               We couldn&apos;t find a restaurant linked to your account yet.
               Finish onboarding or contact support.
             </p>
+
           </div>
+
         </div>
-      </div>
+
+      </main>
     );
   }
 
   return (
-    <div className="page-fade text-slate-900">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* HEADER CARD */}
-        <section className="rounded-[28px] bg-white/90 backdrop-blur-xl shadow-[0_20px_60px_rgba(15,23,42,0.16)] border border-slate-200/70 px-7 py-4 flex flex-col gap-1">
-          <h1 className="text-2xl md:text-[26px] font-semibold text-slate-900">
+    <main className="so-main page-fade">
+
+      <div className="so-main-inner mx-auto w-full max-w-[1250px] space-y-6">
+
+        {/* HEADER */}
+
+        <section className="so-card">
+
+          <h1 className="text-xl font-semibold text-white">
             Settings
           </h1>
-          <p className="text-sm text-slate-500 max-w-xl">
+
+          <p className="text-sm text-slate-400 mt-1">
             Tune how SelectorOS looks and behaves for{" "}
-            <span className="font-medium text-slate-800">
+            <span className="text-white font-medium">
               {restaurant.name || "your restaurant"}
             </span>
             .
           </p>
+
         </section>
 
+
         {/* MAIN GRID */}
-        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] gap-5 items-start">
-          <div className="so-settings-appearance">
+
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6 items-start">
+
+          {/* APPEARANCE */}
+
+          <div className="so-card">
+
             <AppearanceSettingsForm
               restaurantId={restaurant.id}
               initialPrimaryColor={restaurant.theme_primary_color}
@@ -71,10 +91,15 @@ export default async function SettingsPage() {
               initialCardStyle={restaurant.theme_card_style}
               initialDensity={restaurant.theme_density}
             />
+
           </div>
 
-          <aside className="rounded-[28px] bg-white/80 backdrop-blur-xl border border-slate-200/70 shadow-[0_18px_50px_rgba(15,23,42,0.15)] px-6 py-5 flex flex-col gap-4">
-            <h2 className="text-base font-semibold text-slate-900">
+
+          {/* LOGO / BRANDING */}
+
+          <aside className="so-card flex flex-col gap-4">
+
+            <h2 className="text-sm font-semibold text-white">
               Logo & branding
             </h2>
 
@@ -85,18 +110,22 @@ export default async function SettingsPage() {
               }
             />
 
-            <div className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 w-fit">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <div className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-white/10 border border-white/10 text-slate-300 w-fit">
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
               More branding controls coming soon
             </div>
 
-            <p className="text-sm text-slate-500 leading-relaxed">
+            <p className="text-sm text-slate-400 leading-relaxed">
               Future updates will let you configure staff roles, table QR codes
               and deeper theme options for your allergen view.
             </p>
+
           </aside>
+
         </section>
+
       </div>
-    </div>
+
+    </main>
   );
 }
