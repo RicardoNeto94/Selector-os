@@ -630,3 +630,31 @@
   transform:translateY(-1px);
   box-shadow:0 10px 20px rgba(0,0,0,0.3);
 }
+/* =========================================================
+   LOCK ICON SIZE FIX
+========================================================= */
+
+.so-lock-icon{
+  width:14px;
+  height:14px;
+  min-width:14px;
+  min-height:14px;
+  flex:0 0 auto;
+
+  opacity:0.7;
+  color:rgba(203,213,225,0.65);
+}
+
+
+/* submenu alignment improvement */
+
+.so-nav-sub-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  font-size:12px;
+  color:var(--so-text-muted);
+
+  padding:6px 0;
+}
