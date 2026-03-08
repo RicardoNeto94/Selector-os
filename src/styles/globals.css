@@ -4,51 +4,36 @@
 
 /* GLOBAL THEME VARIABLES */
 :root {
-  --primary: #d4af37;  /* Default: Shang Shi gold */
+  --primary: #d4af37;
   --secondary: #ffffff;
   --accent: #8b6f47;
 
   --font: 'Inter', sans-serif;
 
-  /* Visual system */
-  --card-style: glass; /* glass | solid */
+  --card-style: glass;
 
-  /* Future-proof variables */
   --radius: 16px;
   --transition: 0.25s cubic-bezier(.4,0,.2,1);
 }
 
-/* GLOBAL BOX MODEL FIX (prevents layout overflow bugs) */
+/* GLOBAL BOX MODEL FIX */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* Your existing base styles start here */
+/* BASE ELEMENT STYLES */
 @layer base {
+
   h2 {
     @apply py-4 text-4xl font-black text-gray-800;
   }
 
-  .button {
-    @apply custom-focus inline-flex items-center justify-center
-      rounded-full px-6 py-2.5 text-sm font-semibold
-      bg-emerald-500 text-slate-950
-      hover:bg-emerald-400
-      transition;
-  }
+}
 
-  .button-inverse {
-    @apply custom-focus rounded-full border-2 border-white bg-green-400 px-8 py-2 font-bold text-white hover:border-green-400 hover:bg-white hover:text-green-400 focus:border-green-400 focus:bg-white focus:text-green-400;
-  }
-
-  .card {
-    @apply column min-w-[20rem] items-center gap-6
-      rounded-2xl bg-slate-950/70 border border-white/10
-      py-8 px-4 sm:min-w-[24rem] sm:px-10
-      shadow-[0_24px_60px_rgba(0,0,0,0.7)];
-  }
+/* REUSABLE COMPONENT STYLES */
+@layer components {
 
   .column {
     @apply flex flex-col items-start justify-center gap-4;
@@ -56,6 +41,28 @@
 
   .custom-focus {
     @apply focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2;
+  }
+
+  .button {
+    @apply inline-flex items-center justify-center
+      rounded-full px-6 py-2.5 text-sm font-semibold
+      bg-emerald-500 text-slate-950
+      hover:bg-emerald-400
+      transition;
+  }
+
+  .button-inverse {
+    @apply rounded-full border-2 border-white bg-green-400 px-8 py-2
+      font-bold text-white hover:border-green-400
+      hover:bg-white hover:text-green-400;
+  }
+
+  .card {
+    @apply flex flex-col items-start justify-center gap-6
+      min-w-[20rem] rounded-2xl
+      bg-slate-950/70 border border-white/10
+      py-8 px-4 sm:min-w-[24rem] sm:px-10
+      shadow-[0_24px_60px_rgba(0,0,0,0.7)];
   }
 
   .heading {
@@ -71,22 +78,23 @@
   }
 
   .input {
-    @apply custom-focus w-full rounded-xl
+    @apply w-full rounded-xl
       border border-slate-600 bg-slate-900/70
       text-slate-50 placeholder:text-slate-500
       px-4 py-2.5 text-sm;
   }
 
   .link {
-    @apply custom-focus rounded-md font-semibold text-green-400;
+    @apply rounded-md font-semibold text-green-400;
   }
 
   .row {
     @apply flex flex-row items-center justify-start gap-1;
   }
+
 }
 
-/* Smooth fade for all route transitions */
+/* PAGE FADE ANIMATION */
 .page-fade {
   animation: fadeIn 0.4s ease;
 }
@@ -96,7 +104,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* KPI hover animation */
+/* KPI HOVER */
 .kpi-card {
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
@@ -106,7 +114,7 @@
   box-shadow: 0 8px 22px rgba(0,0,0,0.07);
 }
 
-/* Sidebar highlight */
+/* SIDEBAR HIGHLIGHT */
 .sidebar-item {
   border-left: 3px solid transparent;
   padding-left: 0.75rem;
@@ -127,7 +135,7 @@
   font-weight: 600;
 }
 
-/* Subtle unified background */
+/* GLOBAL BACKGROUND */
 html,
 body {
   min-height: 100vh;
@@ -137,7 +145,7 @@ body {
   will-change: background;
 }
 
-/* Enable hover underline expansion */
+/* NAV LINK HOVER */
 nav a {
   position: relative;
 }
