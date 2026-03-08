@@ -1,5 +1,3 @@
-// src/app/dashboard/dishes/page.js
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,7 +15,6 @@ export default function DishesPage() {
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -26,38 +23,32 @@ export default function DishesPage() {
 
     const {
       data: { user },
-      error: userError,
     } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+    if (!user) {
       setError("You must be logged in.");
       setLoading(false);
       return;
     }
 
-    const { data: r, error: rError } = await supabase
+    const { data: r } = await supabase
       .from("restaurants")
       .select("*")
       .eq("owner_id", user.id)
       .maybeSingle();
 
-    if (rError || !r) {
+    if (!r) {
       setError("No restaurant found.");
       setLoading(false);
       return;
     }
+
     setRestaurant(r);
 
-    const { data: menusData, error: mError } = await supabase
+    const { data: menusData } = await supabase
       .from("menus")
       .select("*")
       .eq("restaurant_id", r.id);
-
-    if (mError) {
-      setError("Failed to load menus.");
-      setLoading(false);
-      return;
-    }
 
     setMenus(menusData || []);
 
@@ -69,164 +60,154 @@ export default function DishesPage() {
 
     const menuIds = menusData.map((m) => m.id);
 
-    const { data: dishesData, error: dError } = await supabase
+    const { data: dishesData } = await supabase
       .from("dishes")
       .select("*")
       .in("menu_id", menuIds)
       .order("created_at", { ascending: false });
-
-    if (dError) {
-      setError("Failed to load dishes.");
-      setLoading(false);
-      return;
-    }
 
     setDishes(dishesData || []);
     setLoading(false);
   };
 
   const handleDeleteDish = async (dishId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this dish? This cannot be undone."
-    );
-    if (!confirmed) return;
+    if (!confirm("Delete this dish permanently?")) return;
 
-    setError("");
     setDeletingId(dishId);
 
-    try {
-      const { error: daError } = await supabase
-        .from("dish_allergens")
-        .delete()
-        .eq("dish_id", dishId);
+    await supabase.from("dish_allergens").delete().eq("dish_id", dishId);
+    await supabase.from("dishes").delete().eq("id", dishId);
 
-      if (daError) {
-        console.error("Failed to delete dish_allergens", daError);
-      }
-
-      const { error: dishError } = await supabase
-        .from("dishes")
-        .delete()
-        .eq("id", dishId);
-
-      if (dishError) {
-        console.error("Failed to delete dish", dishError);
-        setError("Failed to delete dish. Check console / Supabase logs.");
-        setDeletingId(null);
-        return;
-      }
-
-      setDishes((prev) => prev.filter((d) => d.id !== dishId));
-      setDeletingId(null);
-    } catch (err) {
-      console.error(err);
-      setError("Unexpected error while deleting dish.");
-      setDeletingId(null);
-    }
+    setDishes((prev) => prev.filter((d) => d.id !== dishId));
+    setDeletingId(null);
   };
 
   if (loading) {
     return (
-      <div className="page-fade">
-        <div className="flex h-[70vh] items-center justify-center text-sm text-slate-500">
-          Loading dishes…
-        </div>
+      <div className="flex h-[70vh] items-center justify-center text-slate-400">
+        Loading dishes...
       </div>
     );
   }
 
   return (
-    <div className="page-fade">
-      {/* full-width workspace inside so-main-inner */}
-      <div className="flex w-full min-h-[calc(100vh-140px)] flex-col gap-6">
-        {/* Header */}
-        <header className="flex items-center justify-between gap-4">
-          <div>
-            <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-600">
-              SELECTOROS • DISHES
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900">Dishes</h1>
-            <p className="mt-1 text-sm text-slate-600">
-              All dishes across your menus. Changes here update your live
-              allergen view.
-            </p>
-          </div>
+    <div className="flex flex-col gap-6 page-fade">
 
-          <a
-            href="/dashboard/dishes/new"
-            className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-          >
-            + Add dish
-          </a>
-        </header>
+      {/* HEADER */}
+      <header className="flex items-center justify-between">
 
-        {error && (
-          <div className="so-card border border-red-200 bg-red-50/90 text-xs text-red-800">
-            {error}
-          </div>
-        )}
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-teal-400">
+            SelectorOS • Workspace
+          </p>
 
-        {/* Main panel */}
-        <section className="flex-1 flex">
-          {dishes.length === 0 ? (
-            <div className="so-card w-full h-full flex items-center justify-center text-sm text-slate-600">
-              No dishes yet. Start by adding your first dish.
-            </div>
-          ) : (
-            <div className="so-card w-full h-full flex flex-col p-4 md:p-5">
-              <div className="-mx-2 md:mx-0 overflow-x-auto">
-                <table className="min-w-full text-sm text-slate-800">
-                  <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                    <tr>
-                      <th className="py-2 px-2 text-left">Name</th>
-                      <th className="py-2 px-2 text-left">Menu</th>
-                      <th className="py-2 px-2 text-left">Category</th>
-                      <th className="py-2 px-2 text-right">Price</th>
-                      <th className="py-2 px-2 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dishes.map((d) => {
-                      const menu = menus.find((m) => m.id === d.menu_id);
-                      return (
-                        <tr
-                          key={d.id}
-                          className="border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50/70"
-                        >
-                          <td className="py-2 px-2 pr-4 font-medium text-slate-900">
-                            {d.name}
-                          </td>
-                          <td className="py-2 px-2 pr-4 text-slate-600">
-                            {menu?.name || "—"}
-                          </td>
-                          <td className="py-2 px-2 pr-4 text-xs text-slate-500">
-                            {d.category || "—"}
-                          </td>
-                          <td className="py-2 px-2 pl-4 text-right text-slate-800">
-                            {d.price != null
-                              ? `${Number(d.price).toFixed(2)} €`
-                              : "—"}
-                          </td>
-                          <td className="py-2 px-2 pl-4 text-right">
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteDish(d.id)}
-                              disabled={deletingId === d.id}
-                              className="rounded-full border border-red-300 px-3 py-1 text-[11px] text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                            >
-                              {deletingId === d.id ? "Deleting…" : "Delete"}
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </section>
-      </div>
+          <h1 className="text-3xl font-semibold text-white mt-1">
+            Dishes
+          </h1>
+
+          <p className="text-sm text-slate-400 mt-1">
+            Manage dishes across all your menus.
+          </p>
+        </div>
+
+        <a
+          href="/dashboard/dishes/new"
+          className="so-btn-primary"
+        >
+          + Add dish
+        </a>
+
+      </header>
+
+      {error && (
+        <div className="so-card border border-red-400/30 text-red-300 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* EMPTY STATE */}
+
+      {dishes.length === 0 && (
+        <div className="so-card flex items-center justify-center h-[300px] text-slate-400">
+          No dishes yet. Add your first dish.
+        </div>
+      )}
+
+      {/* DISH LIST */}
+
+      {dishes.length > 0 && (
+        <div className="so-card p-0 overflow-hidden">
+
+          <table className="w-full text-sm">
+
+            <thead className="text-xs uppercase tracking-wider text-slate-400 border-b border-white/10">
+              <tr>
+                <th className="text-left px-6 py-4">Dish</th>
+                <th className="text-left px-6 py-4">Menu</th>
+                <th className="text-left px-6 py-4">Category</th>
+                <th className="text-right px-6 py-4">Price</th>
+                <th className="text-right px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {dishes.map((dish) => {
+
+                const menu = menus.find((m) => m.id === dish.menu_id);
+
+                return (
+
+                  <tr
+                    key={dish.id}
+                    className="border-b border-white/5 hover:bg-white/5 transition"
+                  >
+
+                    <td className="px-6 py-4 font-medium text-white">
+                      {dish.name}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <span className="px-2 py-1 text-xs rounded-full bg-white/10 text-slate-300">
+                        {menu?.name || "—"}
+                      </span>
+
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-400">
+                      {dish.category || "—"}
+                    </td>
+
+                    <td className="px-6 py-4 text-right text-white font-medium">
+                      {dish.price ? `${Number(dish.price).toFixed(2)} €` : "—"}
+                    </td>
+
+                    <td className="px-6 py-4 text-right">
+
+                      <button
+                        onClick={() => handleDeleteDish(dish.id)}
+                        disabled={deletingId === dish.id}
+                        className="text-xs px-3 py-1 rounded-full border border-red-400/40 text-red-300 hover:bg-red-400/10 transition"
+                      >
+                        {deletingId === dish.id ? "Deleting…" : "Delete"}
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                );
+
+              })}
+
+            </tbody>
+
+          </table>
+
+        </div>
+      )}
+
     </div>
   );
 }
