@@ -36,7 +36,7 @@
 }
 
 /* =======================================================
-BASE LAYOUT
+   BASE LAYOUT
 ======================================================= */
 
 .so-dashboard-root{
@@ -50,7 +50,7 @@ BASE LAYOUT
 }
 
 /* =======================================================
-SIDEBAR
+   SIDEBAR
 ======================================================= */
 
 .so-sidebar{
@@ -82,10 +82,23 @@ SIDEBAR
   box-shadow:
     0 24px 60px rgba(0,0,0,0.45),
     inset 0 1px 0 rgba(255,255,255,0.06);
+
+  overflow:hidden;
+}
+
+/* IMPORTANT:
+   The first unnamed div inside the sidebar must become
+   the flexible/shrinkable region that contains brand + nav.
+*/
+.so-sidebar > div:first-child{
+  display:flex;
+  flex-direction:column;
+  flex:1 1 auto;
+  min-height:0;
 }
 
 /* =======================================================
-BRAND
+   BRAND
 ======================================================= */
 
 .so-sidebar-brand{
@@ -94,6 +107,7 @@ BRAND
   padding:8px 6px 16px;
   margin-bottom:10px;
   border-bottom:1px solid rgba(148,163,184,0.18);
+  flex-shrink:0;
 }
 
 .so-sidebar-logo{
@@ -103,7 +117,7 @@ BRAND
 }
 
 /* =======================================================
-NAVIGATION
+   NAVIGATION
 ======================================================= */
 
 .so-sidebar-nav{
@@ -111,13 +125,14 @@ NAVIGATION
   flex-direction:column;
   gap:12px;
 
-  flex:1;
+  flex:1 1 auto;
+  min-height:0;
 
   overflow-y:auto;
   overflow-x:hidden;
 
   padding-right:8px;
-  margin-bottom:16px;
+  margin-right:-4px;
 }
 
 .so-sidebar-nav::-webkit-scrollbar{
@@ -129,6 +144,10 @@ NAVIGATION
   border-radius:999px;
 }
 
+.so-sidebar-nav::-webkit-scrollbar-thumb:hover{
+  background:rgba(148,163,184,0.4);
+}
+
 .so-sidebar-section-label{
   font-size:10px;
   letter-spacing:0.18em;
@@ -138,7 +157,7 @@ NAVIGATION
 }
 
 /* =======================================================
-NAV ITEMS
+   NAV ITEMS
 ======================================================= */
 
 .so-nav-item{
@@ -182,7 +201,7 @@ NAV ITEMS
 }
 
 /* =======================================================
-ICON CONTAINER
+   ICON CONTAINER
 ======================================================= */
 
 .so-nav-icon-wrap{
@@ -197,16 +216,19 @@ ICON CONTAINER
   display:flex;
   align-items:center;
   justify-content:center;
+
+  flex:0 0 auto;
 }
 
 .so-nav-icon{
   width:18px;
   height:18px;
   color:rgba(226,232,240,0.9);
+  flex:0 0 auto;
 }
 
 /* =======================================================
-SUBMENU
+   SUBMENU
 ======================================================= */
 
 .so-nav-sub{
@@ -226,7 +248,6 @@ SUBMENU
   gap:8px;
 
   font-size:12px;
-
   padding:4px 2px;
 
   color:rgba(203,213,225,0.65);
@@ -246,17 +267,23 @@ SUBMENU
 .so-lock-icon{
   width:14px;
   height:14px;
+  min-width:14px;
+  min-height:14px;
   flex:0 0 auto;
   opacity:.6;
+  color:rgba(203,213,225,0.65);
 }
 
 /* =======================================================
-SIDEBAR FOOTER
+   SIDEBAR FOOTER
 ======================================================= */
 
 .so-sidebar-footer{
+  flex:0 0 auto;
+  margin-top:12px;
   padding-top:14px;
   border-top:1px solid rgba(148,163,184,0.16);
+
   display:flex;
   flex-direction:column;
   gap:12px;
@@ -287,21 +314,25 @@ SIDEBAR FOOTER
   font-weight:650;
 
   color:rgba(2,6,23,0.95);
+  flex:0 0 auto;
 }
 
 .so-user-meta{
   display:flex;
   flex-direction:column;
+  min-width:0;
 }
 
 .so-user-name{
   font-size:12px;
   font-weight:550;
+  line-height:1.2;
 }
 
 .so-user-tag{
   font-size:10px;
   color:rgba(203,213,225,0.6);
+  line-height:1.2;
 }
 
 .so-logout-btn{
@@ -322,6 +353,7 @@ SIDEBAR FOOTER
   cursor:pointer;
 
   transition:all .18s ease;
+  box-sizing:border-box;
 }
 
 .so-logout-btn:hover{
@@ -331,7 +363,7 @@ SIDEBAR FOOTER
 }
 
 /* =======================================================
-MAIN CONTENT
+   MAIN CONTENT
 ======================================================= */
 
 .so-main{
@@ -343,7 +375,7 @@ MAIN CONTENT
 }
 
 /* =======================================================
-TOPBAR
+   TOPBAR
 ======================================================= */
 
 .so-topbar{
@@ -384,7 +416,7 @@ TOPBAR
 }
 
 /* =======================================================
-SEARCH
+   SEARCH
 ======================================================= */
 
 .so-search{
@@ -406,6 +438,7 @@ SEARCH
 .so-search svg{
   width:16px;
   height:16px;
+  flex:0 0 auto;
 }
 
 .so-search-input{
@@ -425,7 +458,7 @@ SEARCH
 }
 
 /* =======================================================
-ICON BUTTON
+   ICON BUTTON
 ======================================================= */
 
 .so-icon-btn{
@@ -456,10 +489,11 @@ ICON BUTTON
   width:18px;
   height:18px;
   color:white;
+  flex:0 0 auto;
 }
 
 /* =======================================================
-CARDS
+   CARDS
 ======================================================= */
 
 .so-card{
@@ -494,7 +528,7 @@ CARDS
 }
 
 /* =======================================================
-GRID
+   GRID
 ======================================================= */
 
 .so-kpi-grid{
@@ -536,7 +570,7 @@ GRID
 }
 
 /* =======================================================
-BUTTON
+   BUTTON
 ======================================================= */
 
 .so-btn-primary{
