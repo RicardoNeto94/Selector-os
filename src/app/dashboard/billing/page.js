@@ -1,4 +1,5 @@
 // src/app/dashboard/billing/page.js
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -25,26 +26,40 @@ export default async function BillingPage() {
 
   if (error || !restaurant) {
     console.error("Billing: no restaurant for user", error);
+
     return (
-      <div className="page-fade">
-        <div className="max-w-xl mx-auto rounded-2xl border border-red-500/40 bg-red-50/90 p-6">
-          <h1 className="text-lg font-semibold mb-2 text-red-800">
-            No restaurant found
-          </h1>
-          <p className="text-sm text-red-700/90">
-            We couldn&apos;t find a restaurant linked to your account. Finish
-            onboarding first.
-          </p>
+      <main className="so-main page-fade">
+
+        <div className="so-main-inner mx-auto w-full max-w-[900px]">
+
+          <div className="so-card border border-red-400/30 bg-red-50/90">
+
+            <h1 className="text-lg font-semibold mb-2 text-red-800">
+              No restaurant found
+            </h1>
+
+            <p className="text-sm text-red-700/90">
+              We couldn&apos;t find a restaurant linked to your account.
+              Finish onboarding first.
+            </p>
+
+          </div>
+
         </div>
-      </div>
+
+      </main>
     );
   }
 
   return (
-    <div className="page-fade">
-      <div className="max-w-4xl mx-auto">
+    <main className="so-main page-fade">
+
+      <div className="so-main-inner mx-auto w-full max-w-[1000px]">
+
         <BillingClient restaurant={restaurant} />
+
       </div>
-    </div>
+
+    </main>
   );
 }
