@@ -18,13 +18,9 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  // 1.5) PAYWALL / PLAN GUARD (redirect to /select-plan if no active plan)
-  // NOTE: This assumes you have a "subscriptions" table with:
-  // - user_id (uuid)
-  // - status (text) e.g. "active", "trialing", "canceled", etc.
-  //
-  // If your schema differs, this block will NOT crash the page — it will warn and allow access.
-  let planLabel = "Starter"; // fallback label shown in UI
+  // 1.5) PAYWALL / PLAN GUARD
+  let planLabel = "Starter";
+
   try {
     const { data: subscription, error: subError } = await supabase
       .from("subscriptions")
@@ -34,14 +30,15 @@ export default async function DashboardPage() {
       .maybeSingle();
 
     if (subError) {
-      console.warn("Dashboard: subscription check failed (non-fatal):", subError);
+      console.warn(
+        "Dashboard: subscription check failed (non-fatal):",
+        subError
+      );
     } else if (!subscription) {
-      // No active/trialing subscription → send to plan selection
       redirect("/select-plan");
     } else {
-      // Optional: derive a nicer label (adjust to your schema if needed)
       if (subscription.plan) planLabel = String(subscription.plan);
-      else if (subscription.price_id) planLabel = "Pro"; // generic fallback
+      else if (subscription.price_id) planLabel = "Pro";
       else planLabel = "Active";
     }
   } catch (e) {
@@ -49,10 +46,9 @@ export default async function DashboardPage() {
       "Dashboard: subscription table not available or query threw (non-fatal):",
       e?.message ?? e
     );
-    // fail-open: allow dashboard so you don't lock yourself out if schema differs
   }
 
-  // 2) Get restaurant for this owner
+  // 2) Get restaurant
   const { data: restaurant, error: restaurantError } = await supabase
     .from("restaurants")
     .select("*")
@@ -61,6 +57,7 @@ export default async function DashboardPage() {
 
   if (restaurantError || !restaurant) {
     console.error("Dashboard: no restaurant for user", restaurantError);
+
     return (
       <main className="page-fade">
         <div className="so-main-inner max-w-3xl mx-auto">
@@ -78,7 +75,7 @@ export default async function DashboardPage() {
     );
   }
 
-  // 3) Load some basic stats (safe + simple)
+  // 3) Load stats
   const { data: menus = [] } = await supabase
     .from("menus")
     .select("id, name, created_at")
@@ -100,8 +97,8 @@ export default async function DashboardPage() {
     latestDish = dishes[0] || null;
   }
 
-  // Allergens count is optional – if table doesn’t exist, just show 0
   let allergensCount = 0;
+
   try {
     const { data: allergens = [] } = await supabase
       .from("allergens")
@@ -116,109 +113,103 @@ export default async function DashboardPage() {
     );
   }
 
- return (
-  <main className="so-main page-fade">
-    <div className="so-main-inner space-y-6">
+  return (
+    <main className="so-main page-fade">
+      <div className="so-main-inner space-y-6">
 
-      {/* ALERT / NOTICE */}
-      <section className="so-card so-alert-card">
-        <div>
-          <div className="text-sm text-slate-400">Workspace notice</div>
-          <div className="text-lg font-semibold text-white">
-            SelectorOS workspace active
+        {/* ALERT */}
+        <section className="so-card so-alert-card">
+          <div>
+            <div className="text-sm text-slate-400">Workspace notice</div>
+            <div className="text-lg font-semibold text-white">
+              SelectorOS workspace active
+            </div>
+            <div className="text-sm text-slate-400 mt-1">
+              Manage dishes, allergens and menu visibility from a single cockpit.
+            </div>
           </div>
-          <div className="text-sm text-slate-400 mt-1">
-            Manage dishes, allergens and menu visibility from a single cockpit.
+
+          <button className="so-btn-primary">
+            Open menus
+          </button>
+        </section>
+
+        {/* KPI ROW */}
+        <section className="so-kpi-grid">
+
+          <div className="so-card so-kpi">
+            <div className="so-kpi-title">Menus</div>
+            <div className="so-kpi-value">{menus.length}</div>
+            <div className="so-kpi-sub">Active menus</div>
           </div>
-        </div>
 
-        <button className="so-btn-primary">
-          Open menus
-        </button>
-      </section>
+          <div className="so-card so-kpi">
+            <div className="so-kpi-title">Dishes</div>
+            <div className="so-kpi-value">{dishesCount}</div>
+            <div className="so-kpi-sub">Total dishes</div>
+          </div>
 
+          <div className="so-card so-kpi">
+            <div className="so-kpi-title">Allergens</div>
+            <div className="so-kpi-value">{allergensCount}</div>
+            <div className="so-kpi-sub">Allergen library</div>
+          </div>
 
-      {/* KPI ROW */}
-      <section className="so-kpi-grid">
+          <div className="so-card so-kpi">
+            <div className="so-kpi-title">Plan</div>
+            <div className="so-kpi-value">{planLabel}</div>
+            <div className="so-kpi-sub">Workspace tier</div>
+          </div>
 
-        <div className="so-card so-kpi">
-          <div className="so-kpi-title">Menus</div>
-          <div className="so-kpi-value">{menus.length}</div>
-          <div className="so-kpi-sub">Active menus</div>
-        </div>
+        </section>
 
-        <div className="so-card so-kpi">
-          <div className="so-kpi-title">Dishes</div>
-          <div className="so-kpi-value">{dishesCount}</div>
-          <div className="so-kpi-sub">Total dishes</div>
-        </div>
+        {/* MAIN GRID */}
+        <section className="so-dashboard-grid">
 
-        <div className="so-card so-kpi">
-          <div className="so-kpi-title">Allergens</div>
-          <div className="so-kpi-value">{allergensCount}</div>
-          <div className="so-kpi-sub">Allergen library</div>
-        </div>
+          <div className="so-card">
+            <div className="so-card-title">Latest dish</div>
 
-        <div className="so-card so-kpi">
-          <div className="so-kpi-title">Plan</div>
-          <div className="so-kpi-value">{planLabel}</div>
-          <div className="so-kpi-sub">Workspace tier</div>
-        </div>
+            {latestDish ? (
+              <>
+                <div className="mt-3 text-lg font-semibold text-white">
+                  {latestDish.name}
+                </div>
 
-      </section>
+                <div className="text-sm text-slate-400 mt-1">
+                  Added{" "}
+                  {latestDish.created_at
+                    ? new Date(latestDish.created_at).toLocaleString()
+                    : "recently"}
+                </div>
+              </>
+            ) : (
+              <div className="text-slate-400 mt-3">
+                No dishes yet. Add your first dish.
+              </div>
+            )}
+          </div>
 
+          <div className="so-card">
+            <div className="so-card-title">Workspace status</div>
 
-      {/* MAIN DASHBOARD GRID */}
-      <section className="so-dashboard-grid">
-
-        {/* LEFT PANEL */}
-        <div className="so-card">
-          <div className="so-card-title">Latest dish</div>
-
-          {latestDish ? (
-            <>
-              <div className="mt-3 text-lg font-semibold text-white">
-                {latestDish.name}
+            <div className="mt-4 space-y-2 text-sm text-slate-300">
+              <div>
+                <span className="text-slate-400">Plan:</span> {planLabel}
               </div>
 
-              <div className="text-sm text-slate-400 mt-1">
-                Added{" "}
-                {latestDish.created_at
-                  ? new Date(latestDish.created_at).toLocaleString()
-                  : "recently"}
+              <div>
+                <span className="text-slate-400">Menus:</span> {menus.length}
               </div>
-            </>
-          ) : (
-            <div className="text-slate-400 mt-3">
-              No dishes yet. Add your first dish.
+
+              <div>
+                <span className="text-slate-400">Allergens:</span> {allergensCount}
+              </div>
             </div>
-          )}
-        </div>
-
-
-        {/* RIGHT PANEL */}
-        <div className="so-card">
-          <div className="so-card-title">Workspace status</div>
-
-          <div className="mt-4 space-y-2 text-sm text-slate-300">
-
-            <div>
-              <span className="text-slate-400">Plan:</span> {planLabel}
-            </div>
-
-            <div>
-              <span className="text-slate-400">Menus:</span> {menus.length}
-            </div>
-
-            <div>
-              <span className="text-slate-400">Allergens:</span> {allergensCount}
-            </div>
-
           </div>
-        </div>
 
-      </section>
+        </section>
 
-    </div>
-  </main>
-);
+      </div>
+    </main>
+  );
+}
