@@ -365,3 +365,82 @@
   flex:0 0 auto;
 }
 
+/* =========================================================
+   DASHBOARD LAYOUT SYSTEM
+   (New dashboard design)
+   ========================================================= */
+
+/* Alert / notice card */
+
+.so-alert-card{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:20px;
+}
+
+/* KPI cards row */
+
+.so-kpi-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:18px;
+}
+
+.so-kpi{
+padding:20px;
+}
+
+.so-kpi-title{
+font-size:12px;
+color:rgba(203,213,225,0.6);
+}
+
+.so-kpi-value{
+font-size:28px;
+font-weight:700;
+color:white;
+}
+
+.so-kpi-sub{
+font-size:12px;
+color:rgba(203,213,225,0.5);
+margin-top:4px;
+}
+
+/* Main dashboard grid */
+
+.so-dashboard-grid{
+display:grid;
+grid-template-columns:1.4fr 1fr;
+gap:20px;
+}
+
+.so-card-title{
+font-size:14px;
+font-weight:600;
+color:white;
+}
+
+/* Primary action button */
+
+.so-btn-primary{
+background:linear-gradient(
+135deg,
+rgba(56,189,248,1),
+rgba(99,102,241,1)
+);
+border:none;
+color:white;
+padding:8px 14px;
+border-radius:10px;
+font-size:13px;
+font-weight:600;
+cursor:pointer;
+}
+
+.so-btn-primary:hover{
+transform:translateY(-1px);
+box-shadow:0 10px 20px rgba(0,0,0,0.3);
+}
+
