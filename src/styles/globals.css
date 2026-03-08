@@ -18,6 +18,13 @@
   --transition: 0.25s cubic-bezier(.4,0,.2,1);
 }
 
+/* GLOBAL BOX MODEL FIX (prevents layout overflow bugs) */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /* Your existing base styles start here */
 @layer base {
   h2 {
@@ -105,9 +112,9 @@
   padding-left: 0.75rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  height: 100%; /* Ensure sidebar items are full height */
+  height: 100%;
   display: flex;
-  align-items: center; /* Vertically center the content */
+  align-items: center;
 }
 
 .sidebar-item:hover {
@@ -127,6 +134,7 @@ body {
   background: var(--so-bg-page);
   color: var(--so-text-main);
   overflow-x: hidden;
+  will-change: background;
 }
 
 /* Enable hover underline expansion */
