@@ -116,146 +116,109 @@ export default async function DashboardPage() {
     );
   }
 
-  return (
-    <main className="page-fade">
-      <div className="so-main-inner space-y-6">
-        {/* HERO / WELCOME */}
-        <section className="so-card so-card-hero">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+ return (
+  <main className="so-main page-fade">
+    <div className="so-main-inner space-y-6">
+
+      {/* ALERT / NOTICE */}
+      <section className="so-card so-alert-card">
+        <div>
+          <div className="text-sm text-slate-400">Workspace notice</div>
+          <div className="text-lg font-semibold text-white">
+            SelectorOS workspace active
+          </div>
+          <div className="text-sm text-slate-400 mt-1">
+            Manage dishes, allergens and menu visibility from a single cockpit.
+          </div>
+        </div>
+
+        <button className="so-btn-primary">
+          Open menus
+        </button>
+      </section>
+
+
+      {/* KPI ROW */}
+      <section className="so-kpi-grid">
+
+        <div className="so-card so-kpi">
+          <div className="so-kpi-title">Menus</div>
+          <div className="so-kpi-value">{menus.length}</div>
+          <div className="so-kpi-sub">Active menus</div>
+        </div>
+
+        <div className="so-card so-kpi">
+          <div className="so-kpi-title">Dishes</div>
+          <div className="so-kpi-value">{dishesCount}</div>
+          <div className="so-kpi-sub">Total dishes</div>
+        </div>
+
+        <div className="so-card so-kpi">
+          <div className="so-kpi-title">Allergens</div>
+          <div className="so-kpi-value">{allergensCount}</div>
+          <div className="so-kpi-sub">Allergen library</div>
+        </div>
+
+        <div className="so-card so-kpi">
+          <div className="so-kpi-title">Plan</div>
+          <div className="so-kpi-value">{planLabel}</div>
+          <div className="so-kpi-sub">Workspace tier</div>
+        </div>
+
+      </section>
+
+
+      {/* MAIN DASHBOARD GRID */}
+      <section className="so-dashboard-grid">
+
+        {/* LEFT PANEL */}
+        <div className="so-card">
+          <div className="so-card-title">Latest dish</div>
+
+          {latestDish ? (
+            <>
+              <div className="mt-3 text-lg font-semibold text-white">
+                {latestDish.name}
+              </div>
+
+              <div className="text-sm text-slate-400 mt-1">
+                Added{" "}
+                {latestDish.created_at
+                  ? new Date(latestDish.created_at).toLocaleString()
+                  : "recently"}
+              </div>
+            </>
+          ) : (
+            <div className="text-slate-400 mt-3">
+              No dishes yet. Add your first dish.
+            </div>
+          )}
+        </div>
+
+
+        {/* RIGHT PANEL */}
+        <div className="so-card">
+          <div className="so-card-title">Workspace status</div>
+
+          <div className="mt-4 space-y-2 text-sm text-slate-300">
+
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-emerald-600">
-                SELECTOROS • LIVE COCKPIT
-              </p>
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900 md:text-3xl">
-                Welcome back,{" "}
-                <span className="text-emerald-600">
-                  {restaurant.name || "Operator"}
-                </span>
-                .
-              </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-600">
-                Manage dishes, allergens and menu visibility from a single
-                control panel. Your staff views update in real time with every
-                change.
-              </p>
+              <span className="text-slate-400">Plan:</span> {planLabel}
             </div>
 
-            <div className="mt-2 flex gap-2 text-xs text-slate-600 md:flex-col md:text-right">
-              <div>
-                <span className="font-medium text-slate-900">
-                  Menus live:&nbsp;
-                </span>
-                {menus.length}
-              </div>
-              <div>
-                <span className="font-medium text-slate-900">
-                  Dishes in workspace:&nbsp;
-                </span>
-                {dishesCount}
-              </div>
-              <div>
-                <span className="font-medium text-slate-900">
-                  Allergens in library:&nbsp;
-                </span>
-                {allergensCount}
-              </div>
+            <div>
+              <span className="text-slate-400">Menus:</span> {menus.length}
             </div>
-          </div>
-        </section>
 
-        {/* KPI GRID */}
-        <section className="so-grid">
-          {/* Total dishes */}
-          <div className="so-card">
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>Total dishes in SelectorOS</span>
+            <div>
+              <span className="text-slate-400">Allergens:</span> {allergensCount}
             </div>
-            <div className="mt-2 text-3xl font-semibold text-slate-900">
-              {dishesCount}
-            </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Everything synced with your live guest view.
-            </p>
-          </div>
 
-          {/* Menus */}
-          <div className="so-card">
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>Menus in your workspace</span>
-            </div>
-            <div className="mt-2 text-3xl font-semibold text-slate-900">
-              {menus.length}
-            </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Public &amp; staff views powered from here.
-            </p>
           </div>
+        </div>
 
-          {/* Allergens */}
-          <div className="so-card">
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>Allergens in your library</span>
-            </div>
-            <div className="mt-2 text-3xl font-semibold text-slate-900">
-              {allergensCount}
-            </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Central allergen set used by all menus.
-            </p>
-          </div>
-        </section>
+      </section>
 
-        {/* SECONDARY GRID */}
-        <section className="so-grid-lg">
-          {/* Latest dish */}
-          <div className="so-card">
-            <div className="text-xs text-slate-500">Latest added dish</div>
-            {latestDish ? (
-              <>
-                <div className="mt-2 text-lg font-semibold text-slate-900">
-                  {latestDish.name}
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  Added{" "}
-                  {latestDish.created_at
-                    ? new Date(latestDish.created_at).toLocaleString()
-                    : "recently"}
-                  .
-                </p>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-slate-600">
-                No dishes yet. Start by adding your first dish from the Dishes
-                tab.
-              </p>
-            )}
-          </div>
-
-          {/* Workspace status */}
-          <div className="so-card">
-            <div className="text-xs text-slate-500">Workspace status</div>
-            <div className="mt-2 space-y-1 text-sm text-slate-700">
-              <div>
-                <span className="font-medium text-slate-900">Plan:</span>{" "}
-                {planLabel}
-              </div>
-              <div>
-                <span className="font-medium text-slate-900">Menus live:</span>{" "}
-                {menus.length}
-              </div>
-              <div>
-                <span className="font-medium text-slate-900">
-                  Label coverage:
-                </span>{" "}
-                100%*
-              </div>
-            </div>
-            <p className="mt-3 text-[11px] text-slate-500">
-              *Label coverage calculation will be refined in a later release.
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
-}
+    </div>
+  </main>
+);
