@@ -66,22 +66,19 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <div className="so-dashboard-root sidebar-expanded">
+    <div className="so-dashboard-root">
 
       {/* SIDEBAR */}
-      <aside className="so-sidebar is-expanded">
+      <aside className="so-sidebar">
 
         {/* BRAND */}
         <div>
-          <div
-            className="so-sidebar-brand"
-            style={{ justifyContent: "space-between" }}
-          >
+          <div className="so-sidebar-brand">
             <Image
               src={FULL_LOGO_SRC}
               alt="SelectorOS logo"
-              width={72}
-              height={36}
+              width={96}
+              height={40}
               className="so-sidebar-logo"
               priority
             />
@@ -196,11 +193,14 @@ export default function DashboardLayout({ children }) {
       {/* MAIN */}
       <main className="so-main">
 
-        {/* TOP BAR */}
+        {/* TOPBAR */}
         <div className="so-topbar">
 
           <div className="so-topbar-left">
-            <div className="so-topbar-title">Morning, Operator!</div>
+            <div className="so-topbar-title">
+              Morning, Operator
+            </div>
+
             <div className="so-topbar-sub">
               Here’s what’s happening in your workspace today.
             </div>
@@ -213,7 +213,7 @@ export default function DashboardLayout({ children }) {
 
               <input
                 className="so-search-input"
-                placeholder="Search for something…"
+                placeholder="Search dishes, menus, allergens…"
               />
             </div>
 
@@ -229,7 +229,8 @@ export default function DashboardLayout({ children }) {
 
         </div>
 
-        <div className="so-main-inner">{children}</div>
+        {/* PAGE CONTENT */}
+        {children}
 
       </main>
 
