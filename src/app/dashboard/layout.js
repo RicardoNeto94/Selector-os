@@ -193,42 +193,6 @@ export default function DashboardLayout({ children }) {
       {/* MAIN */}
       <main className="so-main">
 
-        {/* TOPBAR */}
-        <div className="so-topbar">
-
-          <div className="so-topbar-left">
-            <div className="so-topbar-title">
-              Morning, Operator
-            </div>
-
-            <div className="so-topbar-sub">
-              Here’s what’s happening in your workspace today.
-            </div>
-          </div>
-
-          <div className="so-topbar-right">
-
-            <div className="so-search">
-              <MagnifyingGlassIcon className="so-search-icon shrink-0" />
-
-              <input
-                className="so-search-input"
-                placeholder="Search dishes, menus, allergens…"
-              />
-            </div>
-
-            <button
-              type="button"
-              className="so-icon-btn"
-              aria-label="Notifications"
-            >
-              <BellIcon className="so-icon-btn-icon shrink-0" />
-            </button>
-
-          </div>
-
-        </div>
-
         {/* PAGE CONTENT */}
         {children}
 
