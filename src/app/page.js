@@ -1,5 +1,3 @@
-// src/app/page.js
-
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -14,27 +12,28 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If user already logged in → send them to dashboard
+  // Logged in users go straight to the app
   if (user) {
     redirect("/dashboard");
   }
 
-  // Otherwise show landing page
+  // Visitors see the landing page
   return (
-    <main className="min-h-screen text-white">
+    <main className="min-h-screen">
 
+      {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 py-24 text-center">
 
-        <h1 className="text-4xl md:text-6xl font-semibold mb-6">
+        <h1 className="text-5xl font-semibold text-white">
           The operating system for restaurant menus
         </h1>
 
-        <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10">
-          SelectorOS helps restaurants manage dishes, allergens, and menus
-          from a single workspace — giving teams clarity and guests confidence.
+        <p className="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">
+          Manage dishes, allergens and menus from a single workspace.
+          Built for modern restaurants.
         </p>
 
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 mt-8">
 
           <a
             href="/sign-up"
@@ -45,7 +44,7 @@ export default async function HomePage() {
 
           <a
             href="/sign-in"
-            className="px-6 py-3 rounded-full border border-white/30"
+            className="px-6 py-3 rounded-full border border-white/30 text-white"
           >
             Login
           </a>
@@ -55,17 +54,36 @@ export default async function HomePage() {
       </section>
 
 
-      <section className="max-w-5xl mx-auto px-6 py-20 text-center">
+      {/* FEATURES */}
+      <section className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-4 gap-6">
 
-        <h2 className="text-3xl font-semibold mb-6">
-          Restaurants deserve better menu systems
-        </h2>
+        <div className="so-card">
+          <h3 className="text-white font-semibold">Menu intelligence</h3>
+          <p className="text-slate-400 text-sm mt-2">
+            Structure menus, categories and dishes in one system.
+          </p>
+        </div>
 
-        <p className="text-slate-400 text-lg leading-relaxed">
-          Menu information often lives across spreadsheets, printed menus,
-          kitchen notes, and staff memory. SelectorOS brings dishes,
-          allergens, and menus into one structured system.
-        </p>
+        <div className="so-card">
+          <h3 className="text-white font-semibold">Allergen control</h3>
+          <p className="text-slate-400 text-sm mt-2">
+            Track allergens at dish level for full clarity.
+          </p>
+        </div>
+
+        <div className="so-card">
+          <h3 className="text-white font-semibold">Guest safe view</h3>
+          <p className="text-slate-400 text-sm mt-2">
+            Show guests exactly what they can safely eat.
+          </p>
+        </div>
+
+        <div className="so-card">
+          <h3 className="text-white font-semibold">Inverted filtering</h3>
+          <p className="text-slate-400 text-sm mt-2">
+            Instantly see dishes that contain or avoid allergens.
+          </p>
+        </div>
 
       </section>
 
