@@ -42,7 +42,8 @@ export default function WinesPage() {
     const { data: winesData, error } = await supabase
       .from("wines")
       .select("*")
-      .eq("restaurant_id", restaurantData.id);
+      .eq("restaurant_id", restaurantData.id)
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Wine loading error:", error);
@@ -51,6 +52,8 @@ export default function WinesPage() {
     setWines(winesData || []);
     setLoading(false);
   };
+
+  /* UPDATE STOCK */
 
   const updateStock = async (wineId, currentStock, change) => {
 
@@ -69,17 +72,21 @@ export default function WinesPage() {
 
   };
 
-  const winesByType = wines.reduce((groups, wine) => {
+  /* DELETE WINE */
 
-    const type = wine.wine_type || "Other";
+  const deleteWine = async (wineId) => {
 
-    if (!groups[type]) groups[type] = [];
+    const confirmDelete = confirm("Remove this wine from the cellar?");
+    if (!confirmDelete) return;
 
-    groups[type].push(wine);
+    await supabase
+      .from("wines")
+      .delete()
+      .eq("id", wineId);
 
-    return groups;
+    setWines(prev => prev.filter(w => w.id !== wineId));
 
-  }, {});
+  };
 
   if (loading) {
     return (
@@ -115,74 +122,73 @@ export default function WinesPage() {
 
       ) : (
 
-        Object.keys(winesByType).map((type) => (
+        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-          <div key={type} className="mb-10">
+          {wines.map((wine) => (
 
-            <h2 className="text-lg font-semibold text-white mb-4">
-              {type}
-            </h2>
+            <div
+              key={wine.id}
+              className="so-card p-6 hover:scale-[1.02] transition-transform"
+            >
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="text-lg font-semibold text-white">
+                {wine.name}
+              </div>
 
-              {winesByType[type].map((wine) => (
+              <div className="text-sm text-slate-400 mt-1">
+                {wine.region} · {wine.country}
+              </div>
 
-                <div
-                  key={wine.id}
-                  className="so-card p-6"
-                >
+              <div className="text-sm text-slate-400">
+                {wine.vintage} · {wine.size}
+              </div>
 
-                  <div className="text-lg font-semibold text-white">
-                    {wine.name}
+              <div className="mt-3 text-sm text-slate-300">
+                €{wine.price ?? "-"}
+              </div>
+
+              {/* STOCK CONTROLS */}
+
+              <div className="flex items-center justify-between mt-4">
+
+                <div className="flex items-center gap-3">
+
+                  <button
+                    onClick={() => updateStock(wine.id, wine.stock, -1)}
+                    className="px-2 py-1 bg-slate-800 rounded text-white"
+                  >
+                    –
+                  </button>
+
+                  <div className="text-sm text-slate-300">
+                    {wine.stock ?? 0}
                   </div>
 
-                  <div className="text-sm text-slate-400 mt-1">
-                    {wine.region} · {wine.country}
-                  </div>
-
-                  <div className="text-sm text-slate-400">
-                    {wine.vintage} · {wine.size}
-                  </div>
-
-                  <div className="mt-3 text-sm text-slate-300">
-                    €{wine.price ?? "-"}
-                  </div>
-
-                  <div className="flex items-center justify-between mt-4">
-
-                    <div className="flex items-center gap-3">
-
-                      <button
-                        onClick={() => updateStock(wine.id, wine.stock, -1)}
-                        className="px-2 py-1 bg-slate-800 rounded"
-                      >
-                        –
-                      </button>
-
-                      <div className="text-sm text-slate-300">
-                        {wine.stock ?? 0}
-                      </div>
-
-                      <button
-                        onClick={() => updateStock(wine.id, wine.stock, 1)}
-                        className="px-2 py-1 bg-slate-800 rounded"
-                      >
-                        +
-                      </button>
-
-                    </div>
-
-                  </div>
+                  <button
+                    onClick={() => updateStock(wine.id, wine.stock, 1)}
+                    className="px-2 py-1 bg-slate-800 rounded text-white"
+                  >
+                    +
+                  </button>
 
                 </div>
 
-              ))}
+                {/* DELETE BUTTON */}
+
+                <button
+                  onClick={() => deleteWine(wine.id)}
+                  className="text-xs text-red-400 hover:text-red-300"
+                >
+                  Remove
+                </button>
+
+              </div>
 
             </div>
 
-          </div>
+          ))}
 
-        ))
+        </div>
 
       )}
 
