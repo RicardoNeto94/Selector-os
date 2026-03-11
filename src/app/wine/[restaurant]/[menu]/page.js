@@ -280,61 +280,87 @@ return (
 
   )}
 
-  {/* MODAL */}
+  {/* WINE MODAL */}
 
-  {selectedWine && (
+{selectedWine && (
 
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
 
-      <div className="bg-white text-black max-w-3xl w-full rounded-xl p-8 relative">
+  <div className="bg-white text-gray-900 max-w-4xl w-full rounded-lg shadow-2xl p-10 relative">
 
-        <button
-          onClick={() => setSelectedWine(null)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black"
-        >
-          ✕
-        </button>
+    {/* CLOSE BUTTON */}
 
-        <h2 className="text-2xl font-semibold mb-6">
-          {selectedWine.name} - {selectedWine.vintage}
-        </h2>
+    <button
+      onClick={() => setSelectedWine(null)}
+      className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 text-xl"
+    >
+      ✕
+    </button>
 
-        <div className="grid grid-cols-3 gap-6 mb-6">
+    {/* TITLE */}
 
-          <div>
-            <div className="text-sm text-gray-500">Price</div>
-            <div>€{selectedWine.price}</div>
-          </div>
+    <h2 className="text-2xl font-semibold mb-8">
+      {selectedWine.name} - {selectedWine.vintage}
+    </h2>
 
-          <div>
-            <div className="text-sm text-gray-500">Grape</div>
-            <div>{selectedWine.grapes}</div>
-          </div>
+    {/* DIVIDER */}
 
-          <div>
-            <div className="text-sm text-gray-500">Region</div>
-            <div>{selectedWine.country} → {selectedWine.region} → {selectedWine.subregion}</div>
-          </div>
+    <div className="border-t border-amber-300 mb-8"></div>
 
-        </div>
+    {/* WINE INFO GRID */}
 
-        <div>
+    <div className="grid grid-cols-3 gap-10 mb-10 text-sm">
 
-          <div className="text-sm text-gray-500 mb-2">
-            Description
-          </div>
+      <div className="text-amber-700 font-medium">
+        Price (Bottle)
+      </div>
 
-          <p className="leading-relaxed text-gray-700">
-            {selectedWine.description}
-          </p>
+      <div className="col-span-2">
+        €{selectedWine.price} &nbsp;&nbsp;
+        {selectedWine.size}
+      </div>
 
-        </div>
+      <div className="text-amber-700 font-medium">
+        Grape
+      </div>
 
+      <div className="col-span-2">
+        {selectedWine.grapes}
+      </div>
+
+      <div className="text-amber-700 font-medium">
+        Region
+      </div>
+
+      <div className="col-span-2">
+        {selectedWine.country} → {selectedWine.region} → {selectedWine.subregion}
       </div>
 
     </div>
 
-  )}
+    {/* SECOND DIVIDER */}
+
+    <div className="border-t border-amber-300 mb-8"></div>
+
+    {/* DESCRIPTION */}
+
+    <div>
+
+      <div className="text-amber-700 font-medium mb-3">
+        Description
+      </div>
+
+      <p className="leading-relaxed text-gray-700">
+        {selectedWine.description}
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
 
 </div>
 
