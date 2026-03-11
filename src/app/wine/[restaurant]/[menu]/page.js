@@ -122,85 +122,101 @@ export default function WineSelector({ params }) {
 
       {/* FILTER PANEL */}
 
-      <div className="wine-filter-panel">
+      {/* FILTER PANEL */}
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("wine_type",e.target.value)}
-        >
-          <option value="">Wine Type</option>
-          {unique("wine_type").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+<div className="wine-filter-panel">
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("country",e.target.value)}
-        >
-          <option value="">Country</option>
-          {unique("country").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("wine_type",e.target.value)}
+    >
+      <option value="">Select Wine Type</option>
+      {unique("wine_type").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("region",e.target.value)}
-        >
-          <option value="">Region</option>
-          {unique("region").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("country",e.target.value)}
+    >
+      <option value="">Select Country</option>
+      {unique("country").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("subregion",e.target.value)}
-        >
-          <option value="">Sub Region</option>
-          {unique("subregion").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("region",e.target.value)}
+    >
+      <option value="">Select Region</option>
+      {unique("region").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("size",e.target.value)}
-        >
-          <option value="">Bottle Size</option>
-          {unique("size").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("subregion",e.target.value)}
+    >
+      <option value="">Select Sub Region</option>
+      {unique("subregion").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("grapes",e.target.value)}
-        >
-          <option value="">Grape</option>
-          {unique("grapes").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("size",e.target.value)}
+    >
+      <option value="">Select Bottle Size</option>
+      {unique("size").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-        <select
-          className="wine-filter"
-          onChange={(e)=>updateFilter("vintage",e.target.value)}
-        >
-          <option value="">Vintage</option>
-          {unique("vintage").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("grapes",e.target.value)}
+    >
+      <option value="">Select Grape</option>
+      {unique("grapes").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-        <input
-          className="wine-filter"
-          placeholder="Search by name"
-          onChange={(e)=>updateFilter("name",e.target.value)}
-        />
+  <div className="wine-filter-wrapper">
+    <select
+      className="wine-filter"
+      onChange={(e)=>updateFilter("vintage",e.target.value)}
+    >
+      <option value="">Select Vintage</option>
+      {unique("vintage").map(v => (
+        <option key={v}>{v}</option>
+      ))}
+    </select>
+  </div>
 
-      </div>
+  <input
+    className="wine-filter"
+    placeholder="Search wine name"
+    onChange={(e)=>updateFilter("name",e.target.value)}
+  />
+
+</div>
 
       {/* SHOW BUTTON */}
 
