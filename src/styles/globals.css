@@ -78,12 +78,19 @@
   }
 
   .input {
-    @apply w-full rounded-xl
-      border border-slate-600 bg-slate-900/70
-      text-slate-50 placeholder:text-slate-500
-      px-4 py-2.5 text-sm;
-  }
+  @apply w-full rounded-xl
+    border border-slate-600
+    bg-slate-900/70
+    text-slate-200
+    placeholder:text-slate-400
+    px-4 py-2.5 text-sm
+    transition;
+}
 
+.input:focus {
+  @apply outline-none border-emerald-400
+  ring-2 ring-emerald-400/30;
+}
   .link {
     @apply rounded-md font-semibold text-green-400;
   }
