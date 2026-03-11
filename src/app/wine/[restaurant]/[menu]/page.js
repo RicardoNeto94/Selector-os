@@ -17,12 +17,12 @@ export default function WineSelector({ params }) {
   const [filteredWines, setFilteredWines] = useState([]);
 
   const [filters, setFilters] = useState({
-    type: "",
+    wine_type: "",
     country: "",
     region: "",
     subregion: "",
     size: "",
-    grape: "",
+    grapes: "",
     vintage: "",
     name: ""
   });
@@ -39,12 +39,16 @@ export default function WineSelector({ params }) {
       .eq("slug", restaurant)
       .maybeSingle();
 
+    if (!r) return;
+
     const { data: m } = await supabase
       .from("wine_menus")
       .select("*")
       .eq("slug", menu)
       .eq("restaurant_id", r.id)
       .maybeSingle();
+
+    if (!m) return;
 
     const { data: wineItems } = await supabase
       .from("wine_menu_items")
@@ -54,7 +58,7 @@ export default function WineSelector({ params }) {
       `)
       .eq("wine_menu_id", m.id);
 
-    const winesList = wineItems.map(w => w.wines);
+    const winesList = wineItems?.map(item => item.wines) || [];
 
     setRestaurant(r);
     setWineMenu(m);
@@ -74,7 +78,9 @@ export default function WineSelector({ params }) {
       if (!filters[key]) return;
 
       results = results.filter(w =>
-        String(w[key]).toLowerCase().includes(filters[key].toLowerCase())
+        String(w[key] ?? "")
+          .toLowerCase()
+          .includes(filters[key].toLowerCase())
       );
 
     });
@@ -83,12 +89,10 @@ export default function WineSelector({ params }) {
   }
 
   function updateFilter(field, value) {
-
     setFilters(prev => ({
       ...prev,
       [field]: value
     }));
-
   }
 
   return (
@@ -96,7 +100,15 @@ export default function WineSelector({ params }) {
 
       {/* HEADER */}
 
-      <div className="text-center mb-12">
+      <div className="wine-selector-header">
+
+        {restaurantData?.logo_url && (
+          <img
+            src={restaurantData.logo_url}
+            className="h-16 mb-2"
+            alt="Restaurant logo"
+          />
+        )}
 
         <h1 className="text-4xl font-semibold">
           {restaurantData?.name}
@@ -110,93 +122,85 @@ export default function WineSelector({ params }) {
 
       {/* FILTER PANEL */}
 
-     <div className="max-w-5xl w-full">
+      <div className="wine-filter-panel">
 
-  <div className="so-card p-10">
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("wine_type",e.target.value)}
+        >
+          <option value="">Wine Type</option>
+          {unique("wine_type").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("country",e.target.value)}
+        >
+          <option value="">Country</option>
+          {unique("country").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("wine_type",e.target.value)}
-      >
-        <option value="">Wine Type</option>
-        {unique("wine_type").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("region",e.target.value)}
+        >
+          <option value="">Region</option>
+          {unique("region").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("country",e.target.value)}
-      >
-        <option value="">Country</option>
-        {unique("country").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("subregion",e.target.value)}
+        >
+          <option value="">Sub Region</option>
+          {unique("subregion").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("region",e.target.value)}
-      >
-        <option value="">Region</option>
-        {unique("region").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("size",e.target.value)}
+        >
+          <option value="">Bottle Size</option>
+          {unique("size").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("subregion",e.target.value)}
-      >
-        <option value="">Sub Region</option>
-        {unique("subregion").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("grapes",e.target.value)}
+        >
+          <option value="">Grape</option>
+          {unique("grapes").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("size",e.target.value)}
-      >
-        <option value="">Bottle Size</option>
-        {unique("size").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
+        <select
+          className="wine-filter"
+          onChange={(e)=>updateFilter("vintage",e.target.value)}
+        >
+          <option value="">Vintage</option>
+          {unique("vintage").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("grapes",e.target.value)}
-      >
-        <option value="">Grape</option>
-        {unique("grapes").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
+        <input
+          className="wine-filter"
+          placeholder="Search by name"
+          onChange={(e)=>updateFilter("name",e.target.value)}
+        />
 
-      <select
-        className="wine-filter"
-        onChange={(e)=>updateFilter("vintage",e.target.value)}
-      >
-        <option value="">Vintage</option>
-        {unique("vintage").map(v => (
-          <option key={v}>{v}</option>
-        ))}
-      </select>
-
-      <input
-        className="wine-filter"
-        placeholder="Search by name"
-        onChange={(e)=>updateFilter("name",e.target.value)}
-      />
-
-    </div>
-
-  </div>
-
-</div>
+      </div>
 
       {/* SHOW BUTTON */}
 
@@ -215,7 +219,7 @@ export default function WineSelector({ params }) {
 
           {filteredWines.map((wine) => (
 
-            <div key={wine.id} className="so-card p-6">
+            <div key={wine.id} className="wine-selector-card">
 
               <div className="text-lg font-semibold">
                 {wine.name}
@@ -240,115 +244,6 @@ export default function WineSelector({ params }) {
         </div>
 
       )}
-
-    </div>
-  );
-}export const dynamic = "force-dynamic";
-
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-
-export default async function WineGuestPage({ params }) {
-
-  const supabase = createServerComponentClient({ cookies });
-
-  const { restaurant, menu } = params;
-
-  /* -------------------------------- */
-  /* LOAD RESTAURANT                  */
-  /* -------------------------------- */
-
-  const { data: restaurantData, error: restaurantError } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("slug", restaurant)
-    .maybeSingle();
-
-  if (!restaurantData || restaurantError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Restaurant not found
-      </div>
-    );
-  }
-
-  /* -------------------------------- */
-  /* LOAD WINE MENU                   */
-  /* -------------------------------- */
-
-  const { data: wineMenu, error: menuError } = await supabase
-    .from("wine_menus")
-    .select("*")
-    .eq("slug", menu)
-    .eq("restaurant_id", restaurantData.id)
-    .maybeSingle();
-
-  if (!wineMenu || menuError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Wine menu not found
-      </div>
-    );
-  }
-
-  /* -------------------------------- */
-  /* LOAD WINES                       */
-  /* -------------------------------- */
-
-  const { data: wineItems, error: winesError } = await supabase
-    .from("wine_menu_items")
-    .select(`
-      wine_id,
-      wines (*)
-    `)
-    .eq("wine_menu_id", wineMenu.id);
-
-  const wines = wineItems?.map(item => item.wines) || [];
-
-  /* -------------------------------- */
-  /* PAGE                             */
-  /* -------------------------------- */
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-white p-10">
-
-      <h1 className="text-3xl font-semibold mb-10">
-        {restaurantData.name} — {wineMenu.name}
-      </h1>
-
-      {wines.length === 0 && (
-        <div className="text-slate-400 mb-8">
-          No wines in this menu yet.
-        </div>
-      )}
-
-      <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-        {wines.map((wine) => (
-
-          <div key={wine.id} className="so-card p-6">
-
-            <div className="text-lg font-semibold">
-              {wine.name}
-            </div>
-
-            <div className="text-sm text-slate-400 mt-1">
-              {wine.region} · {wine.country}
-            </div>
-
-            <div className="text-sm text-slate-400">
-              {wine.vintage} · {wine.size}
-            </div>
-
-            <div className="mt-3">
-              €{wine.price}
-            </div>
-
-          </div>
-
-        ))}
-
-      </div>
 
     </div>
   );
