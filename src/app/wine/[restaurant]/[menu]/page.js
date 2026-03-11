@@ -122,8 +122,6 @@ export default function WineSelector({ params }) {
 
       {/* FILTER PANEL */}
 
-      {/* FILTER PANEL */}
-
 <div className="wine-filter-panel">
 
   <div className="wine-filter-wrapper">
@@ -131,7 +129,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("wine_type",e.target.value)}
     >
-      <option value="">Select Wine Type</option>
+      <option value="">All Wine Types</option>
       {unique("wine_type").map(v => (
         <option key={v}>{v}</option>
       ))}
@@ -143,7 +141,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("country",e.target.value)}
     >
-      <option value="">Select Country</option>
+      <option value="">All Countries</option>
       {unique("country").map(v => (
         <option key={v}>{v}</option>
       ))}
@@ -155,7 +153,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("region",e.target.value)}
     >
-      <option value="">Select Region</option>
+      <option value="">All Regions</option>
       {unique("region").map(v => (
         <option key={v}>{v}</option>
       ))}
@@ -167,7 +165,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("subregion",e.target.value)}
     >
-      <option value="">Select Sub Region</option>
+      <option value="">All Sub Regions</option>
       {unique("subregion").map(v => (
         <option key={v}>{v}</option>
       ))}
@@ -179,7 +177,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("size",e.target.value)}
     >
-      <option value="">Select Bottle Size</option>
+      <option value="">All Bottle Sizes</option>
       {unique("size").map(v => (
         <option key={v}>{v}</option>
       ))}
@@ -191,7 +189,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("grapes",e.target.value)}
     >
-      <option value="">Select Grape</option>
+      <option value="">All Grapes</option>
       {unique("grapes").map(v => (
         <option key={v}>{v}</option>
       ))}
@@ -203,7 +201,7 @@ export default function WineSelector({ params }) {
       className="wine-filter"
       onChange={(e)=>updateFilter("vintage",e.target.value)}
     >
-      <option value="">Select Vintage</option>
+      <option value="">All Vintages</option>
       {unique("vintage").map(v => (
         <option key={v}>{v}</option>
       ))}
