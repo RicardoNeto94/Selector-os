@@ -49,7 +49,10 @@ export default function NewWinePage() {
       return;
     }
 
-    const { error } = await supabase.from("wines").insert({
+    const { data, error } = await supabase
+  .from("wines")
+  .insert([
+    {
       restaurant_id: restaurant.id,
       name,
       producer,
@@ -61,7 +64,9 @@ export default function NewWinePage() {
       price: price ? Number(price) : null,
       stock: Number(stock),
       description
-    });
+    }
+  ])
+  .select();
 
     if (error) {
       console.error("Wine insert error:", error);
@@ -71,6 +76,8 @@ export default function NewWinePage() {
 
     router.push("/dashboard/wines");
   };
+  
+  console.log("Inserted wine:", data);
 
   return (
 
