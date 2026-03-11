@@ -20,6 +20,8 @@ export default function NewWinePage() {
   const [size, setSize] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState(0);
+  const [grapes, setGrapes] = useState("");
+  const [subregion, setSubregion] = useState("");
   const [description, setDescription] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -62,7 +64,9 @@ export default function NewWinePage() {
           producer,
           wine_type: wineType,
           region,
+          subregion,
           country,
+          grapes,
           vintage,
           size,
           price: price ? Number(price) : null,
@@ -111,6 +115,12 @@ export default function NewWinePage() {
             value={producer}
             onChange={(e) => setProducer(e.target.value)}
           />
+<input
+  className="so-input"
+  placeholder="Grape variety (Pinot Noir, Chardonnay...)"
+  value={grapes}
+  onChange={(e) => setGrapes(e.target.value)}
+/>
 
           <select
             className="so-input"
@@ -139,6 +149,12 @@ export default function NewWinePage() {
             value={region}
             onChange={(e) => setRegion(e.target.value)}
           />
+              <input
+  className="so-input"
+  placeholder="Subregion"
+  value={subregion}
+  onChange={(e) => setSubregion(e.target.value)}
+/>
 
           <input
             className="so-input"
