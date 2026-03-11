@@ -5,8 +5,8 @@
 /* GLOBAL THEME VARIABLES */
 :root {
   --primary: #18A999;
---secondary: #F45B69;
---accent: #E9C46A;
+  --secondary: #F45B69;
+  --accent: #E9C46A;
 
   --font: 'Inter', sans-serif;
 
@@ -77,20 +77,26 @@
     @apply w-full text-center text-red-600;
   }
 
-  .input {
-  @apply w-full rounded-xl
-    border border-slate-600
-    bg-white/90
-    text-slate-800
-    placeholder:text-slate-400
-    px-4 py-2.5 text-sm
-    transition;
-}
+  /* INPUT STYLE */
 
-.input:focus {
-  @apply outline-none border-emerald-400
-  ring-2 ring-emerald-400/30;
-}
+  .input {
+    @apply w-full rounded-xl
+      border border-slate-600
+      bg-white/90
+      placeholder:text-slate-400
+      px-4 py-2.5 text-sm
+      transition;
+      
+    color: #1e293b;
+  }
+
+  .input:focus {
+    @apply outline-none border-emerald-400
+    ring-2 ring-emerald-400/30;
+
+    color: #1e293b;
+  }
+
   .link {
     @apply rounded-md font-semibold text-green-400;
   }
@@ -99,6 +105,26 @@
     @apply flex flex-row items-center justify-start gap-1;
   }
 
+}
+
+/* FORCE INPUT TEXT COLOR (fix browser override) */
+
+.input,
+.input:focus,
+.input:active {
+  color: #1e293b !important;
+}
+
+input,
+textarea,
+select {
+  color: #1e293b !important;
+}
+
+/* FIX NUMBER INPUT COLOR */
+
+input[type="number"] {
+  color: #1e293b;
 }
 
 /* PAGE FADE ANIMATION */
@@ -160,8 +186,4 @@ nav a {
 nav a:hover span:last-child {
   width: 6px;
   opacity: 0.8;
-}
-
-  input[type="number"] {
-  color: #1e293b;
 }
