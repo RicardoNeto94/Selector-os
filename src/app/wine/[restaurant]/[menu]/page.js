@@ -244,49 +244,154 @@ return (
 
   {/* RESULTS */}
 
-  {showResults && filteredWines.length > 0 && (
+{showResults && filteredWines.length > 0 && (
 
-    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 mt-12 max-w-6xl w-full">
+<div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-12 max-w-6xl w-full">
 
-      {filteredWines.map((wine) => (
+{filteredWines.map((wine) => (
 
-        <div
-          key={wine.id}
-          onClick={() => setSelectedWine(wine)}
-          className="cursor-pointer bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-sky-400 transition"
-        >
+<div
+key={wine.id}
+onClick={()=>{
+setSelectedWine(wine)
+setTimeout(()=>setModalVisible(true),10)
+}}
+className="group cursor-pointer bg-slate-900 border border-slate-700 rounded-xl p-6 transition-all duration-200 hover:border-amber-400 hover:shadow-xl hover:-translate-y-1"
+>
 
-          <div className="text-lg font-semibold">
-            {wine.name}
-          </div>
+{/* WINE NAME */}
 
-          <div className="text-sm text-slate-400">
-            {wine.region} · {wine.country}
-          </div>
+<div className="text-lg font-semibold text-white group-hover:text-amber-300 transition">
+{wine.name}
+</div>
 
-          <div className="text-sm text-slate-400">
-            {wine.vintage} · {wine.size}
-          </div>
+{/* REGION */}
 
-          <div className="mt-2 font-semibold">
-            €{wine.price}
-          </div>
+<div className="text-sm text-slate-400 mt-2">
+{wine.region} · {wine.country}
+</div>
 
-        </div>
+{/* VINTAGE */}
 
-      ))}
+<div className="text-sm text-slate-400">
+{wine.vintage} · {wine.size}
+</div>
 
-    </div>
+{/* DIVIDER */}
 
-  )}
+<div className="border-t border-slate-700 my-4 group-hover:border-amber-400 transition"></div>
 
+{/* PRICE */}
+
+<div className="text-base font-semibold text-amber-400">
+€{wine.price}
+</div>
+
+</div>
+
+))}
+
+</div>
+
+)}
   {/* WINE MODAL */}
 
 {selectedWine && (
 
-<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+<div
+className={`fixed inset-0 flex items-center justify-center z-50 px-4 transition-all duration-200
+${modalVisible ? "bg-black/70 backdrop-blur-sm opacity-100" : "bg-black/0 opacity-0"}
+`}
+>
 
-  <div className="bg-white text-gray-900 max-w-4xl w-full rounded-lg shadow-2xl p-10 relative">
+<div
+className={`bg-white text-gray-900 max-w-4xl w-full rounded-lg shadow-2xl p-10 relative transition-all duration-200
+${modalVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}
+`}
+>
+
+{/* CLOSE BUTTON */}
+
+<button
+onClick={()=>{
+setModalVisible(false)
+setTimeout(()=>setSelectedWine(null),200)
+}}
+className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 text-xl"
+>
+✕
+</button>
+
+
+{/* TITLE */}
+
+<h2 className="text-2xl font-semibold mb-8">
+{selectedWine.name} – {selectedWine.vintage}
+</h2>
+
+
+{/* GOLD DIVIDER */}
+
+<div className="border-t border-amber-300 mb-8"></div>
+
+
+{/* WINE INFORMATION GRID */}
+
+<div className="grid grid-cols-3 gap-10 mb-10 text-sm">
+
+<div className="text-amber-700 font-medium">
+Price (Bottle)
+</div>
+
+<div className="col-span-2">
+€{selectedWine.price} &nbsp;&nbsp; {selectedWine.size}
+</div>
+
+
+<div className="text-amber-700 font-medium">
+Grape
+</div>
+
+<div className="col-span-2">
+{selectedWine.grapes}
+</div>
+
+
+<div className="text-amber-700 font-medium">
+Region
+</div>
+
+<div className="col-span-2">
+{selectedWine.country} → {selectedWine.region} → {selectedWine.subregion}
+</div>
+
+</div>
+
+
+{/* SECOND DIVIDER */}
+
+<div className="border-t border-amber-300 mb-8"></div>
+
+
+{/* DESCRIPTION */}
+
+<div>
+
+<div className="text-amber-700 font-medium mb-3">
+Description
+</div>
+
+<p className="leading-relaxed text-gray-700">
+{selectedWine.description}
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+)}
 
     {/* CLOSE BUTTON */}
 
