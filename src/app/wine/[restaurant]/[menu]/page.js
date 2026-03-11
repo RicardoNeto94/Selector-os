@@ -19,6 +19,7 @@ const [filteredWines, setFilteredWines] = useState([]);
 /* NEW STATES */
 const [showResults, setShowResults] = useState(false);
 const [selectedWine, setSelectedWine] = useState(null);
+const [modalVisible, setModalVisible] = useState(false);
 
 const [filters, setFilters] = useState({
 wine_type: "",
@@ -254,7 +255,7 @@ return (
 key={wine.id}
 onClick={()=>{
 setSelectedWine(wine)
-setTimeout(()=>setModalVisible(true),10)
+setModalVisible(true)
 }}
 className="group cursor-pointer bg-slate-900 border border-slate-700 rounded-xl p-6 transition-all duration-200 hover:border-amber-400 hover:shadow-xl hover:-translate-y-1"
 >
@@ -322,20 +323,17 @@ className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 text-xl"
 ✕
 </button>
 
-
 {/* TITLE */}
 
 <h2 className="text-2xl font-semibold mb-8">
 {selectedWine.name} – {selectedWine.vintage}
 </h2>
 
-
-{/* GOLD DIVIDER */}
+{/* DIVIDER */}
 
 <div className="border-t border-amber-300 mb-8"></div>
 
-
-{/* WINE INFORMATION GRID */}
+{/* WINE INFO */}
 
 <div className="grid grid-cols-3 gap-10 mb-10 text-sm">
 
@@ -347,7 +345,6 @@ Price (Bottle)
 €{selectedWine.price} &nbsp;&nbsp; {selectedWine.size}
 </div>
 
-
 <div className="text-amber-700 font-medium">
 Grape
 </div>
@@ -355,7 +352,6 @@ Grape
 <div className="col-span-2">
 {selectedWine.grapes}
 </div>
-
 
 <div className="text-amber-700 font-medium">
 Region
@@ -367,11 +363,9 @@ Region
 
 </div>
 
-
 {/* SECOND DIVIDER */}
 
 <div className="border-t border-amber-300 mb-8"></div>
-
 
 {/* DESCRIPTION */}
 
