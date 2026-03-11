@@ -68,16 +68,14 @@ export default function NewWinePage() {
   ])
   .select();
 
-    if (error) {
-      console.error("Wine insert error:", error);
-      setLoading(false);
-      return;
-    }
+if (error) {
+  console.error("Wine insert error:", error);
+  setLoading(false);
+  return;
+}
 
-    router.push("/dashboard/wines");
-  };
-  
-  console.log("Inserted wine:", data);
+console.log("Inserted wine:", data);
+router.push("/dashboard/wines");
 
   return (
 
