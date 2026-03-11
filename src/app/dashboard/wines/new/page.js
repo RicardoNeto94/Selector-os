@@ -26,6 +26,8 @@ export default function NewWinePage() {
 
   const handleSubmit = async (e) => {
 
+    console.log("Submit triggered");
+
     e.preventDefault();
     setLoading(true);
 
