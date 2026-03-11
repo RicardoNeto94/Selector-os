@@ -140,7 +140,9 @@ export default function WineMenuEditor() {
 
         <div className="grid md:grid-cols-3 gap-4">
 
-          {cellarWines.map((wine) => (
+          {cellarWines
+  .filter(w => !menuWines.some(m => m.wine_id === w.id))
+  .map((wine) => (
 
             <div
               key={wine.id}
