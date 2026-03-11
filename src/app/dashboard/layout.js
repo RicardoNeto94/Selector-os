@@ -14,9 +14,8 @@ import {
   CreditCardIcon,
   Cog6ToothIcon,
   LockClosedIcon,
-  MagnifyingGlassIcon,
-  BellIcon,
   BeakerIcon,
+  BookOpenIcon
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +41,7 @@ function NavItem({ href, isActive, icon: Icon, label, onClick }) {
 }
 
 export default function DashboardLayout({ children }) {
+
   const pathname = usePathname();
   const isPro = PLAN !== "starter";
 
@@ -74,6 +74,7 @@ export default function DashboardLayout({ children }) {
 
         {/* BRAND */}
         <div>
+
           <div className="so-sidebar-brand">
             <Image
               src={FULL_LOGO_SRC}
@@ -85,7 +86,7 @@ export default function DashboardLayout({ children }) {
             />
           </div>
 
-          {/* NAVIGATION */}
+          {/* NAV */}
           <nav className="so-sidebar-nav">
 
             <div className="so-sidebar-section-label">Overview</div>
@@ -106,12 +107,20 @@ export default function DashboardLayout({ children }) {
               label="Dishes"
             />
 
-            {/* WINE MODULE */}
+            {/* WINE CELLAR */}
             <NavItem
               href="/dashboard/wines"
               isActive={isActive("/dashboard/wines")}
               icon={BeakerIcon}
-              label="Wine"
+              label="Wine Cellar"
+            />
+
+            {/* WINE MENUS */}
+            <NavItem
+              href="/dashboard/wine-menus"
+              isActive={isActive("/dashboard/wine-menus")}
+              icon={BookOpenIcon}
+              label="Wine Menus"
             />
 
             {/* MENUS */}
