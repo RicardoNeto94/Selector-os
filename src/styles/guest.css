@@ -853,6 +853,861 @@
   transform: none;
 }
 
+:root {
+  /* Dark (night) defaults */
+  --guest-bg: #0a0d10;
+  --guest-text-main: #f8fafc;
+  --guest-card-bg: rgba(255, 255, 255, 0.06);
+  --guest-card-border: rgba(255, 255, 255, 0.12);
+  --guest-header-glass: linear-gradient(
+    to bottom,
+    rgba(3, 7, 18, 0.98),
+    rgba(3, 7, 18, 0.96),
+    rgba(3, 7, 18, 0.9),
+    rgba(3, 7, 18, 0.8)
+  );
+  --guest-dock-bg: rgba(15, 23, 42, 0.9);
+}
+
+/* Light mode overrides (applied via extra class on root) */
+.guest-root--light {
+  --guest-bg: #f5f5f0;
+  --guest-text-main: #020617;
+  --guest-card-bg: rgba(255, 255, 255, 0.96);
+  --guest-card-border: rgba(148, 163, 184, 0.35);
+  --guest-header-glass: rgba(255, 255, 255, 0.9);
+  --guest-dock-bg: rgba(15, 23, 42, 0.08);
+}
+
+/* === PAGE BACKGROUND & LAYOUT ====================== */
+
+.guest-root {
+  min-height: 100vh;
+  background: var(--guest-bg);
+  color: var(--guest-text-main);
+
+  /* top padding leaves space for fixed header */
+  padding: 120px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.guest-shell {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* === FROSTED TRANSPARENT HEADER ============================== */
+
+.glass-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  width: 100%;
+
+  background: rgba(255, 255, 255, 0.02); /* almost invisible */
+  backdrop-filter: blur(22px) saturate(1.8);
+  -webkit-backdrop-filter: blur(22px) saturate(1.8);
+
+  border-bottom: none;
+}
+/* keep header content nicely padded inside the shell */
+.glass-header .guest-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Wrap for whatever you render inside the glass header */
+.guest-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* === LOGO ========================================== */
+
+.guest-logo-image-wrap {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-header-logo-img {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.7));
+}
+
+/* fallback circle (if no logo yet) */
+.guest-logo-circle {
+  display: none;
+}
+
+/* === ALLERGEN PILLS ROW (generic) ================== */
+
+.guest-chips-row {
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.guest-pill {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: radial-gradient(circle at top left, #020617, #020617 70%);
+  padding: 4px 14px 4px 20px;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: rgba(226, 232, 240, 0.96);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.12s ease;
+}
+
+.guest-pill-dot {
+  position: absolute;
+  left: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.75);
+}
+
+.guest-pill:hover {
+  border-color: rgba(56, 189, 248, 0.75);
+  transform: translateY(-1px);
+}
+
+.guest-pill.active {
+  border-color: #22c55e;
+  background: radial-gradient(circle at top left, #064e3b, #020617);
+}
+
+.guest-pill.active .guest-pill-dot {
+  background: #22c55e;
+}
+
+/* === DISH GRID ===================================== */
+
+.guest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 220px));
+  gap: 16px;
+
+  padding: 16px 12px 120px;
+
+  max-width: 1240px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+/* === DISH CARDS ==================================== */
+
+.guest-card {
+  width: 100%;
+  max-width: 220px;
+  min-height: 260px;
+
+  border-radius: 24px;
+  padding: 16px 16px 14px;
+
+  background: var(--guest-card-bg);
+  backdrop-filter: blur(22px) saturate(1.8);
+  -webkit-backdrop-filter: blur(22px) saturate(1.8);
+
+  border: 1px solid var(--guest-card-border);
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+
+  color: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.guest-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.55),
+    inset 0 1px 2px rgba(255, 255, 255, 0.18),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.guest-card-header {
+  display: flex;
+  justify-content: flex-start; /* no empty space on the right now */
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* === DISH PILLS (CATEGORY + STATUS) ================ */
+
+.dish-chip-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dish-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: capitalize;
+  border: none;
+  box-shadow: 0 3px 6px rgba(15, 23, 42, 0.35);
+}
+
+/* Blue category pill (Starters / Mains / etc) */
+.dish-chip-category {
+  background: #60a5fa;
+  color: #0b1120;
+}
+
+/* Green SAFE pill */
+.dish-chip-safe {
+  background: #22c55e;
+  color: #052e16;
+}
+
+/* Red CONTAINS pill */
+.dish-chip-contains {
+  background: #f97373;
+  color: #450a0a;
+}
+
+.guest-card-name {
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+/* kept in case you re-add price later; currently not used */
+.guest-card-price {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+/* description */
+.guest-card-desc {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #cbd5f5;
+  line-height: 1.45;
+}
+
+/* bottom area */
+.guest-card-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* === ALLERGEN TAGS IN DISH CARDS (NEW) ============== */
+
+.guest-card-allergens {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guest-card-allergens-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #9ca3af;
+}
+
+.guest-card-allergens-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guest-card-allergens-none {
+  font-size: 10px;
+  color: #9ca3af;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Base chip */
+.allergen-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.92);
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* === COLOR MAP (one per allergen code) ============== */
+.allergen-GL { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.55); color: #bfdbfe; } /* Gluten */
+.allergen-CR { background: rgba(244,114,182,0.22); border-color: rgba(244,114,182,0.55); color: #fbcfe8; } /* Crustaceans */
+.allergen-EG { background: rgba(250,204,21,0.22); border-color: rgba(250,204,21,0.55); color: #fde68a; } /* Eggs */
+.allergen-FL { background: rgba(56,189,248,0.22); border-color: rgba(56,189,248,0.55); color: #bae6fd; } /* Fish */
+.allergen-PE { background: rgba(251,113,133,0.22); border-color: rgba(251,113,133,0.55); color: #fecdd3; } /* Peanuts */
+.allergen-SO { background: rgba(74,222,128,0.18); border-color: rgba(74,222,128,0.55); color: #bbf7d0; } /* Soya */
+.allergen-MI { background: rgba(248,250,252,0.16); border-color: rgba(248,250,252,0.35); color: #f8fafc; } /* Milk */
+.allergen-NU { background: rgba(245,158,11,0.22); border-color: rgba(245,158,11,0.55); color: #fed7aa; } /* Nuts */
+.allergen-SE { background: rgba(167,139,250,0.22); border-color: rgba(167,139,250,0.55); color: #ddd6fe; } /* Sesame */
+.allergen-CE { background: rgba(34,211,238,0.18); border-color: rgba(34,211,238,0.55); color: #a5f3fc; } /* Celery */
+.allergen-MU { background: rgba(253,186,116,0.22); border-color: rgba(253,186,116,0.55); color: #ffedd5; } /* Mustard */
+.allergen-SU { background: rgba(163,163,163,0.22); border-color: rgba(163,163,163,0.55); color: #e5e7eb; } /* Sulphites */
+.allergen-LU { background: rgba(129,140,248,0.22); border-color: rgba(129,140,248,0.55); color: #c7d2fe; } /* Lupin */
+.allergen-MO { background: rgba(244,63,94,0.18); border-color: rgba(244,63,94,0.55); color: #fecdd3; } /* Molluscs */
+.allergen-GA { background: rgba(217,119,6,0.22); border-color: rgba(217,119,6,0.55); color: #fed7aa; } /* Garlic */
+.allergen-ON { background: rgba(168,85,247,0.18); border-color: rgba(168,85,247,0.55); color: #e9d5ff; } /* Onion */
+.allergen-MR { background: rgba(100,116,139,0.22); border-color: rgba(100,116,139,0.55); color: #e2e8f0; } /* Mushrooms */
+.allergen-CL { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.55); color: #fecaca; } /* Chilli */
+
+/* === EMPTY STATE =================================== */
+
+.guest-empty {
+  margin-top: 32px;
+  font-size: 13px;
+  color: rgba(148, 163, 184, 0.96);
+  text-align: center;
+}
+
+/* === FLOATING DOCK (BOTTOM) ======================= */
+
+.guest-dock {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 14px;
+  background: var(--guest-dock-bg);
+  backdrop-filter: blur(14px) saturate(1.8);
+  -webkit-backdrop-filter: blur(14px) saturate(1.8);
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.guest-dock-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* iOS-style switch for "Contain" mode */
+.ios-switch {
+  width: 64px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: #111827;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(15, 23, 42, 0.8);
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.ios-switch-knob {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #f9fafb;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+  transform: translateX(0);
+  transition: transform 0.18s ease;
+}
+
+.ios-switch-on {
+  background: #22c55e;
+  border-color: #4ade80;
+}
+
+.ios-switch-on .ios-switch-knob {
+  transform: translateX(26px);
+}
+
+.ios-switch:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Icon buttons cluster */
+.guest-dock-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dock-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: radial-gradient(circle at 30% 0, #4b5563, #020617);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(15, 23, 42, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+  color: #e5e7eb;
+  font-size: 18px;
+}
+
+.dock-icon:hover:not(:disabled),
+.dock-icon-active {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(148, 163, 184, 1);
+  border-color: rgba(248, 250, 252, 0.9);
+}
+
+.dock-icon:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dock-icon-label {
+  line-height: 1;
+}
+
+/* Make dock stay pill-shaped on small screens */
+@media (max-width: 640px) {
+  .guest-dock {
+    bottom: 18px;
+    padding: 4px 10px;
+  }
+
+  .guest-dock-inner {
+    gap: 8px;
+  }
+
+  .ios-switch {
+    width: 56px;
+    height: 30px;
+  }
+
+  .ios-switch-knob {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ios-switch-on .ios-switch-knob {
+    transform: translateX(22px);
+  }
+
+  .dock-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+}
+
+/* === RESPONSIVE TWEAKS ============================= */
+
+@media (max-width: 768px) {
+  .guest-root {
+    padding: 110px 8px 80px;
+  }
+}
+
+@media (max-width: 640px) {
+  .guest-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 8px 10px 110px;
+  }
+
+  .guest-card {
+    padding: 14px 12px;
+    border-radius: 22px;
+    max-width: none;
+    min-height: 260px;
+  }
+
+  /* hide price chip on phone (still safe even if you reintroduce it later) */
+  .guest-card-price {
+    display: none;
+  }
+}
+
+/* =========================================================
+   PREMIUM MODAL (BOTTOM SHEET) — UI + ANIMATION UPGRADE
+   ========================================================= */
+
+/* Backdrop: merged (layout + fade + click enabled only when open) */
+.guest-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+
+  /* dim background slightly but keep it elegant */
+  background: rgba(0, 0, 0, 0.35);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.guest-sheet-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Glassy, almost colorless sheet */
+.guest-sheet {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  border-radius: 24px 24px 0 0;
+
+  background: rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+  border-inline: 1px solid rgba(148, 163, 184, 0.45);
+
+  box-shadow:
+    0 -16px 40px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  padding: 10px 18px 16px;
+
+  /* smooth up/down and snap back on drag */
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.18s ease-out;
+}
+
+.guest-sheet-handle {
+  width: 44px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.85);
+  margin: 4px auto 10px;
+}
+
+/* Sheet: premium glass + smooth open/close */
+.guest-sheet--premium {
+  opacity: 0;
+  transform: translateY(24px) scale(0.985);
+  transition:
+    transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.18s ease;
+  will-change: transform, opacity;
+}
+
+.guest-sheet--premium.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Top bar */
+.guest-sheet-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.guest-sheet-title {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.guest-sheet-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(2, 6, 23, 0.35);
+  color: rgba(248, 250, 252, 0.92);
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.guest-sheet-close:hover {
+  transform: translateY(-1px);
+  border-color: rgba(248, 250, 252, 0.7);
+  background: rgba(2, 6, 23, 0.5);
+}
+
+/* Segmented control */
+.guest-segment {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  padding: 6px;
+  border-radius: 16px;
+
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  margin-bottom: 12px;
+}
+
+.guest-seg-btn {
+  position: relative;
+  z-index: 2;
+  height: 34px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.guest-seg-btn.active {
+  color: rgba(2, 6, 23, 0.95);
+}
+
+.guest-seg-indicator {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  left: 6px;
+  width: calc(50% - 3px);
+  height: 34px;
+  border-radius: 12px;
+
+  background: rgba(248, 250, 252, 0.88);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+  transform: translateX(0);
+  transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.guest-seg-indicator.right {
+  transform: translateX(calc(100% + 6px));
+}
+
+/* Body */
+.guest-sheet-body--premium {
+  max-height: 56vh;
+  overflow-y: auto;
+  padding: 6px 2px 8px;
+}
+
+/* Helper text */
+.guest-sheet-sub {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: rgba(203, 213, 225, 0.9);
+}
+
+/* Grid layout for pills */
+.guest-sheet-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 520px) {
+  .guest-sheet-pills-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Premium pill style (does not remove your existing active logic) */
+.guest-pill--premium {
+  width: 100%;
+  justify-content: center;
+  padding: 10px 12px 10px 18px;
+  border-radius: 999px;
+
+  background: rgba(2, 6, 23, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.guest-pill--premium:hover {
+  transform: translateY(-1px);
+  border-color: rgba(248, 250, 252, 0.65);
+}
+
+.guest-pill--premium.active {
+  border-color: #4ade80;
+  background: rgba(34, 197, 94, 0.22);
+}
+
+/* Panel animation when switching tabs */
+.guest-sheet-panel {
+  display: none;
+}
+
+.guest-sheet-panel.show {
+  display: block;
+  animation: sheetPanelIn 0.16s ease-out;
+}
+
+@keyframes sheetPanelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Footer */
+.guest-sheet-footer--premium {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+
+/* === HARD OVERRIDE: MODAL FOOTER BUTTONS (fix text-only buttons) === */
+.guest-sheet-footer--premium .guest-sheet-btn {
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+  padding: 8px 14px;
+  min-height: 34px;
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  border: none;
+  cursor: pointer;
+
+  background: #22c55e;
+  color: #022c22;
+
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+}
+
+.guest-sheet-footer--premium .guest-sheet-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(34, 197, 94, 0.4);
+}
+
+.guest-sheet-footer--premium .guest-sheet-btn.ghost {
+  background: transparent;
+  color: rgba(248, 250, 252, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  box-shadow: none;
+}
+
+.guest-sheet-footer--premium .guest-sheet-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
 /* =========================================================
    WINE SELECTOR
    ========================================================= */
