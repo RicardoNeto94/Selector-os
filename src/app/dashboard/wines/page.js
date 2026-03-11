@@ -42,8 +42,7 @@ export default function WinesPage() {
     const { data: winesData, error } = await supabase
       .from("wines")
       .select("*")
-      .eq("restaurant_id", restaurantData.id)
-      .order("created_at", { ascending: false });
+      .eq("restaurant_id", restaurantData.id);
 
     if (error) {
       console.error("Wine loading error:", error);
@@ -52,6 +51,35 @@ export default function WinesPage() {
     setWines(winesData || []);
     setLoading(false);
   };
+
+  const updateStock = async (wineId, currentStock, change) => {
+
+    const newStock = Math.max(0, (currentStock || 0) + change);
+
+    await supabase
+      .from("wines")
+      .update({ stock: newStock })
+      .eq("id", wineId);
+
+    setWines(prev =>
+      prev.map(w =>
+        w.id === wineId ? { ...w, stock: newStock } : w
+      )
+    );
+
+  };
+
+  const winesByType = wines.reduce((groups, wine) => {
+
+    const type = wine.wine_type || "Other";
+
+    if (!groups[type]) groups[type] = [];
+
+    groups[type].push(wine);
+
+    return groups;
+
+  }, {});
 
   if (loading) {
     return (
@@ -87,40 +115,74 @@ export default function WinesPage() {
 
       ) : (
 
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+        Object.keys(winesByType).map((type) => (
 
-          {wines.map((wine) => (
+          <div key={type} className="mb-10">
 
-            <div
-              key={wine.id}
-              className="so-card p-6 hover:scale-[1.02] transition-transform"
-            >
+            <h2 className="text-lg font-semibold text-white mb-4">
+              {type}
+            </h2>
 
-              <div className="text-lg font-semibold text-white">
-                {wine.name}
-              </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-              <div className="text-sm text-slate-400 mt-1">
-                {wine.region} · {wine.country}
-              </div>
+              {winesByType[type].map((wine) => (
 
-              <div className="text-sm text-slate-400">
-                {wine.vintage} · {wine.size}
-              </div>
+                <div
+                  key={wine.id}
+                  className="so-card p-6"
+                >
 
-              <div className="mt-3 text-sm text-slate-300">
-                €{wine.price ?? "-"}
-              </div>
+                  <div className="text-lg font-semibold text-white">
+                    {wine.name}
+                  </div>
 
-              <div className="mt-2 text-xs text-slate-500">
-                Stock: {wine.stock ?? 0} bottles
-              </div>
+                  <div className="text-sm text-slate-400 mt-1">
+                    {wine.region} · {wine.country}
+                  </div>
+
+                  <div className="text-sm text-slate-400">
+                    {wine.vintage} · {wine.size}
+                  </div>
+
+                  <div className="mt-3 text-sm text-slate-300">
+                    €{wine.price ?? "-"}
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+
+                    <div className="flex items-center gap-3">
+
+                      <button
+                        onClick={() => updateStock(wine.id, wine.stock, -1)}
+                        className="px-2 py-1 bg-slate-800 rounded"
+                      >
+                        –
+                      </button>
+
+                      <div className="text-sm text-slate-300">
+                        {wine.stock ?? 0}
+                      </div>
+
+                      <button
+                        onClick={() => updateStock(wine.id, wine.stock, 1)}
+                        className="px-2 py-1 bg-slate-800 rounded"
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              ))}
 
             </div>
 
-          ))}
+          </div>
 
-        </div>
+        ))
 
       )}
 
