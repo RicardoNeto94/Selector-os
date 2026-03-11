@@ -20,6 +20,7 @@ export default function NewWinePage() {
   const [size, setSize] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState(0);
+  const [description, setDescription] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -58,7 +59,8 @@ export default function NewWinePage() {
       vintage,
       size,
       price: price ? Number(price) : null,
-      stock: Number(stock)
+      stock: Number(stock),
+      description
     });
 
     if (error) {
@@ -72,9 +74,9 @@ export default function NewWinePage() {
 
   return (
 
-    <div className="page-fade">
+    <div className="page-fade h-[calc(100vh-120px)] flex items-center">
 
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-3xl mx-auto w-full">
 
         <h1 className="text-2xl font-semibold text-white mb-6">
           Add Wine
@@ -82,7 +84,7 @@ export default function NewWinePage() {
 
         <form
           onSubmit={handleSubmit}
-          className="so-card p-6 space-y-4"
+          className="so-card p-6 grid grid-cols-2 gap-4"
         >
 
           <input
@@ -104,7 +106,7 @@ export default function NewWinePage() {
             value={wineType}
             onChange={(e) => setWineType(e.target.value)}
           >
-            <option value="">Select Wine Type</option>
+            <option value="">Wine Type</option>
             <option value="Sparkling">Sparkling</option>
             <option value="White">White</option>
             <option value="Rosé">Rosé</option>
@@ -136,7 +138,7 @@ export default function NewWinePage() {
 
           <input
             className="so-input"
-            placeholder="Bottle size (750ml, Magnum)"
+            placeholder="Bottle size"
             value={size}
             onChange={(e) => setSize(e.target.value)}
           />
@@ -152,14 +154,21 @@ export default function NewWinePage() {
           <input
             className="so-input"
             type="number"
-            placeholder="Initial stock (bottles)"
+            placeholder="Initial stock"
             value={stock}
             onChange={(e) => setStock(e.target.value)}
           />
 
+          <textarea
+            className="so-input col-span-2 h-24 resize-none"
+            placeholder="Wine description (appears in guest modal)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+
           <button
             disabled={loading}
-            className="so-btn-primary w-full"
+            className="so-btn-primary col-span-2"
           >
             {loading ? "Saving..." : "Save Wine"}
           </button>
