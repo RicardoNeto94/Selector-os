@@ -10,11 +10,8 @@ export default function WinesPage() {
   const supabase = createClientComponentClient();
 
   const [wines, setWines] = useState([]);
+  const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const [regionFilter, setRegionFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [vintageFilter, setVintageFilter] = useState("");
 
   useEffect(() => {
     loadWines();
@@ -22,56 +19,39 @@ export default function WinesPage() {
 
   const loadWines = async () => {
 
-    try {
+    const { data: { user } } = await supabase.auth.getUser();
 
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: restaurant } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (!restaurant) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: winesData, error } = await supabase
-        .from("wines")
-        .select("*")
-        .eq("restaurant_id", restaurant.id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Wine loading error:", error);
-      }
-
-      setWines(winesData || []);
-
-    } catch (err) {
-      console.error("Unexpected wine loading error:", err);
+    if (!user) {
+      setLoading(false);
+      return;
     }
 
+    const { data: restaurantData } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+
+    if (!restaurantData) {
+      setLoading(false);
+      return;
+    }
+
+    setRestaurant(restaurantData);
+
+    const { data: winesData, error } = await supabase
+      .from("wines")
+      .select("*")
+      .eq("restaurant_id", restaurantData.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Wine loading error:", error);
+    }
+
+    setWines(winesData || []);
     setLoading(false);
   };
-
-  const filteredWines = wines.filter((wine) => {
-
-    if (regionFilter && wine.region !== regionFilter) return false;
-    if (typeFilter && wine.type !== typeFilter) return false;
-    if (vintageFilter && wine.vintage !== vintageFilter) return false;
-
-    return true;
-
-  });
 
   if (loading) {
     return (
@@ -87,7 +67,7 @@ export default function WinesPage() {
       <div className="flex items-center justify-between mb-8">
 
         <h1 className="text-2xl font-semibold text-white">
-          Wine Library
+          Wine Cellar
         </h1>
 
         <a
@@ -99,60 +79,21 @@ export default function WinesPage() {
 
       </div>
 
-      {/* FILTERS */}
-
-      <div className="flex gap-4 mb-6 flex-wrap">
-
-        <select
-          value={regionFilter}
-          onChange={(e) => setRegionFilter(e.target.value)}
-          className="so-input"
-        >
-          <option value="">All regions</option>
-          {[...new Set(wines.map(w => w.region).filter(Boolean))].map(region => (
-            <option key={region} value={region}>{region}</option>
-          ))}
-        </select>
-
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="so-input"
-        >
-          <option value="">All types</option>
-          {[...new Set(wines.map(w => w.type).filter(Boolean))].map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
-
-        <select
-          value={vintageFilter}
-          onChange={(e) => setVintageFilter(e.target.value)}
-          className="so-input"
-        >
-          <option value="">All vintages</option>
-          {[...new Set(wines.map(w => w.vintage).filter(Boolean))].map(vintage => (
-            <option key={vintage} value={vintage}>{vintage}</option>
-          ))}
-        </select>
-
-      </div>
-
-      {filteredWines.length === 0 ? (
+      {wines.length === 0 ? (
 
         <div className="so-card p-8 text-center text-slate-400">
-          No wines match your filters.
+          Your cellar is empty. Add your first bottle.
         </div>
 
       ) : (
 
         <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-          {filteredWines.map((wine) => (
+          {wines.map((wine) => (
 
             <div
               key={wine.id}
-              className="so-card p-6 hover:scale-[1.02] transition-transform cursor-pointer"
+              className="so-card p-6 hover:scale-[1.02] transition-transform"
             >
 
               <div className="text-lg font-semibold text-white">
@@ -171,12 +112,8 @@ export default function WinesPage() {
                 €{wine.price ?? "-"}
               </div>
 
-              <div className="mt-2 text-xs">
-
-                <span className={wine.stock <= 3 ? "text-amber-400" : "text-slate-500"}>
-                  Stock: {wine.stock ?? 0} bottles
-                </span>
-
+              <div className="mt-2 text-xs text-slate-500">
+                Stock: {wine.stock ?? 0} bottles
               </div>
 
             </div>
