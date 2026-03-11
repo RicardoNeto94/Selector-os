@@ -16,7 +16,6 @@ const [wineMenu, setWineMenu] = useState(null);
 const [wines, setWines] = useState([]);
 const [filteredWines, setFilteredWines] = useState([]);
 
-/* NEW STATES */
 const [showResults, setShowResults] = useState(false);
 const [selectedWine, setSelectedWine] = useState(null);
 const [modalVisible, setModalVisible] = useState(false);
@@ -39,29 +38,29 @@ loadData();
 async function loadData() {
 
 const { data: r } = await supabase
-  .from("restaurants")
-  .select("*")
-  .eq("slug", restaurant)
-  .maybeSingle();
+.from("restaurants")
+.select("*")
+.eq("slug", restaurant)
+.maybeSingle();
 
 if (!r) return;
 
 const { data: m } = await supabase
-  .from("wine_menus")
-  .select("*")
-  .eq("slug", menu)
-  .eq("restaurant_id", r.id)
-  .maybeSingle();
+.from("wine_menus")
+.select("*")
+.eq("slug", menu)
+.eq("restaurant_id", r.id)
+.maybeSingle();
 
 if (!m) return;
 
 const { data: wineItems } = await supabase
-  .from("wine_menu_items")
-  .select(`
-    wine_id,
-    wines (*)
-  `)
-  .eq("wine_menu_id", m.id);
+.from("wine_menu_items")
+.select(`
+wine_id,
+wines (*)
+`)
+.eq("wine_menu_id", m.id);
 
 const winesList = wineItems?.map(item => item.wines) || [];
 
@@ -81,19 +80,17 @@ let results = wines;
 
 Object.keys(filters).forEach((key) => {
 
-  if (!filters[key]) return;
+if (!filters[key]) return;
 
-  results = results.filter(w =>
-    String(w[key] ?? "")
-      .toLowerCase()
-      .includes(filters[key].toLowerCase())
-  );
+results = results.filter(w =>
+String(w[key] ?? "")
+.toLowerCase()
+.includes(filters[key].toLowerCase())
+);
 
 });
 
 setFilteredWines(results);
-
-/* SHOW RESULTS PAGE */
 setShowResults(true);
 
 }
@@ -111,139 +108,140 @@ setFilteredWines([]);
 }
 
 return (
+
 <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center px-6 py-16">
 
-  {/* HEADER */}
+{/* HEADER */}
 
-  <div className="flex flex-col items-center text-center mb-12">
+<div className="flex flex-col items-center text-center mb-12">
 
-    {restaurantData?.logo_url && (
-      <img
-        src={restaurantData.logo_url}
-        className="h-16 mb-3"
-        alt="Restaurant logo"
-      />
-    )}
+{restaurantData?.logo_url && (
+<img
+src={restaurantData.logo_url}
+className="h-16 mb-3"
+alt="Restaurant logo"
+/>
+)}
 
-    <h1 className="text-4xl font-semibold">
-      {restaurantData?.name}
-    </h1>
+<h1 className="text-4xl font-semibold">
+{restaurantData?.name}
+</h1>
 
-    <p className="text-slate-400 mt-2">
-      {wineMenu?.name}
-    </p>
+<p className="text-slate-400 mt-2">
+{wineMenu?.name}
+</p>
 
-  </div>
+</div>
 
-  {/* BACK BUTTON */}
+{/* BACK BUTTON */}
 
-  {showResults && (
-    <button
-      onClick={resetFilters}
-      className="mb-6 flex items-center gap-2 text-slate-300 hover:text-white"
-    >
-      ← Back to Filters
-    </button>
-  )}
+{showResults && (
+<button
+onClick={resetFilters}
+className="mb-6 flex items-center gap-2 text-slate-300 hover:text-white"
+>
+← Back to Filters
+</button>
+)}
 
-  {/* FILTER PANEL */}
+{/* FILTER PANEL */}
 
-  {!showResults && (
+{!showResults && (
 
-  <>
+<>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl w-full">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl w-full">
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("wine_type",e.target.value)}
-    >
-      <option value="">All Wine Types</option>
-      {unique("wine_type").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("wine_type",e.target.value)}
+>
+<option value="">All Wine Types</option>
+{unique("wine_type").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("country",e.target.value)}
-    >
-      <option value="">All Countries</option>
-      {unique("country").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("country",e.target.value)}
+>
+<option value="">All Countries</option>
+{unique("country").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("region",e.target.value)}
-    >
-      <option value="">All Regions</option>
-      {unique("region").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("region",e.target.value)}
+>
+<option value="">All Regions</option>
+{unique("region").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("subregion",e.target.value)}
-    >
-      <option value="">All Sub Regions</option>
-      {unique("subregion").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("subregion",e.target.value)}
+>
+<option value="">All Sub Regions</option>
+{unique("subregion").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("size",e.target.value)}
-    >
-      <option value="">All Bottle Sizes</option>
-      {unique("size").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("size",e.target.value)}
+>
+<option value="">All Bottle Sizes</option>
+{unique("size").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("grapes",e.target.value)}
-    >
-      <option value="">All Grapes</option>
-      {unique("grapes").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("grapes",e.target.value)}
+>
+<option value="">All Grapes</option>
+{unique("grapes").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <select
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-      onChange={(e)=>updateFilter("vintage",e.target.value)}
-    >
-      <option value="">All Vintages</option>
-      {unique("vintage").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
+<select
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+onChange={(e)=>updateFilter("vintage",e.target.value)}
+>
+<option value="">All Vintages</option>
+{unique("vintage").map(v => (
+<option key={v}>{v}</option>
+))}
+</select>
 
-    <input
-      className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 md:col-span-2"
-      placeholder="Search wine name"
-      onChange={(e)=>updateFilter("name",e.target.value)}
-    />
+<input
+className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 md:col-span-2"
+placeholder="Search wine name"
+onChange={(e)=>updateFilter("name",e.target.value)}
+/>
 
-  </div>
+</div>
 
-  <button
-    onClick={applyFilters}
-    className="mt-8 bg-amber-400 text-black px-6 py-3 rounded-lg hover:opacity-90"
-  >
-    Show Selection
-  </button>
+<button
+onClick={applyFilters}
+className="mt-8 bg-amber-400 text-black px-6 py-3 rounded-lg hover:opacity-90"
+>
+Show Selection
+</button>
 
-  </>
+</>
 
-  )}
+)}
 
-  {/* RESULTS */}
+{/* RESULTS */}
 
 {showResults && filteredWines.length > 0 && (
 
@@ -353,85 +351,6 @@ Description
 </div>
 
 </div>
-
-</div>
-
-)}
-
-</div>
-
-);
-}
-
-    {/* CLOSE BUTTON */}
-
-    <button
-      onClick={() => setSelectedWine(null)}
-      className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 text-xl"
-    >
-      ✕
-    </button>
-
-    {/* TITLE */}
-
-    <h2 className="text-2xl font-semibold mb-8">
-      {selectedWine.name} - {selectedWine.vintage}
-    </h2>
-
-    {/* DIVIDER */}
-
-    <div className="border-t border-amber-300 mb-8"></div>
-
-    {/* WINE INFO GRID */}
-
-    <div className="grid grid-cols-3 gap-10 mb-10 text-sm">
-
-      <div className="text-amber-700 font-medium">
-        Price (Bottle)
-      </div>
-
-      <div className="col-span-2">
-        €{selectedWine.price} &nbsp;&nbsp;
-        {selectedWine.size}
-      </div>
-
-      <div className="text-amber-700 font-medium">
-        Grape
-      </div>
-
-      <div className="col-span-2">
-        {selectedWine.grapes}
-      </div>
-
-      <div className="text-amber-700 font-medium">
-        Region
-      </div>
-
-      <div className="col-span-2">
-        {selectedWine.country} → {selectedWine.region} → {selectedWine.subregion}
-      </div>
-
-    </div>
-
-    {/* SECOND DIVIDER */}
-
-    <div className="border-t border-amber-300 mb-8"></div>
-
-    {/* DESCRIPTION */}
-
-    <div>
-
-      <div className="text-amber-700 font-medium mb-3">
-        Description
-      </div>
-
-      <p className="leading-relaxed text-gray-700">
-        {selectedWine.description}
-      </p>
-
-    </div>
-
-  </div>
 
 </div>
 
