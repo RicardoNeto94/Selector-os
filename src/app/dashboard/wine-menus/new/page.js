@@ -1,4 +1,3 @@
-
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -20,36 +19,52 @@ export default function NewWineMenuPage() {
     e.preventDefault();
     setLoading(true);
 
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
+    try {
 
-    if (!user) {
-      setLoading(false);
-      return;
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: restaurant } = await supabase
+        .from("restaurants")
+        .select("id")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (!restaurant) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("wine_menus")
+        .insert({
+          restaurant_id: restaurant.id,
+          name
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Wine menu creation error:", error);
+        setLoading(false);
+        return;
+      }
+
+      router.push(`/dashboard/wine-menus/${data.id}`);
+
+    } catch (err) {
+
+      console.error("Unexpected error:", err);
+
     }
 
-    const { data: restaurant } = await supabase
-      .from("restaurants")
-      .select("*")
-      .eq("owner_id", user.id)
-      .maybeSingle();
-
-    if (!restaurant) {
-      setLoading(false);
-      return;
-    }
-
-    const { data } = await supabase
-      .from("wine_menus")
-      .insert({
-        restaurant_id: restaurant.id,
-        name
-      })
-      .select()
-      .single();
-
-    router.push(`/dashboard/wine-menus/${data.id}`);
+    setLoading(false);
   };
 
   return (
