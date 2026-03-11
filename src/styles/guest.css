@@ -899,6 +899,7 @@
 
 /* SELECT */
 
+/* Force custom styling instead of browser default */
 .wine-filter {
   appearance: none;
   -webkit-appearance: none;
@@ -910,7 +911,7 @@
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.12);
 
-  background: rgba(15,23,42,0.75);
+  background: rgba(15,23,42,0.85);
   color: #e5e7eb;
 
   font-size: 14px;
@@ -928,21 +929,22 @@
     transform .12s ease;
 }
 
+/* Hover gives subtle lift */
 .wine-filter:hover {
   border-color: rgba(148,163,184,0.6);
   transform: translateY(-1px);
 }
 
+/* Focus glow */
 .wine-filter:focus {
   outline: none;
   border-color: #38bdf8;
-
   box-shadow:
     0 0 0 2px rgba(56,189,248,0.25),
     0 12px 24px rgba(0,0,0,0.45);
 }
 
-/* dropdown arrow */
+/* Custom dropdown arrow */
 .wine-filter-wrapper::after {
   content: "▾";
   position: absolute;
@@ -953,7 +955,6 @@
   pointer-events: none;
   font-size: 14px;
 }
-
 /* WINE RESULT CARDS */
 
 .wine-selector-card {
