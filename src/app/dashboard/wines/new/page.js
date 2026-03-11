@@ -43,6 +43,8 @@ export default function NewWinePage() {
       .select("*")
       .eq("owner_id", user.id)
       .maybeSingle();
+    
+    console.log("Restaurant found:", restaurant);
 
     if (!restaurant) {
       setLoading(false);
