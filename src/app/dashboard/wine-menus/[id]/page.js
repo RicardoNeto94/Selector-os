@@ -64,13 +64,24 @@ export default function WineMenuEditor() {
 
   const addWineToMenu = async (wineId) => {
 
-    await supabase.from("wine_menu_items").insert({
+  const { data, error } = await supabase
+    .from("wine_menu_items")
+    .insert({
       wine_menu_id: id,
-      wine_id: wineId
-    });
+      wine_id: wineId,
+      position: 0
+    })
+    .select();
 
-    loadData();
-  };
+  if (error) {
+    console.error("Insert failed:", error);
+    return;
+  }
+
+  console.log("Wine added:", data);
+
+  loadData();
+};
 
   if (loading) {
     return (
