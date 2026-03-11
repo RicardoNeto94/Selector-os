@@ -16,6 +16,7 @@ import {
   LockClosedIcon,
   MagnifyingGlassIcon,
   BellIcon,
+  BeakerIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -103,6 +104,14 @@ export default function DashboardLayout({ children }) {
               isActive={isActive("/dashboard/dishes")}
               icon={RectangleStackIcon}
               label="Dishes"
+            />
+
+            {/* WINE MODULE */}
+            <NavItem
+              href="/dashboard/wines"
+              isActive={isActive("/dashboard/wines")}
+              icon={BeakerIcon}
+              label="Wine"
             />
 
             {/* MENUS */}
@@ -193,7 +202,6 @@ export default function DashboardLayout({ children }) {
       {/* MAIN */}
       <main className="so-main">
 
-        {/* PAGE CONTENT */}
         {children}
 
       </main>
