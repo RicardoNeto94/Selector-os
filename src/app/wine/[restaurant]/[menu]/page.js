@@ -96,16 +96,16 @@ export default function WineSelector({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center p-10">
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center px-6 py-16">
 
       {/* HEADER */}
 
-      <div className="wine-selector-header">
+      <div className="flex flex-col items-center text-center mb-12">
 
         {restaurantData?.logo_url && (
           <img
             src={restaurantData.logo_url}
-            className="h-16 mb-2"
+            className="h-16 mb-3"
             alt="Restaurant logo"
           />
         )}
@@ -122,105 +122,91 @@ export default function WineSelector({ params }) {
 
       {/* FILTER PANEL */}
 
-<div className="wine-filter-panel">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl w-full">
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("wine_type",e.target.value)}
-    >
-      <option value="">All Wine Types</option>
-      {unique("wine_type").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("wine_type",e.target.value)}
+        >
+          <option value="">All Wine Types</option>
+          {unique("wine_type").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("country",e.target.value)}
-    >
-      <option value="">All Countries</option>
-      {unique("country").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("country",e.target.value)}
+        >
+          <option value="">All Countries</option>
+          {unique("country").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("region",e.target.value)}
-    >
-      <option value="">All Regions</option>
-      {unique("region").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("region",e.target.value)}
+        >
+          <option value="">All Regions</option>
+          {unique("region").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("subregion",e.target.value)}
-    >
-      <option value="">All Sub Regions</option>
-      {unique("subregion").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("subregion",e.target.value)}
+        >
+          <option value="">All Sub Regions</option>
+          {unique("subregion").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("size",e.target.value)}
-    >
-      <option value="">All Bottle Sizes</option>
-      {unique("size").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("size",e.target.value)}
+        >
+          <option value="">All Bottle Sizes</option>
+          {unique("size").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("grapes",e.target.value)}
-    >
-      <option value="">All Grapes</option>
-      {unique("grapes").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("grapes",e.target.value)}
+        >
+          <option value="">All Grapes</option>
+          {unique("grapes").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <div className="wine-filter-wrapper">
-    <select
-      className="wine-filter"
-      onChange={(e)=>updateFilter("vintage",e.target.value)}
-    >
-      <option value="">All Vintages</option>
-      {unique("vintage").map(v => (
-        <option key={v}>{v}</option>
-      ))}
-    </select>
-  </div>
+        <select
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+          onChange={(e)=>updateFilter("vintage",e.target.value)}
+        >
+          <option value="">All Vintages</option>
+          {unique("vintage").map(v => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
 
-  <input
-    className="wine-filter"
-    placeholder="Search wine name"
-    onChange={(e)=>updateFilter("name",e.target.value)}
-  />
+        <input
+          className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 md:col-span-2"
+          placeholder="Search wine name"
+          onChange={(e)=>updateFilter("name",e.target.value)}
+        />
 
-</div>
+      </div>
 
       {/* SHOW BUTTON */}
 
       <button
         onClick={applyFilters}
-        className="so-btn-primary mt-8"
+        className="mt-8 bg-amber-400 text-black px-6 py-3 rounded-lg hover:opacity-90"
       >
         Show Selection
       </button>
@@ -233,7 +219,7 @@ export default function WineSelector({ params }) {
 
           {filteredWines.map((wine) => (
 
-            <div key={wine.id} className="wine-selector-card">
+            <div key={wine.id} className="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-sky-400 transition">
 
               <div className="text-lg font-semibold">
                 {wine.name}
@@ -247,7 +233,7 @@ export default function WineSelector({ params }) {
                 {wine.vintage} · {wine.size}
               </div>
 
-              <div className="mt-2">
+              <div className="mt-2 font-semibold">
                 €{wine.price}
               </div>
 
