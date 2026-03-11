@@ -98,8 +98,8 @@ export default function NewWinePage() {
         </h1>
 
         <form
-          onSubmit={handleSubmit}
-          className="so-card p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  onSubmit={handleSubmit}
+  className="so-card w-full max-w-6xl p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
 
           <input
