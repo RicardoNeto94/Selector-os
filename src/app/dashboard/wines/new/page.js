@@ -89,7 +89,7 @@ export default function NewWinePage() {
 
   return (
 
-    <div className="page-fade h-[calc(100vh-120px)] flex items-center">
+    <div className="page-fade w-full px-8 py-6">
 
       <div className="w-full">
 
