@@ -10,6 +10,7 @@ export default function WineMenusPage() {
   const supabase = createClientComponentClient();
 
   const [menus, setMenus] = useState([]);
+  const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,21 +28,23 @@ export default function WineMenusPage() {
       return;
     }
 
-    const { data: restaurant } = await supabase
+    const { data: restaurantData } = await supabase
       .from("restaurants")
       .select("*")
       .eq("owner_id", user.id)
       .maybeSingle();
 
-    if (!restaurant) {
+    if (!restaurantData) {
       setLoading(false);
       return;
     }
 
+    setRestaurant(restaurantData);
+
     const { data } = await supabase
       .from("wine_menus")
       .select("*")
-      .eq("restaurant_id", restaurant.id)
+      .eq("restaurant_id", restaurantData.id)
       .order("created_at", { ascending: false });
 
     setMenus(data || []);
@@ -86,10 +89,9 @@ export default function WineMenusPage() {
 
           {menus.map((menu) => (
 
-            <a
+            <div
               key={menu.id}
-              href={`/dashboard/wine-menus/${menu.id}`}
-              className="so-card p-6 hover:scale-[1.02] transition-transform"
+              className="so-card p-6"
             >
 
               <div className="text-lg font-semibold text-white">
@@ -100,7 +102,30 @@ export default function WineMenusPage() {
                 Created {new Date(menu.created_at).toLocaleDateString()}
               </div>
 
-            </a>
+              <div className="flex gap-3 mt-6">
+
+                <a
+                  href={`/dashboard/wine-menus/${menu.id}`}
+                  className="so-btn-secondary"
+                >
+                  Edit
+                </a>
+
+                {restaurant && menu.slug && (
+
+                  <a
+                    href={`/wine/${restaurant.slug}/${menu.slug}`}
+                    target="_blank"
+                    className="so-btn-primary"
+                  >
+                    Guest view
+                  </a>
+
+                )}
+
+              </div>
+
+            </div>
 
           ))}
 
