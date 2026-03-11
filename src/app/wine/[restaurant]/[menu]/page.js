@@ -110,64 +110,93 @@ export default function WineSelector({ params }) {
 
       {/* FILTER PANEL */}
 
-      <div className="so-card p-8 max-w-4xl w-full grid md:grid-cols-2 gap-6">
+     <div className="max-w-5xl w-full">
 
-        <select onChange={(e)=>updateFilter("wine_type",e.target.value)}>
-          <option value="">Wine Type</option>
-          {unique("wine_type").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+  <div className="so-card p-10">
 
-        <select onChange={(e)=>updateFilter("country",e.target.value)}>
-          <option value="">Country</option>
-          {unique("country").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        <select onChange={(e)=>updateFilter("region",e.target.value)}>
-          <option value="">Region</option>
-          {unique("region").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("wine_type",e.target.value)}
+      >
+        <option value="">Wine Type</option>
+        {unique("wine_type").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
 
-        <select onChange={(e)=>updateFilter("subregion",e.target.value)}>
-          <option value="">Subregion</option>
-          {unique("subregion").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("country",e.target.value)}
+      >
+        <option value="">Country</option>
+        {unique("country").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
 
-        <select onChange={(e)=>updateFilter("size",e.target.value)}>
-          <option value="">Bottle Size</option>
-          {unique("size").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("region",e.target.value)}
+      >
+        <option value="">Region</option>
+        {unique("region").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
 
-        <select onChange={(e)=>updateFilter("grapes",e.target.value)}>
-          <option value="">Grape</option>
-          {unique("grapes").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("subregion",e.target.value)}
+      >
+        <option value="">Sub Region</option>
+        {unique("subregion").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
 
-        <select onChange={(e)=>updateFilter("vintage",e.target.value)}>
-          <option value="">Vintage</option>
-          {unique("vintage").map(v => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("size",e.target.value)}
+      >
+        <option value="">Bottle Size</option>
+        {unique("size").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
 
-        <input
-          placeholder="Search by name"
-          className="bg-slate-900 p-3 rounded"
-          onChange={(e)=>updateFilter("name",e.target.value)}
-        />
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("grapes",e.target.value)}
+      >
+        <option value="">Grape</option>
+        {unique("grapes").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
 
-      </div>
+      <select
+        className="wine-filter"
+        onChange={(e)=>updateFilter("vintage",e.target.value)}
+      >
+        <option value="">Vintage</option>
+        {unique("vintage").map(v => (
+          <option key={v}>{v}</option>
+        ))}
+      </select>
+
+      <input
+        className="wine-filter"
+        placeholder="Search by name"
+        onChange={(e)=>updateFilter("name",e.target.value)}
+      />
+
+    </div>
+
+  </div>
+
+</div>
 
       {/* SHOW BUTTON */}
 
