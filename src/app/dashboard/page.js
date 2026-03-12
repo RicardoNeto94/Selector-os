@@ -1,217 +1,284 @@
-/* src/app/dashboard/page.js */
-
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+"use client";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
-  const supabase = createServerComponentClient({ cookies });
+import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function WinesPage() {
 
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const supabase = createClientComponentClient();
 
-  let planLabel = "Starter";
+  const [wines, setWines] = useState([]);
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const { data: subscription } = await supabase
-      .from("subscriptions")
-      .select("status, plan, price_id")
-      .eq("user_id", user.id)
-      .in("status", ["active", "trialing"])
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  useEffect(() => {
+    loadWines();
+  }, []);
+
+  /* LOAD WINES */
+
+  const loadWines = async () => {
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const { data: restaurantData } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("owner_id", user.id)
       .maybeSingle();
 
-    if (!subscription) {
-      redirect("/select-plan");
-    } else {
-      if (subscription.plan) planLabel = String(subscription.plan);
-      else if (subscription.price_id) planLabel = "Pro";
-      else planLabel = "Active";
+    if (!restaurantData) {
+      setLoading(false);
+      return;
     }
-  } catch (e) {
-    console.warn("Subscription check failed:", e?.message ?? e);
-  }
 
-  const { data: restaurant } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
+    setRestaurant(restaurantData);
 
-  if (!restaurant) {
+    const { data: winesData, error } = await supabase
+      .from("wines")
+      .select("*")
+      .eq("restaurant_id", restaurantData.id)
+      .order("name");
+
+    if (error) {
+      console.error("Wine loading error:", error);
+    }
+
+    setWines(winesData || []);
+    setLoading(false);
+  };
+
+  /* UPDATE STOCK */
+
+  const updateStock = async (wineId, currentStock, change) => {
+
+    const newStock = Math.max(0, (currentStock || 0) + change);
+
+    const { error } = await supabase
+      .from("wines")
+      .update({ stock: newStock })
+      .eq("id", wineId);
+
+    if (error) {
+      console.error("Stock update failed:", error);
+      return;
+    }
+
+    setWines(prev =>
+      prev.map(w =>
+        w.id === wineId ? { ...w, stock: newStock } : w
+      )
+    );
+
+  };
+
+  /* DELETE WINE */
+
+  const deleteWine = async (wineId) => {
+
+    const confirmDelete = confirm("Remove this wine from the cellar?");
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from("wines")
+      .delete()
+      .eq("id", wineId);
+
+    if (error) {
+      console.error("Delete failed:", error);
+      return;
+    }
+
+    setWines(prev => prev.filter(w => w.id !== wineId));
+
+  };
+
+  /* FILTER WINES */
+
+  const filteredWines = wines
+    .filter(w => {
+      if (typeFilter === "all") return true;
+      return w.wine_type === typeFilter;
+    })
+    .filter(w =>
+      `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes} ${w.vintage}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+
+  if (loading) {
     return (
-      <main className="so-main page-fade">
-        <div className="so-main-inner">
-          <div className="so-card border border-red-200/80 bg-red-50/90">
-            <h1 className="mb-2 text-lg font-semibold text-red-800">
-              No restaurant found
-            </h1>
-            <p className="text-sm text-red-700">
-              We couldn&apos;t find a restaurant linked to your account yet.
-            </p>
-          </div>
-        </div>
-      </main>
+      <div className="page-fade">
+        <div className="text-slate-400">Loading wines…</div>
+      </div>
     );
   }
 
-  const { data: menus = [] } = await supabase
-    .from("menus")
-    .select("id, name, created_at")
-    .eq("restaurant_id", restaurant.id);
-
-  let dishesCount = 0;
-  let latestDish = null;
-
-  if (menus.length > 0) {
-    const menuIds = menus.map((m) => m.id);
-
-    const { data: dishes = [] } = await supabase
-      .from("dishes")
-      .select("*")
-      .in("menu_id", menuIds)
-      .order("created_at", { ascending: false });
-
-    dishesCount = dishes.length;
-    latestDish = dishes[0] || null;
-  }
-
-  let allergensCount = 0;
-
-  try {
-    const { data: allergens = [] } = await supabase
-      .from("allergens")
-      .select("id")
-      .eq("restaurant_id", restaurant.id);
-
-    allergensCount = allergens.length;
-  } catch {}
-
   return (
-    <main className="so-main page-fade">
+    <div className="page-fade">
 
-      {/* CENTERED WORKSPACE */}
-      <div className="so-main-inner mx-auto w-full max-w-[1350px] space-y-8">
+      {/* HEADER */}
 
-        {/* ALERT */}
-        <section className="so-card so-alert-card">
+      <div className="flex items-center justify-between mb-8">
 
-          <div>
-            <div className="text-sm text-slate-400">Workspace notice</div>
+        <h1 className="text-2xl font-semibold text-white">
+          Wine Cellar
+        </h1>
 
-            <div className="text-xl font-semibold text-white mt-1">
-              SelectorOS workspace active
-            </div>
-
-            <div className="text-sm text-slate-400 mt-1">
-              Manage dishes, allergens and menu visibility from a single cockpit.
-            </div>
-          </div>
-
-          <button className="so-btn-primary">
-            Open menus
-          </button>
-
-        </section>
-
-
-        {/* KPI ROW */}
-
-        <section className="so-kpi-grid">
-
-          <div className="so-card so-kpi">
-            <div className="so-kpi-title">Menus</div>
-            <div className="so-kpi-value">{menus.length}</div>
-            <div className="so-kpi-sub">Active menus</div>
-          </div>
-
-          <div className="so-card so-kpi">
-            <div className="so-kpi-title">Dishes</div>
-            <div className="so-kpi-value">{dishesCount}</div>
-            <div className="so-kpi-sub">Total dishes</div>
-          </div>
-
-          <div className="so-card so-kpi">
-            <div className="so-kpi-title">Allergens</div>
-            <div className="so-kpi-value">{allergensCount}</div>
-            <div className="so-kpi-sub">Allergen library</div>
-          </div>
-
-          <div className="so-card so-kpi">
-            <div className="so-kpi-title">Plan</div>
-            <div className="so-kpi-value">{planLabel}</div>
-            <div className="so-kpi-sub">Workspace tier</div>
-          </div>
-
-        </section>
-
-
-        {/* MAIN GRID */}
-
-        <section className="so-dashboard-grid">
-
-          <div className="so-card">
-
-            <div className="so-card-title">
-              Latest dish
-            </div>
-
-            {latestDish ? (
-              <>
-                <div className="mt-4 text-xl font-semibold text-white">
-                  {latestDish.name}
-                </div>
-
-                <div className="text-sm text-slate-400 mt-2">
-                  Added{" "}
-                  {latestDish.created_at
-                    ? new Date(latestDish.created_at).toLocaleString()
-                    : "recently"}
-                </div>
-              </>
-            ) : (
-              <div className="text-slate-400 mt-4">
-                No dishes yet. Add your first dish.
-              </div>
-            )}
-
-          </div>
-
-
-          <div className="so-card">
-
-            <div className="so-card-title">
-              Workspace status
-            </div>
-
-            <div className="mt-4 space-y-3 text-sm text-slate-300">
-
-              <div>
-                <span className="text-slate-400">Plan:</span> {planLabel}
-              </div>
-
-              <div>
-                <span className="text-slate-400">Menus:</span> {menus.length}
-              </div>
-
-              <div>
-                <span className="text-slate-400">Allergens:</span> {allergensCount}
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
+        <a
+          href="/dashboard/wines/new"
+          className="so-btn-primary"
+        >
+          + Add Wine
+        </a>
 
       </div>
 
-    </main>
+      {/* TYPE FILTER TABS */}
+
+      <div className="flex gap-3 mb-6 flex-wrap">
+
+        {[
+          { label: "All", value: "all" },
+          { label: "Sparkling", value: "sparkling" },
+          { label: "White", value: "white" },
+          { label: "Rosé", value: "rose" },
+          { label: "Red", value: "red" },
+          { label: "Orange", value: "orange" },
+          { label: "Dessert", value: "dessert" },
+          { label: "Fortified", value: "fortified" }
+        ].map(tab => (
+
+          <button
+            key={tab.value}
+            onClick={() => setTypeFilter(tab.value)}
+            className={`px-4 py-2 rounded-lg text-sm transition
+            ${typeFilter === tab.value
+              ? "bg-emerald-500 text-white"
+              : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+            }`}
+          >
+            {tab.label}
+          </button>
+
+        ))}
+
+      </div>
+
+      {/* SEARCH */}
+
+      <input
+        type="text"
+        placeholder="Search wines..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="so-input mb-6"
+      />
+
+      {/* TABLE */}
+
+      <div className="so-card overflow-x-auto">
+
+        <table className="w-full text-sm">
+
+          <thead className="border-b border-slate-700 text-slate-400">
+
+            <tr className="text-left">
+
+              <th className="py-3 px-4">Wine</th>
+              <th className="py-3 px-4">Producer</th>
+              <th className="py-3 px-4">Region</th>
+              <th className="py-3 px-4">Vintage</th>
+              <th className="py-3 px-4">Price</th>
+              <th className="py-3 px-4">Stock</th>
+              <th className="py-3 px-4"></th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {filteredWines.map(wine => (
+
+              <tr
+                key={wine.id}
+                className="border-b border-slate-800 hover:bg-slate-800/40"
+              >
+
+                <td className="py-3 px-4 text-white font-medium">
+                  {wine.name}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.producer}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.region}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.vintage}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  €{wine.price ?? "-"}
+                </td>
+
+                <td className="py-3 px-4 text-slate-300">
+                  {wine.stock ?? 0}
+                </td>
+
+                <td className="py-3 px-4">
+
+                  <div className="flex gap-2">
+
+                    <button
+                      onClick={() => updateStock(wine.id, wine.stock, -1)}
+                      className="px-2 py-1 bg-slate-800 rounded text-white"
+                    >
+                      –
+                    </button>
+
+                    <button
+                      onClick={() => updateStock(wine.id, wine.stock, 1)}
+                      className="px-2 py-1 bg-slate-800 rounded text-white"
+                    >
+                      +
+                    </button>
+
+                    <button
+                      onClick={() => deleteWine(wine.id)}
+                      className="text-xs text-red-400 hover:text-red-300 ml-3"
+                    >
+                      Remove
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
   );
 }
