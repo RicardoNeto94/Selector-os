@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import Papa from "papaparse";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function WinesPage() {
@@ -19,7 +20,8 @@ export default function WinesPage() {
   const [page, setPage] = useState(1);
   const perPage = 25;
 
-  const [csvFile, setCsvFile] = useState(null);
+  const [file, setFile] = useState(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     loadWines();
@@ -53,13 +55,81 @@ export default function WinesPage() {
       .eq("restaurant_id", restaurantData.id)
       .order("name");
 
-    if (error) {
-      console.error(error);
-    }
+    if (error) console.error(error);
 
     setWines(winesData || []);
     setLoading(false);
   }
+
+ async function importCSV() {
+
+  if (!file || !restaurant) return;
+
+  setImporting(true);
+
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async function(results) {
+
+      const rows = results.data;
+
+      const winesToInsert = rows
+        .filter(row => row.name && row.name.trim() !== "") // skip empty rows
+        .map(row => ({
+
+          restaurant_id: restaurant.id,
+
+          name: row.name.trim(),
+
+          producer: row.producer?.trim() || null,
+          country: row.country?.trim() || null,
+          region: row.region?.trim() || null,
+          subregion: row.subregion?.trim() || null,
+          grapes: row.grapes?.trim() || null,
+
+          wine_type: row.wine_type
+            ? row.wine_type.toLowerCase().trim()
+            : null,
+
+          vintage:
+            row.vintage && !isNaN(row.vintage)
+              ? Number(row.vintage)
+              : null,
+
+          size: row.size?.trim() || "75cl",
+
+          price:
+            row.price && !isNaN(row.price)
+              ? Number(row.price)
+              : null,
+
+          stock:
+            row.stock && !isNaN(row.stock)
+              ? Number(row.stock)
+              : 0,
+
+          description: row.description?.trim() || null,
+          notes: row.notes?.trim() || null
+
+        }));
+
+      const { error } = await supabase
+        .from("wines")
+        .insert(winesToInsert);
+
+      if (error) {
+        console.error(error);
+        alert("Import failed");
+      } else {
+        alert(`Imported ${winesToInsert.length} wines`);
+        loadWines();
+      }
+
+      setImporting(false);
+    }
+  });
+}
 
   async function updateStock(wineId, currentStock, change) {
 
@@ -95,63 +165,6 @@ export default function WinesPage() {
     setWines(prev => prev.filter(w => w.id !== wineId));
   }
 
-  async function importCSV() {
-
-    if (!csvFile || !restaurant) {
-      alert("Please select a CSV file first");
-      return;
-    }
-
-    const text = await csvFile.text();
-
-    const rows = text
-      .split("\n")
-      .map(r => r.trim())
-      .filter(Boolean);
-
-    const headers = rows[0].split(",").map(h => h.trim());
-
-    const winesToInsert = rows.slice(1).map(row => {
-
-      const values = row.split(",");
-
-      const wine = {};
-      headers.forEach((h, i) => wine[h] = values[i]);
-
-      return {
-        restaurant_id: restaurant.id,
-        name: wine.name,
-        producer: wine.producer,
-        country: wine.country,
-        region: wine.region,
-        subregion: wine.subregion,
-        grapes: wine.grapes,
-        wine_type: wine.wine_type,
-        vintage: wine.vintage,
-        size: wine.size,
-        price: wine.price ? Number(wine.price) : null,
-        stock: wine.stock ? Number(wine.stock) : 0,
-        description: wine.description,
-        notes: wine.notes
-      };
-
-    });
-
-    const { error } = await supabase
-      .from("wines")
-      .insert(winesToInsert);
-
-    if (error) {
-      console.error(error);
-      alert("Import failed");
-      return;
-    }
-
-    alert(`${winesToInsert.length} wines imported`);
-
-    loadWines();
-  }
-
   function getStockStatus(stock) {
 
     if (!stock || stock === 0) return "text-red-400";
@@ -171,7 +184,7 @@ export default function WinesPage() {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-  
+
   const totalPages = Math.ceil(filtered.length / perPage);
 
   const paginated = filtered.slice(
@@ -196,32 +209,36 @@ export default function WinesPage() {
           Wine Cellar
         </h1>
 
-        <div className="flex items-center gap-3">
-
-          <input
-            type="file"
-            accept=".csv"
-            onChange={e => setCsvFile(e.target.files[0])}
-            className="text-sm text-slate-300"
-          />
-
-          <button
-            onClick={importCSV}
-            className="px-3 py-2 bg-slate-800 rounded text-sm"
-          >
-            Import CSV
-          </button>
-
-          <a
-            href="/dashboard/wines/new"
-            className="so-btn-primary"
-          >
-            + Add Wine
-          </a>
-
-        </div>
+        <a
+          href="/dashboard/wines/new"
+          className="so-btn-primary"
+        >
+          + Add Wine
+        </a>
 
       </div>
+
+      {/* IMPORT */}
+
+      <div className="flex items-center gap-3">
+
+        <input
+          type="file"
+          accept=".csv"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <button
+          onClick={importCSV}
+          disabled={!file || importing}
+          className="so-btn-primary"
+        >
+          {importing ? "Importing..." : "Import CSV"}
+        </button>
+
+      </div>
+
+      {/* FILTERS */}
 
       <div className="flex gap-2 flex-wrap">
 
@@ -255,6 +272,8 @@ export default function WinesPage() {
 
       </div>
 
+      {/* SEARCH */}
+
       <input
         type="text"
         placeholder="Search wines..."
@@ -266,6 +285,8 @@ export default function WinesPage() {
         className="so-input"
       />
 
+      {/* TABLE */}
+
       <div className="so-card overflow-x-auto">
 
         <table className="w-full text-sm">
@@ -273,6 +294,7 @@ export default function WinesPage() {
           <thead className="border-b border-slate-700 text-slate-400">
 
             <tr>
+
               <th className="text-left py-3 px-4">Wine</th>
               <th className="text-left py-3 px-4">Producer</th>
               <th className="text-left py-3 px-4">Region</th>
@@ -280,6 +302,7 @@ export default function WinesPage() {
               <th className="text-left py-3 px-4">Price</th>
               <th className="text-left py-3 px-4">Stock</th>
               <th className="text-left py-3 px-4"></th>
+
             </tr>
 
           </thead>
@@ -351,6 +374,8 @@ export default function WinesPage() {
         </table>
 
       </div>
+
+      {/* PAGINATION */}
 
       <div className="flex justify-center gap-2">
 
