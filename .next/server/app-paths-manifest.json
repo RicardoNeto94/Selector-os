@@ -1,7 +1,0 @@
-{
-  "/dashboard/wines/page": "app/dashboard/wines/page.js",
-  "/dashboard/wine-menus/page": "app/dashboard/wine-menus/page.js",
-  "/dashboard/wines/new/page": "app/dashboard/wines/new/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/wine-menus/[id]/page": "app/dashboard/wine-menus/[id]/page.js"
-}
