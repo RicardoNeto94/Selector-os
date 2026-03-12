@@ -12,17 +12,18 @@ export default function WinesPage() {
   const [wines, setWines] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
+  const [wineType, setWineType] = useState("all");
+
+  const [page, setPage] = useState(1);
+  const perPage = 25;
 
   useEffect(() => {
     loadWines();
   }, []);
 
-  /* ------------------------------
-     LOAD WINES
-  ------------------------------ */
-
-  const loadWines = async () => {
+  async function loadWines() {
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -48,39 +49,17 @@ export default function WinesPage() {
       .from("wines")
       .select("*")
       .eq("restaurant_id", restaurantData.id)
-      .order("created_at", { ascending: false });
+      .order("name");
 
     if (error) {
-      console.error("Wine loading error:", error);
+      console.error(error);
     }
 
     setWines(winesData || []);
     setLoading(false);
-  };
+  }
 
-  /* ------------------------------
-     STOCK STATUS
-  ------------------------------ */
-
-  const getStockStatus = (stock) => {
-
-    if (!stock || stock === 0) {
-      return { label: "Out", color: "text-red-400" };
-    }
-
-    if (stock <= 3) {
-      return { label: "Low", color: "text-amber-400" };
-    }
-
-    return { label: "OK", color: "text-emerald-400" };
-
-  };
-
-  /* ------------------------------
-     UPDATE STOCK
-  ------------------------------ */
-
-  const updateStock = async (wineId, currentStock, change) => {
+  async function updateStock(wineId, currentStock, change) {
 
     const newStock = Math.max(0, (currentStock || 0) + change);
 
@@ -90,7 +69,7 @@ export default function WinesPage() {
       .eq("id", wineId);
 
     if (error) {
-      console.error("Stock update failed:", error);
+      console.error(error);
       return;
     }
 
@@ -99,64 +78,56 @@ export default function WinesPage() {
         w.id === wineId ? { ...w, stock: newStock } : w
       )
     );
+  }
 
-  };
-
-  /* ------------------------------
-     DELETE WINE
-  ------------------------------ */
-
-  const deleteWine = async (wineId) => {
+  async function deleteWine(wineId) {
 
     const confirmDelete = confirm("Remove this wine from the cellar?");
     if (!confirmDelete) return;
 
-    const { error } = await supabase
+    await supabase
       .from("wines")
       .delete()
       .eq("id", wineId);
 
-    if (error) {
-      console.error("Delete failed:", error);
-      return;
-    }
-
     setWines(prev => prev.filter(w => w.id !== wineId));
+  }
 
-  };
+  function getStockStatus(stock) {
 
-  /* ------------------------------
-     SEARCH FILTER
-  ------------------------------ */
+    if (!stock || stock === 0) return "text-red-400";
+    if (stock <= 3) return "text-amber-400";
+    return "text-emerald-400";
 
-  const filteredWines = wines.filter(w =>
-    `${w.name} ${w.region} ${w.country}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
+  }
+
+  const filtered = wines
+    .filter(w => wineType === "all" || w.wine_type === wineType)
+    .filter(w =>
+      `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+
+  const paginated = filtered.slice(
+    (page - 1) * perPage,
+    page * perPage
   );
-
-  /* ------------------------------
-     LOADING
-  ------------------------------ */
 
   if (loading) {
     return (
-      <div className="page-fade">
-        <div className="text-slate-400">Loading wines…</div>
+      <div className="page-fade text-slate-400">
+        Loading wines…
       </div>
     );
   }
 
-  /* ------------------------------
-     UI
-  ------------------------------ */
-
   return (
-    <div className="page-fade">
+    <div className="page-fade space-y-6">
 
-      {/* HEADER */}
-
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between">
 
         <h1 className="text-2xl font-semibold text-white">
           Wine Cellar
@@ -171,133 +142,156 @@ export default function WinesPage() {
 
       </div>
 
-      {/* SEARCH */}
+      <div className="flex gap-2 flex-wrap">
+
+        {[
+          ["all","All"],
+          ["sparkling","Sparkling"],
+          ["white","White"],
+          ["rose","Rosé"],
+          ["red","Red"],
+          ["orange","Orange"],
+          ["dessert","Dessert"],
+          ["fortified","Fortified"]
+        ].map(([value,label]) => (
+
+          <button
+            key={value}
+            onClick={() => {
+              setWineType(value);
+              setPage(1);
+            }}
+            className={`px-3 py-1 rounded text-sm ${
+              wineType === value
+                ? "bg-emerald-500 text-white"
+                : "bg-slate-800 text-slate-300"
+            }`}
+          >
+            {label}
+          </button>
+
+        ))}
+
+      </div>
 
       <input
         type="text"
         placeholder="Search wines..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="so-input mb-6"
+        onChange={e => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        className="so-input"
       />
 
-      {/* EMPTY STATE */}
+      <div className="so-card overflow-x-auto">
 
-      {filteredWines.length === 0 ? (
+        <table className="w-full text-sm">
 
-        <div className="so-card p-8 text-center text-slate-400">
-          Your cellar is empty. Add your first bottle.
-        </div>
+          <thead className="border-b border-slate-700 text-slate-400">
 
-      ) : (
+            <tr>
 
-        <div className="so-card overflow-x-auto">
+              <th className="text-left py-3 px-4">Wine</th>
+              <th className="text-left py-3 px-4">Producer</th>
+              <th className="text-left py-3 px-4">Region</th>
+              <th className="text-left py-3 px-4">Vintage</th>
+              <th className="text-left py-3 px-4">Price</th>
+              <th className="text-left py-3 px-4">Stock</th>
+              <th className="text-left py-3 px-4"></th>
 
-          <table className="w-full text-sm">
+            </tr>
 
-            {/* TABLE HEADER */}
+          </thead>
 
-            <thead className="border-b border-slate-700 text-slate-400">
+          <tbody>
 
-              <tr className="text-left">
+            {paginated.map(wine => (
 
-                <th className="py-3 px-4">Wine</th>
-                <th className="py-3 px-4">Region</th>
-                <th className="py-3 px-4">Vintage</th>
-                <th className="py-3 px-4">Size</th>
-                <th className="py-3 px-4">Price</th>
-                <th className="py-3 px-4">Stock</th>
-                <th className="py-3 px-4">Actions</th>
+              <tr
+                key={wine.id}
+                className="border-b border-slate-800 hover:bg-slate-800/40"
+              >
+
+                <td className="py-3 px-4 text-white font-medium">
+                  {wine.name}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.producer}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.region}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.vintage}
+                </td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  €{wine.price ?? "-"}
+                </td>
+
+                <td className={`py-3 px-4 ${getStockStatus(wine.stock)}`}>
+                  {wine.stock ?? 0}
+                </td>
+
+                <td className="py-3 px-4 flex gap-2">
+
+                  <button
+                    onClick={() => updateStock(wine.id, wine.stock, -1)}
+                    className="px-2 bg-slate-800 rounded"
+                  >
+                    –
+                  </button>
+
+                  <button
+                    onClick={() => updateStock(wine.id, wine.stock, 1)}
+                    className="px-2 bg-slate-800 rounded"
+                  >
+                    +
+                  </button>
+
+                  <button
+                    onClick={() => deleteWine(wine.id)}
+                    className="text-red-400 text-xs ml-2"
+                  >
+                    Remove
+                  </button>
+
+                </td>
 
               </tr>
 
-            </thead>
+            ))}
 
-            {/* TABLE BODY */}
+          </tbody>
 
-            <tbody>
+        </table>
 
-              {filteredWines.map((wine) => {
+      </div>
 
-                const stockStatus = getStockStatus(wine.stock);
+      <div className="flex justify-center gap-2">
 
-                return (
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
 
-                  <tr
-                    key={wine.id}
-                    className="border-b border-slate-800 hover:bg-slate-800/40 transition"
-                  >
+          <button
+            key={p}
+            onClick={() => setPage(p)}
+            className={`px-3 py-1 rounded ${
+              p === page
+                ? "bg-emerald-500 text-white"
+                : "bg-slate-800 text-slate-300"
+            }`}
+          >
+            {p}
+          </button>
 
-                    <td className="py-3 px-4 text-white font-medium">
-                      {wine.name}
-                    </td>
+        ))}
 
-                    <td className="py-3 px-4 text-slate-300">
-                      {wine.region} · {wine.country}
-                    </td>
-
-                    <td className="py-3 px-4 text-slate-300">
-                      {wine.vintage}
-                    </td>
-
-                    <td className="py-3 px-4 text-slate-300">
-                      {wine.size}
-                    </td>
-
-                    <td className="py-3 px-4 text-slate-300">
-                      {wine.price ? `€${wine.price}` : "No price"}
-                    </td>
-
-                    <td className="py-3 px-4">
-
-                      <div className="flex items-center gap-3">
-
-                        <button
-                          onClick={() => updateStock(wine.id, wine.stock, -1)}
-                          className="px-2 py-1 bg-slate-800 rounded text-white"
-                        >
-                          –
-                        </button>
-
-                        <span className={`text-sm ${stockStatus.color}`}>
-                          {wine.stock ?? 0}
-                        </span>
-
-                        <button
-                          onClick={() => updateStock(wine.id, wine.stock, 1)}
-                          className="px-2 py-1 bg-slate-800 rounded text-white"
-                        >
-                          +
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                    <td className="py-3 px-4">
-
-                      <button
-                        onClick={() => deleteWine(wine.id)}
-                        className="text-xs text-red-400 hover:text-red-300"
-                      >
-                        Remove
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                );
-
-              })}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      )}
+      </div>
 
     </div>
   );
