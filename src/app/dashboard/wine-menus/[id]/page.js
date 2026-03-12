@@ -66,11 +66,14 @@ export default function WineMenuEditor() {
 
     const { error } = await supabase
       .from("wine_menu_items")
-      .insert({
-        wine_menu_id: id,
-        wine_id: wineId,
-        position: 0
-      });
+      .insert(
+        {
+          wine_menu_id: id,
+          wine_id: wineId,
+          position: 0
+        },
+        { ignoreDuplicates: true }
+      );
 
     if (error) {
       console.error("Insert failed:", error);
@@ -90,7 +93,7 @@ export default function WineMenuEditor() {
 
     const { error } = await supabase
       .from("wine_menu_items")
-      .insert(rows);
+      .insert(rows, { ignoreDuplicates: true });
 
     if (error) {
       console.error("Bulk insert failed:", error);
