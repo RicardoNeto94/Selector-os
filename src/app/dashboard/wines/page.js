@@ -136,7 +136,7 @@ export default function WinesPage() {
   );
 
   /* ------------------------------
-     LOADING STATE
+     LOADING
   ------------------------------ */
 
   if (loading) {
@@ -191,93 +191,109 @@ export default function WinesPage() {
 
       ) : (
 
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="so-card overflow-x-auto">
 
-          {filteredWines.map((wine) => {
+          <table className="w-full text-sm">
 
-            const stockStatus = getStockStatus(wine.stock);
+            {/* TABLE HEADER */}
 
-            return (
+            <thead className="border-b border-slate-700 text-slate-400">
 
-              <div
-                key={wine.id}
-                className="so-card p-6 hover:scale-[1.02] transition-transform"
-              >
+              <tr className="text-left">
 
-                {/* WINE HEADER */}
+                <th className="py-3 px-4">Wine</th>
+                <th className="py-3 px-4">Region</th>
+                <th className="py-3 px-4">Vintage</th>
+                <th className="py-3 px-4">Size</th>
+                <th className="py-3 px-4">Price</th>
+                <th className="py-3 px-4">Stock</th>
+                <th className="py-3 px-4">Actions</th>
 
-                <div className="flex items-start justify-between">
+              </tr>
 
-                  <div>
+            </thead>
 
-                    <div className="text-lg font-semibold text-white">
-                      {wine.name}
-                    </div>
+            {/* TABLE BODY */}
 
-                    <div className="text-sm text-slate-400 mt-1">
-                      {wine.region} · {wine.country}
-                    </div>
+            <tbody>
 
-                    <div className="text-sm text-slate-400">
-                      {wine.vintage} · {wine.size}
-                    </div>
+              {filteredWines.map((wine) => {
 
-                  </div>
+                const stockStatus = getStockStatus(wine.stock);
 
-                  <div className={`text-xs font-medium ${stockStatus.color}`}>
-                    {stockStatus.label}
-                  </div>
+                return (
 
-                </div>
-
-                {/* PRICE */}
-
-                <div className="mt-3 text-sm text-slate-300">
-                  {wine.price ? `€${wine.price}` : "No price"}
-                </div>
-
-                {/* STOCK CONTROLS */}
-
-                <div className="flex items-center justify-between mt-4">
-
-                  <div className="flex items-center gap-3">
-
-                    <button
-                      onClick={() => updateStock(wine.id, wine.stock, -1)}
-                      className="px-2 py-1 bg-slate-800 rounded text-white"
-                    >
-                      –
-                    </button>
-
-                    <div className="text-sm text-slate-300">
-                      {wine.stock ?? 0}
-                    </div>
-
-                    <button
-                      onClick={() => updateStock(wine.id, wine.stock, 1)}
-                      className="px-2 py-1 bg-slate-800 rounded text-white"
-                    >
-                      +
-                    </button>
-
-                  </div>
-
-                  {/* DELETE */}
-
-                  <button
-                    onClick={() => deleteWine(wine.id)}
-                    className="text-xs text-red-400 hover:text-red-300"
+                  <tr
+                    key={wine.id}
+                    className="border-b border-slate-800 hover:bg-slate-800/40 transition"
                   >
-                    Remove
-                  </button>
 
-                </div>
+                    <td className="py-3 px-4 text-white font-medium">
+                      {wine.name}
+                    </td>
 
-              </div>
+                    <td className="py-3 px-4 text-slate-300">
+                      {wine.region} · {wine.country}
+                    </td>
 
-            );
+                    <td className="py-3 px-4 text-slate-300">
+                      {wine.vintage}
+                    </td>
 
-          })}
+                    <td className="py-3 px-4 text-slate-300">
+                      {wine.size}
+                    </td>
+
+                    <td className="py-3 px-4 text-slate-300">
+                      {wine.price ? `€${wine.price}` : "No price"}
+                    </td>
+
+                    <td className="py-3 px-4">
+
+                      <div className="flex items-center gap-3">
+
+                        <button
+                          onClick={() => updateStock(wine.id, wine.stock, -1)}
+                          className="px-2 py-1 bg-slate-800 rounded text-white"
+                        >
+                          –
+                        </button>
+
+                        <span className={`text-sm ${stockStatus.color}`}>
+                          {wine.stock ?? 0}
+                        </span>
+
+                        <button
+                          onClick={() => updateStock(wine.id, wine.stock, 1)}
+                          className="px-2 py-1 bg-slate-800 rounded text-white"
+                        >
+                          +
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                    <td className="py-3 px-4">
+
+                      <button
+                        onClick={() => deleteWine(wine.id)}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        Remove
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                );
+
+              })}
+
+            </tbody>
+
+          </table>
 
         </div>
 
