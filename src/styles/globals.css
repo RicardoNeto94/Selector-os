@@ -2,188 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
-/* GLOBAL THEME VARIABLES */
+/* DESIGN TOKENS */
+
 :root {
-  --primary: #18A999;
-  --secondary: #F45B69;
-  --accent: #E9C46A;
+  --bg: #0f1115;
+  --panel: #15181d;
+  --border: #23262d;
 
-  --font: 'Inter', sans-serif;
+  --text: #e6e7ea;
+  --text-muted: #8b8f98;
 
-  --card-style: glass;
+  --accent: #3b82f6;
 
-  --radius: 16px;
-  --transition: 0.25s cubic-bezier(.4,0,.2,1);
+  --radius: 8px;
 }
 
-/* GLOBAL BOX MODEL FIX */
+/* GLOBAL RESET */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* BASE ELEMENT STYLES */
-@layer base {
+/* BASE ELEMENTS */
 
-  h2 {
-    @apply py-4 text-4xl font-black text-gray-800;
-  }
-
-}
-
-/* REUSABLE COMPONENT STYLES */
-@layer components {
-
-  .column {
-    @apply flex flex-col items-start justify-center gap-4;
-  }
-
-  .custom-focus {
-    @apply focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2;
-  }
-
-  .button {
-    @apply inline-flex items-center justify-center
-      rounded-full px-6 py-2.5 text-sm font-semibold
-      bg-emerald-500 text-slate-950
-      hover:bg-emerald-400
-      transition;
-  }
-
-  .button-inverse {
-    @apply rounded-full border-2 border-white bg-green-400 px-8 py-2
-      font-bold text-white hover:border-green-400
-      hover:bg-white hover:text-green-400;
-  }
-
-  .card {
-    @apply flex flex-col items-start justify-center gap-6
-      min-w-[20rem] rounded-2xl
-      bg-slate-950/70 border border-white/10
-      py-8 px-4 sm:min-w-[24rem] sm:px-10
-      shadow-[0_24px_60px_rgba(0,0,0,0.7)];
-  }
-
-  .heading {
-    @apply text-lg font-semibold text-gray-700;
-  }
-
-  .highlight {
-    @apply ml-1 rounded-lg bg-gray-100 p-2 font-mono;
-  }
-
-  .error {
-    @apply w-full text-center text-red-600;
-  }
-
-  /* INPUT STYLE */
-
-  .input {
-    @apply w-full rounded-xl
-      border border-slate-600
-      bg-white/90
-      placeholder:text-slate-400
-      px-4 py-2.5 text-sm
-      transition;
-      
-    color: #1e293b;
-  }
-
-  .input:focus {
-    @apply outline-none border-emerald-400
-    ring-2 ring-emerald-400/30;
-
-    color: #1e293b;
-  }
-
-  .link {
-    @apply rounded-md font-semibold text-green-400;
-  }
-
-  .row {
-    @apply flex flex-row items-center justify-start gap-1;
-  }
-
-}
-
-/* FORCE INPUT TEXT COLOR (fix browser override) */
-
-.input,
-.input:focus,
-.input:active {
-  color: #1e293b !important;
-}
-
-input,
-textarea,
-select {
-  color: #1e293b !important;
-}
-
-/* FIX NUMBER INPUT COLOR */
-
-input[type="number"] {
-  color: #1e293b;
-}
-
-/* PAGE FADE ANIMATION */
-.page-fade {
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* KPI HOVER */
-.kpi-card {
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-}
-
-.kpi-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 22px rgba(0,0,0,0.07);
-}
-
-/* SIDEBAR HIGHLIGHT */
-.sidebar-item {
-  border-left: 3px solid transparent;
-  padding-left: 0.75rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.sidebar-item:hover {
-  background: #f2f2f2;
-}
-
-.sidebar-item-active {
-  border-left-color: #4ade80;
-  background: #ecfdf5;
-  font-weight: 600;
-}
-
-/* GLOBAL BACKGROUND */
 html,
 body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
   min-height: 100vh;
-  background: var(--so-bg-page);
-  color: var(--so-text-main);
-  overflow-x: hidden;
-  will-change: background;
 }
 
-/* NAV LINK HOVER */
-nav a {
-  position: relative;
+/* PANEL CONTAINER */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
-nav a:hover span:last-child {
-  width: 6px;
-  opacity: 0.8;
+/* BUTTON */
+
+.button {
+  @apply px-4 py-2 text-sm font-medium rounded-md;
+  background: var(--accent);
+  color: white;
+}
+
+.button-secondary {
+  @apply px-4 py-2 text-sm font-medium rounded-md;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* INPUT */
+
+.input {
+  @apply w-full px-3 py-2 text-sm rounded-md;
+  background: #1b1f26;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* TABLE */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tr:hover {
+  background: #1a1d23;
 }
