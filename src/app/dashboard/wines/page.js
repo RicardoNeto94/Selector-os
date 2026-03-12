@@ -102,13 +102,17 @@ export default function WinesPage() {
   }
 
   const filtered = wines
-    .filter(w => wineType === "all" || w.wine_type === wineType)
-    .filter(w =>
-      `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
-
+  .filter(
+    w =>
+      wineType === "all" ||
+      (w.wine_type || "").toLowerCase() === wineType.toLowerCase()
+  )
+  .filter(w =>
+    `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+  
   const totalPages = Math.ceil(filtered.length / perPage);
 
   const paginated = filtered.slice(
