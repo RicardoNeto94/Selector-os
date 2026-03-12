@@ -61,75 +61,97 @@ export default function WinesPage() {
     setLoading(false);
   }
 
- async function importCSV() {
+  async function importCSV() {
 
-  if (!file || !restaurant) return;
+    if (!file || !restaurant) return;
 
-  setImporting(true);
+    setImporting(true);
 
-  Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    complete: async function(results) {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async function(results) {
 
-      const rows = results.data;
+        const rows = results.data;
 
-      const winesToInsert = rows
-        .filter(row => row.name && row.name.trim() !== "") // skip empty rows
-        .map(row => ({
+        const winesToInsert = rows
+          .filter(row => row.name && row.name.trim() !== "")
+          .map(row => {
 
-          restaurant_id: restaurant.id,
+            const cleanPrice = row.price
+              ? parseFloat(
+                  row.price
+                    .toString()
+                    .replace(",", ".")
+                    .replace(/[^\d.]/g, "")
+                )
+              : null;
 
-          name: row.name.trim(),
+            const cleanStock = row.stock
+              ? parseInt(
+                  row.stock
+                    .toString()
+                    .replace(/[^\d]/g, "")
+                )
+              : 0;
 
-          producer: row.producer?.trim() || null,
-          country: row.country?.trim() || null,
-          region: row.region?.trim() || null,
-          subregion: row.subregion?.trim() || null,
-          grapes: row.grapes?.trim() || null,
+            const cleanVintage = row.vintage
+              ? parseInt(
+                  row.vintage
+                    .toString()
+                    .replace(/[^\d]/g, "")
+                )
+              : null;
 
-          wine_type: row.wine_type
-            ? row.wine_type.toLowerCase().trim()
-            : null,
+            return {
 
-          vintage:
-            row.vintage && !isNaN(row.vintage)
-              ? Number(row.vintage)
-              : null,
+              restaurant_id: restaurant.id,
 
-          size: row.size?.trim() || "75cl",
+              name: row.name.trim(),
 
-          price:
-            row.price && !isNaN(row.price)
-              ? Number(row.price)
-              : null,
+              producer: row.producer?.trim() || null,
+              country: row.country?.trim() || null,
+              region: row.region?.trim() || null,
+              subregion: row.subregion?.trim() || null,
+              grapes: row.grapes?.trim() || null,
 
-          stock:
-            row.stock && !isNaN(row.stock)
-              ? Number(row.stock)
-              : 0,
+              wine_type: row.wine_type
+                ? row.wine_type.toLowerCase().trim()
+                : null,
 
-          description: row.description?.trim() || null,
-          notes: row.notes?.trim() || null
+              vintage: cleanVintage,
 
-        }));
+              size: row.size?.trim() || "75cl",
 
-      const { error } = await supabase
-        .from("wines")
-        .insert(winesToInsert);
+              price: isNaN(cleanPrice) ? null : cleanPrice,
 
-      if (error) {
-        console.error(error);
-        alert("Import failed");
-      } else {
-        alert(`Imported ${winesToInsert.length} wines`);
-        loadWines();
+              stock: isNaN(cleanStock) ? 0 : cleanStock,
+
+              description: row.description?.trim() || null,
+              notes: row.notes?.trim() || null
+
+            };
+
+          });
+
+        console.log("Preview import:", winesToInsert.slice(0,5));
+
+        const { error } = await supabase
+          .from("wines")
+          .insert(winesToInsert);
+
+        if (error) {
+          console.error(error);
+          alert("Import failed — check console");
+        } else {
+          alert(`Imported ${winesToInsert.length} wines`);
+          loadWines();
+        }
+
+        setImporting(false);
       }
-
-      setImporting(false);
-    }
-  });
-}
+    });
+  }
 
   async function updateStock(wineId, currentStock, change) {
 
@@ -174,16 +196,16 @@ export default function WinesPage() {
   }
 
   const filtered = wines
-  .filter(
-    w =>
-      wineType === "all" ||
-      (w.wine_type || "").toLowerCase() === wineType.toLowerCase()
-  )
-  .filter(w =>
-    `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+    .filter(
+      w =>
+        wineType === "all" ||
+        (w.wine_type || "").toLowerCase() === wineType.toLowerCase()
+    )
+    .filter(w =>
+      `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
 
   const totalPages = Math.ceil(filtered.length / perPage);
 
@@ -218,8 +240,6 @@ export default function WinesPage() {
 
       </div>
 
-      {/* IMPORT */}
-
       <div className="flex items-center gap-3">
 
         <input
@@ -237,8 +257,6 @@ export default function WinesPage() {
         </button>
 
       </div>
-
-      {/* FILTERS */}
 
       <div className="flex gap-2 flex-wrap">
 
@@ -272,8 +290,6 @@ export default function WinesPage() {
 
       </div>
 
-      {/* SEARCH */}
-
       <input
         type="text"
         placeholder="Search wines..."
@@ -284,8 +300,6 @@ export default function WinesPage() {
         }}
         className="so-input"
       />
-
-      {/* TABLE */}
 
       <div className="so-card overflow-x-auto">
 
@@ -372,28 +386,6 @@ export default function WinesPage() {
           </tbody>
 
         </table>
-
-      </div>
-
-      {/* PAGINATION */}
-
-      <div className="flex justify-center gap-2">
-
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-
-          <button
-            key={p}
-            onClick={() => setPage(p)}
-            className={`px-3 py-1 rounded ${
-              p === page
-                ? "bg-emerald-500 text-white"
-                : "bg-slate-800 text-slate-300"
-            }`}
-          >
-            {p}
-          </button>
-
-        ))}
 
       </div>
 
