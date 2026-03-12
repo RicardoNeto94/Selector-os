@@ -20,7 +20,7 @@ export default function WineMenuEditor() {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  async function loadData() {
 
     const {
       data: { user }
@@ -60,28 +60,48 @@ export default function WineMenuEditor() {
     setMenuWines(menuItems || []);
 
     setLoading(false);
-  };
-
-  const addWineToMenu = async (wineId) => {
-
-  const { data, error } = await supabase
-    .from("wine_menu_items")
-    .insert({
-      wine_menu_id: id,
-      wine_id: wineId,
-      position: 0
-    })
-    .select();
-
-  if (error) {
-    console.error("Insert failed:", error);
-    return;
   }
 
-  console.log("Wine added:", data);
+  async function addWineToMenu(wineId) {
 
-  loadData();
-};
+    const { error } = await supabase
+      .from("wine_menu_items")
+      .insert({
+        wine_menu_id: id,
+        wine_id: wineId,
+        position: 0
+      });
+
+    if (error) {
+      console.error("Insert failed:", error);
+      return;
+    }
+
+    loadData();
+  }
+
+  async function addEntireCellar() {
+
+    const rows = cellarWines.map(w => ({
+      wine_menu_id: id,
+      wine_id: w.id,
+      position: 0
+    }));
+
+    const { error } = await supabase
+      .from("wine_menu_items")
+      .insert(rows);
+
+    if (error) {
+      console.error("Bulk insert failed:", error);
+      alert("Failed to add wines");
+      return;
+    }
+
+    alert(`Added ${rows.length} wines to the menu`);
+
+    loadData();
+  }
 
   if (loading) {
     return (
@@ -145,37 +165,48 @@ export default function WineMenuEditor() {
 
       <div className="so-card p-6">
 
-        <h2 className="text-white font-semibold mb-4">
-          Cellar wines
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+
+          <h2 className="text-white font-semibold">
+            Cellar wines
+          </h2>
+
+          <button
+            onClick={addEntireCellar}
+            className="so-btn-primary"
+          >
+            Add entire cellar
+          </button>
+
+        </div>
 
         <div className="grid md:grid-cols-3 gap-4">
 
           {cellarWines
-  .filter(w => !menuWines.some(m => m.wine_id === w.id))
-  .map((wine) => (
+            .filter(w => !menuWines.some(m => m.wine_id === w.id))
+            .map((wine) => (
 
-            <div
-              key={wine.id}
-              className="so-card p-4 hover:scale-[1.02] transition cursor-pointer"
-              onClick={() => addWineToMenu(wine.id)}
-            >
+              <div
+                key={wine.id}
+                className="so-card p-4 hover:scale-[1.02] transition cursor-pointer"
+                onClick={() => addWineToMenu(wine.id)}
+              >
 
-              <div className="text-white font-medium">
-                {wine.name}
+                <div className="text-white font-medium">
+                  {wine.name}
+                </div>
+
+                <div className="text-sm text-slate-400">
+                  {wine.region} · {wine.vintage}
+                </div>
+
+                <div className="text-xs text-slate-500 mt-2">
+                  Click to add to menu
+                </div>
+
               </div>
 
-              <div className="text-sm text-slate-400">
-                {wine.region} · {wine.vintage}
-              </div>
-
-              <div className="text-xs text-slate-500 mt-2">
-                Click to add to menu
-              </div>
-
-            </div>
-
-          ))}
+            ))}
 
         </div>
 
