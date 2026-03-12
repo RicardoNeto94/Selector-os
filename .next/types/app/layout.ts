@@ -1,4 +1,4 @@
-// File: /workspaces/Selector-os/src/app/layout.js
+// File: /Users/ricardo.neto/Documents/GitHub/Selector-os/src/app/layout.js
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
