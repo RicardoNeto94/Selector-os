@@ -19,6 +19,8 @@ export default function WinesPage() {
   const [page, setPage] = useState(1);
   const perPage = 25;
 
+  const [csvFile, setCsvFile] = useState(null);
+
   useEffect(() => {
     loadWines();
   }, []);
@@ -93,6 +95,63 @@ export default function WinesPage() {
     setWines(prev => prev.filter(w => w.id !== wineId));
   }
 
+  async function importCSV() {
+
+    if (!csvFile || !restaurant) {
+      alert("Please select a CSV file first");
+      return;
+    }
+
+    const text = await csvFile.text();
+
+    const rows = text
+      .split("\n")
+      .map(r => r.trim())
+      .filter(Boolean);
+
+    const headers = rows[0].split(",").map(h => h.trim());
+
+    const winesToInsert = rows.slice(1).map(row => {
+
+      const values = row.split(",");
+
+      const wine = {};
+      headers.forEach((h, i) => wine[h] = values[i]);
+
+      return {
+        restaurant_id: restaurant.id,
+        name: wine.name,
+        producer: wine.producer,
+        country: wine.country,
+        region: wine.region,
+        subregion: wine.subregion,
+        grapes: wine.grapes,
+        wine_type: wine.wine_type,
+        vintage: wine.vintage,
+        size: wine.size,
+        price: wine.price ? Number(wine.price) : null,
+        stock: wine.stock ? Number(wine.stock) : 0,
+        description: wine.description,
+        notes: wine.notes
+      };
+
+    });
+
+    const { error } = await supabase
+      .from("wines")
+      .insert(winesToInsert);
+
+    if (error) {
+      console.error(error);
+      alert("Import failed");
+      return;
+    }
+
+    alert(`${winesToInsert.length} wines imported`);
+
+    loadWines();
+  }
+
   function getStockStatus(stock) {
 
     if (!stock || stock === 0) return "text-red-400";
@@ -137,12 +196,30 @@ export default function WinesPage() {
           Wine Cellar
         </h1>
 
-        <a
-          href="/dashboard/wines/new"
-          className="so-btn-primary"
-        >
-          + Add Wine
-        </a>
+        <div className="flex items-center gap-3">
+
+          <input
+            type="file"
+            accept=".csv"
+            onChange={e => setCsvFile(e.target.files[0])}
+            className="text-sm text-slate-300"
+          />
+
+          <button
+            onClick={importCSV}
+            className="px-3 py-2 bg-slate-800 rounded text-sm"
+          >
+            Import CSV
+          </button>
+
+          <a
+            href="/dashboard/wines/new"
+            className="so-btn-primary"
+          >
+            + Add Wine
+          </a>
+
+        </div>
 
       </div>
 
@@ -196,7 +273,6 @@ export default function WinesPage() {
           <thead className="border-b border-slate-700 text-slate-400">
 
             <tr>
-
               <th className="text-left py-3 px-4">Wine</th>
               <th className="text-left py-3 px-4">Producer</th>
               <th className="text-left py-3 px-4">Region</th>
@@ -204,7 +280,6 @@ export default function WinesPage() {
               <th className="text-left py-3 px-4">Price</th>
               <th className="text-left py-3 px-4">Stock</th>
               <th className="text-left py-3 px-4"></th>
-
             </tr>
 
           </thead>
