@@ -88,16 +88,11 @@
   align-items:center;
   gap:10px;
 
-  padding:10px 12px;
+  padding:8px 10px;
 
-  border-radius:6px;
+  border-radius:8px;
 
   font-size:14px;
-
-  color:var(--so-text-muted);
-  text-decoration:none;
-
-  transition:background .15s ease;
 }
 
 .so-nav-item:hover{
@@ -117,12 +112,16 @@
   display:flex;
   align-items:center;
   justify-content:center;
+  flex:0 0 auto;
 }
 
 .so-nav-icon{
-  width:18px;
-  height:18px;
+  width:16px;
+  height:16px;
+  opacity:0.85;
+  flex:0 0 auto;
 }
+
 
 /* =======================================================
    SUBMENU
