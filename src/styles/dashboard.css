@@ -35,6 +35,10 @@
 
 .so-sidebar{
   width:var(--so-sidebar-width);
+  height:100vh;
+  position:sticky;
+  top:0;
+
   background:var(--so-panel);
   border-right:1px solid var(--so-border);
 
@@ -43,6 +47,8 @@
   justify-content:space-between;
 
   padding:20px 16px;
+
+  overflow-y:auto;
 }
 
 /* =======================================================
