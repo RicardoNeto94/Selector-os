@@ -23,6 +23,9 @@ export default function WinesPage() {
   const [file, setFile] = useState(null);
   const [importing, setImporting] = useState(false);
 
+  const [sortColumn, setSortColumn] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
+
   useEffect(() => {
     loadWines();
   }, []);
@@ -52,13 +55,23 @@ export default function WinesPage() {
     const { data: winesData, error } = await supabase
       .from("wines")
       .select("*")
-      .eq("restaurant_id", restaurantData.id)
-      .order("name");
+      .eq("restaurant_id", restaurantData.id);
 
     if (error) console.error(error);
 
     setWines(winesData || []);
     setLoading(false);
+  }
+
+  function toggleSort(column) {
+
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+
   }
 
   async function importCSV() {
@@ -106,9 +119,7 @@ export default function WinesPage() {
             return {
 
               restaurant_id: restaurant.id,
-
               name: row.name.trim(),
-
               producer: row.producer?.trim() || null,
               country: row.country?.trim() || null,
               region: row.region?.trim() || null,
@@ -120,21 +131,15 @@ export default function WinesPage() {
                 : null,
 
               vintage: cleanVintage,
-
               size: row.size?.trim() || "75cl",
-
               price: isNaN(cleanPrice) ? null : cleanPrice,
-
               stock: isNaN(cleanStock) ? 0 : cleanStock,
-
               description: row.description?.trim() || null,
               notes: row.notes?.trim() || null
 
             };
 
           });
-
-        console.log("Preview import:", winesToInsert.slice(0,5));
 
         const { error } = await supabase
           .from("wines")
@@ -162,10 +167,7 @@ export default function WinesPage() {
       .update({ stock: newStock })
       .eq("id", wineId);
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+    if (error) return console.error(error);
 
     setWines(prev =>
       prev.map(w =>
@@ -176,8 +178,7 @@ export default function WinesPage() {
 
   async function deleteWine(wineId) {
 
-    const confirmDelete = confirm("Remove this wine from the cellar?");
-    if (!confirmDelete) return;
+    if (!confirm("Remove this wine from the cellar?")) return;
 
     await supabase
       .from("wines")
@@ -205,7 +206,17 @@ export default function WinesPage() {
       `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
         .toLowerCase()
         .includes(search.toLowerCase())
-    );
+    )
+    .sort((a, b) => {
+
+      const valA = a[sortColumn] ?? "";
+      const valB = b[sortColumn] ?? "";
+
+      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+
+    });
 
   const totalPages = Math.ceil(filtered.length / perPage);
 
@@ -214,12 +225,13 @@ export default function WinesPage() {
     page * perPage
   );
 
+  function sortIndicator(col) {
+    if (sortColumn !== col) return "";
+    return sortDirection === "asc" ? " ↑" : " ↓";
+  }
+
   if (loading) {
-    return (
-      <div className="page-fade text-slate-400">
-        Loading wines…
-      </div>
-    );
+    return <div className="page-fade text-slate-400">Loading wines…</div>;
   }
 
   return (
@@ -237,56 +249,6 @@ export default function WinesPage() {
         >
           + Add Wine
         </a>
-
-      </div>
-
-      <div className="flex items-center gap-3">
-
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-
-        <button
-          onClick={importCSV}
-          disabled={!file || importing}
-          className="so-btn-primary"
-        >
-          {importing ? "Importing..." : "Import CSV"}
-        </button>
-
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-
-        {[
-          ["all","All"],
-          ["sparkling","Sparkling"],
-          ["white","White"],
-          ["rose","Rosé"],
-          ["red","Red"],
-          ["orange","Orange"],
-          ["dessert","Dessert"],
-          ["fortified","Fortified"]
-        ].map(([value,label]) => (
-
-          <button
-            key={value}
-            onClick={() => {
-              setWineType(value);
-              setPage(1);
-            }}
-            className={`px-3 py-1 rounded text-sm ${
-              wineType === value
-                ? "bg-emerald-500 text-white"
-                : "bg-slate-800 text-slate-300"
-            }`}
-          >
-            {label}
-          </button>
-
-        ))}
 
       </div>
 
@@ -309,13 +271,31 @@ export default function WinesPage() {
 
             <tr>
 
-              <th className="text-left py-3 px-4">Wine</th>
-              <th className="text-left py-3 px-4">Producer</th>
-              <th className="text-left py-3 px-4">Region</th>
-              <th className="text-left py-3 px-4">Vintage</th>
-              <th className="text-left py-3 px-4">Price</th>
-              <th className="text-left py-3 px-4">Stock</th>
-              <th className="text-left py-3 px-4"></th>
+              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("name")}>
+                Wine{sortIndicator("name")}
+              </th>
+
+              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("producer")}>
+                Producer{sortIndicator("producer")}
+              </th>
+
+              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("region")}>
+                Region{sortIndicator("region")}
+              </th>
+
+              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("vintage")}>
+                Vintage{sortIndicator("vintage")}
+              </th>
+
+              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("price")}>
+                Price{sortIndicator("price")}
+              </th>
+
+              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("stock")}>
+                Stock{sortIndicator("stock")}
+              </th>
+
+              <th></th>
 
             </tr>
 
@@ -389,61 +369,6 @@ export default function WinesPage() {
 
       </div>
 
-{/* PAGINATION */}
-
-<div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
-
-  <button
-    disabled={page === 1}
-    onClick={() => setPage(1)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    ⏮ First
-  </button>
-
-  <button
-    disabled={page === 1}
-    onClick={() => setPage(page - 1)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    ← Prev
-  </button>
-
-  {Array.from({ length: totalPages }, (_, i) => i + 1)
-    .filter(p => p >= page - 2 && p <= page + 2)
-    .map(p => (
-
-      <button
-        key={p}
-        onClick={() => setPage(p)}
-        className={`px-3 py-1 rounded ${
-          p === page
-            ? "bg-emerald-500 text-white"
-            : "bg-slate-800 text-slate-300"
-        }`}
-      >
-        {p}
-      </button>
-
-  ))}
-
-  <button
-    disabled={page === totalPages}
-    onClick={() => setPage(page + 1)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    Next →
-  </button>
-
-  <button
-    disabled={page === totalPages}
-    onClick={() => setPage(totalPages)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    Last ⏭
-  </button>
-
-</div>
     </div>
   );
 }
