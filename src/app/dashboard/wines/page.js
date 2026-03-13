@@ -243,25 +243,52 @@ export default function WinesPage() {
           Wine Cellar
         </h1>
 
-        <a
-          href="/dashboard/wines/new"
-          className="so-btn-primary"
-        >
+        <a href="/dashboard/wines/new" className="so-btn-primary">
           + Add Wine
         </a>
 
       </div>
 
-      <input
-        type="text"
-        placeholder="Search wines..."
-        value={search}
-        onChange={e => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
-        className="so-input"
-      />
+      {/* CSV IMPORT */}
+
+      <div className="flex items-center gap-3">
+
+        <input
+          type="file"
+          accept=".csv"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <button
+          onClick={importCSV}
+          disabled={!file || importing}
+          className="so-btn-primary"
+        >
+          {importing ? "Importing..." : "Import CSV"}
+        </button>
+
+      </div>
+
+      {/* APPLE STYLE SEARCH */}
+
+      <div className="flex justify-start">
+
+        <div className="relative w-full max-w-md">
+
+          <input
+            type="text"
+            placeholder="Search wines, producer, region..."
+            value={search}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-full rounded-full bg-slate-800/60 border border-slate-700 px-5 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+          />
+
+        </div>
+
+      </div>
 
       <div className="so-card overflow-x-auto">
 
@@ -369,61 +396,45 @@ export default function WinesPage() {
 
       </div>
 
-{/* PAGINATION */}
+      {/* PAGINATION */}
 
-<div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+      <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
 
-  <button
-    disabled={page === 1}
-    onClick={() => setPage(1)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    ⏮ First
-  </button>
+        <button disabled={page === 1} onClick={() => setPage(1)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
+          ⏮ First
+        </button>
 
-  <button
-    disabled={page === 1}
-    onClick={() => setPage(page - 1)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    ← Prev
-  </button>
+        <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
+          ← Prev
+        </button>
 
-  {Array.from({ length: totalPages }, (_, i) => i + 1)
-    .filter(p => p >= page - 2 && p <= page + 2)
-    .map(p => (
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p >= page - 2 && p <= page + 2)
+          .map(p => (
 
-      <button
-        key={p}
-        onClick={() => setPage(p)}
-        className={`px-3 py-1 rounded ${
-          p === page
-            ? "bg-emerald-500 text-white"
-            : "bg-slate-800 text-slate-300"
-        }`}
-      >
-        {p}
-      </button>
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`px-3 py-1 rounded ${
+                p === page
+                  ? "bg-emerald-500 text-white"
+                  : "bg-slate-800 text-slate-300"
+              }`}
+            >
+              {p}
+            </button>
 
-  ))}
+        ))}
 
-  <button
-    disabled={page === totalPages}
-    onClick={() => setPage(page + 1)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    Next →
-  </button>
+        <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
+          Next →
+        </button>
 
-  <button
-    disabled={page === totalPages}
-    onClick={() => setPage(totalPages)}
-    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
-  >
-    Last ⏭
-  </button>
+        <button disabled={page === totalPages} onClick={() => setPage(totalPages)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
+          Last ⏭
+        </button>
 
-</div>
+      </div>
 
     </div>
   );
