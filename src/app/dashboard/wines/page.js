@@ -26,6 +26,9 @@ export default function WinesPage() {
   const [sortColumn, setSortColumn] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
 
+  const [editingWine, setEditingWine] = useState(null);
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     loadWines();
   }, []);
@@ -92,32 +95,18 @@ export default function WinesPage() {
           .map(row => {
 
             const cleanPrice = row.price
-              ? parseFloat(
-                  row.price
-                    .toString()
-                    .replace(",", ".")
-                    .replace(/[^\d.]/g, "")
-                )
+              ? parseFloat(row.price.toString().replace(",", ".").replace(/[^\d.]/g, ""))
               : null;
 
             const cleanStock = row.stock
-              ? parseInt(
-                  row.stock
-                    .toString()
-                    .replace(/[^\d]/g, "")
-                )
+              ? parseInt(row.stock.toString().replace(/[^\d]/g, ""))
               : 0;
 
             const cleanVintage = row.vintage
-              ? parseInt(
-                  row.vintage
-                    .toString()
-                    .replace(/[^\d]/g, "")
-                )
+              ? parseInt(row.vintage.toString().replace(/[^\d]/g, ""))
               : null;
 
             return {
-
               restaurant_id: restaurant.id,
               name: row.name.trim(),
               producer: row.producer?.trim() || null,
@@ -125,18 +114,13 @@ export default function WinesPage() {
               region: row.region?.trim() || null,
               subregion: row.subregion?.trim() || null,
               grapes: row.grapes?.trim() || null,
-
-              wine_type: row.wine_type
-                ? row.wine_type.toLowerCase().trim()
-                : null,
-
+              wine_type: row.wine_type ? row.wine_type.toLowerCase().trim() : null,
               vintage: cleanVintage,
               size: row.size?.trim() || "75cl",
               price: isNaN(cleanPrice) ? null : cleanPrice,
               stock: isNaN(cleanStock) ? 0 : cleanStock,
               description: row.description?.trim() || null,
               notes: row.notes?.trim() || null
-
             };
 
           });
@@ -186,6 +170,34 @@ export default function WinesPage() {
       .eq("id", wineId);
 
     setWines(prev => prev.filter(w => w.id !== wineId));
+  }
+
+  async function saveWine() {
+
+    if (!editingWine) return;
+
+    setSaving(true);
+
+    const { id, ...updates } = editingWine;
+
+    const { error } = await supabase
+      .from("wines")
+      .update(updates)
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      alert("Failed to update wine");
+      setSaving(false);
+      return;
+    }
+
+    setWines(prev =>
+      prev.map(w => w.id === id ? editingWine : w)
+    );
+
+    setSaving(false);
+    setEditingWine(null);
   }
 
   function getStockStatus(stock) {
@@ -269,26 +281,18 @@ export default function WinesPage() {
 
       </div>
 
-      {/* APPLE STYLE SEARCH */}
+      {/* SEARCH */}
 
-      <div className="flex justify-start">
-
-        <div className="relative w-full max-w-md">
-
-          <input
-            type="text"
-            placeholder="Search wines, producer, region..."
-            value={search}
-            onChange={e => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="w-full rounded-full bg-slate-800/60 border border-slate-700 px-5 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-          />
-
-        </div>
-
-      </div>
+      <input
+        type="text"
+        placeholder="Search wines..."
+        value={search}
+        onChange={e => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        className="w-full max-w-md rounded-full bg-slate-800/60 border border-slate-700 px-5 py-2 text-sm text-white"
+      />
 
       <div className="so-card overflow-x-auto">
 
@@ -334,7 +338,8 @@ export default function WinesPage() {
 
               <tr
                 key={wine.id}
-                className="border-b border-slate-800 hover:bg-slate-800/40"
+                onClick={() => setEditingWine(wine)}
+                className="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer"
               >
 
                 <td className="py-3 px-4 text-white font-medium">
@@ -361,30 +366,7 @@ export default function WinesPage() {
                   {wine.stock ?? 0}
                 </td>
 
-                <td className="py-3 px-4 flex gap-2">
-
-                  <button
-                    onClick={() => updateStock(wine.id, wine.stock, -1)}
-                    className="px-2 bg-slate-800 rounded"
-                  >
-                    –
-                  </button>
-
-                  <button
-                    onClick={() => updateStock(wine.id, wine.stock, 1)}
-                    className="px-2 bg-slate-800 rounded"
-                  >
-                    +
-                  </button>
-
-                  <button
-                    onClick={() => deleteWine(wine.id)}
-                    className="text-red-400 text-xs ml-2"
-                  >
-                    Remove
-                  </button>
-
-                </td>
+                <td></td>
 
               </tr>
 
@@ -396,45 +378,51 @@ export default function WinesPage() {
 
       </div>
 
-      {/* PAGINATION */}
+      {/* MODAL */}
 
-      <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+      {editingWine && (
 
-        <button disabled={page === 1} onClick={() => setPage(1)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
-          ⏮ First
-        </button>
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
 
-        <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
-          ← Prev
-        </button>
+        <div className="bg-slate-900 border border-slate-700 rounded-xl w-[600px] p-6 space-y-3">
 
-        {Array.from({ length: totalPages }, (_, i) => i + 1)
-          .filter(p => p >= page - 2 && p <= page + 2)
-          .map(p => (
+          <h2 className="text-xl font-semibold text-white">Edit Wine</h2>
+
+          <input className="so-input" value={editingWine.name || ""} onChange={e=>setEditingWine({...editingWine,name:e.target.value})}/>
+          <input className="so-input" value={editingWine.producer || ""} onChange={e=>setEditingWine({...editingWine,producer:e.target.value})}/>
+          <input className="so-input" value={editingWine.country || ""} onChange={e=>setEditingWine({...editingWine,country:e.target.value})}/>
+          <input className="so-input" value={editingWine.region || ""} onChange={e=>setEditingWine({...editingWine,region:e.target.value})}/>
+          <input className="so-input" value={editingWine.grapes || ""} onChange={e=>setEditingWine({...editingWine,grapes:e.target.value})}/>
+          <input type="number" className="so-input" value={editingWine.vintage || ""} onChange={e=>setEditingWine({...editingWine,vintage:e.target.value})}/>
+          <input type="number" className="so-input" value={editingWine.price || ""} onChange={e=>setEditingWine({...editingWine,price:e.target.value})}/>
+          <input type="number" className="so-input" value={editingWine.stock || ""} onChange={e=>setEditingWine({...editingWine,stock:e.target.value})}/>
+
+          <textarea className="so-input" value={editingWine.description || ""} onChange={e=>setEditingWine({...editingWine,description:e.target.value})}/>
+          <textarea className="so-input" value={editingWine.notes || ""} onChange={e=>setEditingWine({...editingWine,notes:e.target.value})}/>
+
+          <div className="flex justify-end gap-3 pt-4">
 
             <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={`px-3 py-1 rounded ${
-                p === page
-                  ? "bg-emerald-500 text-white"
-                  : "bg-slate-800 text-slate-300"
-              }`}
+              onClick={() => setEditingWine(null)}
+              className="px-4 py-2 bg-slate-800 rounded"
             >
-              {p}
+              Cancel
             </button>
 
-        ))}
+            <button
+              onClick={saveWine}
+              className="so-btn-primary"
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
 
-        <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
-          Next →
-        </button>
+          </div>
 
-        <button disabled={page === totalPages} onClick={() => setPage(totalPages)} className="px-3 py-1 rounded bg-slate-800 text-slate-300">
-          Last ⏭
-        </button>
+        </div>
 
       </div>
+
+      )}
 
     </div>
   );
