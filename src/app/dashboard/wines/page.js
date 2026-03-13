@@ -369,6 +369,62 @@ export default function WinesPage() {
 
       </div>
 
+{/* PAGINATION */}
+
+<div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+
+  <button
+    disabled={page === 1}
+    onClick={() => setPage(1)}
+    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+  >
+    ⏮ First
+  </button>
+
+  <button
+    disabled={page === 1}
+    onClick={() => setPage(page - 1)}
+    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+  >
+    ← Prev
+  </button>
+
+  {Array.from({ length: totalPages }, (_, i) => i + 1)
+    .filter(p => p >= page - 2 && p <= page + 2)
+    .map(p => (
+
+      <button
+        key={p}
+        onClick={() => setPage(p)}
+        className={`px-3 py-1 rounded ${
+          p === page
+            ? "bg-emerald-500 text-white"
+            : "bg-slate-800 text-slate-300"
+        }`}
+      >
+        {p}
+      </button>
+
+  ))}
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => setPage(page + 1)}
+    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+  >
+    Next →
+  </button>
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => setPage(totalPages)}
+    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+  >
+    Last ⏭
+  </button>
+
+</div>
+
     </div>
   );
 }
