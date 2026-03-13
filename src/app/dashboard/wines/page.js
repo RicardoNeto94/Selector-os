@@ -391,23 +391,43 @@ export default function WinesPage() {
 
 {/* PAGINATION */}
 
-<div className="flex justify-center gap-2">
+{/* PAGINATION */}
 
-  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<div className="flex items-center justify-center gap-3 mt-6">
 
-    <button
-      key={p}
-      onClick={() => setPage(p)}
-      className={`px-3 py-1 rounded ${
-        p === page
-          ? "bg-emerald-500 text-white"
-          : "bg-slate-800 text-slate-300"
-      }`}
-    >
-      {p}
-    </button>
+  <button
+    disabled={page === 1}
+    onClick={() => setPage(page - 1)}
+    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+  >
+    ← Previous
+  </button>
+
+  {Array.from({ length: totalPages }, (_, i) => i + 1)
+    .filter(p => p >= page - 2 && p <= page + 2)
+    .map(p => (
+
+      <button
+        key={p}
+        onClick={() => setPage(p)}
+        className={`px-3 py-1 rounded ${
+          p === page
+            ? "bg-emerald-500 text-white"
+            : "bg-slate-800 text-slate-300"
+        }`}
+      >
+        {p}
+      </button>
 
   ))}
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => setPage(page + 1)}
+    className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+  >
+    Next →
+  </button>
 
 </div>
     </div>
