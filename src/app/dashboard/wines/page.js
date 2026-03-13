@@ -389,6 +389,27 @@ export default function WinesPage() {
 
       </div>
 
+{/* PAGINATION */}
+
+<div className="flex justify-center gap-2">
+
+  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+
+    <button
+      key={p}
+      onClick={() => setPage(p)}
+      className={`px-3 py-1 rounded ${
+        p === page
+          ? "bg-emerald-500 text-white"
+          : "bg-slate-800 text-slate-300"
+      }`}
+    >
+      {p}
+    </button>
+
+  ))}
+
+</div>
     </div>
   );
 }
