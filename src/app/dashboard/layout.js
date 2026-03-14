@@ -1,4 +1,3 @@
-// src/app/dashboard/layout.js
 "use client";
 
 import "../../styles/dashboard.css";
@@ -24,7 +23,15 @@ export const dynamic = "force-dynamic";
 const PLAN = "starter";
 const FULL_LOGO_SRC = "/selectoros-logo.png";
 
-function NavItem({ href, isActive, icon: Icon, label, onClick, hasArrow, expanded }) {
+function NavItem({
+  href,
+  isActive,
+  icon: Icon,
+  label,
+  onClick,
+  hasArrow,
+  expanded
+}) {
   return (
     <Link
       href={href}
@@ -90,10 +97,8 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="so-dashboard-root">
 
-      {/* SIDEBAR */}
       <aside className="so-sidebar">
 
-        {/* BRAND */}
         <div>
 
           <div className="so-sidebar-brand">
@@ -107,7 +112,6 @@ export default function DashboardLayout({ children }) {
             />
           </div>
 
-          {/* NAV */}
           <nav className="so-sidebar-nav">
 
             <div className="so-sidebar-section-label">Overview</div>
@@ -128,7 +132,6 @@ export default function DashboardLayout({ children }) {
               label="Dishes"
             />
 
-            {/* WINE CELLAR */}
             <NavItem
               href="/dashboard/wines"
               isActive={isActive("/dashboard/wines")}
@@ -136,18 +139,17 @@ export default function DashboardLayout({ children }) {
               label="Wine Cellar"
             />
 
-            {/* WINE MENUS */}
             <div className="so-nav-group">
 
               <NavItem
-  href="/dashboard/wine-menus"
-  isActive={isActive("/dashboard/wine-menus")}
-  icon={BookOpenIcon}
-  label="Wine Menus"
-  onClick={handleWineMenusClick}
-  hasArrow
-  expanded={wineMenusOpen}
-/>
+                href="/dashboard/wine-menus"
+                isActive={isActive("/dashboard/wine-menus")}
+                icon={BookOpenIcon}
+                label="Wine Menus"
+                onClick={handleWineMenusClick}
+                hasArrow
+                expanded={wineMenusOpen}
+              />
 
               {wineMenusOpen && (
                 <div className="so-nav-sub">
@@ -173,18 +175,17 @@ export default function DashboardLayout({ children }) {
 
             </div>
 
-            {/* MENUS */}
             <div className="so-nav-group">
 
-             <NavItem
-  href="/dashboard/menu"
-  isActive={isActive("/dashboard/menu")}
-  icon={SwatchIcon}
-  label="Menus"
-  onClick={handleMenusClick}
-  hasArrow
-  expanded={menusOpen}
-/>
+              <NavItem
+                href="/dashboard/menu"
+                isActive={isActive("/dashboard/menu")}
+                icon={SwatchIcon}
+                label="Menus"
+                onClick={handleMenusClick}
+                hasArrow
+                expanded={menusOpen}
+              />
 
               {menusOpen && (
                 <div className="so-nav-sub">
@@ -239,7 +240,6 @@ export default function DashboardLayout({ children }) {
           </nav>
         </div>
 
-        {/* FOOTER */}
         <div className="so-sidebar-footer">
 
           <div className="so-sidebar-user">
@@ -261,7 +261,6 @@ export default function DashboardLayout({ children }) {
 
       </aside>
 
-      {/* MAIN */}
       <main className="so-main">
         {children}
       </main>
