@@ -105,15 +105,19 @@ setShowResults(false);
 setFilteredWines([]);
 }
 
-function groupByCountry(wineList) {
+function groupWineList(wineList) {
 
 return wineList.reduce((acc, wine) => {
 
+const type = wine.wine_type || "Other";
 const country = wine.country || "Other";
+const region = wine.region || "Other";
 
-if (!acc[country]) acc[country] = [];
+if (!acc[type]) acc[type] = {};
+if (!acc[type][country]) acc[type][country] = {};
+if (!acc[type][country][region]) acc[type][country][region] = [];
 
-acc[country].push(wine);
+acc[type][country][region].push(wine);
 
 return acc;
 
@@ -122,8 +126,7 @@ return acc;
 }
 
 const winesToDisplay = showResults ? filteredWines : wines;
-
-const winesByCountry = groupByCountry(winesToDisplay);
+const wineTree = groupWineList(winesToDisplay);
 
 return (
 
@@ -231,15 +234,33 @@ Show Selection
 
 {/* WINE LIST */}
 
-<div className="max-w-4xl w-full mt-12">
+{showResults && (
 
-{Object.entries(winesByCountry).map(([country, wines]) => (
+<div className="max-w-4xl w-full mt-12 space-y-12">
 
-<div key={country} className="mb-10">
+{Object.entries(wineTree).map(([type, countries]) => (
 
-<h2 className="text-xl font-semibold mb-4 border-b border-slate-700 pb-2">
-{country}
+<div key={type}>
+
+<h2 className="text-2xl font-semibold mb-6 border-b border-slate-700 pb-2">
+{type}
 </h2>
+
+{Object.entries(countries).map(([country, regions]) => (
+
+<div key={country} className="mb-8">
+
+<h3 className="text-lg font-semibold text-slate-200 mb-4">
+{country}
+</h3>
+
+{Object.entries(regions).map(([region, wines]) => (
+
+<div key={region} className="mb-6">
+
+<div className="text-sm uppercase tracking-wide text-slate-400 mb-3">
+{region}
+</div>
 
 <div className="space-y-2">
 
@@ -247,7 +268,7 @@ Show Selection
 
 <div
 key={wine.id}
-onClick={() => setSelectedWine(wine)}
+onClick={()=>setSelectedWine(wine)}
 className="flex justify-between items-center py-2 border-b border-slate-800 cursor-pointer hover:text-amber-300 transition"
 >
 
@@ -258,7 +279,7 @@ className="flex justify-between items-center py-2 border-b border-slate-800 curs
 </div>
 
 <div className="text-xs text-slate-400">
-{wine.region} · {wine.vintage}
+{wine.vintage}
 </div>
 
 </div>
@@ -278,6 +299,16 @@ className="flex justify-between items-center py-2 border-b border-slate-800 curs
 ))}
 
 </div>
+
+))}
+
+</div>
+
+))}
+
+</div>
+
+)}
 
 {/* WINE MODAL */}
 
