@@ -116,12 +116,36 @@ export default function DashboardLayout({ children }) {
             />
 
             {/* WINE MENUS */}
-            <NavItem
-              href="/dashboard/wine-menus"
-              isActive={isActive("/dashboard/wine-menus")}
-              icon={BookOpenIcon}
-              label="Wine Menus"
-            />
+<div className="so-nav-group">
+
+  <NavItem
+    href="/dashboard/wine-menus"
+    isActive={isActive("/dashboard/wine-menus")}
+    icon={BookOpenIcon}
+    label="Wine Menus"
+  />
+
+  <div className="so-nav-sub">
+
+    <Link href="/menu/shang-shi" className="so-nav-sub-item">
+      Shang Shi
+    </Link>
+
+    <Link href="/menu/fox-den" className="so-nav-sub-item">
+      Fox Den
+    </Link>
+
+    <Link href="/menu/koyo" className="so-nav-sub-item">
+      Koyo
+    </Link>
+
+    <Link href="/menu/ecrin" className="so-nav-sub-item">
+      Ecrin
+    </Link>
+
+  </div>
+
+</div>
 
             {/* MENUS */}
             <div className="so-nav-group">
