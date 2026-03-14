@@ -8,7 +8,6 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 export default function WineSelector({ params }) {
 
 const supabase = createClientComponentClient();
-
 const { restaurant, menu } = params;
 
 const [restaurantData, setRestaurant] = useState(null);
@@ -18,7 +17,6 @@ const [filteredWines, setFilteredWines] = useState([]);
 
 const [showResults, setShowResults] = useState(false);
 const [selectedWine, setSelectedWine] = useState(null);
-const [modalVisible, setModalVisible] = useState(false);
 
 const [filters, setFilters] = useState({
 wine_type: "",
@@ -107,6 +105,26 @@ setShowResults(false);
 setFilteredWines([]);
 }
 
+function groupByCountry(wineList) {
+
+return wineList.reduce((acc, wine) => {
+
+const country = wine.country || "Other";
+
+if (!acc[country]) acc[country] = [];
+
+acc[country].push(wine);
+
+return acc;
+
+}, {});
+
+}
+
+const winesToDisplay = showResults ? filteredWines : wines;
+
+const winesByCountry = groupByCountry(winesToDisplay);
+
 return (
 
 <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center px-6 py-16">
@@ -184,40 +202,10 @@ onChange={(e)=>updateFilter("region",e.target.value)}
 
 <select
 className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-onChange={(e)=>updateFilter("subregion",e.target.value)}
->
-<option value="">All Sub Regions</option>
-{unique("subregion").map(v => (
-<option key={v}>{v}</option>
-))}
-</select>
-
-<select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-onChange={(e)=>updateFilter("size",e.target.value)}
->
-<option value="">All Bottle Sizes</option>
-{unique("size").map(v => (
-<option key={v}>{v}</option>
-))}
-</select>
-
-<select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
 onChange={(e)=>updateFilter("grapes",e.target.value)}
 >
 <option value="">All Grapes</option>
 {unique("grapes").map(v => (
-<option key={v}>{v}</option>
-))}
-</select>
-
-<select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
-onChange={(e)=>updateFilter("vintage",e.target.value)}
->
-<option value="">All Vintages</option>
-{unique("vintage").map(v => (
 <option key={v}>{v}</option>
 ))}
 </select>
@@ -241,38 +229,41 @@ Show Selection
 
 )}
 
-{/* RESULTS */}
+{/* WINE LIST */}
 
-{showResults && filteredWines.length > 0 && (
+<div className="max-w-4xl w-full mt-12">
 
-<div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-12 max-w-6xl w-full">
+{Object.entries(winesByCountry).map(([country, wines]) => (
 
-{filteredWines.map((wine) => (
+<div key={country} className="mb-10">
+
+<h2 className="text-xl font-semibold mb-4 border-b border-slate-700 pb-2">
+{country}
+</h2>
+
+<div className="space-y-2">
+
+{wines.map((wine) => (
 
 <div
 key={wine.id}
-onClick={()=>{
-setSelectedWine(wine)
-setModalVisible(true)
-}}
-className="group cursor-pointer bg-slate-900 border border-slate-700 rounded-xl p-6 transition-all duration-200 hover:border-amber-400 hover:shadow-xl hover:-translate-y-1"
+onClick={() => setSelectedWine(wine)}
+className="flex justify-between items-center py-2 border-b border-slate-800 cursor-pointer hover:text-amber-300 transition"
 >
 
-<div className="text-lg font-semibold text-white group-hover:text-amber-300 transition">
+<div>
+
+<div className="font-medium">
 {wine.name}
 </div>
 
-<div className="text-sm text-slate-400 mt-2">
-{wine.region} · {wine.country}
+<div className="text-xs text-slate-400">
+{wine.region} · {wine.vintage}
 </div>
 
-<div className="text-sm text-slate-400">
-{wine.vintage} · {wine.size}
 </div>
 
-<div className="border-t border-slate-700 my-4 group-hover:border-amber-400 transition"></div>
-
-<div className="text-base font-semibold text-amber-400">
+<div className="text-amber-400 font-semibold">
 €{wine.price}
 </div>
 
@@ -282,7 +273,11 @@ className="group cursor-pointer bg-slate-900 border border-slate-700 rounded-xl 
 
 </div>
 
-)}
+</div>
+
+))}
+
+</div>
 
 {/* WINE MODAL */}
 
@@ -293,10 +288,7 @@ className="group cursor-pointer bg-slate-900 border border-slate-700 rounded-xl 
 <div className="bg-white text-gray-900 max-w-4xl w-full rounded-lg shadow-2xl p-10 relative">
 
 <button
-onClick={()=>{
-setModalVisible(false)
-setSelectedWine(null)
-}}
+onClick={()=>setSelectedWine(null)}
 className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 text-xl"
 >
 ✕
