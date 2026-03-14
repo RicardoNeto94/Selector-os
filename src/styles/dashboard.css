@@ -159,25 +159,15 @@
 
 .so-nav-sub{
 
-  position:absolute;
-  left:32px;
-  top:36px;
+  margin-left:28px;
 
   display:flex;
   flex-direction:column;
   gap:4px;
 
-  padding:8px;
-
-  background:#1a1d23;
-  border:1px solid var(--so-border);
-  border-radius:8px;
-
-  min-width:160px;
+  padding:6px 0;
 
   animation:soSubMenu .16s ease;
-
-  z-index:20;
 }
 
 @keyframes soSubMenu{
