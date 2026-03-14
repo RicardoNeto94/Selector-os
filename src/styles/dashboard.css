@@ -110,6 +110,18 @@
   color:white;
 }
 
+.so-nav-arrow {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  color: rgba(0,0,0,0.4);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.so-nav-arrow-open {
+  transform: rotate(90deg);
+}
+
 /* =======================================================
    ICON
 ======================================================= */

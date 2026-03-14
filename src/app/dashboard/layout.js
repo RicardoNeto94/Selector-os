@@ -15,7 +15,8 @@ import {
   Cog6ToothIcon,
   LockClosedIcon,
   BeakerIcon,
-  BookOpenIcon
+  BookOpenIcon,
+  ChevronRightIcon
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export const dynamic = "force-dynamic";
 const PLAN = "starter";
 const FULL_LOGO_SRC = "/selectoros-logo.png";
 
-function NavItem({ href, isActive, icon: Icon, label, onClick }) {
+function NavItem({ href, isActive, icon: Icon, label, onClick, hasArrow, expanded }) {
   return (
     <Link
       href={href}
@@ -35,6 +36,14 @@ function NavItem({ href, isActive, icon: Icon, label, onClick }) {
       </span>
 
       <span className="so-nav-label">{label}</span>
+
+      {hasArrow && (
+        <ChevronRightIcon
+          className={
+            "so-nav-arrow " + (expanded ? "so-nav-arrow-open" : "")
+          }
+        />
+      )}
     </Link>
   );
 }
@@ -131,12 +140,14 @@ export default function DashboardLayout({ children }) {
             <div className="so-nav-group">
 
               <NavItem
-                href="/dashboard/wine-menus"
-                isActive={isActive("/dashboard/wine-menus")}
-                icon={BookOpenIcon}
-                label="Wine Menus"
-                onClick={handleWineMenusClick}
-              />
+  href="/dashboard/wine-menus"
+  isActive={isActive("/dashboard/wine-menus")}
+  icon={BookOpenIcon}
+  label="Wine Menus"
+  onClick={handleWineMenusClick}
+  hasArrow
+  expanded={wineMenusOpen}
+/>
 
               {wineMenusOpen && (
                 <div className="so-nav-sub">
@@ -165,13 +176,15 @@ export default function DashboardLayout({ children }) {
             {/* MENUS */}
             <div className="so-nav-group">
 
-              <NavItem
-                href="/dashboard/menu"
-                isActive={isActive("/dashboard/menu")}
-                icon={SwatchIcon}
-                label="Menus"
-                onClick={handleMenusClick}
-              />
+             <NavItem
+  href="/dashboard/menu"
+  isActive={isActive("/dashboard/menu")}
+  icon={SwatchIcon}
+  label="Menus"
+  onClick={handleMenusClick}
+  hasArrow
+  expanded={menusOpen}
+/>
 
               {menusOpen && (
                 <div className="so-nav-sub">
