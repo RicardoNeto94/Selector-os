@@ -7,7 +7,6 @@ import Papa from "papaparse";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function WinesPage() {
-
   const supabase = createClientComponentClient();
 
   const [wines, setWines] = useState([]);
@@ -34,8 +33,9 @@ export default function WinesPage() {
   }, []);
 
   async function loadWines() {
-
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       setLoading(false);
@@ -67,18 +67,20 @@ export default function WinesPage() {
   }
 
   function toggleSort(column) {
-
     if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortColumn(column);
       setSortDirection("asc");
     }
+  }
 
+  function sortIndicator(col) {
+    if (sortColumn !== col) return "";
+    return sortDirection === "asc" ? " ↑" : " ↓";
   }
 
   async function importCSV() {
-
     if (!file || !restaurant) return;
 
     setImporting(true);
@@ -86,16 +88,16 @@ export default function WinesPage() {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: async function(results) {
-
+      complete: async function (results) {
         const rows = results.data;
 
         const winesToInsert = rows
-          .filter(row => row.name && row.name.trim() !== "")
-          .map(row => {
-
+          .filter((row) => row.name && row.name.trim() !== "")
+          .map((row) => {
             const cleanPrice = row.price
-              ? parseFloat(row.price.toString().replace(",", ".").replace(/[^\d.]/g, ""))
+              ? parseFloat(
+                  row.price.toString().replace(",", ".").replace(/[^\d.]/g, "")
+                )
               : null;
 
             const cleanStock = row.stock
@@ -114,20 +116,19 @@ export default function WinesPage() {
               region: row.region?.trim() || null,
               subregion: row.subregion?.trim() || null,
               grapes: row.grapes?.trim() || null,
-              wine_type: row.wine_type ? row.wine_type.toLowerCase().trim() : null,
+              wine_type: row.wine_type
+                ? row.wine_type.toLowerCase().trim()
+                : null,
               vintage: cleanVintage,
               size: row.size?.trim() || "75cl",
               price: isNaN(cleanPrice) ? null : cleanPrice,
               stock: isNaN(cleanStock) ? 0 : cleanStock,
               description: row.description?.trim() || null,
-              notes: row.notes?.trim() || null
+              notes: row.notes?.trim() || null,
             };
-
           });
 
-        const { error } = await supabase
-          .from("wines")
-          .insert(winesToInsert);
+        const { error } = await supabase.from("wines").insert(winesToInsert);
 
         if (error) {
           console.error(error);
@@ -135,24 +136,80 @@ export default function WinesPage() {
         } else {
           alert(`Imported ${winesToInsert.length} wines`);
           loadWines();
+          setFile(null);
         }
 
         setImporting(false);
-      }
+      },
     });
   }
 
-  async function saveWine() {
+  async function updateStock(wineId, currentStock, change) {
+    const newStock = Math.max(0, (currentStock || 0) + change);
 
+    const { error } = await supabase
+      .from("wines")
+      .update({ stock: newStock })
+      .eq("id", wineId);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setWines((prev) =>
+      prev.map((w) => (w.id === wineId ? { ...w, stock: newStock } : w))
+    );
+
+    if (editingWine?.id === wineId) {
+      setEditingWine((prev) => ({ ...prev, stock: newStock }));
+    }
+  }
+
+  async function deleteWine(wineId) {
+    if (!confirm("Remove this wine from the cellar?")) return;
+
+    const { error } = await supabase.from("wines").delete().eq("id", wineId);
+
+    if (error) {
+      console.error(error);
+      alert("Failed to delete wine");
+      return;
+    }
+
+    setWines((prev) => prev.filter((w) => w.id !== wineId));
+
+    if (editingWine?.id === wineId) {
+      setEditingWine(null);
+    }
+  }
+
+  async function saveWine() {
     if (!editingWine) return;
 
     setSaving(true);
 
     const { id, ...updates } = editingWine;
 
+    const normalizedUpdates = {
+      ...updates,
+      vintage:
+        editingWine.vintage === "" || editingWine.vintage == null
+          ? null
+          : Number(editingWine.vintage),
+      price:
+        editingWine.price === "" || editingWine.price == null
+          ? null
+          : Number(editingWine.price),
+      stock:
+        editingWine.stock === "" || editingWine.stock == null
+          ? 0
+          : Number(editingWine.stock),
+    };
+
     const { error } = await supabase
       .from("wines")
-      .update(updates)
+      .update(normalizedUpdates)
       .eq("id", id);
 
     if (error) {
@@ -162,163 +219,447 @@ export default function WinesPage() {
       return;
     }
 
-    setWines(prev =>
-      prev.map(w => w.id === id ? editingWine : w)
+    setWines((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, ...normalizedUpdates } : w))
     );
 
     setSaving(false);
     setEditingWine(null);
   }
 
+  function getStockStatus(stock) {
+    if (!stock || stock === 0) return "text-red-400";
+    if (stock <= 3) return "text-amber-400";
+    return "text-emerald-400";
+  }
+
+  const filtered = wines
+    .filter(
+      (w) =>
+        wineType === "all" ||
+        (w.wine_type || "").toLowerCase() === wineType.toLowerCase()
+    )
+    .filter((w) =>
+      `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      const valA = a[sortColumn] ?? "";
+      const valB = b[sortColumn] ?? "";
+
+      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+
   if (loading) {
-    return <div className="text-slate-400">Loading wines…</div>;
+    return <div className="page-fade text-slate-400">Loading wines…</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-fade space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-white">Wine Cellar</h1>
+
+        <a href="/dashboard/wines/new" className="so-btn-primary">
+          + Add Wine
+        </a>
+      </div>
+
+      {/* CSV IMPORT */}
+      <div className="flex items-center gap-3">
+        <input
+          type="file"
+          accept=".csv"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+        />
+
+        <button
+          onClick={importCSV}
+          disabled={!file || importing}
+          className="so-btn-primary"
+        >
+          {importing ? "Importing..." : "Import CSV"}
+        </button>
+      </div>
+
+      {/* WINE TYPE FILTERS */}
+      <div className="flex gap-2 flex-wrap">
+        {[
+          ["all", "All"],
+          ["sparkling", "Sparkling"],
+          ["white", "White"],
+          ["rose", "Rosé"],
+          ["red", "Red"],
+          ["orange", "Orange"],
+          ["dessert", "Dessert"],
+          ["fortified", "Fortified"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            onClick={() => {
+              setWineType(value);
+              setPage(1);
+            }}
+            className={`px-3 py-1 rounded text-sm ${
+              wineType === value
+                ? "bg-emerald-500 text-white"
+                : "bg-slate-800 text-slate-300"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* SEARCH */}
+      <div className="flex justify-start">
+        <div className="relative w-full max-w-md">
+          <input
+            type="text"
+            placeholder="Search wines, producer, region..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-full rounded-full bg-slate-800/60 border border-slate-700 px-5 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+          />
+        </div>
+      </div>
 
       {/* TABLE */}
-
       <div className="so-card overflow-x-auto">
-
         <table className="w-full text-sm">
-
           <thead className="border-b border-slate-700 text-slate-400">
-
             <tr>
+              <th
+                className="py-3 px-4 cursor-pointer text-left"
+                onClick={() => toggleSort("name")}
+              >
+                Wine{sortIndicator("name")}
+              </th>
 
-              <th className="py-3 px-4">Wine</th>
-              <th className="py-3 px-4">Producer</th>
-              <th className="py-3 px-4">Region</th>
-              <th className="py-3 px-4">Vintage</th>
-              <th className="py-3 px-4">Price</th>
-              <th className="py-3 px-4">Stock</th>
+              <th
+                className="py-3 px-4 cursor-pointer text-left"
+                onClick={() => toggleSort("producer")}
+              >
+                Producer{sortIndicator("producer")}
+              </th>
 
+              <th
+                className="py-3 px-4 cursor-pointer text-left"
+                onClick={() => toggleSort("region")}
+              >
+                Region{sortIndicator("region")}
+              </th>
+
+              <th
+                className="py-3 px-4 cursor-pointer text-left"
+                onClick={() => toggleSort("vintage")}
+              >
+                Vintage{sortIndicator("vintage")}
+              </th>
+
+              <th
+                className="py-3 px-4 cursor-pointer text-left"
+                onClick={() => toggleSort("price")}
+              >
+                Price{sortIndicator("price")}
+              </th>
+
+              <th
+                className="py-3 px-4 cursor-pointer text-left"
+                onClick={() => toggleSort("stock")}
+              >
+                Stock{sortIndicator("stock")}
+              </th>
+
+              <th className="py-3 px-4 text-left"></th>
             </tr>
-
           </thead>
 
           <tbody>
-
-            {wines.map(wine => (
-
+            {paginated.map((wine) => (
               <tr
                 key={wine.id}
                 onClick={() => setEditingWine(wine)}
                 className="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer"
               >
+                <td className="py-3 px-4 text-white font-medium">
+                  {wine.name}
+                </td>
 
-                <td className="py-3 px-4 text-white">{wine.name}</td>
-                <td className="py-3 px-4">{wine.producer}</td>
-                <td className="py-3 px-4">{wine.region}</td>
-                <td className="py-3 px-4">{wine.vintage}</td>
-                <td className="py-3 px-4">€{wine.price ?? "-"}</td>
-                <td className="py-3 px-4">{wine.stock ?? 0}</td>
+                <td className="py-3 px-4 text-slate-400">
+                  {wine.producer}
+                </td>
 
+                <td className="py-3 px-4 text-slate-400">{wine.region}</td>
+
+                <td className="py-3 px-4 text-slate-400">{wine.vintage}</td>
+
+                <td className="py-3 px-4 text-slate-400">
+                  €{wine.price ?? "-"}
+                </td>
+
+                <td className={`py-3 px-4 ${getStockStatus(wine.stock)}`}>
+                  {wine.stock ?? 0}
+                </td>
+
+                <td
+                  className="py-3 px-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => updateStock(wine.id, wine.stock, -1)}
+                      className="px-2 bg-slate-800 rounded text-white"
+                    >
+                      –
+                    </button>
+
+                    <button
+                      onClick={() => updateStock(wine.id, wine.stock, 1)}
+                      className="px-2 bg-slate-800 rounded text-white"
+                    >
+                      +
+                    </button>
+
+                    <button
+                      onClick={() => deleteWine(wine.id)}
+                      className="text-red-400 text-xs ml-2"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </td>
               </tr>
-
             ))}
 
+            {paginated.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="py-8 px-4 text-center text-slate-500"
+                >
+                  No wines found.
+                </td>
+              </tr>
+            )}
           </tbody>
-
         </table>
-
       </div>
 
-      {/* APPLE STYLE MODAL */}
+      {/* PAGINATION */}
+      <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(1)}
+          className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+        >
+          ⏮ First
+        </button>
 
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+          className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+        >
+          ← Prev
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter((p) => p >= page - 2 && p <= page + 2)
+          .map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`px-3 py-1 rounded ${
+                p === page
+                  ? "bg-emerald-500 text-white"
+                  : "bg-slate-800 text-slate-300"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
+          className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+        >
+          Next →
+        </button>
+
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage(totalPages)}
+          className="px-3 py-1 rounded bg-slate-800 text-slate-300 disabled:opacity-40"
+        >
+          Last ⏭
+        </button>
+      </div>
+
+      {/* MODAL */}
       {editingWine && (
+        <div className="so-modal-backdrop">
+          <div className="so-modal">
+            <h2 className="text-2xl font-semibold text-white mb-2">
+              Edit Wine
+            </h2>
 
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="text-sm text-slate-400 mb-6">
+              {editingWine.producer || "Unknown producer"}
+              {editingWine.region ? ` • ${editingWine.region}` : ""}
+              {editingWine.country ? ` • ${editingWine.country}` : ""}
+            </div>
 
-        <div className="w-[720px] rounded-2xl border border-white/10 bg-gradient-to-b from-[#111827] to-[#020617] shadow-2xl p-8">
+            <div className="so-form-grid">
+              <input
+                className="so-input-apple"
+                placeholder="Wine name"
+                value={editingWine.name || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, name: e.target.value })
+                }
+              />
 
-          <h2 className="text-2xl font-semibold text-white mb-6">
-            Edit Wine
-          </h2>
+              <input
+                className="so-input-apple"
+                placeholder="Producer"
+                value={editingWine.producer || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, producer: e.target.value })
+                }
+              />
 
-          <div className="grid grid-cols-2 gap-4">
+              <input
+                className="so-input-apple"
+                placeholder="Country"
+                value={editingWine.country || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, country: e.target.value })
+                }
+              />
 
-            <input className="so-input-apple" placeholder="Wine name"
-              value={editingWine.name || ""}
-              onChange={e=>setEditingWine({...editingWine,name:e.target.value})}
+              <input
+                className="so-input-apple"
+                placeholder="Region"
+                value={editingWine.region || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, region: e.target.value })
+                }
+              />
+
+              <input
+                className="so-input-apple"
+                placeholder="Subregion"
+                value={editingWine.subregion || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, subregion: e.target.value })
+                }
+              />
+
+              <input
+                className="so-input-apple"
+                placeholder="Grapes"
+                value={editingWine.grapes || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, grapes: e.target.value })
+                }
+              />
+
+              <input
+                className="so-input-apple"
+                placeholder="Wine type"
+                value={editingWine.wine_type || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, wine_type: e.target.value })
+                }
+              />
+
+              <input
+                className="so-input-apple"
+                placeholder="Bottle size"
+                value={editingWine.size || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, size: e.target.value })
+                }
+              />
+
+              <input
+                type="number"
+                className="so-input-apple"
+                placeholder="Vintage"
+                value={editingWine.vintage || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, vintage: e.target.value })
+                }
+              />
+
+              <input
+                type="number"
+                className="so-input-apple"
+                placeholder="Price"
+                value={editingWine.price || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, price: e.target.value })
+                }
+              />
+
+              <input
+                type="number"
+                className="so-input-apple"
+                placeholder="Stock"
+                value={editingWine.stock || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, stock: e.target.value })
+                }
+              />
+            </div>
+
+            <textarea
+              className="so-input-apple so-textarea"
+              placeholder="Description"
+              value={editingWine.description || ""}
+              onChange={(e) =>
+                setEditingWine({
+                  ...editingWine,
+                  description: e.target.value,
+                })
+              }
             />
 
-            <input className="so-input-apple" placeholder="Producer"
-              value={editingWine.producer || ""}
-              onChange={e=>setEditingWine({...editingWine,producer:e.target.value})}
+            <textarea
+              className="so-input-apple so-textarea"
+              placeholder="Sommelier notes"
+              value={editingWine.notes || ""}
+              onChange={(e) =>
+                setEditingWine({ ...editingWine, notes: e.target.value })
+              }
             />
 
-            <input className="so-input-apple" placeholder="Country"
-              value={editingWine.country || ""}
-              onChange={e=>setEditingWine({...editingWine,country:e.target.value})}
-            />
+            <div className="so-modal-actions">
+              <button
+                onClick={() => setEditingWine(null)}
+                className="so-btn-secondary"
+              >
+                Cancel
+              </button>
 
-            <input className="so-input-apple" placeholder="Region"
-              value={editingWine.region || ""}
-              onChange={e=>setEditingWine({...editingWine,region:e.target.value})}
-            />
-
-            <input className="so-input-apple" placeholder="Grapes"
-              value={editingWine.grapes || ""}
-              onChange={e=>setEditingWine({...editingWine,grapes:e.target.value})}
-            />
-
-            <input type="number" className="so-input-apple" placeholder="Vintage"
-              value={editingWine.vintage || ""}
-              onChange={e=>setEditingWine({...editingWine,vintage:e.target.value})}
-            />
-
-            <input type="number" className="so-input-apple" placeholder="Price"
-              value={editingWine.price || ""}
-              onChange={e=>setEditingWine({...editingWine,price:e.target.value})}
-            />
-
-            <input type="number" className="so-input-apple" placeholder="Stock"
-              value={editingWine.stock || ""}
-              onChange={e=>setEditingWine({...editingWine,stock:e.target.value})}
-            />
-
+              <button onClick={saveWine} className="so-btn-primary">
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
-
-          <textarea
-            className="so-input-apple mt-4 h-20"
-            placeholder="Description"
-            value={editingWine.description || ""}
-            onChange={e=>setEditingWine({...editingWine,description:e.target.value})}
-          />
-
-          <textarea
-            className="so-input-apple mt-3 h-20"
-            placeholder="Sommelier notes"
-            value={editingWine.notes || ""}
-            onChange={e=>setEditingWine({...editingWine,notes:e.target.value})}
-          />
-
-          <div className="flex justify-end gap-3 mt-6">
-
-            <button
-              onClick={() => setEditingWine(null)}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={saveWine}
-              className="so-btn-primary"
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
-
-          </div>
-
         </div>
-
-      </div>
-
       )}
-
     </div>
   );
 }
