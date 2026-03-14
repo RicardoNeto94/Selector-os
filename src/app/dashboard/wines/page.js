@@ -46,6 +46,8 @@ export default function WinesPage() {
   const [editingWine, setEditingWine] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  const [inventory, setInventory] = useState([]);
+
   useEffect(() => {
     loadWines();
   }, []);
@@ -95,6 +97,17 @@ export default function WinesPage() {
 
     setWines(winesData || []);
     setLoading(false);
+  }
+
+  async function openWineEditor(wine) {
+    setEditingWine(wine);
+
+    const { data } = await supabase
+      .from("wine_inventory")
+      .select("*")
+      .eq("wine_id", wine.id);
+
+    setInventory(data || []);
   }
 
   function toggleSort(column) {
@@ -195,6 +208,38 @@ export default function WinesPage() {
     if (editingWine?.id === wineId) {
       setEditingWine((prev) => ({ ...prev, stock: newStock }));
     }
+  }
+
+  async function updateLocationStock(locationId, change) {
+    const item = inventory.find((i) => i.id === locationId);
+    if (!item) return;
+
+    const newStock = Math.max(0, item.stock + change);
+
+    await supabase
+      .from("wine_inventory")
+      .update({ stock: newStock })
+      .eq("id", locationId);
+
+    const updated = inventory.map((i) =>
+      i.id === locationId ? { ...i, stock: newStock } : i
+    );
+
+    setInventory(updated);
+
+    const total = updated.reduce((sum, i) => sum + i.stock, 0);
+
+    await supabase.from("wines").update({ stock: total }).eq("id", editingWine.id);
+
+    setEditingWine((prev) => ({ ...prev, stock: total }));
+
+    setWines((prev) =>
+      prev.map((w) => (w.id === editingWine.id ? { ...w, stock: total } : w))
+    );
+  }
+
+  function totalInventoryStock() {
+    return inventory.reduce((sum, item) => sum + (item.stock || 0), 0);
   }
 
   async function deleteWine(wineId) {
@@ -308,7 +353,6 @@ export default function WinesPage() {
         </a>
       </div>
 
-      {/* CSV IMPORT */}
       <div className="flex items-center gap-3">
         <input
           type="file"
@@ -325,7 +369,6 @@ export default function WinesPage() {
         </button>
       </div>
 
-      {/* WINE TYPE FILTERS */}
       <div className="flex gap-2 flex-wrap">
         {[
           ["all", "All"],
@@ -354,7 +397,6 @@ export default function WinesPage() {
         ))}
       </div>
 
-      {/* SEARCH */}
       <div className="flex justify-start">
         <div className="relative w-full max-w-md">
           <input
@@ -370,7 +412,6 @@ export default function WinesPage() {
         </div>
       </div>
 
-      {/* TABLE */}
       <div className="so-card overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-slate-700 text-slate-400">
@@ -425,7 +466,7 @@ export default function WinesPage() {
             {paginated.map((wine) => (
               <tr
                 key={wine.id}
-                onClick={() => setEditingWine(wine)}
+                onClick={() => openWineEditor(wine)}
                 className="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer"
               >
                 <td className="py-3 px-4 text-white font-medium">
@@ -492,7 +533,6 @@ export default function WinesPage() {
         </table>
       </div>
 
-      {/* PAGINATION */}
       <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
         <button
           disabled={page === 1}
@@ -543,7 +583,6 @@ export default function WinesPage() {
         </button>
       </div>
 
-      {/* MODAL */}
       {editingWine && (
         <div
           className="so-modal-backdrop"
@@ -564,6 +603,7 @@ export default function WinesPage() {
             </div>
 
             <div className="so-form-grid">
+
               <div>
                 <label className="block text-xs text-slate-400 mb-2">
                   Wine name
@@ -729,6 +769,60 @@ export default function WinesPage() {
                   }
                 />
               </div>
+
+            </div>
+
+            <div className="mt-6">
+
+              <label className="block text-xs text-slate-400 mb-3">
+                Cellar Locations
+              </label>
+
+              <div className="space-y-2">
+
+                {inventory.map((loc) => (
+
+                  <div
+                    key={loc.id}
+                    className="flex items-center justify-between bg-slate-800/60 px-3 py-2 rounded"
+                  >
+
+                    <span className="text-sm text-slate-300 capitalize">
+                      {loc.location.replace("_", " ")}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+
+                      <button
+                        onClick={() => updateLocationStock(loc.id, -1)}
+                        className="px-2 bg-slate-700 rounded"
+                      >
+                        –
+                      </button>
+
+                      <span className="w-6 text-center">
+                        {loc.stock}
+                      </span>
+
+                      <button
+                        onClick={() => updateLocationStock(loc.id, 1)}
+                        className="px-2 bg-slate-700 rounded"
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+              <div className="text-xs text-slate-500 mt-3">
+                Total stock: {totalInventoryStock()}
+              </div>
+
             </div>
 
             <div className="mt-4">
@@ -772,6 +866,7 @@ export default function WinesPage() {
                 {saving ? "Saving..." : "Save"}
               </button>
             </div>
+
           </div>
         </div>
       )}
