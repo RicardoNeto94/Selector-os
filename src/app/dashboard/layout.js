@@ -21,7 +21,6 @@ import {
 export const dynamic = "force-dynamic";
 
 const PLAN = "starter";
-
 const FULL_LOGO_SRC = "/selectoros-logo.png";
 
 function NavItem({ href, isActive, icon: Icon, label, onClick }) {
@@ -45,7 +44,8 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const isPro = PLAN !== "starter";
 
-  const [menusOpen, setMenusOpen] = useState(true);
+  const [menusOpen, setMenusOpen] = useState(false);
+  const [wineMenusOpen, setWineMenusOpen] = useState(false);
 
   const isActive = useMemo(() => {
     return (href) => {
@@ -64,6 +64,18 @@ export default function DashboardLayout({ children }) {
     }
 
     setMenusOpen(true);
+  };
+
+  const handleWineMenusClick = (e) => {
+    const onWineRoute = pathname?.startsWith("/dashboard/wine-menus");
+
+    if (onWineRoute) {
+      e.preventDefault();
+      setWineMenusOpen((v) => !v);
+      return;
+    }
+
+    setWineMenusOpen(true);
   };
 
   return (
@@ -116,36 +128,39 @@ export default function DashboardLayout({ children }) {
             />
 
             {/* WINE MENUS */}
-<div className="so-nav-group">
+            <div className="so-nav-group">
 
-  <NavItem
-    href="/dashboard/wine-menus"
-    isActive={isActive("/dashboard/wine-menus")}
-    icon={BookOpenIcon}
-    label="Wine Menus"
-  />
+              <NavItem
+                href="/dashboard/wine-menus"
+                isActive={isActive("/dashboard/wine-menus")}
+                icon={BookOpenIcon}
+                label="Wine Menus"
+                onClick={handleWineMenusClick}
+              />
 
-  <div className="so-nav-sub">
+              {wineMenusOpen && (
+                <div className="so-nav-sub">
 
-    <Link href="/menu/shang-shi" className="so-nav-sub-item">
-      Shang Shi
-    </Link>
+                  <Link href="/menu/shang-shi" className="so-nav-sub-item">
+                    Shang Shi
+                  </Link>
 
-    <Link href="/menu/fox-den" className="so-nav-sub-item">
-      Fox Den
-    </Link>
+                  <Link href="/menu/fox-den" className="so-nav-sub-item">
+                    Fox Den
+                  </Link>
 
-    <Link href="/menu/koyo" className="so-nav-sub-item">
-      Koyo
-    </Link>
+                  <Link href="/menu/koyo" className="so-nav-sub-item">
+                    Koyo
+                  </Link>
 
-    <Link href="/menu/ecrin" className="so-nav-sub-item">
-      Ecrin
-    </Link>
+                  <Link href="/menu/ecrin" className="so-nav-sub-item">
+                    Ecrin
+                  </Link>
 
-  </div>
+                </div>
+              )}
 
-</div>
+            </div>
 
             {/* MENUS */}
             <div className="so-nav-group">
@@ -189,6 +204,7 @@ export default function DashboardLayout({ children }) {
 
                 </div>
               )}
+
             </div>
 
             <div className="so-sidebar-section-label">Account</div>
@@ -234,9 +250,7 @@ export default function DashboardLayout({ children }) {
 
       {/* MAIN */}
       <main className="so-main">
-
         {children}
-
       </main>
 
     </div>
