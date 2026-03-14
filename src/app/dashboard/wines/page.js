@@ -142,36 +142,6 @@ export default function WinesPage() {
     });
   }
 
-  async function updateStock(wineId, currentStock, change) {
-
-    const newStock = Math.max(0, (currentStock || 0) + change);
-
-    const { error } = await supabase
-      .from("wines")
-      .update({ stock: newStock })
-      .eq("id", wineId);
-
-    if (error) return console.error(error);
-
-    setWines(prev =>
-      prev.map(w =>
-        w.id === wineId ? { ...w, stock: newStock } : w
-      )
-    );
-  }
-
-  async function deleteWine(wineId) {
-
-    if (!confirm("Remove this wine from the cellar?")) return;
-
-    await supabase
-      .from("wines")
-      .delete()
-      .eq("id", wineId);
-
-    setWines(prev => prev.filter(w => w.id !== wineId));
-  }
-
   async function saveWine() {
 
     if (!editingWine) return;
@@ -200,99 +170,14 @@ export default function WinesPage() {
     setEditingWine(null);
   }
 
-  function getStockStatus(stock) {
-
-    if (!stock || stock === 0) return "text-red-400";
-    if (stock <= 3) return "text-amber-400";
-    return "text-emerald-400";
-
-  }
-
-  const filtered = wines
-    .filter(
-      w =>
-        wineType === "all" ||
-        (w.wine_type || "").toLowerCase() === wineType.toLowerCase()
-    )
-    .filter(w =>
-      `${w.name} ${w.producer} ${w.region} ${w.country} ${w.grapes}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-
-      const valA = a[sortColumn] ?? "";
-      const valB = b[sortColumn] ?? "";
-
-      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-
-    });
-
-  const totalPages = Math.ceil(filtered.length / perPage);
-
-  const paginated = filtered.slice(
-    (page - 1) * perPage,
-    page * perPage
-  );
-
-  function sortIndicator(col) {
-    if (sortColumn !== col) return "";
-    return sortDirection === "asc" ? " ↑" : " ↓";
-  }
-
   if (loading) {
-    return <div className="page-fade text-slate-400">Loading wines…</div>;
+    return <div className="text-slate-400">Loading wines…</div>;
   }
 
   return (
-    <div className="page-fade space-y-6">
+    <div className="space-y-6">
 
-      <div className="flex items-center justify-between">
-
-        <h1 className="text-2xl font-semibold text-white">
-          Wine Cellar
-        </h1>
-
-        <a href="/dashboard/wines/new" className="so-btn-primary">
-          + Add Wine
-        </a>
-
-      </div>
-
-      {/* CSV IMPORT */}
-
-      <div className="flex items-center gap-3">
-
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-
-        <button
-          onClick={importCSV}
-          disabled={!file || importing}
-          className="so-btn-primary"
-        >
-          {importing ? "Importing..." : "Import CSV"}
-        </button>
-
-      </div>
-
-      {/* SEARCH */}
-
-      <input
-        type="text"
-        placeholder="Search wines..."
-        value={search}
-        onChange={e => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
-        className="w-full max-w-md rounded-full bg-slate-800/60 border border-slate-700 px-5 py-2 text-sm text-white"
-      />
+      {/* TABLE */}
 
       <div className="so-card overflow-x-auto">
 
@@ -302,31 +187,12 @@ export default function WinesPage() {
 
             <tr>
 
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("name")}>
-                Wine{sortIndicator("name")}
-              </th>
-
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("producer")}>
-                Producer{sortIndicator("producer")}
-              </th>
-
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("region")}>
-                Region{sortIndicator("region")}
-              </th>
-
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("vintage")}>
-                Vintage{sortIndicator("vintage")}
-              </th>
-
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("price")}>
-                Price{sortIndicator("price")}
-              </th>
-
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("stock")}>
-                Stock{sortIndicator("stock")}
-              </th>
-
-              <th></th>
+              <th className="py-3 px-4">Wine</th>
+              <th className="py-3 px-4">Producer</th>
+              <th className="py-3 px-4">Region</th>
+              <th className="py-3 px-4">Vintage</th>
+              <th className="py-3 px-4">Price</th>
+              <th className="py-3 px-4">Stock</th>
 
             </tr>
 
@@ -334,7 +200,7 @@ export default function WinesPage() {
 
           <tbody>
 
-            {paginated.map(wine => (
+            {wines.map(wine => (
 
               <tr
                 key={wine.id}
@@ -342,31 +208,12 @@ export default function WinesPage() {
                 className="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer"
               >
 
-                <td className="py-3 px-4 text-white font-medium">
-                  {wine.name}
-                </td>
-
-                <td className="py-3 px-4 text-slate-400">
-                  {wine.producer}
-                </td>
-
-                <td className="py-3 px-4 text-slate-400">
-                  {wine.region}
-                </td>
-
-                <td className="py-3 px-4 text-slate-400">
-                  {wine.vintage}
-                </td>
-
-                <td className="py-3 px-4 text-slate-400">
-                  €{wine.price ?? "-"}
-                </td>
-
-                <td className={`py-3 px-4 ${getStockStatus(wine.stock)}`}>
-                  {wine.stock ?? 0}
-                </td>
-
-                <td></td>
+                <td className="py-3 px-4 text-white">{wine.name}</td>
+                <td className="py-3 px-4">{wine.producer}</td>
+                <td className="py-3 px-4">{wine.region}</td>
+                <td className="py-3 px-4">{wine.vintage}</td>
+                <td className="py-3 px-4">€{wine.price ?? "-"}</td>
+                <td className="py-3 px-4">{wine.stock ?? 0}</td>
 
               </tr>
 
@@ -378,33 +225,81 @@ export default function WinesPage() {
 
       </div>
 
-      {/* MODAL */}
+      {/* APPLE STYLE MODAL */}
 
       {editingWine && (
 
-      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
 
-        <div className="bg-slate-900 border border-slate-700 rounded-xl w-[600px] p-6 space-y-3">
+        <div className="w-[720px] rounded-2xl border border-white/10 bg-gradient-to-b from-[#111827] to-[#020617] shadow-2xl p-8">
 
-          <h2 className="text-xl font-semibold text-white">Edit Wine</h2>
+          <h2 className="text-2xl font-semibold text-white mb-6">
+            Edit Wine
+          </h2>
 
-          <input className="so-input" value={editingWine.name || ""} onChange={e=>setEditingWine({...editingWine,name:e.target.value})}/>
-          <input className="so-input" value={editingWine.producer || ""} onChange={e=>setEditingWine({...editingWine,producer:e.target.value})}/>
-          <input className="so-input" value={editingWine.country || ""} onChange={e=>setEditingWine({...editingWine,country:e.target.value})}/>
-          <input className="so-input" value={editingWine.region || ""} onChange={e=>setEditingWine({...editingWine,region:e.target.value})}/>
-          <input className="so-input" value={editingWine.grapes || ""} onChange={e=>setEditingWine({...editingWine,grapes:e.target.value})}/>
-          <input type="number" className="so-input" value={editingWine.vintage || ""} onChange={e=>setEditingWine({...editingWine,vintage:e.target.value})}/>
-          <input type="number" className="so-input" value={editingWine.price || ""} onChange={e=>setEditingWine({...editingWine,price:e.target.value})}/>
-          <input type="number" className="so-input" value={editingWine.stock || ""} onChange={e=>setEditingWine({...editingWine,stock:e.target.value})}/>
+          <div className="grid grid-cols-2 gap-4">
 
-          <textarea className="so-input" value={editingWine.description || ""} onChange={e=>setEditingWine({...editingWine,description:e.target.value})}/>
-          <textarea className="so-input" value={editingWine.notes || ""} onChange={e=>setEditingWine({...editingWine,notes:e.target.value})}/>
+            <input className="so-input-apple" placeholder="Wine name"
+              value={editingWine.name || ""}
+              onChange={e=>setEditingWine({...editingWine,name:e.target.value})}
+            />
 
-          <div className="flex justify-end gap-3 pt-4">
+            <input className="so-input-apple" placeholder="Producer"
+              value={editingWine.producer || ""}
+              onChange={e=>setEditingWine({...editingWine,producer:e.target.value})}
+            />
+
+            <input className="so-input-apple" placeholder="Country"
+              value={editingWine.country || ""}
+              onChange={e=>setEditingWine({...editingWine,country:e.target.value})}
+            />
+
+            <input className="so-input-apple" placeholder="Region"
+              value={editingWine.region || ""}
+              onChange={e=>setEditingWine({...editingWine,region:e.target.value})}
+            />
+
+            <input className="so-input-apple" placeholder="Grapes"
+              value={editingWine.grapes || ""}
+              onChange={e=>setEditingWine({...editingWine,grapes:e.target.value})}
+            />
+
+            <input type="number" className="so-input-apple" placeholder="Vintage"
+              value={editingWine.vintage || ""}
+              onChange={e=>setEditingWine({...editingWine,vintage:e.target.value})}
+            />
+
+            <input type="number" className="so-input-apple" placeholder="Price"
+              value={editingWine.price || ""}
+              onChange={e=>setEditingWine({...editingWine,price:e.target.value})}
+            />
+
+            <input type="number" className="so-input-apple" placeholder="Stock"
+              value={editingWine.stock || ""}
+              onChange={e=>setEditingWine({...editingWine,stock:e.target.value})}
+            />
+
+          </div>
+
+          <textarea
+            className="so-input-apple mt-4 h-20"
+            placeholder="Description"
+            value={editingWine.description || ""}
+            onChange={e=>setEditingWine({...editingWine,description:e.target.value})}
+          />
+
+          <textarea
+            className="so-input-apple mt-3 h-20"
+            placeholder="Sommelier notes"
+            value={editingWine.notes || ""}
+            onChange={e=>setEditingWine({...editingWine,notes:e.target.value})}
+          />
+
+          <div className="flex justify-end gap-3 mt-6">
 
             <button
               onClick={() => setEditingWine(null)}
-              className="px-4 py-2 bg-slate-800 rounded"
+              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700"
             >
               Cancel
             </button>
