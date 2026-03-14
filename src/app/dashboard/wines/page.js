@@ -6,6 +6,24 @@ import { useEffect, useState } from "react";
 import Papa from "papaparse";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
+const WINE_TYPE_OPTIONS = [
+  "sparkling",
+  "white",
+  "rose",
+  "red",
+  "orange",
+  "dessert",
+  "fortified",
+];
+
+const BOTTLE_SIZE_OPTIONS = [
+  "37.5cl",
+  "75cl",
+  "150cl",
+  "300cl",
+  "600cl",
+];
+
 export default function WinesPage() {
   const supabase = createClientComponentClient();
 
@@ -31,6 +49,19 @@ export default function WinesPage() {
   useEffect(() => {
     loadWines();
   }, []);
+
+  useEffect(() => {
+    if (!editingWine) return;
+
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setEditingWine(null);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editingWine]);
 
   async function loadWines() {
     const {
@@ -193,6 +224,8 @@ export default function WinesPage() {
 
     const normalizedUpdates = {
       ...updates,
+      wine_type: editingWine.wine_type || null,
+      size: editingWine.size || null,
       vintage:
         editingWine.vintage === "" || editingWine.vintage == null
           ? null
@@ -233,6 +266,11 @@ export default function WinesPage() {
     return "text-emerald-400";
   }
 
+  function prettyWineType(value) {
+    if (!value) return "Uncategorized";
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
   const filtered = wines
     .filter(
       (w) =>
@@ -254,7 +292,6 @@ export default function WinesPage() {
     });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
   if (loading) {
@@ -508,8 +545,14 @@ export default function WinesPage() {
 
       {/* MODAL */}
       {editingWine && (
-        <div className="so-modal-backdrop">
-          <div className="so-modal">
+        <div
+          className="so-modal-backdrop"
+          onClick={() => setEditingWine(null)}
+        >
+          <div
+            className="so-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-2xl font-semibold text-white mb-2">
               Edit Wine
             </h2>
@@ -521,129 +564,201 @@ export default function WinesPage() {
             </div>
 
             <div className="so-form-grid">
-              <input
-                className="so-input-apple"
-                placeholder="Wine name"
-                value={editingWine.name || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, name: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Wine name
+                </label>
+                <input
+                  className="so-input-apple"
+                  value={editingWine.name || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, name: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Producer"
-                value={editingWine.producer || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, producer: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Producer
+                </label>
+                <input
+                  className="so-input-apple"
+                  value={editingWine.producer || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, producer: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Country"
-                value={editingWine.country || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, country: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Country
+                </label>
+                <input
+                  className="so-input-apple"
+                  value={editingWine.country || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, country: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Region"
-                value={editingWine.region || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, region: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Region
+                </label>
+                <input
+                  className="so-input-apple"
+                  value={editingWine.region || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, region: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Subregion"
-                value={editingWine.subregion || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, subregion: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Subregion
+                </label>
+                <input
+                  className="so-input-apple"
+                  value={editingWine.subregion || ""}
+                  onChange={(e) =>
+                    setEditingWine({
+                      ...editingWine,
+                      subregion: e.target.value,
+                    })
+                  }
+                />
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Grapes"
-                value={editingWine.grapes || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, grapes: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Grapes
+                </label>
+                <input
+                  className="so-input-apple"
+                  value={editingWine.grapes || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, grapes: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Wine type"
-                value={editingWine.wine_type || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, wine_type: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Wine type
+                </label>
+                <select
+                  className="so-input-apple"
+                  value={editingWine.wine_type || ""}
+                  onChange={(e) =>
+                    setEditingWine({
+                      ...editingWine,
+                      wine_type: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Select wine type</option>
+                  {WINE_TYPE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {prettyWineType(option)}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <input
-                className="so-input-apple"
-                placeholder="Bottle size"
-                value={editingWine.size || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, size: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Bottle size
+                </label>
+                <select
+                  className="so-input-apple"
+                  value={editingWine.size || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, size: e.target.value })
+                  }
+                >
+                  <option value="">Select bottle size</option>
+                  {BOTTLE_SIZE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <input
-                type="number"
-                className="so-input-apple"
-                placeholder="Vintage"
-                value={editingWine.vintage || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, vintage: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Vintage
+                </label>
+                <input
+                  type="number"
+                  className="so-input-apple"
+                  value={editingWine.vintage || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, vintage: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                type="number"
-                className="so-input-apple"
-                placeholder="Price"
-                value={editingWine.price || ""}
-                onChange={(e) =>
-                  setEditingWine({ ...editingWine, price: e.target.value })
-                }
-              />
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  className="so-input-apple"
+                  value={editingWine.price || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, price: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                type="number"
-                className="so-input-apple"
-                placeholder="Stock"
-                value={editingWine.stock || ""}
+              <div>
+                <label className="block text-xs text-slate-400 mb-2">
+                  Stock
+                </label>
+                <input
+                  type="number"
+                  className="so-input-apple"
+                  value={editingWine.stock || ""}
+                  onChange={(e) =>
+                    setEditingWine({ ...editingWine, stock: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-xs text-slate-400 mb-2">
+                Description
+              </label>
+              <textarea
+                className="so-input-apple so-textarea"
+                value={editingWine.description || ""}
                 onChange={(e) =>
-                  setEditingWine({ ...editingWine, stock: e.target.value })
+                  setEditingWine({
+                    ...editingWine,
+                    description: e.target.value,
+                  })
                 }
               />
             </div>
 
-            <textarea
-              className="so-input-apple so-textarea"
-              placeholder="Description"
-              value={editingWine.description || ""}
-              onChange={(e) =>
-                setEditingWine({
-                  ...editingWine,
-                  description: e.target.value,
-                })
-              }
-            />
-
-            <textarea
-              className="so-input-apple so-textarea"
-              placeholder="Sommelier notes"
-              value={editingWine.notes || ""}
-              onChange={(e) =>
-                setEditingWine({ ...editingWine, notes: e.target.value })
-              }
-            />
+            <div className="mt-4">
+              <label className="block text-xs text-slate-400 mb-2">
+                Sommelier notes
+              </label>
+              <textarea
+                className="so-input-apple so-textarea"
+                value={editingWine.notes || ""}
+                onChange={(e) =>
+                  setEditingWine({ ...editingWine, notes: e.target.value })
+                }
+              />
+            </div>
 
             <div className="so-modal-actions">
               <button
