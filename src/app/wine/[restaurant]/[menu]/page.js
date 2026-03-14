@@ -130,27 +130,29 @@ const wineTree = groupWineList(winesToDisplay);
 
 return (
 
-<div className="min-h-screen bg-slate-950 text-white flex flex-col items-center px-6 py-16">
+<div className="min-h-screen bg-[#f8f6f1] text-[#1c1c1c] flex flex-col items-center px-6 py-20">
 
 {/* HEADER */}
 
-<div className="flex flex-col items-center text-center mb-12">
+<div className="flex flex-col items-center text-center mb-14">
 
 {restaurantData?.logo_url && (
 <img
 src={restaurantData.logo_url}
-className="h-16 mb-3"
+className="h-14 mb-4"
 alt="Restaurant logo"
 />
 )}
 
-<h1 className="text-4xl font-semibold">
+<h1 className="text-3xl font-semibold tracking-wide">
 {restaurantData?.name}
 </h1>
 
-<p className="text-slate-400 mt-2">
+<p className="text-sm text-gray-500 mt-2 tracking-wide">
 {wineMenu?.name}
 </p>
+
+<div className="w-24 h-[1px] bg-[#c9a96a] mt-6"></div>
 
 </div>
 
@@ -159,7 +161,7 @@ alt="Restaurant logo"
 {showResults && (
 <button
 onClick={resetFilters}
-className="mb-6 flex items-center gap-2 text-slate-300 hover:text-white"
+className="mb-6 text-sm text-gray-600 hover:text-black"
 >
 ← Back to Filters
 </button>
@@ -174,7 +176,7 @@ className="mb-6 flex items-center gap-2 text-slate-300 hover:text-white"
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl w-full">
 
 <select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
 onChange={(e)=>updateFilter("wine_type",e.target.value)}
 >
 <option value="">All Wine Types</option>
@@ -184,7 +186,7 @@ onChange={(e)=>updateFilter("wine_type",e.target.value)}
 </select>
 
 <select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
 onChange={(e)=>updateFilter("country",e.target.value)}
 >
 <option value="">All Countries</option>
@@ -194,7 +196,7 @@ onChange={(e)=>updateFilter("country",e.target.value)}
 </select>
 
 <select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
 onChange={(e)=>updateFilter("region",e.target.value)}
 >
 <option value="">All Regions</option>
@@ -204,7 +206,7 @@ onChange={(e)=>updateFilter("region",e.target.value)}
 </select>
 
 <select
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
 onChange={(e)=>updateFilter("grapes",e.target.value)}
 >
 <option value="">All Grapes</option>
@@ -214,7 +216,7 @@ onChange={(e)=>updateFilter("grapes",e.target.value)}
 </select>
 
 <input
-className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 md:col-span-2"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 md:col-span-2 text-sm"
 placeholder="Search wine name"
 onChange={(e)=>updateFilter("name",e.target.value)}
 />
@@ -223,7 +225,7 @@ onChange={(e)=>updateFilter("name",e.target.value)}
 
 <button
 onClick={applyFilters}
-className="mt-8 bg-amber-400 text-black px-6 py-3 rounded-lg hover:opacity-90"
+className="mt-10 border border-[#c9a96a] text-[#8b6b33] px-6 py-2 text-sm tracking-wide hover:bg-[#c9a96a]/10 transition"
 >
 Show Selection
 </button>
@@ -236,21 +238,21 @@ Show Selection
 
 {showResults && (
 
-<div className="max-w-4xl w-full mt-12 space-y-12">
+<div className="max-w-4xl w-full mt-12 space-y-14">
 
 {Object.entries(wineTree).map(([type, countries]) => (
 
 <div key={type}>
 
-<h2 className="text-2xl font-semibold mb-6 border-b border-slate-700 pb-2">
+<h2 className="text-xl font-semibold tracking-wide mb-8 pb-3 border-b border-[#d9c7a3]">
 {type}
 </h2>
 
 {Object.entries(countries).map(([country, regions]) => (
 
-<div key={country} className="mb-8">
+<div key={country} className="mb-10">
 
-<h3 className="text-lg font-semibold text-slate-200 mb-4">
+<h3 className="text-base font-semibold text-[#2b2b2b] mb-4 tracking-wide">
 {country}
 </h3>
 
@@ -258,7 +260,7 @@ Show Selection
 
 <div key={region} className="mb-6">
 
-<div className="text-sm uppercase tracking-wide text-slate-400 mb-3">
+<div className="text-xs uppercase tracking-[0.18em] text-[#8b7d63] mb-3">
 {region}
 </div>
 
@@ -269,22 +271,22 @@ Show Selection
 <div
 key={wine.id}
 onClick={()=>setSelectedWine(wine)}
-className="flex justify-between items-center py-2 border-b border-slate-800 cursor-pointer hover:text-amber-300 transition"
+className="flex justify-between items-center py-2 border-b border-[#ece6da] cursor-pointer hover:text-[#b89656] transition"
 >
 
 <div>
 
-<div className="font-medium">
+<div className="text-[15px] font-medium font-serif">
 {wine.name}
 </div>
 
-<div className="text-xs text-slate-400">
+<div className="text-xs text-gray-500">
 {wine.vintage}
 </div>
 
 </div>
 
-<div className="text-amber-400 font-semibold">
+<div className="text-[#b89656] font-semibold">
 €{wine.price}
 </div>
 
@@ -314,9 +316,9 @@ className="flex justify-between items-center py-2 border-b border-slate-800 curs
 
 {selectedWine && (
 
-<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+<div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
 
-<div className="bg-white text-gray-900 max-w-4xl w-full rounded-lg shadow-2xl p-10 relative">
+<div className="bg-white text-gray-900 max-w-3xl w-full rounded-lg shadow-xl p-10 relative">
 
 <button
 onClick={()=>setSelectedWine(null)}
@@ -325,23 +327,23 @@ className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 text-xl"
 ✕
 </button>
 
-<h2 className="text-2xl font-semibold mb-8">
+<h2 className="text-xl font-semibold mb-8 font-serif">
 {selectedWine.name} – {selectedWine.vintage}
 </h2>
 
-<div className="border-t border-amber-300 mb-8"></div>
+<div className="border-t border-[#d9c7a3] mb-8"></div>
 
 <div className="grid grid-cols-3 gap-10 mb-10 text-sm">
 
-<div className="text-amber-700 font-medium">
-Price (Bottle)
+<div className="text-[#8b6b33] font-medium">
+Price
 </div>
 
 <div className="col-span-2">
 €{selectedWine.price} {selectedWine.size}
 </div>
 
-<div className="text-amber-700 font-medium">
+<div className="text-[#8b6b33] font-medium">
 Grape
 </div>
 
@@ -349,7 +351,7 @@ Grape
 {selectedWine.grapes}
 </div>
 
-<div className="text-amber-700 font-medium">
+<div className="text-[#8b6b33] font-medium">
 Region
 </div>
 
@@ -359,15 +361,15 @@ Region
 
 </div>
 
-<div className="border-t border-amber-300 mb-8"></div>
+<div className="border-t border-[#d9c7a3] mb-8"></div>
 
 <div>
 
-<div className="text-amber-700 font-medium mb-3">
+<div className="text-[#8b6b33] font-medium mb-3">
 Description
 </div>
 
-<p className="leading-relaxed text-gray-700">
+<p className="leading-relaxed text-gray-700 text-sm">
 {selectedWine.description}
 </p>
 
