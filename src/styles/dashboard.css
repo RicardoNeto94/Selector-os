@@ -128,7 +128,6 @@
   flex:0 0 auto;
 }
 
-
 /* =======================================================
    SUBMENU
 ======================================================= */
@@ -164,6 +163,7 @@
   flex:0 0 auto;
   margin-right:4px;
 }
+
 /* =======================================================
    SIDEBAR FOOTER
 ======================================================= */
@@ -316,8 +316,25 @@
   opacity:.9;
 }
 
+.so-btn-secondary{
+  background:#1f2937;
+  border:1px solid rgba(255,255,255,0.08);
+
+  padding:8px 14px;
+  border-radius:8px;
+
+  font-size:13px;
+  color:#e5e7eb;
+
+  cursor:pointer;
+}
+
+.so-btn-secondary:hover{
+  background:#2b3340;
+}
+
 /* =======================================================
-   PANELS (REPLACES GLASS CARDS)
+   PANELS
 ======================================================= */
 
 .so-card{
@@ -330,4 +347,130 @@
 .so-card-title{
   font-size:14px;
   font-weight:600;
+}
+
+/* =======================================================
+   APPLE STYLE MODAL
+======================================================= */
+
+.so-modal-backdrop{
+  position:fixed;
+  inset:0;
+
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(6px);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  z-index:999;
+
+  animation:soFade .18s ease;
+}
+
+@keyframes soFade{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+.so-modal{
+  width:720px;
+  max-width:92vw;
+
+  background:linear-gradient(180deg,#111827,#020617);
+
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+
+  padding:32px;
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+
+  animation:soModal .22s ease;
+}
+
+@keyframes soModal{
+  from{
+    transform:scale(.96) translateY(8px);
+    opacity:0;
+  }
+  to{
+    transform:scale(1) translateY(0);
+    opacity:1;
+  }
+}
+
+/* =======================================================
+   APPLE STYLE INPUTS
+======================================================= */
+
+.so-input-apple{
+  width:100%;
+  padding:11px 14px;
+
+  border-radius:12px;
+
+  background:rgba(15,23,42,0.6);
+  border:1px solid rgba(255,255,255,0.08);
+
+  color:#e5e7eb;
+  font-size:14px;
+
+  transition:all .18s ease;
+}
+
+.so-input-apple::placeholder{
+  color:#6b7280;
+}
+
+.so-input-apple:focus{
+  outline:none;
+
+  border-color:#3b82f6;
+  background:rgba(15,23,42,0.85);
+
+  box-shadow:
+    0 0 0 1px #3b82f6,
+    0 10px 30px rgba(59,130,246,0.25);
+}
+
+/* =======================================================
+   FORM GRID + MODAL ACTIONS
+======================================================= */
+
+.so-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.so-textarea{
+  margin-top:14px;
+  height:80px;
+  resize:vertical;
+}
+
+.so-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:22px;
+}
+
+/* =======================================================
+   RESPONSIVE
+======================================================= */
+
+@media (max-width: 768px){
+  .so-form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .so-modal{
+    width:94vw;
+    padding:20px;
+  }
 }
