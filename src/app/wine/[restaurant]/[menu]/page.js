@@ -10,6 +10,8 @@ export default function WineSelector({ params }) {
 const supabase = createClientComponentClient();
 const { restaurant, menu } = params;
 
+const [scrolled, setScrolled] = useState(false);
+
 const [restaurantData, setRestaurant] = useState(null);
 const [wineMenu, setWineMenu] = useState(null);
 const [wines, setWines] = useState([]);
@@ -31,6 +33,18 @@ name: ""
 
 useEffect(() => {
 loadData();
+}, []);
+
+useEffect(() => {
+
+const handleScroll = () => {
+setScrolled(window.scrollY > 120);
+};
+
+window.addEventListener("scroll", handleScroll);
+
+return () => window.removeEventListener("scroll", handleScroll);
+
 }, []);
 
 async function loadData() {
@@ -107,31 +121,27 @@ setFilteredWines([]);
 
 function groupWineList(wineList) {
 
-const tree = wineList.reduce((acc, wine) => {
+const tree = {};
+
+wineList.forEach((wine) => {
 
 const type = wine.wine_type || "Other";
 const country = wine.country || "Other";
 const region = wine.region || "Other";
 
-if (!acc[type]) acc[type] = {};
-if (!acc[type][country]) acc[type][country] = {};
-if (!acc[type][country][region]) acc[type][country][region] = [];
+if (!tree[type]) tree[type] = {};
+if (!tree[type][country]) tree[type][country] = {};
+if (!tree[type][country][region]) tree[type][country][region] = [];
 
-acc[type][country][region].push(wine);
+tree[type][country][region].push(wine);
 
-return acc;
-
-}, {});
-
-/* SORT WINES BY PRICE */
-
-Object.keys(tree).forEach(type => {
-Object.keys(tree[type]).forEach(country => {
-Object.keys(tree[type][country]).forEach(region => {
-
-tree[type][country][region].sort((a, b) => {
-return (a.price || 0) - (b.price || 0);
 });
+
+Object.values(tree).forEach(countries => {
+Object.values(countries).forEach(regions => {
+Object.values(regions).forEach(wines => {
+
+wines.sort((a,b)=> (a.price || 0) - (b.price || 0));
 
 });
 });
@@ -141,18 +151,38 @@ return tree;
 
 }
 
-const winesToDisplay = (showResults ? filteredWines : wines)
-  .slice()
-  .sort((a, b) => (a.price || 0) - (b.price || 0));
+const winesToDisplay = showResults ? filteredWines : wines;
 const wineTree = groupWineList(winesToDisplay);
 
 return (
 
-<div className="min-h-screen bg-[#f8f6f1] text-[#1c1c1c] flex flex-col items-center px-6 py-20">
+<>
 
-{/* HEADER */}
+{scrolled && (
 
-<div className="flex flex-col items-center text-center mb-14">
+<div className="fixed top-0 left-0 w-full backdrop-blur-md bg-[#f8f6f1]/80 border-b border-[#e8dfcf] z-50 transition-all duration-300">
+
+<div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+
+<img
+src="/shangshi-logo.png"
+className="h-10 transition-all duration-300"
+alt="Shang Shi"
+/>
+
+<div className="text-xs tracking-[0.3em] text-[#8b7d63] uppercase">
+Wine Selection
+</div>
+
+</div>
+
+</div>
+
+)}
+
+<div className="min-h-screen bg-[#f8f6f1] text-[#1c1c1c] flex flex-col items-center px-6 pt-32 pb-20">
+
+<div className="flex flex-col items-center text-center mb-16">
 
 <img
 src="/shangshi-logo.png"
@@ -164,11 +194,9 @@ alt="Shang Shi logo"
 Wine Selection
 </p>
 
-<div className="w-24 h-[1px] bg-[#c9a96a] mt-6"></div>
+<div className="w-24 h-[1px] bg-[#c9a96a] mt-6 animate-[fadeGrow_1s_ease]"></div>
 
 </div>
-
-{/* BACK BUTTON */}
 
 {showResults && (
 <button
@@ -178,8 +206,6 @@ className="mb-6 text-sm text-gray-600 hover:text-black"
 ← Back to Filters
 </button>
 )}
-
-{/* FILTER PANEL */}
 
 {!showResults && (
 
@@ -246,8 +272,6 @@ Show Selection
 
 )}
 
-{/* WINE LIST */}
-
 {showResults && (
 
 <div className="max-w-4xl w-full mt-12 space-y-14">
@@ -256,8 +280,8 @@ Show Selection
 
 <div key={type}>
 
-<h2 className="text-xl font-semibold tracking-wide mb-8 pb-3 border-b border-[#d9c7a3]">
-{type}
+<h2 className="text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-10 pb-3 border-b border-[#d9c7a3]">
+{type} wines
 </h2>
 
 {Object.entries(countries).map(([country, regions]) => (
@@ -283,7 +307,7 @@ Show Selection
 <div
 key={wine.id}
 onClick={()=>setSelectedWine(wine)}
-className="flex justify-between items-center py-2 border-b border-[#ece6da] cursor-pointer hover:text-[#b89656] transition"
+className="flex justify-between items-center py-4 border-b border-[#ece6da] cursor-pointer hover:text-[#b89656] transition"
 >
 
 <div>
@@ -298,7 +322,7 @@ className="flex justify-between items-center py-2 border-b border-[#ece6da] curs
 
 </div>
 
-<div className="text-[#b89656] font-semibold">
+<div className="text-[#b89656] font-semibold tabular-nums">
 €{wine.price}
 </div>
 
@@ -323,8 +347,6 @@ className="flex justify-between items-center py-2 border-b border-[#ece6da] curs
 </div>
 
 )}
-
-{/* WINE MODAL */}
 
 {selectedWine && (
 
@@ -394,6 +416,8 @@ Description
 )}
 
 </div>
+
+</>
 
 );
 }
