@@ -154,16 +154,14 @@ return (
 
 <div className="flex flex-col items-center text-center mb-14">
 
-{restaurantData?.logo_url && (
 <img
-src={restaurantData.logo_url}
-className="h-14 mb-4"
-alt="Restaurant logo"
+src="/shangshi-logo.png"
+className="h-20 mb-6"
+alt="Shang Shi logo"
 />
-)}
 
 <h1 className="text-3xl font-semibold tracking-wide">
-{restaurantData?.name}
+Shang Shi
 </h1>
 
 <p className="text-sm text-gray-500 mt-2 tracking-wide">
