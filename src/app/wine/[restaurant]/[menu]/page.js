@@ -107,7 +107,7 @@ setFilteredWines([]);
 
 function groupWineList(wineList) {
 
-return wineList.reduce((acc, wine) => {
+const tree = wineList.reduce((acc, wine) => {
 
 const type = wine.wine_type || "Other";
 const country = wine.country || "Other";
@@ -122,6 +122,22 @@ acc[type][country][region].push(wine);
 return acc;
 
 }, {});
+
+/* SORT WINES BY PRICE */
+
+Object.keys(tree).forEach(type => {
+Object.keys(tree[type]).forEach(country => {
+Object.keys(tree[type][country]).forEach(region => {
+
+tree[type][country][region].sort((a, b) => {
+return (a.price || 0) - (b.price || 0);
+});
+
+});
+});
+});
+
+return tree;
 
 }
 
