@@ -190,7 +190,7 @@ Wine Selection
 
 <img
 src="/shangshi-logo.png"
-className="h-28 mb-6"
+className="h-32 mb-8"
 alt="Shang Shi logo"
 />
 
@@ -284,7 +284,7 @@ Show Selection
 
 <div key={type}>
 
-<h2 className="text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-6 pb-2 border-b border-[#d9c7a3]">
+<h2 className="sticky top-14 bg-[#f8f6f1]/90 backdrop-blur-md text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-6 pb-2 border-b border-[#d9c7a3] z-30">
 {type} wines
 </h2>
 
