@@ -141,7 +141,9 @@ return tree;
 
 }
 
-const winesToDisplay = showResults ? filteredWines : wines;
+const winesToDisplay = (showResults ? filteredWines : wines)
+  .slice()
+  .sort((a, b) => (a.price || 0) - (b.price || 0));
 const wineTree = groupWineList(winesToDisplay);
 
 return (
