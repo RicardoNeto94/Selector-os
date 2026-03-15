@@ -161,7 +161,7 @@ return (
 {scrolled && (
 
 <div className="fixed top-0 left-0 w-full z-[100]">
-    
+
 <div className="absolute inset-0 backdrop-blur-xl bg-[#f8f6f1]/70"></div>
 
 <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-b from-transparent to-[#f8f6f1]"></div>
@@ -284,8 +284,8 @@ Show Selection
 
 <div key={type}>
 
-<h2 className="sticky top-20 bg-[#f8f6f1]/90 backdrop-blur-md text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-6 pb-2 border-b border-[#d9c7a3] z-30">
-{type} wines
+<h2 className="sticky top-16 bg-[#f8f6f1] text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-6 pb-2 border-b border-[#d9c7a3] z-20">
+  {type} wines
 </h2>
 
 {Object.entries(countries).map(([country, regions]) => (
