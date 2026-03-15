@@ -156,16 +156,12 @@ return (
 
 <img
 src="/shangshi-logo.png"
-className="h-20 mb-6"
+className="h-32 mb-8"
 alt="Shang Shi logo"
 />
 
-<h1 className="text-3xl font-semibold tracking-wide">
-Shang Shi
-</h1>
-
-<p className="text-sm text-gray-500 mt-2 tracking-wide">
-{wineMenu?.name}
+<p className="text-sm tracking-[0.25em] text-[#8b7d63] uppercase">
+Wine Selection
 </p>
 
 <div className="w-24 h-[1px] bg-[#c9a96a] mt-6"></div>
