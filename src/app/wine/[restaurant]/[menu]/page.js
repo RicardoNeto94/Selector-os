@@ -160,13 +160,17 @@ return (
 
 {scrolled && (
 
-<div className="fixed top-0 left-0 w-full backdrop-blur-md bg-[#f8f6f1]/80 border-b border-[#e8dfcf] z-50 transition-all duration-300">
+<div className="fixed top-0 left-0 w-full z-50">
 
-<div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+<div className="absolute inset-0 backdrop-blur-xl bg-[#f8f6f1]/70"></div>
+
+<div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-b from-transparent to-[#f8f6f1]"></div>
+
+<div className="relative max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
 
 <img
 src="/shangshi-logo.png"
-className="h-10 transition-all duration-300"
+className="h-10 opacity-90 transition-all duration-300"
 alt="Shang Shi"
 />
 
@@ -180,13 +184,13 @@ Wine Selection
 
 )}
 
-<div className="min-h-screen bg-[#f8f6f1] text-[#1c1c1c] flex flex-col items-center px-6 pt-32 pb-20">
+<div className="min-h-screen bg-[#f8f6f1] text-[#1c1c1c] flex flex-col items-center px-6 pt-28 pb-20">
 
-<div className="flex flex-col items-center text-center mb-16">
+<div className="flex flex-col items-center text-center mb-12">
 
 <img
 src="/shangshi-logo.png"
-className="h-32 mb-8"
+className="h-28 mb-6"
 alt="Shang Shi logo"
 />
 
@@ -194,7 +198,7 @@ alt="Shang Shi logo"
 Wine Selection
 </p>
 
-<div className="w-24 h-[1px] bg-[#c9a96a] mt-6 animate-[fadeGrow_1s_ease]"></div>
+<div className="w-20 h-[1px] bg-[#c9a96a] mt-4"></div>
 
 </div>
 
@@ -211,10 +215,10 @@ className="mb-6 text-sm text-gray-600 hover:text-black"
 
 <>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl w-full">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-xl w-full">
 
 <select
-className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-2 text-sm"
 onChange={(e)=>updateFilter("wine_type",e.target.value)}
 >
 <option value="">All Wine Types</option>
@@ -224,7 +228,7 @@ onChange={(e)=>updateFilter("wine_type",e.target.value)}
 </select>
 
 <select
-className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-2 text-sm"
 onChange={(e)=>updateFilter("country",e.target.value)}
 >
 <option value="">All Countries</option>
@@ -234,7 +238,7 @@ onChange={(e)=>updateFilter("country",e.target.value)}
 </select>
 
 <select
-className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-2 text-sm"
 onChange={(e)=>updateFilter("region",e.target.value)}
 >
 <option value="">All Regions</option>
@@ -244,7 +248,7 @@ onChange={(e)=>updateFilter("region",e.target.value)}
 </select>
 
 <select
-className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 text-sm"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-2 text-sm"
 onChange={(e)=>updateFilter("grapes",e.target.value)}
 >
 <option value="">All Grapes</option>
@@ -254,7 +258,7 @@ onChange={(e)=>updateFilter("grapes",e.target.value)}
 </select>
 
 <input
-className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-3 md:col-span-2 text-sm"
+className="bg-white border border-[#e5e0d6] rounded-lg px-4 py-2 md:col-span-2 text-sm"
 placeholder="Search wine name"
 onChange={(e)=>updateFilter("name",e.target.value)}
 />
@@ -263,7 +267,7 @@ onChange={(e)=>updateFilter("name",e.target.value)}
 
 <button
 onClick={applyFilters}
-className="mt-10 border border-[#c9a96a] text-[#8b6b33] px-6 py-2 text-sm tracking-wide hover:bg-[#c9a96a]/10 transition"
+className="mt-8 border border-[#c9a96a] text-[#8b6b33] px-6 py-2 text-sm tracking-wide hover:bg-[#c9a96a]/10 transition"
 >
 Show Selection
 </button>
@@ -274,40 +278,40 @@ Show Selection
 
 {showResults && (
 
-<div className="max-w-4xl w-full mt-12 space-y-14">
+<div className="max-w-4xl w-full mt-10 space-y-8">
 
 {Object.entries(wineTree).map(([type, countries]) => (
 
 <div key={type}>
 
-<h2 className="text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-10 pb-3 border-b border-[#d9c7a3]">
+<h2 className="text-sm tracking-[0.35em] uppercase text-[#8b7d63] mb-6 pb-2 border-b border-[#d9c7a3]">
 {type} wines
 </h2>
 
 {Object.entries(countries).map(([country, regions]) => (
 
-<div key={country} className="mb-10">
+<div key={country} className="mb-6">
 
-<h3 className="text-base font-semibold text-[#2b2b2b] mb-4 tracking-wide">
+<h3 className="text-base font-semibold text-[#2b2b2b] mb-2 tracking-wide">
 {country}
 </h3>
 
 {Object.entries(regions).map(([region, wines]) => (
 
-<div key={region} className="mb-6">
+<div key={region} className="mb-4">
 
-<div className="text-xs uppercase tracking-[0.18em] text-[#8b7d63] mb-3">
+<div className="text-xs uppercase tracking-[0.18em] text-[#8b7d63] mb-2">
 {region}
 </div>
 
-<div className="space-y-2">
+<div className="space-y-1">
 
 {wines.map((wine) => (
 
 <div
 key={wine.id}
 onClick={()=>setSelectedWine(wine)}
-className="flex justify-between items-center py-4 border-b border-[#ece6da] cursor-pointer hover:text-[#b89656] transition"
+className="flex justify-between items-center py-2 border-b border-[#ece6da] cursor-pointer hover:text-[#b89656] transition"
 >
 
 <div>
