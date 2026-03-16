@@ -7,7 +7,7 @@ export const metadata = {
   title: "SelectorOS",
   description: "Restaurant menu & allergen cockpit",
   manifest: "/manifest.json",
-  themeColor: "#020617",
+  themeColor: "#F7F6F2",
 };
 
 export default function RootLayout({ children }) {

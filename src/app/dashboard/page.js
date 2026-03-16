@@ -13,6 +13,8 @@ export default function DashboardPage() {
 
   const [wineStats, setWineStats] = useState({
     total: 0,
+    bottles: 0,
+    value: 0,
     lowStock: 0,
     outOfStock: 0,
     menus: 0
@@ -60,6 +62,15 @@ export default function DashboardPage() {
       .select("*")
       .eq("restaurant_id", restaurantData.id);
 
+    const { data: inventory } = await supabase
+      .from("wine_inventory")
+      .select(`
+        stock,
+        wine_id,
+        wines(price)
+      `)
+      .eq("restaurant_id", restaurantData.id);
+
     const { data: wineMenus } = await supabase
       .from("wine_menus")
       .select("*")
@@ -67,21 +78,52 @@ export default function DashboardPage() {
 
     const totalWines = wines?.length || 0;
 
+    let bottles = 0;
+    let value = 0;
+
+    inventory?.forEach(i => {
+
+      const stock = i.stock || 0;
+
+      bottles += stock;
+
+      const price = i.wines?.price || 0;
+
+      value += stock * price;
+
+    });
+
+    const wineStockMap = {};
+
+    inventory?.forEach(i => {
+
+      if (!wineStockMap[i.wine_id]) {
+        wineStockMap[i.wine_id] = 0;
+      }
+
+      wineStockMap[i.wine_id] += i.stock;
+
+    });
+
+    const wineStockArray = Object.values(wineStockMap);
+
     const lowStock =
-      wines?.filter(w => w.stock > 0 && w.stock <= 3).length || 0;
+      wineStockArray.filter(s => s > 0 && s <= 3).length;
 
     const outOfStock =
-      wines?.filter(w => !w.stock || w.stock === 0).length || 0;
+      wineStockArray.filter(s => s === 0).length;
 
     setWineStats({
       total: totalWines,
+      bottles: bottles,
+      value: value,
       lowStock: lowStock,
       outOfStock: outOfStock,
       menus: wineMenus?.length || 0
     });
 
     /* ---------------------------
-       DISH STATS (FIXED LOGIC)
+       DISH STATS
     ---------------------------- */
 
     const { data: menus } = await supabase
@@ -129,12 +171,26 @@ export default function DashboardPage() {
           Wine Program
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-6 gap-6">
 
           <div className="so-card">
             <div className="so-card-title">Total Wines</div>
             <div className="text-3xl font-bold text-white">
               {wineStats.total}
+            </div>
+          </div>
+
+          <div className="so-card">
+            <div className="so-card-title">Total Bottles</div>
+            <div className="text-3xl font-bold text-white">
+              {wineStats.bottles}
+            </div>
+          </div>
+
+          <div className="so-card">
+            <div className="so-card-title">Cellar Value</div>
+            <div className="text-3xl font-bold text-white">
+              €{wineStats.value.toLocaleString()}
             </div>
           </div>
 
@@ -163,7 +219,7 @@ export default function DashboardPage() {
 
       </div>
 
-      {/* KITCHEN & ALLERGEN */}
+      {/* KITCHEN */}
 
       <div className="space-y-4">
 

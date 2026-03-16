@@ -1,18 +1,19 @@
 /* src/styles/dashboard.css */
-/* SelectorOS – Minimal Operational Dashboard */
+/* SelectorOS – Off-White Hospitality Theme */
 
 :root{
 
-  --so-bg-page:#0f1115;
-  --so-panel:#15181d;
-  --so-border:#23262d;
+  --so-bg-page:#F7F6F2;
+  --so-panel:#FFFFFF;
+  --so-border:#E5E7EB;
 
-  --so-text-main:#e6e7ea;
-  --so-text-muted:#8b8f98;
+  --so-text-main:#1F2937;
+  --so-text-muted:#6B7280;
 
-  --so-accent:#3b82f6;
+  --so-accent:#0F2744;
+  --so-accent-soft:#1F3A5F;
 
-  --so-radius:8px;
+  --so-radius:10px;
 
   --so-sidebar-width:240px;
 }
@@ -34,13 +35,14 @@
 ======================================================= */
 
 .so-sidebar{
+
   width:var(--so-sidebar-width);
   height:100vh;
   position:sticky;
   top:0;
 
-  background:var(--so-panel);
-  border-right:1px solid var(--so-border);
+  background:#0F2744;
+  border-right:1px solid rgba(0,0,0,0.08);
 
   display:flex;
   flex-direction:column;
@@ -49,6 +51,8 @@
   padding:20px 16px;
 
   overflow-y:auto;
+
+  color:white;
 }
 
 /* =======================================================
@@ -80,7 +84,7 @@
   font-size:11px;
   letter-spacing:.08em;
   text-transform:uppercase;
-  color:var(--so-text-muted);
+  color:rgba(255,255,255,0.6);
   margin-top:18px;
   margin-bottom:6px;
 }
@@ -94,7 +98,7 @@
   align-items:center;
   gap:10px;
 
-  padding:8px 10px;
+  padding:10px 12px;
 
   border-radius:8px;
 
@@ -103,34 +107,29 @@
   cursor:pointer;
 
   transition:background .15s ease;
+
+  line-height:1;
 }
 
 .so-nav-item:hover{
-  background:#1a1d23;
+  background:rgba(255,255,255,0.08);
 }
 
 .so-nav-item--active{
-  background:#1a1d23;
-  color:white;
+  background:rgba(255,255,255,0.18);
 }
 
 /* =======================================================
-   ARROW
+   LOCK ICON
 ======================================================= */
 
-.so-nav-arrow{
+.so-lock-icon{
   width:14px;
   height:14px;
-  margin-left:auto;
-  color:rgba(255,255,255,0.5);
-
-  transition:transform .18s ease;
+  opacity:0.55;
+  margin-right:6px;
+  flex:0 0 auto;
 }
-
-.so-nav-arrow-open{
-  transform:rotate(90deg);
-}
-
 /* =======================================================
    ICON
 ======================================================= */
@@ -145,12 +144,39 @@
 .so-nav-icon{
   width:16px;
   height:16px;
-  opacity:0.85;
+  opacity:0.9;
   flex:0 0 auto;
 }
 
 /* =======================================================
-   SUBMENU (FLOATING)
+   ARROW
+======================================================= */
+
+.so-nav-arrow{
+
+  width:14px;
+  height:14px;
+
+  margin-left:auto;
+
+  opacity:.65;
+
+  transition:
+    transform .18s ease,
+    opacity .15s ease;
+
+}
+
+.so-nav-arrow:hover{
+  opacity:1;
+}
+
+.so-nav-arrow-open{
+  transform:rotate(90deg);
+}
+
+/* =======================================================
+   SUBMENU
 ======================================================= */
 
 .so-nav-group{
@@ -159,7 +185,7 @@
 
 .so-nav-sub{
 
-  margin-left:28px;
+  margin-left:26px;
 
   display:flex;
   flex-direction:column;
@@ -174,7 +200,7 @@
 
   from{
     opacity:0;
-    transform:translateY(-6px);
+    transform:translateY(-4px);
   }
 
   to{
@@ -185,14 +211,19 @@
 }
 
 .so-nav-sub-item{
+
   font-size:13px;
-  color:var(--so-text-muted);
+
+  color:rgba(255,255,255,0.75);
+
   padding:6px 8px;
+
   border-radius:6px;
+
 }
 
 .so-nav-sub-item:hover{
-  background:#22262e;
+  background:rgba(255,255,255,0.12);
   color:white;
 }
 
@@ -201,23 +232,11 @@
 }
 
 /* =======================================================
-   LOCK ICON
-======================================================= */
-
-.so-lock-icon{
-  width:12px;
-  height:12px;
-  opacity:0.6;
-  flex:0 0 auto;
-  margin-right:4px;
-}
-
-/* =======================================================
    SIDEBAR FOOTER
 ======================================================= */
 
 .so-sidebar-footer{
-  border-top:1px solid var(--so-border);
+  border-top:1px solid rgba(255,255,255,0.1);
   padding-top:16px;
 
   display:flex;
@@ -236,7 +255,7 @@
   height:32px;
   border-radius:50%;
 
-  background:var(--so-accent);
+  background:var(--so-accent-soft);
 
   display:flex;
   align-items:center;
@@ -257,25 +276,26 @@
 
 .so-user-tag{
   font-size:11px;
-  color:var(--so-text-muted);
+  opacity:0.7;
 }
 
 .so-logout-btn{
-  border:1px solid var(--so-border);
-  background:#1a1d23;
+
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.05);
 
   padding:8px 12px;
   border-radius:6px;
 
   font-size:13px;
 
-  color:var(--so-text-main);
+  color:white;
 
   cursor:pointer;
 }
 
 .so-logout-btn:hover{
-  background:#20242b;
+  background:rgba(255,255,255,0.12);
 }
 
 /* =======================================================
@@ -322,15 +342,16 @@
 ======================================================= */
 
 .so-search{
+
   display:flex;
   align-items:center;
   gap:8px;
 
   border:1px solid var(--so-border);
-  background:#1a1d23;
+  background:white;
 
   padding:8px 10px;
-  border-radius:6px;
+  border-radius:8px;
 }
 
 .so-search-input{
@@ -341,16 +362,17 @@
 }
 
 /* =======================================================
-   BUTTON
+   BUTTONS
 ======================================================= */
 
 .so-btn-primary{
+
   background:var(--so-accent);
   border:none;
 
-  padding:8px 14px;
+  padding:9px 14px;
 
-  border-radius:6px;
+  border-radius:8px;
 
   font-size:13px;
   font-weight:600;
@@ -358,43 +380,57 @@
   color:white;
 
   cursor:pointer;
+
+  transition:all .15s ease;
 }
 
 .so-btn-primary:hover{
-  opacity:.9;
+  background:var(--so-accent-soft);
 }
 
 .so-btn-secondary{
-  background:#1f2937;
-  border:1px solid rgba(255,255,255,0.08);
+
+  background:white;
+  border:1px solid var(--so-border);
 
   padding:8px 14px;
   border-radius:8px;
 
   font-size:13px;
-  color:#e5e7eb;
 
   cursor:pointer;
 }
 
 .so-btn-secondary:hover{
-  background:#2b3340;
+  background:#f3f4f6;
 }
 
 /* =======================================================
-   PANELS
+   CARDS
 ======================================================= */
 
 .so-card{
+
   background:var(--so-panel);
   border:1px solid var(--so-border);
   border-radius:var(--so-radius);
-  padding:16px;
+
+  padding:18px;
+
+  box-shadow:
+  0 1px 2px rgba(0,0,0,0.04),
+  0 8px 24px rgba(0,0,0,0.06);
+
 }
 
 .so-card-title{
-  font-size:14px;
-  font-weight:600;
+
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+
+  color:var(--so-text-muted);
+
 }
 
 /* =======================================================
@@ -402,54 +438,36 @@
 ======================================================= */
 
 .so-modal-backdrop{
+
   position:fixed;
   inset:0;
 
-  background:rgba(0,0,0,0.55);
-  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,0.25);
+  backdrop-filter:blur(4px);
 
   display:flex;
   align-items:center;
   justify-content:center;
 
   z-index:999;
-
-  animation:soFade .18s ease;
-}
-
-@keyframes soFade{
-  from{opacity:0}
-  to{opacity:1}
 }
 
 .so-modal{
+
   width:640px;
   max-width:92vw;
 
   max-height:85vh;
   overflow-y:auto;
 
-  background:linear-gradient(180deg,#111827,#020617);
+  background:white;
 
-  border:1px solid rgba(255,255,255,0.08);
+  border:1px solid var(--so-border);
   border-radius:18px;
 
   padding:28px;
 
   box-shadow:
-    0 30px 80px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(255,255,255,0.04) inset;
+  0 20px 60px rgba(0,0,0,0.15);
 
-  animation:soModal .22s ease;
-}
-
-@keyframes soModal{
-  from{
-    transform:scale(.96) translateY(8px);
-    opacity:0;
-  }
-  to{
-    transform:scale(1) translateY(0);
-    opacity:1;
-  }
 }

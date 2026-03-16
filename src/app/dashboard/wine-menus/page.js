@@ -105,10 +105,10 @@ export default function WineMenusPage() {
               <div className="flex gap-3 mt-6">
 
                 <a
-                  href={`/dashboard/wine-menus/${menu.id}`}
+                  href={`/dashboard/wine-menus/${menu.slug}`}
                   className="so-btn-secondary"
                 >
-                  Edit
+                  Open
                 </a>
 
                 {restaurant && menu.slug && (
