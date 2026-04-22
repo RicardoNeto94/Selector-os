@@ -8,16 +8,14 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const lastSlug = localStorage.getItem("lastSlug");
+  const lastSlug = localStorage.getItem("lastSlug");
 
-    // 🔥 If opened from QR before → go back to that menu
-    if (lastSlug) {
-      router.replace(`/menu/${lastSlug}`);
-      return;
-    }
-
-    // fallback → go to landing page (handled below)
-  }, []);
+  if (lastSlug) {
+    router.replace(`/menu/${lastSlug}`);
+  } else {
+    router.replace("/menu/foxden"); // 🔥 IMPORTANT
+  }
+}, []);
 
   return (
     <main className="min-h-screen text-white">
