@@ -16,84 +16,14 @@ export default async function PublicMenuPage({ params, searchParams }) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 🔹 FOOD MENU
-  const { data: menu } = await supabase
-    .from("menus")
-    .select("*")
-    .eq("public_slug", slug)
-    .maybeSingle();
-
-  // 🔹 WINE MENU
+  // 🔥 1. CHECK WINE FIRST (CRITICAL)
   const { data: wineMenu } = await supabase
     .from("wine_menus")
     .select("*")
     .eq("slug", slug)
     .maybeSingle();
 
-  // 🔥 SAVE SLUG FOR PWA
-  const SlugSaver = () => {
-    "use client";
-    if (typeof window !== "undefined") {
-      localStorage.setItem("lastSlug", slug);
-    }
-    return null;
-  };
-
-  // 🔥 SELECTOR PAGE (only for food menus)
-  if (!type && menu) {
-    return (
-      <>
-        <SlugSaver />
-        <LandingSelector slug={slug} menu={menu} />
-      </>
-    );
-  }
-
-  // 🔥 FOOD MENU
-  if (menu && type === "food") {
-
-    const { data: categories } = await supabase
-      .from("menu_categories")
-      .select("*")
-      .eq("menu_id", menu.id)
-      .eq("type", "food")
-      .order("position");
-
-    const { data: items } = await supabase
-      .from("menu_items")
-      .select("*")
-      .eq("menu_id", menu.id)
-      .eq("type", "food")
-      .order("position");
-
-    return (
-      <main className="min-h-screen">
-        <SlugSaver />
-        <MenuClientView
-          menu={menu}
-          categories={categories || []}
-          items={items || []}
-        />
-      </main>
-    );
-  }
-
-  // 🔥 DRINKS (wine under food menu)
-  if (menu && type === "drinks") {
-
-    const { data: wineMenu } = await supabase
-      .from("wine_menus")
-      .select("*")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (!wineMenu) {
-      return (
-        <div className="min-h-screen flex items-center justify-center text-white">
-          No drinks menu found
-        </div>
-      );
-    }
+  if (wineMenu) {
 
     const { data: items } = await supabase
       .from("wine_menu_items")
@@ -128,8 +58,76 @@ export default async function PublicMenuPage({ params, searchParams }) {
     );
   }
 
-  // 🔥 DIRECT WINE URL (QR CODE like /menu/shang-shi-wine)
-  if (wineMenu) {
+  // 🔹 2. THEN LOAD FOOD MENU
+  const { data: menu } = await supabase
+    .from("menus")
+    .select("*")
+    .eq("public_slug", slug)
+    .maybeSingle();
+
+  const SlugSaver = () => {
+    "use client";
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lastSlug", slug);
+    }
+    return null;
+  };
+
+  // 🔥 SELECTOR
+  if (!type && menu) {
+    return (
+      <>
+        <SlugSaver />
+        <LandingSelector slug={slug} menu={menu} />
+      </>
+    );
+  }
+
+  // 🔥 FOOD
+  if (menu && type === "food") {
+
+    const { data: categories } = await supabase
+      .from("menu_categories")
+      .select("*")
+      .eq("menu_id", menu.id)
+      .eq("type", "food")
+      .order("position");
+
+    const { data: items } = await supabase
+      .from("menu_items")
+      .select("*")
+      .eq("menu_id", menu.id)
+      .eq("type", "food")
+      .order("position");
+
+    return (
+      <main className="min-h-screen">
+        <SlugSaver />
+        <MenuClientView
+          menu={menu}
+          categories={categories || []}
+          items={items || []}
+        />
+      </main>
+    );
+  }
+
+  // 🔥 DRINKS BUTTON (from selector)
+  if (menu && type === "drinks") {
+
+    const { data: wineMenu } = await supabase
+      .from("wine_menus")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (!wineMenu) {
+      return (
+        <div className="min-h-screen flex items-center justify-center text-white">
+          No drinks menu found
+        </div>
+      );
+    }
 
     const { data: items } = await supabase
       .from("wine_menu_items")
