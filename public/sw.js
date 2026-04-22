@@ -1,18 +1,20 @@
-// public/sw.js
+const CACHE_NAME = "selectoros-v5";
 
-const CACHE_NAME = "selectoros-v3";
-
-// 🔹 Only cache static assets
+// Only static assets
 const STATIC_ASSETS = [
   "/",
-  "/favicon.ico",
   "/manifest.json",
+  "/favicon.ico",
 ];
 
 // INSTALL
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
+
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    })
   );
 });
 
@@ -21,52 +23,50 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       )
     )
   );
+
+  self.clients.claim();
 });
 
 // FETCH
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  if (request.method !== "GET") return;
-
-  const url = new URL(request.url);
-
   // 🚫 NEVER cache API
-  if (url.pathname.startsWith("/api")) {
+  if (request.url.includes("/api/")) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // 🚫 NEVER cache dynamic menu pages
-  if (url.pathname.startsWith("/menu")) {
+  // 🚫 NEVER cache Supabase
+  if (request.url.includes("supabase")) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // ✅ STATIC FILES → cache first
+  // ✅ Static files only (CSS, JS)
   if (
-    url.origin === self.location.origin &&
-    (
-      url.pathname.startsWith("/_next") ||
-      url.pathname.endsWith(".css") ||
-      url.pathname.endsWith(".js") ||
-      url.pathname.endsWith(".png") ||
-      url.pathname.endsWith(".jpg") ||
-      url.pathname.endsWith(".svg")
-    )
+    request.url.includes("/_next/") ||
+    request.url.endsWith(".css") ||
+    request.url.endsWith(".js")
   ) {
     event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request))
+      caches.match(request).then((cached) => {
+        return cached || fetch(request);
+      })
     );
     return;
   }
 
-  // 🌐 DEFAULT → network only (NO CACHE)
-  event.respondWith(fetch(request));
+  // 🌐 Pages → always network first
+  event.respondWith(
+    fetch(request).catch(() => caches.match("/"))
+  );
 });
