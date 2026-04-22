@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import MenuClientView from "./MenuClientView";
-import WineClientView from "@/app/wine/[slug]/WineClientView";
 import LandingSelector from "./LandingSelector";
 
 export const dynamic = "force-dynamic";
@@ -16,55 +15,22 @@ export default async function PublicMenuPage({ params, searchParams }) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 🔥 1. CHECK WINE FIRST (CRITICAL)
-  const { data: wineMenu } = await supabase
-    .from("wine_menus")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (wineMenu) {
-
-    const { data: items } = await supabase
-      .from("wine_menu_items")
-      .select(`
-        id,
-        position,
-        wine_id,
-        wines:wine_id (
-          id,
-          name,
-          producer,
-          country,
-          region,
-          subregion,
-          wine_type,
-          grapes,
-          vintage,
-          price,
-          description
-        )
-      `)
-      .eq("wine_menu_id", wineMenu.id)
-      .order("position");
-
-    return (
-      <main className="min-h-screen">
-        <WineClientView
-          menu={wineMenu}
-          items={items || []}
-        />
-      </main>
-    );
-  }
-
-  // 🔹 2. THEN LOAD FOOD MENU
+  // 🔹 LOAD BASE MENU
   const { data: menu } = await supabase
     .from("menus")
     .select("*")
     .eq("public_slug", slug)
     .maybeSingle();
 
+  if (!menu) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Menu not found
+      </div>
+    );
+  }
+
+  // 🔹 SAVE SLUG FOR PWA
   const SlugSaver = () => {
     "use client";
     if (typeof window !== "undefined") {
@@ -73,8 +39,8 @@ export default async function PublicMenuPage({ params, searchParams }) {
     return null;
   };
 
-  // 🔥 SELECTOR
-  if (!type && menu) {
+  // 🔥 SELECTOR PAGE
+  if (!type) {
     return (
       <>
         <SlugSaver />
@@ -83,88 +49,29 @@ export default async function PublicMenuPage({ params, searchParams }) {
     );
   }
 
-  // 🔥 FOOD
-  if (menu && type === "food") {
+  // 🔥 SHARED LOGIC (food + drinks)
+  const { data: categories } = await supabase
+    .from("menu_categories")
+    .select("*")
+    .eq("menu_id", menu.id)
+    .eq("type", type) // 🔥 dynamic
+    .order("position");
 
-    const { data: categories } = await supabase
-      .from("menu_categories")
-      .select("*")
-      .eq("menu_id", menu.id)
-      .eq("type", "food")
-      .order("position");
-
-    const { data: items } = await supabase
-      .from("menu_items")
-      .select("*")
-      .eq("menu_id", menu.id)
-      .eq("type", "food")
-      .order("position");
-
-    return (
-      <main className="min-h-screen">
-        <SlugSaver />
-        <MenuClientView
-          menu={menu}
-          categories={categories || []}
-          items={items || []}
-        />
-      </main>
-    );
-  }
-
-  // 🔥 DRINKS BUTTON (from selector)
-  if (menu && type === "drinks") {
-
-    const { data: wineMenu } = await supabase
-      .from("wine_menus")
-      .select("*")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (!wineMenu) {
-      return (
-        <div className="min-h-screen flex items-center justify-center text-white">
-          No drinks menu found
-        </div>
-      );
-    }
-
-    const { data: items } = await supabase
-      .from("wine_menu_items")
-      .select(`
-        id,
-        position,
-        wine_id,
-        wines:wine_id (
-          id,
-          name,
-          producer,
-          country,
-          region,
-          subregion,
-          wine_type,
-          grapes,
-          vintage,
-          price,
-          description
-        )
-      `)
-      .eq("wine_menu_id", wineMenu.id)
-      .order("position");
-
-    return (
-      <main className="min-h-screen">
-        <WineClientView
-          menu={wineMenu}
-          items={items || []}
-        />
-      </main>
-    );
-  }
+  const { data: items } = await supabase
+    .from("menu_items")
+    .select("*")
+    .eq("menu_id", menu.id)
+    .eq("type", type) // 🔥 dynamic
+    .order("position");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
-      Menu not found
-    </div>
+    <main className="min-h-screen">
+      <SlugSaver />
+      <MenuClientView
+        menu={menu}
+        categories={categories || []}
+        items={items || []}
+      />
+    </main>
   );
 }
