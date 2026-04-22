@@ -1,4 +1,4 @@
-import GuestMenu from "@/components/GuestMenu";
+import GuestMenu from "../../components/GuestMenu";
 
 export default async function PublicMenuPage({ params }) {
   const { slug } = await params;
