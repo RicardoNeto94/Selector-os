@@ -13,11 +13,15 @@ export default function WineMenusPage() {
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [showModal, setShowModal] = useState(false);
+  const [menuName, setMenuName] = useState("");
+  const [logoFile, setLogoFile] = useState(null);
+
   useEffect(() => {
     loadMenus();
   }, []);
 
-  const loadMenus = async () => {
+  async function loadMenus() {
 
     const {
       data: { user }
@@ -49,7 +53,97 @@ export default function WineMenusPage() {
 
     setMenus(data || []);
     setLoading(false);
-  };
+  }
+
+  function generateSlug(name) {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s]/gi, "")
+      .replace(/\s+/g, "-");
+  }
+
+  async function uploadLogo(file) {
+
+    if (!file) return null;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `menu-logo-${Date.now()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("restaurant-logos")
+      .upload(fileName, file);
+
+    if (error) {
+      console.error(error);
+      alert("Logo upload failed");
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from("menu-logos")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  }
+
+  async function createMenu() {
+
+    if (!menuName || !restaurant) return;
+
+    const slug = generateSlug(menuName);
+
+    let logoUrl = null;
+
+    if (logoFile) {
+      logoUrl = await uploadLogo(logoFile);
+    }
+
+    const { error } = await supabase
+      .from("wine_menus")
+      .insert({
+        name: menuName,
+        slug: slug,
+        restaurant_id: restaurant.id,
+        logo_url: logoUrl
+      });
+
+    if (error) {
+      console.error(error);
+      alert("Failed to create menu");
+      return;
+    }
+
+    setMenuName("");
+    setLogoFile(null);
+    setShowModal(false);
+
+    loadMenus();
+    window.location.reload();
+  }
+
+  async function deleteMenu(menuId) {
+
+    const confirmed = confirm("Delete this wine menu?");
+    if (!confirmed) return;
+
+    await supabase
+      .from("wine_menu_items")
+      .delete()
+      .eq("wine_menu_id", menuId);
+
+    const { error } = await supabase
+      .from("wine_menus")
+      .delete()
+      .eq("id", menuId);
+
+    if (error) {
+      console.error(error);
+      alert("Failed to delete menu");
+      return;
+    }
+
+    loadMenus();
+  }
 
   if (loading) {
     return (
@@ -64,16 +158,16 @@ export default function WineMenusPage() {
 
       <div className="flex items-center justify-between mb-8">
 
-        <h1 className="text-2xl font-semibold text-white">
+        <h1 className="text-2xl font-semibold text-slate-900">
           Wine Menus
         </h1>
 
-        <a
-          href="/dashboard/wine-menus/new"
+        <button
+          onClick={() => setShowModal(true)}
           className="so-btn-primary"
         >
           + Create Wine Menu
-        </a>
+        </button>
 
       </div>
 
@@ -91,43 +185,117 @@ export default function WineMenusPage() {
 
             <div
               key={menu.id}
-              className="so-card p-6"
+              className="so-card flex flex-col justify-between h-[180px]"
             >
 
-              <div className="text-lg font-semibold text-white">
-                {menu.name}
+              <div>
+
+                <div className="text-lg font-semibold text-slate-900">
+                  {menu.name}
+                </div>
+
+                <div className="text-xs text-slate-500 mt-1">
+                  Created {new Date(menu.created_at).toLocaleDateString()}
+                </div>
+
+                <div
+                  className="mt-4 h-3 rounded"
+                  style={{
+                    background: menu.accent_color || "#0F2744"
+                  }}
+                />
+
               </div>
 
-              <div className="text-sm text-slate-400 mt-2">
-                Created {new Date(menu.created_at).toLocaleDateString()}
-              </div>
-
-              <div className="flex gap-3 mt-6">
+              <div className="flex justify-between items-center mt-6">
 
                 <a
                   href={`/dashboard/wine-menus/${menu.slug}`}
-                  className="so-btn-secondary"
+                  className="text-sm font-medium text-slate-700 hover:text-black"
                 >
                   Open
                 </a>
 
-                {restaurant && menu.slug && (
+                <a
+                  href={`/wine/${restaurant.slug}/${menu.slug}`}
+                  target="_blank"
+                  className="text-sm font-medium text-[#0F2744]"
+                >
+                  Guest View
+                </a>
 
-                  <a
-                    href={`/wine/${restaurant.slug}/${menu.slug}`}
-                    target="_blank"
-                    className="so-btn-primary"
-                  >
-                    Guest view
-                  </a>
-
-                )}
+                <button
+                  onClick={() => deleteMenu(menu.id)}
+                  className="text-sm text-red-500 hover:text-red-600"
+                >
+                  Delete
+                </button>
 
               </div>
 
             </div>
 
           ))}
+
+        </div>
+
+      )}
+
+      {showModal && (
+
+        <div className="so-modal-backdrop">
+
+          <div className="so-modal">
+
+            <h2 className="text-xl font-semibold text-[var(--so-text-main)] mb-6">
+              Create Wine Menu
+            </h2>
+
+            <div className="space-y-5">
+
+              <input
+                type="text"
+                placeholder="Menu name (Example: Shang Shi)"
+                value={menuName}
+                onChange={(e) => setMenuName(e.target.value)}
+                className="w-full border border-gray-300 rounded p-3 text-[var(--so-text-main)] placeholder:text-gray-400 bg-white"
+              />
+
+              <div className="flex flex-col gap-2">
+
+                <label className="text-sm text-[var(--so-text-muted)]">
+                  Restaurant Logo
+                </label>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e)=>setLogoFile(e.target.files[0])}
+                />
+
+              </div>
+
+              <div className="flex gap-3 pt-2">
+
+                <button
+                  onClick={createMenu}
+                  className="so-btn-primary"
+                >
+                  Create
+                </button>
+
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="so-btn-secondary"
+                >
+                  Cancel
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
 
         </div>
 

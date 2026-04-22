@@ -3,8 +3,9 @@
 import "../../styles/dashboard.css";
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import {
   Squares2X2Icon,
@@ -58,10 +59,40 @@ function NavItem({
 export default function DashboardLayout({ children }) {
 
   const pathname = usePathname();
+  const supabase = createClientComponentClient();
+
   const isPro = PLAN !== "starter";
 
   const [menusOpen, setMenusOpen] = useState(false);
   const [wineMenusOpen, setWineMenusOpen] = useState(false);
+
+  const [menus, setMenus] = useState([]);
+
+  useEffect(() => {
+    loadMenus();
+  }, []);
+
+  async function loadMenus() {
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: restaurant } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+
+    if (!restaurant) return;
+
+    const { data } = await supabase
+      .from("wine_menus")
+      .select("*")
+      .eq("restaurant_id", restaurant.id)
+      .order("name");
+
+    setMenus(data || []);
+  }
 
   const isActive = useMemo(() => {
     return (href) => {
@@ -154,21 +185,15 @@ export default function DashboardLayout({ children }) {
               {wineMenusOpen && (
                 <div className="so-nav-sub">
 
-                  <Link href="/menu/shang-shi" className="so-nav-sub-item">
-                    Shang Shi
-                  </Link>
-
-                  <Link href="/menu/fox-den" className="so-nav-sub-item">
-                    Fox Den
-                  </Link>
-
-                  <Link href="/menu/koyo" className="so-nav-sub-item">
-                    Koyo
-                  </Link>
-
-                  <Link href="/menu/ecrin" className="so-nav-sub-item">
-                    Ecrin
-                  </Link>
+                  {menus.map(menu => (
+                    <Link
+                      key={menu.id}
+                      href={`/dashboard/wine-menus/${menu.slug}`}
+                      className="so-nav-sub-item"
+                    >
+                      {menu.name}
+                    </Link>
+                  ))}
 
                 </div>
               )}

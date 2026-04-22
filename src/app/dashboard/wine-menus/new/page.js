@@ -14,6 +14,13 @@ export default function NewWineMenuPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // NEW DESIGN STATES
+  const [primaryColor, setPrimaryColor] = useState("#d4af37");
+  const [secondaryColor, setSecondaryColor] = useState("#ffffff");
+  const [backgroundStyle, setBackgroundStyle] = useState("dark");
+  const [cardStyle, setCardStyle] = useState("glass");
+  const [logoUrl, setLogoUrl] = useState("");
+
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -45,7 +52,12 @@ export default function NewWineMenuPage() {
         .from("wine_menus")
         .insert({
           restaurant_id: restaurant.id,
-          name
+          name,
+          theme_primary_color: primaryColor,
+          theme_secondary_color: secondaryColor,
+          background_style: backgroundStyle,
+          card_style: cardStyle,
+          custom_logo_url: logoUrl
         })
         .select()
         .single();
@@ -86,6 +98,51 @@ export default function NewWineMenuPage() {
             placeholder="Wine menu name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+          />
+
+          {/* DESIGN SETTINGS */}
+
+          <div className="grid grid-cols-2 gap-4">
+
+            <input
+              type="color"
+              value={primaryColor}
+              onChange={(e) => setPrimaryColor(e.target.value)}
+              className="so-input h-12"
+            />
+
+            <input
+              type="color"
+              value={secondaryColor}
+              onChange={(e) => setSecondaryColor(e.target.value)}
+              className="so-input h-12"
+            />
+
+            <select
+              className="so-input"
+              value={backgroundStyle}
+              onChange={(e) => setBackgroundStyle(e.target.value)}
+            >
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+
+            <select
+              className="so-input"
+              value={cardStyle}
+              onChange={(e) => setCardStyle(e.target.value)}
+            >
+              <option value="glass">Glass</option>
+              <option value="minimal">Minimal</option>
+            </select>
+
+          </div>
+
+          <input
+            className="so-input"
+            placeholder="Custom logo URL (optional)"
+            value={logoUrl}
+            onChange={(e) => setLogoUrl(e.target.value)}
           />
 
           <button

@@ -6,9 +6,9 @@ import { useParams } from "next/navigation";
 export default function VenueWineDashboard() {
 
   const params = useParams();
-  const venue = params.venue;
+  const venue = params.slug;
 
-  const pretty = venue
+  const pretty = (venue || "")
     .replace("-", " ")
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
