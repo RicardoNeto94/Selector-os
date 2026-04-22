@@ -101,11 +101,11 @@ export default function MenuDashboardClient({
                     <div className="flex flex-col items-center gap-2">
 
                       <div id={`qr-${m.id}`} className="bg-white p-2 rounded">
-                        <QRCodeSVG
-                          value={`http://localhost:3000/menu/${m.public_slug}`}
-                          size={70}
-                        />
-                      </div>
+  <QRCodeSVG
+    value={`${process.env.NEXT_PUBLIC_APP_URL}/menu/${m.public_slug}`}
+    size={70}
+  />
+</div>
 
                       <button
                         onClick={() => {
