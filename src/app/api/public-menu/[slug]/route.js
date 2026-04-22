@@ -3,8 +3,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+// 🔥 FORCE REALTIME (NO CACHE)
+export const dynamic = "force-dynamic";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-// SERVER-SIDE ONLY service role key
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
@@ -13,7 +15,6 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-// Runs only on the server, so the service key is not exposed to the browser.
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
 });
@@ -29,7 +30,7 @@ export async function GET(_req, { params }) {
       );
     }
 
-    // 1) Get restaurant so we can read logo_url
+    // 🔹 Restaurant
     const { data: restaurant, error: restaurantError } = await supabase
       .from("restaurants")
       .select("id, logo_url")
@@ -37,7 +38,7 @@ export async function GET(_req, { params }) {
       .maybeSingle();
 
     if (restaurantError) {
-      console.error("Error fetching restaurant for public menu", restaurantError);
+      console.error("Error fetching restaurant", restaurantError);
       return NextResponse.json(
         { error: "Failed to load restaurant" },
         { status: 500 }
@@ -51,7 +52,7 @@ export async function GET(_req, { params }) {
       );
     }
 
-    // 2) Get dishes (existing RPC)
+    // 🔹 Dishes
     const { data: dishes, error: dishesError } = await supabase.rpc(
       "menu_for_slug",
       { slug_input: slug }
@@ -60,20 +61,25 @@ export async function GET(_req, { params }) {
     if (dishesError) {
       console.error("menu_for_slug error", dishesError);
       return NextResponse.json(
-        {
-          error: dishesError.message || "Failed to load menu",
-        },
+        { error: dishesError.message || "Failed to load menu" },
         { status: 500 }
       );
     }
 
-    // 3) Return both logo URL + dishes
-    return NextResponse.json({
-      logo_url: restaurant.logo_url ?? null,
-      dishes: dishes ?? [],
-    });
+    // 🔥 RETURN WITH NO-CACHE HEADERS
+    return NextResponse.json(
+      {
+        logo_url: restaurant.logo_url ?? null,
+        dishes: dishes ?? [],
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
   } catch (err) {
-    console.error("Unexpected error in public-menu route", err);
+    console.error("Unexpected error", err);
     return NextResponse.json(
       { error: "Unexpected server error" },
       { status: 500 }
