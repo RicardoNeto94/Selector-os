@@ -25,34 +25,35 @@ export default function RootLayout({ children }) {
         {/* iOS support */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        {/* 🔥 FIX: REMOVE TRANSLUCENT STATUS BAR */}
         <meta
           name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
+          content="default"
         />
 
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      {/* 🔥 CRITICAL FIX */}
       <body
-  style={{
-    backgroundColor: "#1a0505",
-    minHeight: "100dvh",
-  }}
->
-  <div
-    className="page-fade"
-    style={{
-      minHeight: "100dvh",
-      backgroundColor: "#1a0505",
-    }}
-  >
-    {children}
-  </div>
+        style={{
+          backgroundColor: "#1a0505",
+          minHeight: "100dvh",
+        }}
+      >
+        <div
+          className="page-fade"
+          style={{
+            minHeight: "100dvh",
+            backgroundColor: "#1a0505",
+          }}
+        >
+          {children}
+        </div>
 
-  <ServiceWorkerRegister />
-</body>
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }
