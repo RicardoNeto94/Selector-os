@@ -11,18 +11,18 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#1a0505", // 🔥 your Fox Den color
+  themeColor: "#1a0505",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* ✅ PWA */}
+        {/* PWA */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1a0505" />
 
-        {/* ✅ iOS support */}
+        {/* iOS support */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
@@ -30,14 +30,29 @@ export default function RootLayout({ children }) {
           content="black-translucent"
         />
 
-        {/* ✅ Favicon */}
+        {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      <body>
-        {children}
-        <ServiceWorkerRegister />
-      </body>
+      {/* 🔥 CRITICAL FIX */}
+      <body
+  style={{
+    backgroundColor: "#1a0505",
+    minHeight: "100dvh",
+  }}
+>
+  <div
+    className="page-fade"
+    style={{
+      minHeight: "100dvh",
+      backgroundColor: "#1a0505",
+    }}
+  >
+    {children}
+  </div>
+
+  <ServiceWorkerRegister />
+</body>
     </html>
   );
 }
