@@ -1,11 +1,7 @@
-import dynamic from "next/dynamic";
+import GuestMenu from "@/components/GuestMenu";
 
-const GuestMenu = dynamic(
-  () => import("../../components/GuestMenu"),
-  { ssr: false }
-);
+export default async function PublicMenuPage({ params }) {
+  const { slug } = await params;
 
-export default function PublicMenuPage({ params }) {
-  const { slug } = params;
   return <GuestMenu slug={slug} />;
 }
