@@ -11,6 +11,10 @@ export default function MenuClientView({ menu, categories, items }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    const container = document.getElementById("app-scroll");
+
+    if (!container) return;
+
     const handleScroll = () => {
 
       const sections = document.querySelectorAll("[data-category]");
@@ -25,13 +29,14 @@ export default function MenuClientView({ menu, categories, items }) {
 
       setActiveCategory(current);
 
-      setScrolled(window.scrollY > 40);
+      // 🔥 FIX: use container scroll instead of window
+      setScrolled(container.scrollTop > 40);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    container.addEventListener("scroll", handleScroll);
     handleScroll();
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
   const grouped = categories.map(cat => ({

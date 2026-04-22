@@ -22,11 +22,9 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1a0505" />
 
-        {/* iOS support */}
+        {/* iOS */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-
-        {/* 🔥 FIX: REMOVE TRANSLUCENT STATUS BAR */}
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="default"
@@ -36,19 +34,9 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      <body
-        style={{
-          backgroundColor: "#1a0505",
-          minHeight: "100dvh",
-        }}
-      >
-        <div
-          className="page-fade"
-          style={{
-            minHeight: "100dvh",
-            backgroundColor: "#1a0505",
-          }}
-        >
+      <body>
+        {/* 🔥 MAIN SCROLL CONTAINER */}
+        <div id="app-scroll" className="page-fade app-container">
           {children}
         </div>
 
