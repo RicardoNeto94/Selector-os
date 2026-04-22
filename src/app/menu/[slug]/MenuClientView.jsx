@@ -13,7 +13,7 @@ export default function MenuClientView({ menu, categories, items }) {
 
       sections.forEach((section) => {
         const rect = section.getBoundingClientRect();
-        if (rect.top <= 140) {
+        if (rect.top <= 160) {
           current = section.getAttribute("data-category");
         }
       });
@@ -38,14 +38,14 @@ export default function MenuClientView({ menu, categories, items }) {
     <div className="min-h-screen bg-[#2a0000] text-[#f5f5f5]">
 
       {/* 🔥 STICKY HEADER */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-[#2a0000]/70 border-b border-white/5">
+      <div className="sticky top-0 z-50 backdrop-blur-xl bg-[#2a0000]/80 border-b border-white/5">
 
         <div className="max-w-[720px] mx-auto text-center py-6">
 
           {menu.logo_url && (
             <img
               src={menu.logo_url}
-              className="h-16 mx-auto mb-2 opacity-95"
+              className="h-24 mx-auto mb-2 opacity-95"
             />
           )}
 
@@ -57,56 +57,55 @@ export default function MenuClientView({ menu, categories, items }) {
 
       </div>
 
-      {/* 🔥 CONTENT */}
+      {/* CONTENT */}
       <div className="px-6 pt-12 pb-20">
-        <div className="max-w-[720px] mx-auto">
+        <div className="max-w-[720px] mx-auto space-y-24">
 
-          {/* LIST */}
-          <div className="space-y-24">
+          {grouped.map(cat => (
+            <div key={cat.id} data-category={cat.name}>
 
-            {grouped.map(cat => (
-              <div key={cat.id} data-category={cat.name}>
+              {/* 🔥 STICKY CATEGORY */}
+              <div className="sticky top-[120px] z-40 bg-[#2a0000]/90 backdrop-blur-md py-4">
 
-                {/* CATEGORY TITLE */}
-                <div className="text-center mb-10">
+                <div className="text-center">
                   <p className="text-xs tracking-[0.5em] uppercase text-[#c9a96a]">
                     {cat.name}
                   </p>
                   <div className="w-10 h-[1px] bg-[#c9a96a]/40 mx-auto mt-3"></div>
                 </div>
 
-                {/* ITEMS */}
-                <div className="space-y-8">
+              </div>
 
-                  {cat.items.map(item => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between border-b border-white/10 pb-6"
-                    >
+              {/* ITEMS */}
+              <div className="space-y-8 mt-6">
 
-                      <div className="max-w-[75%]">
-                        <p className="text-[18px]">{item.name}</p>
+                {cat.items.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between border-b border-white/10 pb-6"
+                  >
 
-                        {item.description && (
-                          <p className="text-[13px] opacity-50 mt-2">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
+                    <div className="max-w-[75%]">
+                      <p className="text-[18px]">{item.name}</p>
 
-                      <div className="text-[#c9a96a]">
-                        €{item.price}
-                      </div>
-
+                      {item.description && (
+                        <p className="text-[13px] opacity-50 mt-2">
+                          {item.description}
+                        </p>
+                      )}
                     </div>
-                  ))}
 
-                </div>
+                    <div className="text-[#c9a96a]">
+                      €{item.price}
+                    </div>
+
+                  </div>
+                ))}
 
               </div>
-            ))}
 
-          </div>
+            </div>
+          ))}
 
         </div>
       </div>
