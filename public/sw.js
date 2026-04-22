@@ -1,6 +1,6 @@
 // public/sw.js
 
-const CACHE_NAME = "selectoros-v2";
+const CACHE_NAME = "selectoros-v3";
 
 // 🔹 Only cache static assets
 const STATIC_ASSETS = [
