@@ -22,20 +22,34 @@ export default async function PublicMenuPage({ params, searchParams }) {
     .eq("public_slug", slug)
     .maybeSingle();
 
+  // 🔥 SAVE SLUG FOR PWA (CLIENT SIDE)
+  const SlugSaver = () => {
+    "use client";
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lastSlug", slug);
+    }
+    return null;
+  };
+
   // 🔥 SELECTOR PAGE
   if (!type) {
-    return <LandingSelector slug={slug} menu={menu} />;
+    return (
+      <>
+        <SlugSaver />
+        <LandingSelector slug={slug} menu={menu} />
+      </>
+    );
   }
 
-  // 🔥 FILTER CATEGORIES BY TYPE (THIS WAS MISSING)
+  // 🔥 FILTER CATEGORIES
   const { data: categories } = await supabase
     .from("menu_categories")
     .select("*")
     .eq("menu_id", menu.id)
-    .eq("type", type) // ✅ FIX
+    .eq("type", type)
     .order("position");
 
-  // 🔹 ITEMS (already correct)
+  // 🔹 ITEMS
   const { data: items } = await supabase
     .from("menu_items")
     .select("*")
@@ -45,6 +59,7 @@ export default async function PublicMenuPage({ params, searchParams }) {
 
   return (
     <main className="min-h-screen">
+      <SlugSaver />
       <MenuClientView
         menu={menu}
         categories={categories || []}
