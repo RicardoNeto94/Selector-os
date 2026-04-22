@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // 🔥 NEW
 
 export default function MenuClientView({ menu, categories, items }) {
 
+  const router = useRouter(); // 🔥 NEW
+
   const [activeCategory, setActiveCategory] = useState(null);
-  const [scrolled, setScrolled] = useState(false); // 🔥 NEW
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,7 +25,6 @@ export default function MenuClientView({ menu, categories, items }) {
 
       setActiveCategory(current);
 
-      // 🔥 HEADER ANIMATION TRIGGER
       if (window.scrollY > 40) {
         setScrolled(true);
       } else {
@@ -45,6 +47,16 @@ export default function MenuClientView({ menu, categories, items }) {
 
   return (
     <div className="min-h-[100dvh] bg-[#2a0000] text-[#f5f5f5]">
+
+      {/* 🔥 BACK BUTTON */}
+      <div className="fixed top-6 left-6 z-[60]">
+        <button
+          onClick={() => router.push(`/menu/${menu.public_slug}`)}
+          className="text-[#c9a96a] text-sm tracking-wide opacity-70 hover:opacity-100 transition"
+        >
+          ← Back
+        </button>
+      </div>
 
       {/* 🔥 LUXURY HEADER */}
       <div
