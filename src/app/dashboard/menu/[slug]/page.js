@@ -13,6 +13,8 @@ export default function MenuEditorPage() {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
 
+  const [menuType, setMenuType] = useState("food");
+
   const [newCategory, setNewCategory] = useState("");
   const [dishInputs, setDishInputs] = useState({});
 
@@ -24,7 +26,7 @@ export default function MenuEditorPage() {
   useEffect(() => {
     if (!slug) return;
     loadAll();
-  }, [slug]);
+  }, [slug, menuType]);
 
   const loadAll = async () => {
 
@@ -43,16 +45,19 @@ export default function MenuEditorPage() {
 
     setMenu(menuData);
 
+    // ✅ FILTER CATEGORIES BY TYPE
     const { data: cats } = await supabase
       .from("menu_categories")
       .select("*")
       .eq("menu_id", menuData.id)
+      .eq("type", menuType)
       .order("position");
 
     const { data: its } = await supabase
       .from("menu_items")
       .select("*")
       .eq("menu_id", menuData.id)
+      .eq("type", menuType)
       .order("position");
 
     setCategories(cats || []);
@@ -68,6 +73,7 @@ export default function MenuEditorPage() {
       .from("menu_categories")
       .select("*")
       .eq("menu_id", menu.id)
+      .eq("type", menuType)
       .order("position");
 
     setCategories(data || []);
@@ -80,6 +86,7 @@ export default function MenuEditorPage() {
       .from("menu_items")
       .select("*")
       .eq("menu_id", menu.id)
+      .eq("type", menuType)
       .order("position");
 
     setItems(data || []);
@@ -89,11 +96,17 @@ export default function MenuEditorPage() {
     if (!menu || !menu.id) return;
     if (!newCategory.trim()) return;
 
-    await supabase.from("menu_categories").insert({
+    const { error } = await supabase.from("menu_categories").insert({
       menu_id: menu.id,
       name: newCategory.toUpperCase(),
+      type: menuType, // ✅ FIX
       position: categories.length + 1
     });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
     setNewCategory("");
     reloadCategories();
@@ -115,7 +128,7 @@ export default function MenuEditorPage() {
       return;
     }
 
-    await supabase
+    const { error } = await supabase
       .from("menu_items")
       .insert({
         menu_id: menu.id,
@@ -123,8 +136,14 @@ export default function MenuEditorPage() {
         name: input.name,
         description: input.description || "",
         price: Number(input.price),
+        type: menuType,
         position: items.length + 1
       });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
     setDishInputs(prev => ({
       ...prev,
@@ -169,9 +188,35 @@ export default function MenuEditorPage() {
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="max-w-4xl mx-auto px-6">
 
-        <div className="mb-10">
+        {/* HEADER */}
+        <div className="mb-6">
           <h1 className="text-3xl font-semibold">{menu.name}</h1>
           <p className="text-sm text-gray-500">Menu Editor</p>
+        </div>
+
+        {/* TYPE TOGGLE */}
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={() => setMenuType("food")}
+            className={`px-4 py-2 rounded-lg text-sm ${
+              menuType === "food"
+                ? "bg-black text-white"
+                : "bg-gray-200"
+            }`}
+          >
+            FOOD
+          </button>
+
+          <button
+            onClick={() => setMenuType("drinks")}
+            className={`px-4 py-2 rounded-lg text-sm ${
+              menuType === "drinks"
+                ? "bg-black text-white"
+                : "bg-gray-200"
+            }`}
+          >
+            DRINKS
+          </button>
         </div>
 
         {/* ADD CATEGORY */}
@@ -201,7 +246,6 @@ export default function MenuEditorPage() {
             return (
               <div key={cat.id} className="bg-white rounded-2xl p-6 shadow-sm">
 
-                {/* HEADER */}
                 <div className="flex justify-between mb-6">
                   <h2 className="text-xl font-semibold">{cat.name}</h2>
                   <button
@@ -212,85 +256,43 @@ export default function MenuEditorPage() {
                   </button>
                 </div>
 
-                {/* DISHES */}
                 <div className="space-y-4 mb-6">
 
                   {catItems.map(item => (
 
-                    editingId === item.id ? (
+                    <div key={item.id} className="flex justify-between items-center border-b pb-2">
 
-                      <div key={item.id} className="grid grid-cols-3 gap-2">
+                      <div>
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {item.description}
+                        </div>
+                      </div>
 
-                        <input
-                          value={editData.name}
-                          onChange={(e) =>
-                            setEditData({ ...editData, name: e.target.value })
-                          }
-                          className="border px-2 py-1"
-                        />
+                      <div className="flex items-center gap-4">
 
-                        <input
-                          value={editData.description}
-                          onChange={(e) =>
-                            setEditData({ ...editData, description: e.target.value })
-                          }
-                          className="border px-2 py-1"
-                        />
-
-                        <input
-                          value={editData.price}
-                          onChange={(e) =>
-                            setEditData({ ...editData, price: e.target.value })
-                          }
-                          className="border px-2 py-1"
-                        />
+                        <span className="font-medium">€{item.price}</span>
 
                         <button
-                          onClick={updateDish}
-                          className="bg-black text-white text-xs px-2 py-1"
+                          onClick={() => {
+                            setEditingId(item.id);
+                            setEditData(item);
+                          }}
+                          className="text-blue-500 text-sm"
                         >
-                          Save
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteDish(item.id)}
+                          className="text-red-500 text-sm"
+                        >
+                          Delete
                         </button>
 
                       </div>
 
-                    ) : (
-
-                      <div key={item.id} className="flex justify-between items-center border-b pb-2">
-
-                        <div>
-                          <div className="font-medium">{item.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {item.description}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-
-                          <span className="font-medium">€{item.price}</span>
-
-                          <button
-                            onClick={() => {
-                              setEditingId(item.id);
-                              setEditData(item);
-                            }}
-                            className="text-blue-500 text-sm"
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={() => deleteDish(item.id)}
-                            className="text-red-500 text-sm"
-                          >
-                            Delete
-                          </button>
-
-                        </div>
-
-                      </div>
-
-                    )
+                    </div>
 
                   ))}
 
