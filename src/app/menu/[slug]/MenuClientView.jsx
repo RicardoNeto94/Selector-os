@@ -43,14 +43,16 @@ export default function MenuClientView({ menu, categories, items }) {
         <div className="max-w-[720px] mx-auto text-center py-6">
 
           {menu.logo_url && (
-            <img
-              src={menu.logo_url}
-              className="h-24 mx-auto mb-2 opacity-95"
-            />
+           <div className="h-24 flex items-center justify-center overflow-visible">
+  <img
+    src={menu.logo_url}
+    className="h-full scale-[3.0] object-contain opacity-95"
+  />
+</div>
           )}
 
           <p className="tracking-[0.45em] text-xs opacity-60">
-            FOOD & DRINKS
+            FOOD (18:00 to 22:00)
           </p>
 
         </div>

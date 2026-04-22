@@ -1,27 +1,34 @@
 import { createClient } from "@supabase/supabase-js";
-import WineClientView from "@/app/wine/[slug]/WineClientView";
 import MenuClientView from "./MenuClientView";
+import WineClientView from "@/app/wine/[slug]/WineClientView";
+import LandingSelector from "./LandingSelector";
 
 export const dynamic = "force-dynamic";
 
-export default async function PublicMenuPage({ params }) {
+export default async function PublicMenuPage({ params, searchParams }) {
 
-  // ✅ FIX (Next 16 correct way)
   const { slug } = await params;
+  const type = searchParams?.type;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 🔹 FOOD MENU
+  // 🔹 GET BASE MENU (for logo + fallback)
   const { data: menu } = await supabase
     .from("menus")
     .select("*")
     .eq("public_slug", slug)
     .maybeSingle();
 
-  if (menu && menu.type === "food") {
+  // 🔥 IF NO TYPE → SHOW SELECTOR
+  if (!type) {
+    return <LandingSelector slug={slug} menu={menu} />;
+  }
+
+  // 🔹 FOOD
+  if (type === "food") {
 
     const { data: categories } = await supabase
       .from("menu_categories")
@@ -46,14 +53,14 @@ export default async function PublicMenuPage({ params }) {
     );
   }
 
-  // 🔹 WINE MENU
-  const { data: wineMenu } = await supabase
-    .from("wine_menus")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  // 🔹 DRINKS (wine menu)
+  if (type === "drinks") {
 
-  if (wineMenu) {
+    const { data: wineMenu } = await supabase
+      .from("wine_menus")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
 
     const { data: items } = await supabase
       .from("wine_menu_items")
