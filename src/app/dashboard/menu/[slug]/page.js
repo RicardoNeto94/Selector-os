@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // ✅ FIX
+import { useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function MenuEditorPage() {
 
-  const { slug } = useParams(); // ✅ FIX
+  const { slug } = useParams();
   const supabase = createClientComponentClient();
 
   const [menu, setMenu] = useState(null);
@@ -21,9 +21,8 @@ export default function MenuEditorPage() {
 
   const [loading, setLoading] = useState(true);
 
-  // 🔹 LOAD EVERYTHING
   useEffect(() => {
-    if (!slug) return; // ✅ prevents crash
+    if (!slug) return;
     loadAll();
   }, [slug]);
 
@@ -87,34 +86,22 @@ export default function MenuEditorPage() {
   };
 
   const addCategory = async () => {
-
-    if (!menu || !menu.id) {
-      alert("Menu not ready yet");
-      return;
-    }
-
+    if (!menu || !menu.id) return;
     if (!newCategory.trim()) return;
 
-    const { error } = await supabase.from("menu_categories").insert({
+    await supabase.from("menu_categories").insert({
       menu_id: menu.id,
       name: newCategory.toUpperCase(),
       position: categories.length + 1
     });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
 
     setNewCategory("");
     reloadCategories();
   };
 
   const deleteCategory = async (id) => {
-
     await supabase.from("menu_items").delete().eq("category_id", id);
     await supabase.from("menu_categories").delete().eq("id", id);
-
     reloadCategories();
     reloadItems();
   };
@@ -128,7 +115,7 @@ export default function MenuEditorPage() {
       return;
     }
 
-    const { error } = await supabase
+    await supabase
       .from("menu_items")
       .insert({
         menu_id: menu.id,
@@ -138,11 +125,6 @@ export default function MenuEditorPage() {
         price: Number(input.price),
         position: items.length + 1
       });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
 
     setDishInputs(prev => ({
       ...prev,
@@ -192,6 +174,7 @@ export default function MenuEditorPage() {
           <p className="text-sm text-gray-500">Menu Editor</p>
         </div>
 
+        {/* ADD CATEGORY */}
         <div className="flex gap-3 mb-12">
           <input
             value={newCategory}
@@ -207,6 +190,7 @@ export default function MenuEditorPage() {
           </button>
         </div>
 
+        {/* CATEGORIES */}
         <div className="space-y-10">
 
           {categories.map(cat => {
@@ -217,6 +201,7 @@ export default function MenuEditorPage() {
             return (
               <div key={cat.id} className="bg-white rounded-2xl p-6 shadow-sm">
 
+                {/* HEADER */}
                 <div className="flex justify-between mb-6">
                   <h2 className="text-xl font-semibold">{cat.name}</h2>
                   <button
@@ -227,16 +212,137 @@ export default function MenuEditorPage() {
                   </button>
                 </div>
 
+                {/* DISHES */}
                 <div className="space-y-4 mb-6">
 
                   {catItems.map(item => (
-                    <div key={item.id} className="flex justify-between border-b pb-2">
-                      <span>{item.name}</span>
-                      <span>€{item.price}</span>
-                    </div>
+
+                    editingId === item.id ? (
+
+                      <div key={item.id} className="grid grid-cols-3 gap-2">
+
+                        <input
+                          value={editData.name}
+                          onChange={(e) =>
+                            setEditData({ ...editData, name: e.target.value })
+                          }
+                          className="border px-2 py-1"
+                        />
+
+                        <input
+                          value={editData.description}
+                          onChange={(e) =>
+                            setEditData({ ...editData, description: e.target.value })
+                          }
+                          className="border px-2 py-1"
+                        />
+
+                        <input
+                          value={editData.price}
+                          onChange={(e) =>
+                            setEditData({ ...editData, price: e.target.value })
+                          }
+                          className="border px-2 py-1"
+                        />
+
+                        <button
+                          onClick={updateDish}
+                          className="bg-black text-white text-xs px-2 py-1"
+                        >
+                          Save
+                        </button>
+
+                      </div>
+
+                    ) : (
+
+                      <div key={item.id} className="flex justify-between items-center border-b pb-2">
+
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {item.description}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+
+                          <span className="font-medium">€{item.price}</span>
+
+                          <button
+                            onClick={() => {
+                              setEditingId(item.id);
+                              setEditData(item);
+                            }}
+                            className="text-blue-500 text-sm"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => deleteDish(item.id)}
+                            className="text-red-500 text-sm"
+                          >
+                            Delete
+                          </button>
+
+                        </div>
+
+                      </div>
+
+                    )
+
                   ))}
 
                 </div>
+
+                {/* ADD DISH */}
+                <div className="grid grid-cols-3 gap-2">
+
+                  <input
+                    placeholder="Name"
+                    value={input.name || ""}
+                    onChange={(e) =>
+                      setDishInputs(prev => ({
+                        ...prev,
+                        [cat.id]: { ...input, name: e.target.value }
+                      }))
+                    }
+                    className="border px-2 py-1"
+                  />
+
+                  <input
+                    placeholder="Description"
+                    value={input.description || ""}
+                    onChange={(e) =>
+                      setDishInputs(prev => ({
+                        ...prev,
+                        [cat.id]: { ...input, description: e.target.value }
+                      }))
+                    }
+                    className="border px-2 py-1"
+                  />
+
+                  <input
+                    placeholder="Price"
+                    value={input.price || ""}
+                    onChange={(e) =>
+                      setDishInputs(prev => ({
+                        ...prev,
+                        [cat.id]: { ...input, price: e.target.value }
+                      }))
+                    }
+                    className="border px-2 py-1"
+                  />
+
+                </div>
+
+                <button
+                  onClick={() => addDish(cat.id)}
+                  className="mt-3 bg-black text-white px-4 py-1 rounded"
+                >
+                  Add Dish
+                </button>
 
               </div>
             );
