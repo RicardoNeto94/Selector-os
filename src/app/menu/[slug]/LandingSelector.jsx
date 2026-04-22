@@ -14,7 +14,7 @@ export default function LandingSelector({ slug, menu }) {
         <div className="mb-12">
           <img
             src={menu.logo_url}
-            className="h-24 mx-auto opacity-90"
+            className="h-80 mx-auto opacity-90"
           />
         </div>
       )}
