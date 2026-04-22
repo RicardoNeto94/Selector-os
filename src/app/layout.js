@@ -34,9 +34,17 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      <body>
+      <body className="bg-[#1a0505]">
         {/* 🔥 MAIN SCROLL CONTAINER */}
-        <div id="app-scroll" className="page-fade app-container">
+        <div
+          id="app-scroll"
+          className="page-fade app-container"
+          style={{
+            height: "100dvh",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
           {children}
         </div>
 

@@ -5,7 +5,7 @@
 /* DESIGN TOKENS */
 
 :root {
-  --bg: #1a0505; /* 🔥 FOX DEN BASE */
+  --bg: #1a0505; /* FOX DEN BASE */
   --panel: #15181d;
   --border: #23262d;
 
@@ -25,7 +25,7 @@
   box-sizing: border-box;
 }
 
-/* 🔥 CORE VIEWPORT FIXES (WORKING VERSION) */
+/* CORE VIEWPORT FIXES */
 
 html {
   height: 100%;
@@ -43,22 +43,22 @@ body {
   font-family: "Inter", sans-serif;
 
   overscroll-behavior: none;
-
-  overflow-x: hidden; /* ✅ allow vertical scroll */
+  overflow-x: hidden;
 }
 
-/* 🔥 SAFE AREAS (iOS) */
+/* SAFE AREAS (iOS) */
 body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 🔥 APP SCROLL CONTAINER */
+/* APP SCROLL CONTAINER */
 .app-container {
-  min-height: 100dvh;
+  height: 100dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: #1a0505;
+  position: relative;
 }
 
 /* PANEL */
@@ -121,7 +121,7 @@ body {
   background: #1a1d23;
 }
 
-/* 🔥 PAGE FADE-IN */
+/* PAGE FADE-IN */
 
 .page-fade {
   animation: pageFadeIn 0.4s ease;
