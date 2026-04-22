@@ -6,17 +6,29 @@ import { useState } from "react";
 export default function LandingSelector({ slug, menu }) {
 
   const router = useRouter();
-  const [loading, setLoading] = useState(null); // 🔥 track click
+  const [loading, setLoading] = useState(null);
+  const [fadeOut, setFadeOut] = useState(false); // 🔥 NEW
 
   const handleNavigate = (type) => {
     setLoading(type);
+    setFadeOut(true);
+
     setTimeout(() => {
       router.push(`/menu/${slug}?type=${type}`);
-    }, 120); // small delay = smoother feel
+    }, 280);
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#2a0000] text-white px-6">
+    <div
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-[#2a0000] text-white px-6 transition-opacity duration-300 ${
+        fadeOut ? "opacity-0" : "opacity-100"
+      }`}
+      style={{
+        minHeight: "100dvh",
+        height: "100dvh",
+        overflow: "hidden", // 🔥 prevents fake scrolling
+      }}
+    >
 
       {/* LOGO */}
       {menu?.logo_url && (
@@ -36,7 +48,6 @@ export default function LandingSelector({ slug, menu }) {
       {/* OPTIONS */}
       <div className="flex gap-6">
 
-        {/* FOOD */}
         <button
           onClick={() => handleNavigate("food")}
           className={`px-10 py-4 rounded-2xl border border-white/20 transition-all duration-300 ${
@@ -48,7 +59,6 @@ export default function LandingSelector({ slug, menu }) {
           FOOD
         </button>
 
-        {/* DRINKS */}
         <button
           onClick={() => handleNavigate("drinks")}
           className={`px-10 py-4 rounded-2xl border border-white/20 transition-all duration-300 ${
