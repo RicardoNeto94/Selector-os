@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 export default function MenuClientView({ menu, categories, items }) {
 
   const [activeCategory, setActiveCategory] = useState(null);
+  const [scrolled, setScrolled] = useState(false); // 🔥 NEW
 
   useEffect(() => {
     const handleScroll = () => {
+
       const sections = document.querySelectorAll("[data-category]");
       let current = null;
 
@@ -19,6 +21,13 @@ export default function MenuClientView({ menu, categories, items }) {
       });
 
       setActiveCategory(current);
+
+      // 🔥 HEADER ANIMATION TRIGGER
+      if (window.scrollY > 40) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -37,16 +46,28 @@ export default function MenuClientView({ menu, categories, items }) {
   return (
     <div className="min-h-[100dvh] bg-[#2a0000] text-[#f5f5f5]">
 
-      {/* 🔥 STICKY HEADER (IMPROVED) */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-[#2a0000]/85 border-b border-white/5">
+      {/* 🔥 LUXURY HEADER */}
+      <div
+        className={`sticky top-0 z-50 border-b border-white/5 transition-all duration-300 ${
+          scrolled
+            ? "backdrop-blur-2xl bg-[#2a0000]/90"
+            : "backdrop-blur-md bg-[#2a0000]/70"
+        }`}
+      >
 
         <div className="max-w-[720px] mx-auto text-center py-6">
 
           {menu.logo_url && (
-            <div className="h-28 flex items-center justify-center overflow-visible">
+            <div
+              className={`flex items-center justify-center overflow-visible transition-all duration-300 ${
+                scrolled ? "h-20" : "h-28"
+              }`}
+            >
               <img
                 src={menu.logo_url}
-                className="h-full scale-[3.2] object-contain opacity-95"
+                className={`h-full object-contain opacity-95 transition-all duration-300 ${
+                  scrolled ? "scale-[2.4]" : "scale-[3.2]"
+                }`}
               />
             </div>
           )}
