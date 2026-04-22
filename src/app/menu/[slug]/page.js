@@ -3,6 +3,7 @@ import MenuClientView from "./MenuClientView";
 import LandingSelector from "./LandingSelector";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function PublicMenuPage({ params, searchParams }) {
 
@@ -14,7 +15,7 @@ export default async function PublicMenuPage({ params, searchParams }) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 🔹 BASE MENU (logo, etc)
+  // 🔹 BASE MENU
   const { data: menu } = await supabase
     .from("menus")
     .select("*")
@@ -26,19 +27,20 @@ export default async function PublicMenuPage({ params, searchParams }) {
     return <LandingSelector slug={slug} menu={menu} />;
   }
 
-  // 🔹 LOAD CATEGORIES
+  // 🔥 FILTER CATEGORIES BY TYPE (THIS WAS MISSING)
   const { data: categories } = await supabase
     .from("menu_categories")
     .select("*")
     .eq("menu_id", menu.id)
+    .eq("type", type) // ✅ FIX
     .order("position");
 
-  // 🔹 LOAD ITEMS BY TYPE (THIS IS THE KEY)
+  // 🔹 ITEMS (already correct)
   const { data: items } = await supabase
     .from("menu_items")
     .select("*")
     .eq("menu_id", menu.id)
-    .eq("type", type) // 👈 MAGIC LINE
+    .eq("type", type)
     .order("position");
 
   return (
