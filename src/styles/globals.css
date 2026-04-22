@@ -25,38 +25,43 @@
   box-sizing: border-box;
 }
 
-/* 🔥 CORE VIEWPORT FIXES */
+/* 🔥 CORE VIEWPORT FIXES (FINAL) */
 
 html {
   height: 100%;
-  background: #1a0505; /* 🔥 fixes top safe area */
+  background: #1a0505;
 }
 
 html,
 body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
   background: #1a0505;
   color: var(--text);
   font-family: "Inter", sans-serif;
 
-  min-height: 100%;
-  height: 100%;
-
-  /* 🔥 kill iOS rubber band scroll */
   overscroll-behavior: none;
+
+  overflow: hidden; /* 🔥 CRITICAL: removes viewport scroll */
 }
 
-/* 🔥 SAFE AREAS (iPhone/iPad) */
+/* 🔥 SAFE AREAS (iOS) */
 body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 🔥 PREVENT EMPTY SCROLL FEEL */
-body {
-  overflow-x: hidden;
+/* 🔥 APP SCROLL CONTAINER */
+.app-container {
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #1a0505;
 }
 
-/* PANEL CONTAINER */
+/* PANEL */
 
 .panel {
   background: var(--panel);
@@ -116,7 +121,7 @@ body {
   background: #1a1d23;
 }
 
-/* 🔥 PAGE FADE-IN (smooth transitions) */
+/* 🔥 PAGE FADE-IN */
 
 .page-fade {
   animation: pageFadeIn 0.4s ease;
