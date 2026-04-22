@@ -5,14 +5,14 @@
 /* DESIGN TOKENS */
 
 :root {
-  --bg: #1a0505; /* 🔥 FORCE FOX DEN COLOR */
+  --bg: #1a0505; /* 🔥 FOX DEN BASE */
   --panel: #15181d;
   --border: #23262d;
 
   --text: #e6e7ea;
   --text-muted: #8b8f98;
 
-  --accent: #c9a96a; /* optional: match gold tone */
+  --accent: #c9a96a;
 
   --radius: 8px;
 }
@@ -25,27 +25,35 @@
   box-sizing: border-box;
 }
 
-/* 🔥 CRITICAL FIXES */
+/* 🔥 CORE VIEWPORT FIXES */
+
+html {
+  height: 100%;
+  background: #1a0505; /* 🔥 fixes top safe area */
+}
 
 html,
 body {
-  background: #1a0505; /* 🔥 HARD OVERRIDE */
+  background: #1a0505;
   color: var(--text);
   font-family: "Inter", sans-serif;
 
   min-height: 100%;
   height: 100%;
-}
 
-/* 🔥 REMOVE iOS SCROLL BOUNCE BLACK */
-body {
-  overscroll-behavior-y: none;
+  /* 🔥 kill iOS rubber band scroll */
+  overscroll-behavior: none;
 }
 
 /* 🔥 SAFE AREAS (iPhone/iPad) */
 body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 🔥 PREVENT EMPTY SCROLL FEEL */
+body {
+  overflow-x: hidden;
 }
 
 /* PANEL CONTAINER */
@@ -107,7 +115,9 @@ body {
 .table tr:hover {
   background: #1a1d23;
 }
-/* 🔥 PAGE FADE-IN (removes hard transitions) */
+
+/* 🔥 PAGE FADE-IN (smooth transitions) */
+
 .page-fade {
   animation: pageFadeIn 0.4s ease;
 }
