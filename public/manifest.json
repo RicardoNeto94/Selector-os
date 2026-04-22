@@ -2,7 +2,7 @@
   "name": "SelectorOS",
   "short_name": "Selector",
   "description": "Digital menu system",
-  "start_url": "/",
+  "start_url": "/menu/foxden",
   "display": "standalone",
   "background_color": "#1a0505",
   "theme_color": "#1a0505",
