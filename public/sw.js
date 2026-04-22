@@ -1,19 +1,22 @@
-const CACHE_NAME = "selectoros-v1";
-const ASSETS = [
-  "/",                  // entry
+// public/sw.js
+
+const CACHE_NAME = "selectoros-v2";
+
+// 🔹 Only cache static assets
+const STATIC_ASSETS = [
+  "/",
   "/favicon.ico",
   "/manifest.json",
-  // add other always-needed assets if you like
 ];
 
-// Install: pre-cache core assets
+// INSTALL
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
 });
 
-// Activate: cleanup old caches
+// ACTIVATE
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -26,32 +29,44 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch: network-first for pages, cache-first for assets
+// FETCH
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  // Only handle GET
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  // Static assets: cache first
-  if (url.origin === self.location.origin &&
-      (url.pathname.startsWith("/_next") || url.pathname.endsWith(".css") || url.pathname.endsWith(".js"))) {
+  // 🚫 NEVER cache API
+  if (url.pathname.startsWith("/api")) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // 🚫 NEVER cache dynamic menu pages
+  if (url.pathname.startsWith("/menu")) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // ✅ STATIC FILES → cache first
+  if (
+    url.origin === self.location.origin &&
+    (
+      url.pathname.startsWith("/_next") ||
+      url.pathname.endsWith(".css") ||
+      url.pathname.endsWith(".js") ||
+      url.pathname.endsWith(".png") ||
+      url.pathname.endsWith(".jpg") ||
+      url.pathname.endsWith(".svg")
+    )
+  ) {
     event.respondWith(
       caches.match(request).then((cached) => cached || fetch(request))
     );
     return;
   }
 
-  // Everything else: network first, fallback to cache or offline page later
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
+  // 🌐 DEFAULT → network only (NO CACHE)
+  event.respondWith(fetch(request));
 });
