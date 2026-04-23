@@ -132,34 +132,34 @@ export default function MenuClientView({ menu, categories, items }) {
                       )}
                     </div>
 
-                    {/* 🎰 POKER CHIP PRICE */}
-                    <div className="relative w-14 h-14 flex items-center justify-center">
+                    {/* 🎰 POKER CHIP PRICE (SMALLER) */}
+<div className="relative w-12 h-12 flex items-center justify-center">
 
-                      {/* OUTER RING */}
-                      <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
+  {/* OUTER RING */}
+  <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
 
-                      {/* STRIPES */}
-                      <div
-                        className="absolute inset-0 rounded-full"
-                        style={{
-                          background:
-                            "repeating-conic-gradient(#c9a96a 0deg 10deg, transparent 10deg 20deg)",
-                          maskImage: "radial-gradient(circle, transparent 58%, black 60%)",
-                          WebkitMaskImage: "radial-gradient(circle, transparent 58%, black 60%)",
-                          opacity: 0.5
-                        }}
-                      />
+  {/* STRIPES */}
+  <div
+    className="absolute inset-0 rounded-full"
+    style={{
+      background:
+        "repeating-conic-gradient(#c9a96a 0deg 10deg, transparent 10deg 20deg)",
+      maskImage: "radial-gradient(circle, transparent 58%, black 60%)",
+      WebkitMaskImage: "radial-gradient(circle, transparent 58%, black 60%)",
+      opacity: 0.5
+    }}
+  />
 
-                      {/* INNER CORE */}
-                      <div className="absolute w-10 h-10 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
+  {/* INNER CORE */}
+  <div className="absolute w-8 h-8 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
 
-                        <span className="text-[#c9a96a] text-[13px] font-light">
-                          €{item.price}
-                        </span>
+    <span className="text-[#c9a96a] text-[12px] font-light">
+      €{item.price}
+    </span>
 
-                      </div>
+  </div>
 
-                    </div>
+</div>
 
                   </div>
                 ))}
