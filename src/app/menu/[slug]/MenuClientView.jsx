@@ -22,7 +22,7 @@ export default function MenuClientView({ menu, categories, items }) {
 
       sections.forEach((section) => {
         const rect = section.getBoundingClientRect();
-        if (rect.top <= 140) {
+        if (rect.top <= 160) {
           current = section.getAttribute("data-section");
         }
       });
@@ -88,17 +88,6 @@ export default function MenuClientView({ menu, categories, items }) {
         </div>
       </div>
 
-      {/* CATEGORY BAR */}
-<div className="sticky top-0 z-40">
-  <div className="bg-[#2a0000]/95 backdrop-blur-xl pt-[88px] pb-3 border-b border-[#c9a96a]/10">
-    <div className="text-center">
-      <p className="text-[11px] tracking-[0.6em] uppercase text-[#c9a96a]">
-        ♦ {activeCategory || ""} ♠
-      </p>
-    </div>
-  </div>
-</div>
-
       {/* CONTENT */}
       <div className="px-6 pt-10 pb-28">
         <div className="max-w-[720px] mx-auto space-y-20">
@@ -106,11 +95,24 @@ export default function MenuClientView({ menu, categories, items }) {
           {grouped.map(cat => (
             <div key={cat.id} data-section={cat.name}>
 
-              {/* SECTION TITLE */}
-              <div className="text-center mb-6">
-                <p className="text-[11px] tracking-[0.5em] uppercase text-[#c9a96a]/70">
-                  {cat.name}
-                </p>
+              {/* 🔥 STICKY CATEGORY TITLE */}
+              <div
+                className="sticky z-40 bg-[#2a0000]/95 backdrop-blur-xl py-3 mb-6"
+                style={{ top: scrolled ? "80px" : "110px" }}
+              >
+                <div className="text-center">
+                  <p
+                    className={`text-[11px] tracking-[0.6em] uppercase transition-all duration-300 ${
+                      activeCategory === cat.name
+                        ? "text-[#c9a96a]"
+                        : "text-[#c9a96a]/40"
+                    }`}
+                  >
+                    ♦ {cat.name} ♠
+                  </p>
+
+                  <div className="w-10 h-[1px] bg-[#c9a96a]/30 mx-auto mt-2"></div>
+                </div>
               </div>
 
               {/* ITEMS */}
@@ -134,34 +136,29 @@ export default function MenuClientView({ menu, categories, items }) {
                       )}
                     </div>
 
-                    {/* 🎰 POKER CHIP PRICE (SMALLER) */}
-<div className="relative w-12 h-12 flex items-center justify-center">
+                    {/* 🎰 CHIP */}
+                    <div className="relative w-12 h-12 flex items-center justify-center">
 
-  {/* OUTER RING */}
-  <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
+                      <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
 
-  {/* STRIPES */}
-  <div
-    className="absolute inset-0 rounded-full"
-    style={{
-      background:
-        "repeating-conic-gradient(#c9a96a 0deg 10deg, transparent 10deg 20deg)",
-      maskImage: "radial-gradient(circle, transparent 58%, black 60%)",
-      WebkitMaskImage: "radial-gradient(circle, transparent 58%, black 60%)",
-      opacity: 0.5
-    }}
-  />
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background:
+                            "repeating-conic-gradient(#c9a96a 0deg 10deg, transparent 10deg 20deg)",
+                          maskImage: "radial-gradient(circle, transparent 58%, black 60%)",
+                          WebkitMaskImage: "radial-gradient(circle, transparent 58%, black 60%)",
+                          opacity: 0.5
+                        }}
+                      />
 
-  {/* INNER CORE */}
-  <div className="absolute w-8 h-8 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
+                      <div className="absolute w-8 h-8 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
+                        <span className="text-[#c9a96a] text-[12px] font-light">
+                          €{item.price}
+                        </span>
+                      </div>
 
-    <span className="text-[#c9a96a] text-[12px] font-light">
-      €{item.price}
-    </span>
-
-  </div>
-
-</div>
+                    </div>
 
                   </div>
                 ))}
