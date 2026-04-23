@@ -1,5 +1,3 @@
-// src/app/layout.js
-
 import "../styles/globals.css";
 import "../styles/theme.css";
 import ServiceWorkerRegister from "../components/ServiceWorkerRegister";
@@ -11,7 +9,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#1a0505",
+  themeColor: "#2a0000", // 🔥 MATCH MENU COLOR
 };
 
 export default function RootLayout({ children }) {
@@ -19,18 +17,19 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1a0505" />
+        <meta name="theme-color" content="#2a0000" />
 
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+        {/* 🔥 THIS AFFECTS IOS TOP BAR */}
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      <body className="bg-[#1a0505]">
+      <body className="bg-[#2a0000]">
 
-        {/* 🔥 RESTORED SCROLL CONTAINER */}
         <div id="app-scroll" className="app-container">
           {children}
         </div>
