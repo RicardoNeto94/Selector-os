@@ -18,24 +18,23 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* PWA */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1a0505" />
 
-        {/* iOS */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="default"
-        />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-        {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
       </head>
 
       <body className="bg-[#1a0505]">
-        {children}
+
+        {/* 🔥 RESTORED SCROLL CONTAINER */}
+        <div id="app-scroll" className="app-container">
+          {children}
+        </div>
+
         <ServiceWorkerRegister />
       </body>
     </html>
