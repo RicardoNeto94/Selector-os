@@ -9,6 +9,7 @@ export default function MenuClientView({ menu, categories, items }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    const container = document.getElementById("app-scroll");
 
     let ticking = false;
 
@@ -16,10 +17,12 @@ export default function MenuClientView({ menu, categories, items }) {
       if (!ticking) {
         requestAnimationFrame(() => {
 
-          const scrollY = window.scrollY;
+          const scrollY = container
+            ? container.scrollTop
+            : window.scrollY;
 
           setScrolled(prev => {
-            const next = scrollY > 60;
+            const next = scrollY > 50;
             return prev !== next ? next : prev;
           });
 
@@ -30,10 +33,20 @@ export default function MenuClientView({ menu, categories, items }) {
       }
     };
 
-    // ✅ ONLY window scroll
-    window.addEventListener("scroll", handleScroll);
+    // attach BOTH safely
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    } else {
+      window.addEventListener("scroll", handleScroll);
+    }
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      } else {
+        window.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, []);
 
   const grouped = categories.map(cat => ({
@@ -64,18 +77,18 @@ export default function MenuClientView({ menu, categories, items }) {
             : "bg-[#2a0000]/70 backdrop-blur-md"
         }`}
       >
-        <div className="max-w-[720px] mx-auto text-center py-6">
+        <div className="max-w-[720px] mx-auto text-center py-4">
 
           {menu.logo_url && (
             <div
               className={`flex justify-center transition-all duration-500 ${
-                scrolled ? "h-16" : "h-32"
+                scrolled ? "h-12" : "h-24"
               }`}
             >
               <img
                 src={menu.logo_url}
                 className={`h-full object-contain transition-all duration-500 ${
-                  scrolled ? "scale-[2.1]" : "scale-[3.2]"
+                  scrolled ? "scale-[1.6]" : "scale-[2.4]"
                 }`}
               />
             </div>
@@ -89,7 +102,7 @@ export default function MenuClientView({ menu, categories, items }) {
       </div>
 
       {/* CONTENT */}
-      <div className="px-6 pt-10 pb-28">
+      <div className="px-6 pt-8 pb-28">
         <div className="max-w-[720px] mx-auto space-y-20">
 
           {grouped.map(cat => (
@@ -121,7 +134,8 @@ export default function MenuClientView({ menu, categories, items }) {
                       )}
                     </div>
 
-                    <div className="relative w-12 h-12 flex items-center justify-center">
+                    {/* CHIP */}
+                    <div className="relative w-10 h-10 flex items-center justify-center">
 
                       <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
 
@@ -136,8 +150,8 @@ export default function MenuClientView({ menu, categories, items }) {
                         }}
                       />
 
-                      <div className="absolute w-8 h-8 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
-                        <span className="text-[#e6c27a] text-[13px] font-medium">
+                      <div className="absolute w-7 h-7 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
+                        <span className="text-[#e6c27a] text-[12px] font-medium">
                           €{item.price}
                         </span>
                       </div>
