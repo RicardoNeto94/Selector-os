@@ -132,9 +132,33 @@ export default function MenuClientView({ menu, categories, items }) {
                       )}
                     </div>
 
-                    {/* 🔥 REAL CHIP */}
-                    <div className="w-12 h-12 flex items-center justify-center rounded-full border border-[#c9a96a]/40 text-[#c9a96a] text-[14px] font-light shadow-[0_0_12px_rgba(201,169,106,0.15)]">
-                      €{item.price}
+                    {/* 🎰 POKER CHIP PRICE */}
+                    <div className="relative w-14 h-14 flex items-center justify-center">
+
+                      {/* OUTER RING */}
+                      <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
+
+                      {/* STRIPES */}
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background:
+                            "repeating-conic-gradient(#c9a96a 0deg 10deg, transparent 10deg 20deg)",
+                          maskImage: "radial-gradient(circle, transparent 58%, black 60%)",
+                          WebkitMaskImage: "radial-gradient(circle, transparent 58%, black 60%)",
+                          opacity: 0.5
+                        }}
+                      />
+
+                      {/* INNER CORE */}
+                      <div className="absolute w-10 h-10 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
+
+                        <span className="text-[#c9a96a] text-[13px] font-light">
+                          €{item.price}
+                        </span>
+
+                      </div>
+
                     </div>
 
                   </div>
