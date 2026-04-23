@@ -7,33 +7,32 @@ export default function MenuClientView({ menu, categories, items }) {
 
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(null);
 
   useEffect(() => {
-    const container = document.getElementById("app-scroll");
-    if (!container) return;
+
+    let ticking = false;
 
     const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
 
-      setScrolled(container.scrollTop > 10);
+          const scrollY = window.scrollY;
 
-      const sections = document.querySelectorAll("[data-section]");
-      let current = null;
+          setScrolled(prev => {
+            const next = scrollY > 20;
+            return prev !== next ? next : prev;
+          });
 
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= 160) {
-          current = section.getAttribute("data-section");
-        }
-      });
+          ticking = false;
+        });
 
-      setActiveCategory(current);
+        ticking = true;
+      }
     };
 
-    container.addEventListener("scroll", handleScroll);
-    handleScroll();
+    window.addEventListener("scroll", handleScroll);
 
-    return () => container.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const grouped = categories.map(cat => ({
@@ -50,7 +49,7 @@ export default function MenuClientView({ menu, categories, items }) {
       <div className="fixed top-6 left-6 z-[60]">
         <button
           onClick={() => router.push(`/menu/${menu.public_slug}`)}
-          className="text-[#c9a96a] text-[13px] tracking-[0.15em] opacity-70 hover:opacity-100"
+          className="text-[#c9a96a] text-[13px] tracking-[0.15em] opacity-70"
         >
           ← Back
         </button>
@@ -93,20 +92,13 @@ export default function MenuClientView({ menu, categories, items }) {
         <div className="max-w-[720px] mx-auto space-y-20">
 
           {grouped.map(cat => (
-            <div key={cat.id} data-section={cat.name}>
+            <div key={cat.id}>
 
-              {/* CATEGORY TITLE (UPDATED) */}
+              {/* CATEGORY TITLE */}
               <div className="py-3 mb-6 text-center">
-                <p
-                  className={`text-[13px] tracking-[0.6em] uppercase transition-all duration-300 ${
-                    activeCategory === cat.name
-                      ? "text-[#e6c27a]"
-                      : "text-[#c9a96a]/50"
-                  }`}
-                >
+                <p className="text-[13px] tracking-[0.6em] uppercase text-[#e6c27a]">
                   ♦ {cat.name} ♠
                 </p>
-
                 <div className="w-10 h-[1px] bg-[#c9a96a]/30 mx-auto mt-2"></div>
               </div>
 
@@ -116,7 +108,7 @@ export default function MenuClientView({ menu, categories, items }) {
                 {cat.items.map(item => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-center border-b border-white/10 pb-4 transition-all duration-200 hover:translate-x-1 hover:border-[#c9a96a]/40"
+                    className="flex justify-between items-center border-b border-white/10 pb-4"
                   >
 
                     <div className="max-w-[75%]">
@@ -125,13 +117,13 @@ export default function MenuClientView({ menu, categories, items }) {
                       </p>
 
                       {item.description && (
-                        <p className="text-[12px] opacity-40 mt-1">
+                        <p className="text-[13px] text-[#b8b8b8] mt-1 leading-relaxed">
                           {item.description}
                         </p>
                       )}
                     </div>
 
-                    {/* 🎰 CHIP */}
+                    {/* CHIP */}
                     <div className="relative w-12 h-12 flex items-center justify-center">
 
                       <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
@@ -148,7 +140,7 @@ export default function MenuClientView({ menu, categories, items }) {
                       />
 
                       <div className="absolute w-8 h-8 rounded-full border border-[#c9a96a]/30 bg-[#2a0000] flex items-center justify-center">
-                        <span className="text-[#c9a96a] text-[12px] font-light">
+                        <span className="text-[#e6c27a] text-[13px] font-medium">
                           €{item.price}
                         </span>
                       </div>

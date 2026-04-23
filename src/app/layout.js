@@ -25,8 +25,6 @@ export default function RootLayout({ children }) {
         {/* iOS */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-
-        {/* 🔥 IMPORTANT: keep default (not translucent) */}
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="default"
@@ -37,12 +35,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className="bg-[#1a0505]">
-
-        {/* 🔥 MAIN SCROLL CONTAINER (DO NOT CHANGE STRUCTURE) */}
-        <div id="app-scroll" className="app-container page-fade">
-          {children}
-        </div>
-
+        {children}
         <ServiceWorkerRegister />
       </body>
     </html>
