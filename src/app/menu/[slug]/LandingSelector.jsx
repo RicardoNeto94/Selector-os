@@ -30,14 +30,14 @@ export default function LandingSelector({ slug, menu }) {
     >
 
       {/* LOGO */}
-      {menu?.logo_url && (
-        <div className="mb-12">
-          <img
-            src={menu.logo_url}
-            className="h-48 mx-auto opacity-90"
-          />
-        </div>
-      )}
+{menu?.logo_url && (
+  <div className="mb-12 flex justify-center overflow-visible">
+    <img
+      src={menu.logo_url}
+      className="h-48 opacity-90 scale-[1.3] object-contain"
+    />
+  </div>
+)}
 
       {/* TITLE */}
       <p className="tracking-[0.5em] text-xs opacity-60 mb-10">
