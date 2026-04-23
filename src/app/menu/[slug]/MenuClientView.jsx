@@ -16,9 +16,7 @@ export default function MenuClientView({ menu, categories, items }) {
       if (!ticking) {
         requestAnimationFrame(() => {
 
-          // 🔥 read BOTH safely
-          const container = document.getElementById("app-scroll");
-          const scrollY = container ? container.scrollTop : window.scrollY;
+          const scrollY = window.scrollY;
 
           setScrolled(prev => {
             const next = scrollY > 60;
@@ -32,20 +30,10 @@ export default function MenuClientView({ menu, categories, items }) {
       }
     };
 
-    // 🔥 attach to BOTH (safe)
+    // ✅ ONLY window scroll
     window.addEventListener("scroll", handleScroll);
 
-    const container = document.getElementById("app-scroll");
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-    }
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (container) {
-        container.removeEventListener("scroll", handleScroll);
-      }
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const grouped = categories.map(cat => ({
@@ -56,7 +44,7 @@ export default function MenuClientView({ menu, categories, items }) {
   }));
 
   return (
-    <div className="bg-[#2a0000] text-[#f5f5f5]">
+    <div className="bg-[#2a0000] text-[#f5f5f5] min-h-screen">
 
       {/* BACK */}
       <div className="fixed top-6 left-6 z-[60]">
@@ -134,6 +122,7 @@ export default function MenuClientView({ menu, categories, items }) {
                     </div>
 
                     <div className="relative w-12 h-12 flex items-center justify-center">
+
                       <div className="absolute inset-0 rounded-full border-2 border-[#c9a96a]/50"></div>
 
                       <div
@@ -152,6 +141,7 @@ export default function MenuClientView({ menu, categories, items }) {
                           €{item.price}
                         </span>
                       </div>
+
                     </div>
 
                   </div>

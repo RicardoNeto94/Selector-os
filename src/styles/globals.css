@@ -28,13 +28,13 @@
 /* CORE VIEWPORT */
 
 html {
-  height: auto;
+  height: 100%;
   background: #1a0505;
 }
 
 html,
 body {
-  height: auto;
+  min-height: 100%;
   margin: 0;
   padding: 0;
 
@@ -46,6 +46,12 @@ body {
   overflow-x: hidden;
 }
 
+/* 🔥 CRITICAL FOR STICKY */
+#root,
+body > div {
+  min-height: 100%;
+}
+
 /* SAFE AREAS */
 
 body {
@@ -53,7 +59,7 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 🔥 FIXED APP CONTAINER (NO CUSTOM SCROLL) */
+/* APP CONTAINER */
 
 .app-container {
   min-height: 100dvh;
@@ -120,7 +126,7 @@ body {
   background: #1a1d23;
 }
 
-/* PAGE FADE (SAFE — NO TRANSFORM BREAKING STICKY) */
+/* PAGE FADE */
 
 .page-fade {
   animation: pageFadeIn 0.3s ease;
