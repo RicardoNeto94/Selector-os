@@ -95,24 +95,19 @@ export default function MenuClientView({ menu, categories, items }) {
           {grouped.map(cat => (
             <div key={cat.id} data-section={cat.name}>
 
-              {/* 🔥 STICKY CATEGORY TITLE */}
-              <div
-  className="sticky z-[60] bg-[#2a0000]/95 backdrop-blur-xl py-3 mb-6"
-  style={{ top: "110px" }}
->
-                <div className="text-center">
-                  <p
-                    className={`text-[11px] tracking-[0.6em] uppercase transition-all duration-300 ${
-                      activeCategory === cat.name
-                        ? "text-[#c9a96a]"
-                        : "text-[#c9a96a]/40"
-                    }`}
-                  >
-                    ♦ {cat.name} ♠
-                  </p>
+              {/* CATEGORY TITLE (UPDATED) */}
+              <div className="py-3 mb-6 text-center">
+                <p
+                  className={`text-[13px] tracking-[0.6em] uppercase transition-all duration-300 ${
+                    activeCategory === cat.name
+                      ? "text-[#e6c27a]"
+                      : "text-[#c9a96a]/50"
+                  }`}
+                >
+                  ♦ {cat.name} ♠
+                </p>
 
-                  <div className="w-10 h-[1px] bg-[#c9a96a]/30 mx-auto mt-2"></div>
-                </div>
+                <div className="w-10 h-[1px] bg-[#c9a96a]/30 mx-auto mt-2"></div>
               </div>
 
               {/* ITEMS */}
