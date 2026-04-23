@@ -88,11 +88,11 @@ export default function MenuClientView({ menu, categories, items }) {
         </div>
       </div>
 
-      {/* 🔥 GLOBAL STICKY CATEGORY BAR */}
+      {/* 🔥 GLOBAL CATEGORY BAR */}
       <div className="sticky top-[96px] z-40 bg-[#2a0000] py-3 border-b border-white/5">
         <div className="text-center">
-          <p className="text-[11px] tracking-[0.5em] uppercase text-[#c9a96a]">
-            {activeCategory || ""}
+          <p className="text-[11px] tracking-[0.6em] uppercase text-[#c9a96a]">
+            ♦ {activeCategory || ""} ♠
           </p>
         </div>
       </div>
@@ -104,7 +104,7 @@ export default function MenuClientView({ menu, categories, items }) {
           {grouped.map(cat => (
             <div key={cat.id} data-section={cat.name}>
 
-              {/* SECTION TITLE (NOT STICKY ANYMORE) */}
+              {/* SECTION TITLE */}
               <div className="text-center mb-6">
                 <p className="text-[11px] tracking-[0.5em] uppercase text-[#c9a96a]/50">
                   {cat.name}
@@ -132,7 +132,8 @@ export default function MenuClientView({ menu, categories, items }) {
                       )}
                     </div>
 
-                    <div className="text-[#c9a96a] text-[14px]">
+                    {/* 🔥 CHIP STYLE PRICE */}
+                    <div className="text-[#c9a96a] text-[13px] px-3 py-1 rounded-full border border-[#c9a96a]/30">
                       €{item.price}
                     </div>
 
