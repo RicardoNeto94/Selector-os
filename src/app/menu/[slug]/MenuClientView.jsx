@@ -10,17 +10,19 @@ export default function MenuClientView({ menu, categories, items }) {
 
   useEffect(() => {
 
+    const container = document.getElementById("app-scroll");
+    if (!container) return;
+
     let ticking = false;
 
     const handleScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
 
-          const scrollY = window.scrollY;
+          const scrollY = container.scrollTop;
 
-          // 🔥 FIXED THRESHOLD (was 20 → too fast)
           setScrolled(prev => {
-            const next = scrollY > 80;
+            const next = scrollY > 60; // 🔥 better trigger point
             return prev !== next ? next : prev;
           });
 
@@ -31,9 +33,9 @@ export default function MenuClientView({ menu, categories, items }) {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    container.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
   const grouped = categories.map(cat => ({
@@ -69,15 +71,13 @@ export default function MenuClientView({ menu, categories, items }) {
           {menu.logo_url && (
             <div
               className={`flex justify-center transition-all duration-500 ${
-                // 🔥 BIGGER DIFFERENCE
                 scrolled ? "h-16" : "h-32"
               }`}
             >
               <img
                 src={menu.logo_url}
                 className={`h-full object-contain transition-all duration-500 ${
-                  // 🔥 STRONGER SCALE CHANGE
-                  scrolled ? "scale-[2.0]" : "scale-[3.4]"
+                  scrolled ? "scale-[2.1]" : "scale-[3.2]"
                 }`}
               />
             </div>
@@ -115,7 +115,8 @@ export default function MenuClientView({ menu, categories, items }) {
                   >
 
                     <div className="max-w-[75%]">
-                      <p className="text-[15px] font-semibold tracking-[0.02em] text-[#f0d48a] leading-tight">
+                      {/* 🔥 REFINED (LESS HEAVY) */}
+                      <p className="text-[15px] font-medium tracking-[0.02em] text-[#f0d48a] leading-tight">
                         {item.name}
                       </p>
 
