@@ -34,7 +34,7 @@ export default function LandingSelector({ slug, menu }) {
   <div className="mb-12 flex justify-center overflow-visible">
     <img
       src={menu.logo_url}
-      className="h-48 opacity-90 scale-[1.3] object-contain"
+      className="h-48 opacity-90 scale-[1.5] object-contain"
     />
   </div>
 )}
