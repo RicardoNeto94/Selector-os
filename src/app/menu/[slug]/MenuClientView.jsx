@@ -113,7 +113,7 @@ export default function MenuClientView({ menu, categories, items }) {
 
                     <div className="max-w-[75%]">
                       {/* 🔥 UPDATED NAME STYLE */}
-                      <p className="text-[15px] font-medium tracking-[0.02em] text-[#f5f5f5]">
+                      <p className="text-[15px] font-medium tracking-[0.02em] text-[#eaeaea]">
                         {item.name}
                       </p>
 
