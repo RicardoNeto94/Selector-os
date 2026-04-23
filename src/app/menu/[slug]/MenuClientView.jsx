@@ -18,8 +18,9 @@ export default function MenuClientView({ menu, categories, items }) {
 
           const scrollY = window.scrollY;
 
+          // 🔥 FIXED THRESHOLD (was 20 → too fast)
           setScrolled(prev => {
-            const next = scrollY > 20;
+            const next = scrollY > 80;
             return prev !== next ? next : prev;
           });
 
@@ -57,7 +58,7 @@ export default function MenuClientView({ menu, categories, items }) {
 
       {/* HEADER */}
       <div
-        className={`sticky top-0 z-50 transition-all duration-300 border-b border-[#c9a96a]/10 ${
+        className={`sticky top-0 z-50 transition-all duration-500 border-b border-[#c9a96a]/10 ${
           scrolled
             ? "bg-[#2a0000]/90 backdrop-blur-xl"
             : "bg-[#2a0000]/70 backdrop-blur-md"
@@ -67,14 +68,16 @@ export default function MenuClientView({ menu, categories, items }) {
 
           {menu.logo_url && (
             <div
-              className={`flex justify-center transition-all duration-300 ${
-                scrolled ? "h-20" : "h-28"
+              className={`flex justify-center transition-all duration-500 ${
+                // 🔥 BIGGER DIFFERENCE
+                scrolled ? "h-16" : "h-32"
               }`}
             >
               <img
                 src={menu.logo_url}
-                className={`h-full object-contain transition-all duration-300 ${
-                  scrolled ? "scale-[2.3]" : "scale-[3.0]"
+                className={`h-full object-contain transition-all duration-500 ${
+                  // 🔥 STRONGER SCALE CHANGE
+                  scrolled ? "scale-[2.0]" : "scale-[3.4]"
                 }`}
               />
             </div>
@@ -112,7 +115,6 @@ export default function MenuClientView({ menu, categories, items }) {
                   >
 
                     <div className="max-w-[75%]">
-                      {/* 🔥 CLEAN HIERARCHY (NO GLOW) */}
                       <p className="text-[15px] font-semibold tracking-[0.02em] text-[#f0d48a] leading-tight">
                         {item.name}
                       </p>
