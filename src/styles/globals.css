@@ -28,13 +28,13 @@
 /* CORE VIEWPORT */
 
 html {
-  height: 100%;
+  height: auto;
   background: #1a0505;
 }
 
 html,
 body {
-  height: 100%;
+  height: auto;
   margin: 0;
   padding: 0;
 
@@ -42,7 +42,7 @@ body {
   color: var(--text);
   font-family: "Inter", sans-serif;
 
-  overscroll-behavior: none;
+  overscroll-behavior-y: contain;
   overflow-x: hidden;
 }
 
@@ -53,14 +53,11 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* APP SCROLL CONTAINER */
+/* 🔥 FIXED APP CONTAINER (NO CUSTOM SCROLL) */
 
 .app-container {
-  height: 100dvh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  min-height: 100dvh;
   background: #1a0505;
-  position: relative;
 }
 
 /* PANEL */
@@ -123,7 +120,7 @@ body {
   background: #1a1d23;
 }
 
-/* 🔥 SAFE PAGE FADE (NO TRANSFORM = STICKY WORKS) */
+/* PAGE FADE (SAFE — NO TRANSFORM BREAKING STICKY) */
 
 .page-fade {
   animation: pageFadeIn 0.3s ease;
