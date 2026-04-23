@@ -89,13 +89,15 @@ export default function MenuClientView({ menu, categories, items }) {
       </div>
 
       {/* CATEGORY BAR */}
-      <div className="sticky top-[96px] z-40 bg-[#2a0000] py-3 border-b border-[#c9a96a]/10">
-        <div className="text-center">
-          <p className="text-[11px] tracking-[0.6em] uppercase text-[#c9a96a]">
-            ♦ {activeCategory || ""} ♠
-          </p>
-        </div>
-      </div>
+<div className="sticky top-0 z-40">
+  <div className="bg-[#2a0000]/95 backdrop-blur-xl pt-[88px] pb-3 border-b border-[#c9a96a]/10">
+    <div className="text-center">
+      <p className="text-[11px] tracking-[0.6em] uppercase text-[#c9a96a]">
+        ♦ {activeCategory || ""} ♠
+      </p>
+    </div>
+  </div>
+</div>
 
       {/* CONTENT */}
       <div className="px-6 pt-10 pb-28">
