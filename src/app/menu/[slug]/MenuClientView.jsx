@@ -58,7 +58,7 @@ export default function MenuClientView({ menu, categories, items }) {
 
       {/* HEADER */}
       <div
-        className={`sticky top-0 z-50 transition-all duration-300 border-b border-white/5 ${
+        className={`sticky top-0 z-50 transition-all duration-300 border-b border-[#c9a96a]/10 ${
           scrolled
             ? "bg-[#2a0000]/90 backdrop-blur-xl"
             : "bg-[#2a0000]/70 backdrop-blur-md"
@@ -88,8 +88,8 @@ export default function MenuClientView({ menu, categories, items }) {
         </div>
       </div>
 
-      {/* 🔥 GLOBAL CATEGORY BAR */}
-      <div className="sticky top-[96px] z-40 bg-[#2a0000] py-3 border-b border-white/5">
+      {/* CATEGORY BAR */}
+      <div className="sticky top-[96px] z-40 bg-[#2a0000] py-3 border-b border-[#c9a96a]/10">
         <div className="text-center">
           <p className="text-[11px] tracking-[0.6em] uppercase text-[#c9a96a]">
             ♦ {activeCategory || ""} ♠
@@ -106,7 +106,7 @@ export default function MenuClientView({ menu, categories, items }) {
 
               {/* SECTION TITLE */}
               <div className="text-center mb-6">
-                <p className="text-[11px] tracking-[0.5em] uppercase text-[#c9a96a]/50">
+                <p className="text-[11px] tracking-[0.5em] uppercase text-[#c9a96a]/70">
                   {cat.name}
                 </p>
               </div>
@@ -117,7 +117,7 @@ export default function MenuClientView({ menu, categories, items }) {
                 {cat.items.map(item => (
                   <div
                     key={item.id}
-                    className="flex justify-between border-b border-white/10 pb-4"
+                    className="flex justify-between items-center border-b border-white/10 pb-4 transition-all duration-200 hover:translate-x-1 hover:border-[#c9a96a]/40"
                   >
 
                     <div className="max-w-[75%]">
@@ -132,8 +132,8 @@ export default function MenuClientView({ menu, categories, items }) {
                       )}
                     </div>
 
-                    {/* 🔥 CHIP STYLE PRICE */}
-                    <div className="text-[#c9a96a] text-[13px] px-3 py-1 rounded-full border border-[#c9a96a]/30">
+                    {/* 🔥 REAL CHIP */}
+                    <div className="w-12 h-12 flex items-center justify-center rounded-full border border-[#c9a96a]/40 text-[#c9a96a] text-[14px] font-light shadow-[0_0_12px_rgba(201,169,106,0.15)]">
                       €{item.price}
                     </div>
 
