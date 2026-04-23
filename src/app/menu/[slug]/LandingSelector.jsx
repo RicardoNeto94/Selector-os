@@ -7,7 +7,7 @@ export default function LandingSelector({ slug, menu }) {
 
   const router = useRouter();
   const [loading, setLoading] = useState(null);
-  const [fadeOut, setFadeOut] = useState(false); // 🔥 NEW
+  const [fadeOut, setFadeOut] = useState(false);
 
   const handleNavigate = (type) => {
     setLoading(type);
@@ -24,9 +24,8 @@ export default function LandingSelector({ slug, menu }) {
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
       style={{
-        minHeight: "100dvh",
         height: "100dvh",
-        overflow: "hidden", // 🔥 prevents fake scrolling
+        overflow: "hidden",
       }}
     >
 
@@ -35,7 +34,7 @@ export default function LandingSelector({ slug, menu }) {
         <div className="mb-16">
           <img
             src={menu.logo_url}
-            className="h-64 mx-auto opacity-90 transition-all duration-500"
+            className="h-56 mx-auto opacity-90"
           />
         </div>
       )}
@@ -45,29 +44,59 @@ export default function LandingSelector({ slug, menu }) {
         SELECT MENU
       </p>
 
-      {/* OPTIONS */}
-      <div className="flex gap-6">
+      {/* TABLE BUTTONS */}
+      <div className="flex gap-10">
 
+        {/* FOOD */}
         <button
           onClick={() => handleNavigate("food")}
-          className={`px-10 py-4 rounded-2xl border border-white/20 transition-all duration-300 ${
+          className={`relative w-36 h-36 rounded-full transition-all duration-300 ${
             loading === "food"
               ? "scale-95 opacity-70"
-              : "hover:bg-white/10 hover:scale-[1.03]"
+              : "hover:scale-[1.05]"
           }`}
         >
-          FOOD
+          {/* GOLD RIM */}
+          <div className="absolute inset-0 rounded-full border-[3px] border-[#c9a96a]/70 shadow-[0_0_20px_rgba(201,169,106,0.2)]"></div>
+
+          {/* FELT SURFACE */}
+          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)] shadow-inner"></div>
+
+          {/* LIGHT REFLECTION */}
+          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_70%)]"></div>
+
+          {/* TEXT */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[13px] tracking-[0.3em] text-[#c9a96a]">
+              FOOD
+            </span>
+          </div>
         </button>
 
+        {/* DRINKS */}
         <button
           onClick={() => handleNavigate("drinks")}
-          className={`px-10 py-4 rounded-2xl border border-white/20 transition-all duration-300 ${
+          className={`relative w-36 h-36 rounded-full transition-all duration-300 ${
             loading === "drinks"
               ? "scale-95 opacity-70"
-              : "hover:bg-white/10 hover:scale-[1.03]"
+              : "hover:scale-[1.05]"
           }`}
         >
-          DRINKS
+          {/* GOLD RIM */}
+          <div className="absolute inset-0 rounded-full border-[3px] border-[#c9a96a]/70 shadow-[0_0_20px_rgba(201,169,106,0.2)]"></div>
+
+          {/* FELT SURFACE */}
+          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)] shadow-inner"></div>
+
+          {/* LIGHT REFLECTION */}
+          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_70%)]"></div>
+
+          {/* TEXT */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[13px] tracking-[0.3em] text-[#c9a96a]">
+              DRINKS
+            </span>
+          </div>
         </button>
 
       </div>
