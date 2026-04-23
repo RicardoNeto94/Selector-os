@@ -44,56 +44,62 @@ export default function LandingSelector({ slug, menu }) {
         SELECT MENU
       </p>
 
-      {/* TABLE BUTTONS */}
-      <div className="flex gap-10">
+      {/* 🎰 POKER TABLE BUTTONS */}
+      <div className="flex flex-col gap-10 items-center">
 
-        {/* FOOD */}
+        {/* SNACKS TABLE */}
         <button
           onClick={() => handleNavigate("food")}
-          className={`relative w-36 h-36 rounded-full transition-all duration-300 ${
+          className={`relative w-[280px] h-[140px] transition-all duration-300 ${
             loading === "food"
               ? "scale-95 opacity-70"
-              : "hover:scale-[1.05]"
+              : "hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(201,169,106,0.25)]"
           }`}
         >
-          {/* GOLD RIM */}
-          <div className="absolute inset-0 rounded-full border-[3px] border-[#c9a96a]/70 shadow-[0_0_20px_rgba(201,169,106,0.2)]"></div>
+          {/* WOOD RIM */}
+          <div className="absolute inset-0 rounded-[999px] bg-[#3b1f0f] shadow-[inset_0_3px_10px_rgba(0,0,0,0.6)]"></div>
 
-          {/* FELT SURFACE */}
-          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)] shadow-inner"></div>
+          {/* GOLD EDGE */}
+          <div className="absolute inset-[6px] rounded-[999px] border border-[#c9a96a]"></div>
 
-          {/* LIGHT REFLECTION */}
-          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_70%)]"></div>
+          {/* FELT */}
+          <div className="absolute inset-[10px] rounded-[999px] bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)]"></div>
+
+          {/* INNER TABLE LINE */}
+          <div className="absolute inset-[22px] rounded-[999px] border border-white/10"></div>
 
           {/* TEXT */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[13px] tracking-[0.3em] text-[#c9a96a]">
-              FOOD
+            <span className="text-[14px] tracking-[0.4em] text-[#c9a96a]">
+              SNACKS
             </span>
           </div>
         </button>
 
-        {/* DRINKS */}
+        {/* DRINKS TABLE */}
         <button
           onClick={() => handleNavigate("drinks")}
-          className={`relative w-36 h-36 rounded-full transition-all duration-300 ${
+          className={`relative w-[280px] h-[140px] transition-all duration-300 ${
             loading === "drinks"
               ? "scale-95 opacity-70"
-              : "hover:scale-[1.05]"
+              : "hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(201,169,106,0.25)]"
           }`}
         >
-          {/* GOLD RIM */}
-          <div className="absolute inset-0 rounded-full border-[3px] border-[#c9a96a]/70 shadow-[0_0_20px_rgba(201,169,106,0.2)]"></div>
+          {/* WOOD RIM */}
+          <div className="absolute inset-0 rounded-[999px] bg-[#3b1f0f] shadow-[inset_0_3px_10px_rgba(0,0,0,0.6)]"></div>
 
-          {/* FELT SURFACE */}
-          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)] shadow-inner"></div>
+          {/* GOLD EDGE */}
+          <div className="absolute inset-[6px] rounded-[999px] border border-[#c9a96a]"></div>
 
-          {/* LIGHT REFLECTION */}
-          <div className="absolute inset-[6px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_70%)]"></div>
+          {/* FELT */}
+          <div className="absolute inset-[10px] rounded-[999px] bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)]"></div>
+
+          {/* INNER TABLE LINE */}
+          <div className="absolute inset-[22px] rounded-[999px] border border-white/10"></div>
 
           {/* TEXT */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[13px] tracking-[0.3em] text-[#c9a96a]">
+            <span className="text-[14px] tracking-[0.4em] text-[#c9a96a]">
               DRINKS
             </span>
           </div>

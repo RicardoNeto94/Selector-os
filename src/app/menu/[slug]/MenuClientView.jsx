@@ -97,9 +97,9 @@ export default function MenuClientView({ menu, categories, items }) {
 
               {/* 🔥 STICKY CATEGORY TITLE */}
               <div
-                className="sticky z-40 bg-[#2a0000]/95 backdrop-blur-xl py-3 mb-6"
-                style={{ top: scrolled ? "80px" : "110px" }}
-              >
+  className="sticky z-[60] bg-[#2a0000]/95 backdrop-blur-xl py-3 mb-6"
+  style={{ top: scrolled ? "72px" : "104px" }}
+>
                 <div className="text-center">
                   <p
                     className={`text-[11px] tracking-[0.6em] uppercase transition-all duration-300 ${
