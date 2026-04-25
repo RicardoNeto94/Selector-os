@@ -1,11 +1,7 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextResponse } from 'next/server';
 
-export async function middleware(req) {
-
+export function middleware(req) {
   const host = req.headers.get("host") || "";
-
-  // 🔥 DOMAIN ROUTING FIRST (VERY IMPORTANT)
 
   if (host.includes("burman.vaxeron.com")) {
     return NextResponse.rewrite(
@@ -19,14 +15,7 @@ export async function middleware(req) {
     );
   }
 
-  // 🔐 THEN run Supabase middleware
-
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
-
-  await supabase.auth.getSession();
-
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {
