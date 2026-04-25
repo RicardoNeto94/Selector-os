@@ -14,6 +14,7 @@ export default function BurmanLanding({ menu }) {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
 
+  // 🔥 LOAD DATA
   useEffect(() => {
     if (!menu?.id) return;
 
@@ -39,6 +40,30 @@ export default function BurmanLanding({ menu }) {
 
     loadData();
   }, [menu]);
+
+  // 🔥 PWA ICON OVERRIDE (KEY FIX)
+  useEffect(() => {
+
+    // remove existing apple icons (Fox Den etc)
+    const existingIcons = document.querySelectorAll("link[rel='apple-touch-icon']");
+    existingIcons.forEach(icon => icon.remove());
+
+    // create Burman icon
+    const link = document.createElement("link");
+    link.rel = "apple-touch-icon";
+    link.href = "/burman-icon.png";
+    document.head.appendChild(link);
+
+    // update favicon as well
+    const favicon =
+      document.querySelector("link[rel='icon']") ||
+      document.createElement("link");
+
+    favicon.rel = "icon";
+    favicon.href = "/burman-icon.png";
+    document.head.appendChild(favicon);
+
+  }, []);
 
   return (
     <div className="burman-root">
@@ -74,7 +99,7 @@ export default function BurmanLanding({ menu }) {
 
       </div>
 
-      {/* FLOATING NAV (DESKTOP ONLY FEEL) */}
+      {/* NAV */}
       <div className="burman-nav">
 
         <a
@@ -106,7 +131,7 @@ export default function BurmanLanding({ menu }) {
 
       </div>
 
-      {/* 🔥 AMAN STYLE FULLSCREEN MENU */}
+      {/* FULLSCREEN MENU */}
       {menuOpen && (
         <div className="burman-fullscreen-menu">
 
@@ -140,12 +165,22 @@ export default function BurmanLanding({ menu }) {
         </div>
       )}
 
-      {/* SPA MODAL stays unchanged */}
+      {/* SPA MODAL */}
       {openSpa && (
         <div className="burman-modal">
-          <div className="burman-modal-backdrop" onClick={() => setOpenSpa(false)} />
+          <div
+            className="burman-modal-backdrop"
+            onClick={() => setOpenSpa(false)}
+          />
+
           <div className="burman-modal-content">
-            <button className="burman-modal-close" onClick={() => setOpenSpa(false)}>✕</button>
+
+            <button
+              className="burman-modal-close"
+              onClick={() => setOpenSpa(false)}
+            >
+              ✕
+            </button>
 
             <div className="burman-modal-header">
               <h2>Burman Spa</h2>
@@ -154,11 +189,16 @@ export default function BurmanLanding({ menu }) {
 
             <div className="burman-modal-body">
               {categories.map(cat => {
-                const catItems = items.filter(i => i.category_id === cat.id);
+
+                const catItems = items.filter(
+                  i => i.category_id === cat.id
+                );
+
                 if (!catItems.length) return null;
 
                 return (
                   <div key={cat.id} className="burman-spa-section">
+
                     <h3>{cat.name}</h3>
 
                     {cat.description && (
@@ -169,14 +209,26 @@ export default function BurmanLanding({ menu }) {
 
                     {catItems.map(item => (
                       <div key={item.id} className="burman-spa-item">
+
                         <div>
                           <h4>{item.name}</h4>
-                          {item.description && <p>{item.description}</p>}
-                          {item.duration && <span>{item.duration}</span>}
+
+                          {item.description && (
+                            <p>{item.description}</p>
+                          )}
+
+                          {item.duration && (
+                            <span>{item.duration}</span>
+                          )}
                         </div>
-                        <div>{item.price ? `€${item.price}` : ""}</div>
+
+                        <div>
+                          {item.price ? `€${item.price}` : ""}
+                        </div>
+
                       </div>
                     ))}
+
                   </div>
                 );
               })}
