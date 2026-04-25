@@ -41,39 +41,6 @@ export default function BurmanLanding({ menu }) {
     loadData();
   }, [menu]);
 
-  // 🔥 PWA FIX (ICON + CORRECT LAUNCH PAGE)
-  useEffect(() => {
-
-    // ===== ICON FIX =====
-    const existingIcons = document.querySelectorAll("link[rel='apple-touch-icon']");
-    existingIcons.forEach(icon => icon.remove());
-
-    const appleIcon = document.createElement("link");
-    appleIcon.rel = "apple-touch-icon";
-    appleIcon.href = "/burman-icon.png";
-    document.head.appendChild(appleIcon);
-
-    const favicon =
-      document.querySelector("link[rel='icon']") ||
-      document.createElement("link");
-
-    favicon.rel = "icon";
-    favicon.href = "/burman-icon.png";
-    document.head.appendChild(favicon);
-
-    // ===== START PAGE FIX (REAL FIX) =====
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true;
-
-    if (isStandalone) {
-      if (!window.location.pathname.includes("burman-hotel")) {
-        window.location.replace("/menu/burman-hotel");
-      }
-    }
-
-  }, []);
-
   return (
     <div className="burman-root">
 
