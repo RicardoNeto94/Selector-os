@@ -10,31 +10,28 @@ html, body{
 
 .burman-root{
   background:#eae6e2;
-  height:100dvh; /* 🔥 FIXED */
+  height:100dvh;
   overflow:hidden;
   display:flex;
   flex-direction:column;
   font-family: "Playfair Display", serif;
   color:#3a2a24;
-
   position:relative;
 }
 
 /* ================= HEADER ================= */
 
 .burman-header{
-  height:80px; /* 🔥 FIXED HEIGHT */
+  height:80px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   padding:0 40px;
-
   font-size:11px;
   letter-spacing:0.2em;
   color:#8a3a2c;
   text-transform:uppercase;
-
-  flex-shrink:0; /* 🔥 prevents pushing layout */
+  flex-shrink:0;
 }
 
 .burman-header-center{
@@ -47,7 +44,7 @@ html, body{
 
 .burman-hero{
   position:relative;
-  flex:1; /* 🔥 THIS is the real fix */
+  flex:1;
   margin:0 40px;
   border:1px solid #d6d2cd;
   overflow:hidden;
@@ -110,26 +107,18 @@ html, body{
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-
   display:flex;
   align-items:center;
   gap:10px;
-
-  max-width:calc(100% - 20px); /* 🔥 prevents overflow */
+  max-width:calc(100% - 20px);
   flex-wrap:wrap;
-
   background:rgba(255,255,255,0.92);
   backdrop-filter:blur(14px);
-
   padding:10px 12px;
   border-radius:14px;
-
   box-shadow:0 15px 40px rgba(0,0,0,0.18);
-
   z-index:999;
 }
-
-/* PRIMARY BUTTON */
 
 .burman-primary{
   background:#8a3a2c;
@@ -140,8 +129,6 @@ html, body{
   text-decoration:none;
   white-space:nowrap;
 }
-
-/* LINKS */
 
 .burman-links{
   display:flex;
@@ -162,14 +149,10 @@ html, body{
   padding:10px 14px;
 }
 
-/* separators */
-
 .burman-links a:not(:last-child),
 .burman-links button:not(:last-child){
   border-right:1px solid rgba(0,0,0,0.06);
 }
-
-/* hover line */
 
 .burman-links a::after,
 .burman-links button::after{
@@ -180,10 +163,8 @@ html, body{
   right:14px;
   height:1px;
   background:#8a3a2c;
-
   transform:scaleX(0);
   transform-origin:left;
-
   transition:transform 0.35s ease;
   opacity:0.6;
 }
@@ -211,22 +192,56 @@ html, body{
   backdrop-filter:blur(8px);
 }
 
+/* 🔥 UPDATED MODAL (MAIN IMPROVEMENT) */
+
 .burman-modal-content{
   position:relative;
   background:#f7f5f3;
-  border-radius:18px;
+  border-radius:20px;
 
-  width:90%;
-  max-width:820px;
-  max-height:85vh;
+  width:92%;
+  max-width:1100px;
 
-  padding:48px;
+  max-height:88vh;
+
+  padding:56px 64px;
 
   overflow-y:auto;
 
-  box-shadow:0 40px 100px rgba(0,0,0,0.3);
+  box-shadow:0 50px 140px rgba(0,0,0,0.25);
 
-  animation:fadeUp 0.4s ease;
+  animation:fadeUp 0.5s ease;
+
+  display:flex;
+  flex-direction:column;
+}
+
+/* 🔥 NEW STRUCTURE IMPROVEMENTS */
+
+.burman-modal-body{
+  margin-top:30px;
+}
+
+.burman-spa-section{
+  margin-bottom:80px;
+}
+
+/* subtle divider */
+
+.burman-spa-section:not(:last-child){
+  border-bottom:1px solid rgba(0,0,0,0.08);
+  padding-bottom:60px;
+}
+
+/* 🔥 SCROLL POLISH */
+
+.burman-modal-content::-webkit-scrollbar {
+  width:6px;
+}
+
+.burman-modal-content::-webkit-scrollbar-thumb {
+  background:rgba(0,0,0,0.15);
+  border-radius:10px;
 }
 
 /* ================= FULLSCREEN MENU ================= */
@@ -235,13 +250,10 @@ html, body{
   position:fixed;
   inset:0;
   background:#f7f5f3;
-
   display:flex;
   justify-content:center;
   align-items:center;
-
   z-index:2000;
-
   animation:fadeIn 0.4s ease;
 }
 
@@ -317,5 +329,9 @@ html, body{
   .burman-nav{
     flex-direction:column;
     width:90%;
+  }
+
+  .burman-modal-content{
+    padding:32px 20px;
   }
 }
