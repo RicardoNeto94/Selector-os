@@ -16,8 +16,11 @@ export default function MenuDashboardClient({
 
   const [showModal, setShowModal] = useState(false);
 
-  // ✅ HARD FIX → no hydration mismatch, no undefined
-  const BASE_URL = "https://selector-os.vercel.app";
+  // 🔥 FIX → dynamic domain (no more hardcoding)
+  const BASE_URL =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "";
 
   return (
     <div className="so-main-inner space-y-8">
@@ -89,8 +92,9 @@ export default function MenuDashboardClient({
                   </div>
                 </div>
 
+                {/* 🔥 FIXED OPEN LINK */}
                 <a
-                  href={menuUrl}
+                  href={`/menu/${m.public_slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-sm text-slate-400 hover:text-white"
@@ -115,7 +119,7 @@ export default function MenuDashboardClient({
               {/* ACTIONS */}
               <div className="flex justify-between items-center">
 
-                {/* ✅ FIXED EDIT BUTTON */}
+                {/* EDIT */}
                 <Link
                   href={`/dashboard/menu/${m.public_slug}`}
                   className="text-sm text-blue-400 hover:text-white"
