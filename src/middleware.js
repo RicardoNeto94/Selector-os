@@ -6,22 +6,19 @@ export async function middleware(req) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
 
-  // 🔐 Keep your auth session logic
   await supabase.auth.getSession();
 
-  const host = req.headers.get("host");
+  const host = req.headers.get("host") || "";
 
-  // 🔥 DOMAIN ROUTING
+  // 🔥 FIX: use includes instead of strict match
 
-  // Burman
-  if (host === "burman.vaxeron.com") {
+  if (host.includes("burman.vaxeron.com")) {
     return NextResponse.rewrite(
       new URL("/menu/burman-hotel", req.url)
     );
   }
 
-  // Fox Den
-  if (host === "foxden.vaxeron.com") {
+  if (host.includes("foxden.vaxeron.com")) {
     return NextResponse.rewrite(
       new URL("/menu/foxden", req.url)
     );
@@ -31,5 +28,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/:path*'], // 🔥 IMPORTANT — applies to all routes
+  matcher: ['/:path*'],
 };
