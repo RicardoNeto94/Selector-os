@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LandingSelector({ slug, menu }) {
+export default function FoxDenLanding({ slug, menu }) {
 
   const router = useRouter();
   const [loading, setLoading] = useState(null);
@@ -24,52 +24,43 @@ export default function LandingSelector({ slug, menu }) {
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
       style={{
-        height: "100dvh",
-        overflow: "hidden",
+        height: "100vh" // 🔥 FIXED (was 100dvh)
       }}
     >
 
       {/* LOGO */}
-{menu?.logo_url && (
-  <div className="mb-12 flex justify-center overflow-visible">
-    <img
-      src={menu.logo_url}
-      className="h-48 opacity-90 scale-[1.5] object-contain"
-    />
-  </div>
-)}
+      {menu?.logo_url && (
+        <div className="mb-12 flex justify-center">
+          <img
+            src={menu.logo_url}
+            className="h-44 opacity-90 object-contain"
+          />
+        </div>
+      )}
 
       {/* TITLE */}
       <p className="tracking-[0.5em] text-xs opacity-60 mb-10">
         SELECT MENU
       </p>
 
-      {/* 🎰 TABLE BUTTONS */}
+      {/* BUTTONS */}
       <div className="flex gap-6 justify-center">
 
-        {/* SNACKS */}
+        {/* FOOD */}
         <button
           onClick={() => handleNavigate("food")}
           className={`relative w-[160px] h-[80px] transition-all duration-200 ${
             loading === "food" ? "scale-95 opacity-70" : ""
           }`}
         >
-          {/* WOOD */}
-          <div className="absolute inset-0 rounded-[999px] bg-[#3b1f0f] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]"></div>
+          <div className="absolute inset-0 rounded-full bg-[#3b1f0f] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]"></div>
+          <div className="absolute inset-[4px] rounded-full border border-[#c9a96a]"></div>
+          <div className="absolute inset-[7px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)]"></div>
+          <div className="absolute inset-[14px] rounded-full border border-white/10"></div>
 
-          {/* GOLD */}
-          <div className="absolute inset-[4px] rounded-[999px] border border-[#c9a96a]"></div>
-
-          {/* FELT */}
-          <div className="absolute inset-[7px] rounded-[999px] bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)]"></div>
-
-          {/* INNER LINE */}
-          <div className="absolute inset-[14px] rounded-[999px] border border-white/10"></div>
-
-          {/* TEXT */}
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-[11px] tracking-[0.35em] text-[#c9a96a]">
-              SNACKS
+              FOOD
             </span>
           </div>
         </button>
@@ -81,19 +72,11 @@ export default function LandingSelector({ slug, menu }) {
             loading === "drinks" ? "scale-95 opacity-70" : ""
           }`}
         >
-          {/* WOOD */}
-          <div className="absolute inset-0 rounded-[999px] bg-[#3b1f0f] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]"></div>
+          <div className="absolute inset-0 rounded-full bg-[#3b1f0f] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]"></div>
+          <div className="absolute inset-[4px] rounded-full border border-[#c9a96a]"></div>
+          <div className="absolute inset-[7px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)]"></div>
+          <div className="absolute inset-[14px] rounded-full border border-white/10"></div>
 
-          {/* GOLD */}
-          <div className="absolute inset-[4px] rounded-[999px] border border-[#c9a96a]"></div>
-
-          {/* FELT */}
-          <div className="absolute inset-[7px] rounded-[999px] bg-[radial-gradient(circle_at_30%_30%,#0f3d2e,#08241b)]"></div>
-
-          {/* INNER LINE */}
-          <div className="absolute inset-[14px] rounded-[999px] border border-white/10"></div>
-
-          {/* TEXT */}
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-[11px] tracking-[0.35em] text-[#c9a96a]">
               DRINKS

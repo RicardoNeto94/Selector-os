@@ -13,13 +13,12 @@ export default function MenuEditorPage() {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
 
-  const [menuType, setMenuType] = useState("food");
+  const [menuType, setMenuType] = useState("services");
 
   const [newCategory, setNewCategory] = useState("");
-  const [dishInputs, setDishInputs] = useState({});
+  const [newCategoryDesc, setNewCategoryDesc] = useState("");
 
-  const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({});
+  const [dishInputs, setDishInputs] = useState({});
 
   const [loading, setLoading] = useState(true);
 
@@ -38,201 +37,139 @@ export default function MenuEditorPage() {
       .eq("public_slug", slug)
       .single();
 
-    if (!menuData) {
-      setLoading(false);
-      return;
-    }
+    if (!menuData) return;
 
     setMenu(menuData);
 
-    // ✅ FILTER CATEGORIES BY TYPE
-    const { data: cats } = await supabase
+    const { data: cats = [] } = await supabase
       .from("menu_categories")
       .select("*")
       .eq("menu_id", menuData.id)
       .eq("type", menuType)
       .order("position");
 
-    const { data: its } = await supabase
+    const { data: its = [] } = await supabase
       .from("menu_items")
       .select("*")
       .eq("menu_id", menuData.id)
       .eq("type", menuType)
       .order("position");
 
-    setCategories(cats || []);
-    setItems(its || []);
+    setCategories(cats);
+    setItems(its);
 
     setLoading(false);
   };
 
-  const reloadCategories = async () => {
-    if (!menu) return;
-
-    const { data } = await supabase
-      .from("menu_categories")
-      .select("*")
-      .eq("menu_id", menu.id)
-      .eq("type", menuType)
-      .order("position");
-
-    setCategories(data || []);
-  };
-
-  const reloadItems = async () => {
-    if (!menu) return;
-
-    const { data } = await supabase
-      .from("menu_items")
-      .select("*")
-      .eq("menu_id", menu.id)
-      .eq("type", menuType)
-      .order("position");
-
-    setItems(data || []);
-  };
-
   const addCategory = async () => {
-    if (!menu || !menu.id) return;
     if (!newCategory.trim()) return;
 
-    const { error } = await supabase.from("menu_categories").insert({
+    await supabase.from("menu_categories").insert({
       menu_id: menu.id,
       name: newCategory.toUpperCase(),
-      type: menuType, // ✅ FIX
+      description: newCategoryDesc,
+      type: menuType,
       position: categories.length + 1
     });
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
     setNewCategory("");
-    reloadCategories();
+    setNewCategoryDesc("");
+    loadAll();
   };
 
-  const deleteCategory = async (id) => {
-    await supabase.from("menu_items").delete().eq("category_id", id);
-    await supabase.from("menu_categories").delete().eq("id", id);
-    reloadCategories();
-    reloadItems();
-  };
-
-  const addDish = async (categoryId) => {
+  const addItem = async (categoryId) => {
 
     const input = dishInputs[categoryId] || {};
+    if (!input.name) return;
 
-    if (!input.name || !input.price) {
-      alert("Missing name or price");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("menu_items")
-      .insert({
-        menu_id: menu.id,
-        category_id: categoryId,
-        name: input.name,
-        description: input.description || "",
-        price: Number(input.price),
-        type: menuType,
-        position: items.length + 1
-      });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
+    await supabase.from("menu_items").insert({
+      menu_id: menu.id,
+      category_id: categoryId,
+      name: input.name,
+      description: input.description || "",
+      duration: input.duration || "",
+      price: input.price ? Number(input.price) : 0,
+      type: menuType,
+      position: items.length + 1
+    });
 
     setDishInputs(prev => ({
       ...prev,
-      [categoryId]: { name: "", description: "", price: "" }
+      [categoryId]: {}
     }));
 
-    reloadItems();
+    loadAll();
   };
 
-  const deleteDish = async (id) => {
-    await supabase.from("menu_items").delete().eq("id", id);
-    reloadItems();
-  };
-
-  const updateDish = async () => {
-
-    await supabase
-      .from("menu_items")
-      .update({
-        name: editData.name,
-        description: editData.description,
-        price: Number(editData.price)
-      })
-      .eq("id", editingId);
-
-    setEditingId(null);
-    setEditData({});
-    reloadItems();
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Loading menu...
-      </div>
-    );
-  }
-
-  if (!menu) return null;
+  if (loading) return <div className="p-10 text-white">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-      <div className="max-w-4xl mx-auto px-6">
+    <div className="min-h-screen bg-[#05070a] text-[#e8e4dc] px-6 py-12 flex justify-center">
+      
+      <div className="w-full max-w-[1200px]">
 
         {/* HEADER */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-semibold">{menu.name}</h1>
-          <p className="text-sm text-gray-500">Menu Editor</p>
-        </div>
+        <div className="flex justify-between items-center mb-12">
 
-        {/* TYPE TOGGLE */}
-        <div className="flex gap-3 mb-8">
-          <button
-            onClick={() => setMenuType("food")}
-            className={`px-4 py-2 rounded-lg text-sm ${
-              menuType === "food"
-                ? "bg-black text-white"
-                : "bg-gray-200"
-            }`}
-          >
-            FOOD
-          </button>
+          <div>
+            <h1 className="text-3xl font-light tracking-wide text-[#c6a46c]">
+              {menu?.name}
+            </h1>
+            <p className="text-sm text-white/40 mt-1">
+              Menu editor
+            </p>
+          </div>
 
-          <button
-            onClick={() => setMenuType("drinks")}
-            className={`px-4 py-2 rounded-lg text-sm ${
-              menuType === "drinks"
-                ? "bg-black text-white"
-                : "bg-gray-200"
-            }`}
-          >
-            DRINKS
-          </button>
+          <div className="flex gap-2 bg-white/5 p-1 rounded-full backdrop-blur-xl border border-white/10">
+            {["food", "drinks", "services"].map(type => (
+              <button
+                key={type}
+                onClick={() => setMenuType(type)}
+                className={`px-5 py-2 text-sm rounded-full transition ${
+                  menuType === type
+                    ? "bg-[#c6a46c] text-black shadow-md"
+                    : "text-white/50 hover:text-white"
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+
         </div>
 
         {/* ADD CATEGORY */}
-        <div className="flex gap-3 mb-12">
-          <input
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            placeholder="New category"
-            className="flex-1 border px-4 py-2 rounded-lg"
-          />
-          <button
-            onClick={addCategory}
-            className="bg-black text-white px-6 rounded-lg"
-          >
-            Add
-          </button>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-12 backdrop-blur-xl">
+
+          <div className="text-xs text-white/40 mb-5 tracking-[0.2em]">
+            ADD CATEGORY
+          </div>
+
+          <div className="flex gap-4 items-center">
+
+            <input
+              placeholder="Category name"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="flex-1 bg-white/[0.03] border border-white/10 px-5 py-3 rounded-2xl focus:outline-none focus:border-[#c6a46c] transition"
+            />
+
+            <input
+              placeholder="Category description"
+              value={newCategoryDesc}
+              onChange={(e) => setNewCategoryDesc(e.target.value)}
+              className="flex-1 bg-white/[0.03] border border-white/10 px-5 py-3 rounded-2xl focus:outline-none focus:border-[#c6a46c] transition"
+            />
+
+            <button
+              onClick={addCategory}
+              className="px-6 py-3 bg-[#c6a46c] text-black rounded-2xl font-medium hover:opacity-90 transition"
+            >
+              Add
+            </button>
+
+          </div>
+
         </div>
 
         {/* CATEGORIES */}
@@ -244,62 +181,28 @@ export default function MenuEditorPage() {
             const input = dishInputs[cat.id] || {};
 
             return (
-              <div key={cat.id} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div
+                key={cat.id}
+                className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+              >
 
-                <div className="flex justify-between mb-6">
-                  <h2 className="text-xl font-semibold">{cat.name}</h2>
-                  <button
-                    onClick={() => deleteCategory(cat.id)}
-                    className="text-red-500 text-xs"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {/* HEADER */}
+                <div className="mb-6 border-b border-white/10 pb-4">
 
-                <div className="space-y-4 mb-6">
+                  <h2 className="text-lg tracking-wide text-[#c6a46c]">
+                    {cat.name}
+                  </h2>
 
-                  {catItems.map(item => (
-
-                    <div key={item.id} className="flex justify-between items-center border-b pb-2">
-
-                      <div>
-                        <div className="font-medium">{item.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {item.description}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-
-                        <span className="font-medium">€{item.price}</span>
-
-                        <button
-                          onClick={() => {
-                            setEditingId(item.id);
-                            setEditData(item);
-                          }}
-                          className="text-blue-500 text-sm"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() => deleteDish(item.id)}
-                          className="text-red-500 text-sm"
-                        >
-                          Delete
-                        </button>
-
-                      </div>
-
-                    </div>
-
-                  ))}
+                  {cat.description && (
+                    <p className="text-sm text-white/40 mt-2 max-w-md">
+                      {cat.description}
+                    </p>
+                  )}
 
                 </div>
 
-                {/* ADD DISH */}
-                <div className="grid grid-cols-3 gap-2">
+                {/* ADD ITEM */}
+                <div className="flex gap-3 mb-6 items-center">
 
                   <input
                     placeholder="Name"
@@ -310,7 +213,7 @@ export default function MenuEditorPage() {
                         [cat.id]: { ...input, name: e.target.value }
                       }))
                     }
-                    className="border px-2 py-1"
+                    className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
                   />
 
                   <input
@@ -322,7 +225,19 @@ export default function MenuEditorPage() {
                         [cat.id]: { ...input, description: e.target.value }
                       }))
                     }
-                    className="border px-2 py-1"
+                    className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
+                  />
+
+                  <input
+                    placeholder="Duration"
+                    value={input.duration || ""}
+                    onChange={(e) =>
+                      setDishInputs(prev => ({
+                        ...prev,
+                        [cat.id]: { ...input, duration: e.target.value }
+                      }))
+                    }
+                    className="w-32 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
                   />
 
                   <input
@@ -334,17 +249,55 @@ export default function MenuEditorPage() {
                         [cat.id]: { ...input, price: e.target.value }
                       }))
                     }
-                    className="border px-2 py-1"
+                    className="w-28 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
                   />
+
+                  <button
+                    onClick={() => addItem(cat.id)}
+                    className="px-5 py-3 bg-[#c6a46c] text-black rounded-2xl"
+                  >
+                    Add
+                  </button>
 
                 </div>
 
-                <button
-                  onClick={() => addDish(cat.id)}
-                  className="mt-3 bg-black text-white px-4 py-1 rounded"
-                >
-                  Add Dish
-                </button>
+                {/* ITEMS */}
+                <div className="space-y-4">
+
+                  {catItems.map(item => (
+                    <div
+                      key={item.id}
+                      className="flex justify-between items-start border-b border-white/10 pb-4"
+                    >
+
+                      <div className="max-w-[70%]">
+
+                        <div className="text-white text-[15px]">
+                          {item.name}
+                        </div>
+
+                        {item.description && (
+                          <div className="text-sm text-white/40 mt-1">
+                            {item.description}
+                          </div>
+                        )}
+
+                        {item.duration && (
+                          <div className="text-xs text-white/30 mt-1">
+                            {item.duration}
+                          </div>
+                        )}
+
+                      </div>
+
+                      <div className="text-[#c6a46c] font-medium text-[15px]">
+                        €{item.price}
+                      </div>
+
+                    </div>
+                  ))}
+
+                </div>
 
               </div>
             );
@@ -353,6 +306,7 @@ export default function MenuEditorPage() {
         </div>
 
       </div>
+
     </div>
   );
 }

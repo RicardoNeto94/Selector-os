@@ -9,115 +9,175 @@ export default function CreateMenuModal({ isOpen, onClose, restaurantId }) {
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [accent, setAccent] = useState("#c9a96a");
-  const [background, setBackground] = useState("#003223");
-  const [logo, setLogo] = useState("");
+  const [defaultView, setDefaultView] = useState("food");
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
+  // ✅ slug generator
+  const generateSlug = (value) => {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
+  };
+
   const handleCreate = async () => {
-  if (!name || !slug) {
-    alert("Name and slug are required");
-    return;
-  }
 
-  setLoading(true);
+    if (!name.trim()) {
+      alert("Menu name is required");
+      return;
+    }
 
-  const { data, error } = await supabase
-    .from("menus")
-    .insert({
-      name,
-      public_slug: slug,
-      restaurant_id: restaurantId,
-      theme_accent: accent,
-      theme_background: background,
-      logo_url: logo,
-      is_active: true,
-    })
-    .select();
+    const finalSlug = slug || generateSlug(name);
 
-  setLoading(false);
+    setLoading(true);
 
-  if (error) {
-    console.error("SUPABASE ERROR:", error);
-    alert(error.message); // 🔥 shows real reason
-    return;
-  }
+    const { error } = await supabase
+      .from("menus")
+      .insert({
+        name: name.trim(),
+        public_slug: finalSlug,
+        restaurant_id: restaurantId,
+        default_view: defaultView,
+        is_active: true,
+      });
 
-  console.log("CREATED:", data);
+    setLoading(false);
 
-  onClose();
-  window.location.reload();
-};
+    if (error) {
+      console.error("CREATE MENU ERROR:", error);
+      alert(error.message);
+      return;
+    }
+
+    // reset
+    setName("");
+    setSlug("");
+    setDefaultView("food");
+
+    onClose();
+
+    // 🔥 smoother refresh (no full reload)
+    window.location.href = "/dashboard/menu";
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-lg">
 
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="so-modal">
 
-        <h2 className="text-lg font-semibold mb-4">
-          Create New Menu
-        </h2>
+        {/* HEADER */}
+        <div className="mb-6">
 
-        <input
-          placeholder="Menu name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
+          <h2 className="text-xl font-semibold text-white">
+            Create new menu
+          </h2>
 
-        <input
-          placeholder="Public slug (koyo-wine)"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
+          <p className="text-sm text-slate-400 mt-1">
+            This will generate a live menu and QR code instantly.
+          </p>
 
-        <div className="mb-3">
-          <label className="text-xs">Accent Color</label>
-          <input
-            type="color"
-            value={accent}
-            onChange={(e) => setAccent(e.target.value)}
-            className="w-full h-10"
-          />
         </div>
 
-        <div className="mb-3">
-          <label className="text-xs">Background</label>
+        {/* NAME */}
+        <div className="mb-4">
+
+          <label className="text-xs text-slate-400 mb-1 block">
+            Menu name
+          </label>
+
           <input
-            type="color"
-            value={background}
-            onChange={(e) => setBackground(e.target.value)}
-            className="w-full h-10"
+            placeholder="e.g. Fox Den, Shang Shi Wine"
+            value={name}
+            onChange={(e) => {
+              const value = e.target.value;
+              setName(value);
+              setSlug(generateSlug(value));
+            }}
+            className="w-full bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/20"
           />
+
         </div>
 
-        <input
-          placeholder="Logo URL"
-          value={logo}
-          onChange={(e) => setLogo(e.target.value)}
-          className="w-full border p-2 rounded mb-4"
-        />
+        {/* SLUG */}
+        <div className="mb-5">
 
-        <div className="flex justify-between">
+          <label className="text-xs text-slate-400 mb-1 block">
+            URL slug
+          </label>
 
-          <button onClick={onClose}>
+          <div className="flex items-center gap-2">
+
+            <span className="text-xs text-slate-500">
+              /menu/
+            </span>
+
+            <input
+              value={slug}
+              onChange={(e) => setSlug(generateSlug(e.target.value))}
+              className="flex-1 bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+
+          </div>
+
+        </div>
+
+        {/* DEFAULT VIEW */}
+        <div className="mb-6">
+
+          <label className="text-xs text-slate-400 mb-2 block">
+            Default menu type
+          </label>
+
+          <div className="grid grid-cols-2 gap-2">
+
+            {[
+              { key: "food", label: "Food" },
+              { key: "drinks", label: "Drinks" },
+              { key: "wine", label: "Wine" },
+              { key: "services", label: "Services" },
+            ].map((type) => (
+              <button
+                key={type.key}
+                onClick={() => setDefaultView(type.key)}
+                className={`px-4 py-3 rounded-xl text-sm transition text-left ${
+                  defaultView === type.key
+                    ? "bg-white text-black font-medium"
+                    : "bg-white/5 text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex justify-between items-center">
+
+          <button
+            onClick={onClose}
+            className="text-sm text-slate-400 hover:text-white"
+          >
             Cancel
           </button>
 
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="bg-black text-white px-4 py-2 rounded"
+            className="bg-white text-black px-6 py-2 rounded-xl font-medium hover:opacity-90"
           >
-            {loading ? "Creating..." : "Create"}
+            {loading ? "Creating..." : "Create Menu"}
           </button>
 
         </div>
 
       </div>
+
     </div>
   );
 }

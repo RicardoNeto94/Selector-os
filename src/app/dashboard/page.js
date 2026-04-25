@@ -1,248 +1,130 @@
-"use client";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+export default async function DashboardPage() {
 
-export default function DashboardPage() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
 
-  const supabase = createClientComponentClient();
+  // 🔹 GET RESTAURANT
+  const { data: restaurant } = await supabase
+    .from("restaurants")
+    .select("*")
+    .limit(1)
+    .single();
 
-  const [restaurant, setRestaurant] = useState(null);
-
-  const [wineStats, setWineStats] = useState({
-    total: 0,
-    bottles: 0,
-    value: 0,
-    lowStock: 0,
-    outOfStock: 0,
-    menus: 0
-  });
-
-  const [dishStats, setDishStats] = useState({
-    dishes: 0,
-    allergenDishes: 0
-  });
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  async function loadDashboard() {
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: restaurantData } = await supabase
-      .from("restaurants")
-      .select("*")
-      .eq("owner_id", user.id)
-      .maybeSingle();
-
-    if (!restaurantData) {
-      setLoading(false);
-      return;
-    }
-
-    setRestaurant(restaurantData);
-
-    /* ---------------------------
-       WINE STATS
-    ---------------------------- */
-
-    const { data: wines } = await supabase
-      .from("wines")
-      .select("*")
-      .eq("restaurant_id", restaurantData.id);
-
-    const { data: inventory } = await supabase
-      .from("wine_inventory")
-      .select(`
-        stock,
-        wine_id,
-        wines(price)
-      `)
-      .eq("restaurant_id", restaurantData.id);
-
-    const { data: wineMenus } = await supabase
-      .from("wine_menus")
-      .select("*")
-      .eq("restaurant_id", restaurantData.id);
-
-    const totalWines = wines?.length || 0;
-
-    let bottles = 0;
-    let value = 0;
-
-    inventory?.forEach(i => {
-
-      const stock = i.stock || 0;
-
-      bottles += stock;
-
-      const price = i.wines?.price || 0;
-
-      value += stock * price;
-
-    });
-
-    const wineStockMap = {};
-
-    inventory?.forEach(i => {
-
-      if (!wineStockMap[i.wine_id]) {
-        wineStockMap[i.wine_id] = 0;
-      }
-
-      wineStockMap[i.wine_id] += i.stock;
-
-    });
-
-    const wineStockArray = Object.values(wineStockMap);
-
-    const lowStock =
-      wineStockArray.filter(s => s > 0 && s <= 3).length;
-
-    const outOfStock =
-      wineStockArray.filter(s => s === 0).length;
-
-    setWineStats({
-      total: totalWines,
-      bottles: bottles,
-      value: value,
-      lowStock: lowStock,
-      outOfStock: outOfStock,
-      menus: wineMenus?.length || 0
-    });
-
-    /* ---------------------------
-       DISH STATS
-    ---------------------------- */
-
-    const { data: menus } = await supabase
-      .from("menus")
-      .select("id")
-      .eq("restaurant_id", restaurantData.id);
-
-    const menuIds = menus?.map(m => m.id) || [];
-
-    const { data: dishes } = await supabase
-      .from("dishes")
-      .select("*")
-      .in("menu_id", menuIds);
-
-    const totalDishes = dishes?.length || 0;
-
-    setDishStats({
-      dishes: totalDishes,
-      allergenDishes: 0
-    });
-
-    setLoading(false);
-  }
-
-  if (loading) {
+  if (!restaurant) {
     return (
-      <div className="page-fade text-slate-400">
-        Loading dashboard…
+      <div className="so-main-inner">
+        <div className="so-card">
+          No restaurant found
+        </div>
       </div>
     );
   }
 
+  // 🔹 GET COUNTS
+  const { count: dishesCount } = await supabase
+    .from("menu_items")
+    .select("*", { count: "exact", head: true });
+
+  const { count: categoriesCount } = await supabase
+    .from("menu_categories")
+    .select("*", { count: "exact", head: true });
+
+  const { count: menusCount } = await supabase
+    .from("menus")
+    .select("*", { count: "exact", head: true });
+
   return (
-    <div className="page-fade space-y-8">
+    <div className="so-main-inner space-y-8">
 
-      <h1 className="text-2xl font-semibold text-white">
-        Dashboard
-      </h1>
+      {/* HEADER */}
+      <div>
+        <h1 className="so-title">
+          Welcome back
+        </h1>
 
-      {/* WINE PROGRAM */}
+        <p className="so-sub">
+          {restaurant.name} — overview of your system
+        </p>
+      </div>
 
-      <div className="space-y-4">
+      {/* KPI CARDS */}
+      <div className="so-grid">
 
-        <h2 className="text-sm uppercase text-slate-400 tracking-wider">
-          Wine Program
-        </h2>
+        <div className="so-card">
+          <div className="so-sub">Menus</div>
+          <div className="text-3xl font-semibold mt-2">
+            {menusCount || 0}
+          </div>
+        </div>
 
-        <div className="grid md:grid-cols-6 gap-6">
+        <div className="so-card">
+          <div className="so-sub">Categories</div>
+          <div className="text-3xl font-semibold mt-2">
+            {categoriesCount || 0}
+          </div>
+        </div>
 
-          <div className="so-card">
-            <div className="so-card-title">Total Wines</div>
-            <div className="text-3xl font-bold text-white">
-              {wineStats.total}
+        <div className="so-card">
+          <div className="so-sub">Dishes / Items</div>
+          <div className="text-3xl font-semibold mt-2">
+            {dishesCount || 0}
+          </div>
+        </div>
+
+      </div>
+
+      {/* QUICK ACTIONS */}
+      <div className="so-card">
+
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <div className="font-semibold text-lg">
+              Quick Actions
+            </div>
+            <div className="so-sub">
+              Jump directly into your workflow
             </div>
           </div>
+        </div>
 
-          <div className="so-card">
-            <div className="so-card-title">Total Bottles</div>
-            <div className="text-3xl font-bold text-white">
-              {wineStats.bottles}
-            </div>
-          </div>
+        <div className="flex flex-wrap gap-3">
 
-          <div className="so-card">
-            <div className="so-card-title">Cellar Value</div>
-            <div className="text-3xl font-bold text-white">
-              €{wineStats.value.toLocaleString()}
-            </div>
-          </div>
+          <a href="/dashboard/menu" className="so-btn-primary">
+            Manage Menus
+          </a>
 
-          <div className="so-card">
-            <div className="so-card-title">Low Stock</div>
-            <div className="text-3xl font-bold text-amber-400">
-              {wineStats.lowStock}
-            </div>
-          </div>
+          <a href="/dashboard/dishes" className="so-btn-primary">
+            Manage Dishes
+          </a>
 
-          <div className="so-card">
-            <div className="so-card-title">Out of Stock</div>
-            <div className="text-3xl font-bold text-red-400">
-              {wineStats.outOfStock}
-            </div>
-          </div>
+          <a href="/dashboard/wines" className="so-btn-primary">
+            Wine Cellar
+          </a>
 
-          <div className="so-card">
-            <div className="so-card-title">Wine Menus</div>
-            <div className="text-3xl font-bold text-white">
-              {wineStats.menus}
-            </div>
-          </div>
+          <a href="/dashboard/settings" className="so-btn-ghost">
+            Settings
+          </a>
 
         </div>
 
       </div>
 
-      {/* KITCHEN */}
+      {/* SYSTEM STATUS */}
+      <div className="so-card">
 
-      <div className="space-y-4">
+        <div className="font-semibold mb-4">
+          System Status
+        </div>
 
-        <h2 className="text-sm uppercase text-slate-400 tracking-wider">
-          Kitchen & Allergens
-        </h2>
-
-        <div className="grid md:grid-cols-2 gap-6">
-
-          <div className="so-card">
-            <div className="so-card-title">Total Dishes</div>
-            <div className="text-3xl font-bold text-white">
-              {dishStats.dishes}
-            </div>
-          </div>
-
-          <div className="so-card">
-            <div className="so-card-title">Dishes With Allergens</div>
-            <div className="text-3xl font-bold text-white">
-              {dishStats.allergenDishes}
-            </div>
-          </div>
-
+        <div className="flex items-center gap-2 text-sm text-slate-400">
+          <div className="w-2 h-2 rounded-full bg-green-400"></div>
+          All systems operational
         </div>
 
       </div>

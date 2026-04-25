@@ -8,7 +8,13 @@ import BillingClient from "./BillingClient";
 export const dynamic = "force-dynamic";
 
 export default async function BillingPage() {
-  const supabase = createServerComponentClient({ cookies });
+
+  // ✅ FIX (Next.js 14)
+  const cookieStore = await cookies();
+
+  const supabase = createServerComponentClient({
+    cookies: () => cookieStore
+  });
 
   const {
     data: { user },
@@ -29,16 +35,15 @@ export default async function BillingPage() {
 
     return (
       <main className="so-main page-fade">
-
         <div className="so-main-inner mx-auto w-full max-w-[900px]">
 
-          <div className="so-card border border-red-400/30 bg-red-50/90">
+          <div className="so-card border border-red-400/30 bg-red-500/10">
 
-            <h1 className="text-lg font-semibold mb-2 text-red-800">
+            <h1 className="text-lg font-semibold mb-2 text-red-400">
               No restaurant found
             </h1>
 
-            <p className="text-sm text-red-700/90">
+            <p className="text-sm text-red-300">
               We couldn&apos;t find a restaurant linked to your account.
               Finish onboarding first.
             </p>
@@ -46,20 +51,17 @@ export default async function BillingPage() {
           </div>
 
         </div>
-
       </main>
     );
   }
 
   return (
     <main className="so-main page-fade">
-
       <div className="so-main-inner mx-auto w-full max-w-[1000px]">
 
         <BillingClient restaurant={restaurant} />
 
       </div>
-
     </main>
   );
 }

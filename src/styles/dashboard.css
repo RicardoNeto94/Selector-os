@@ -1,234 +1,191 @@
-/* src/styles/dashboard.css */
-/* SelectorOS – Off-White Hospitality Theme */
+/* =======================================================
+   SELECTOR OS — PREMIUM DARK (FINAL MASTER)
+======================================================= */
 
 :root{
 
-  --so-bg-page:#F7F6F2;
-  --so-panel:#FFFFFF;
-  --so-border:#E5E7EB;
+  --bg-main:#07090c;
+  --bg-surface:#0e1116;
+  --bg-card:rgba(255,255,255,0.035);
 
-  --so-text-main:#1F2937;
-  --so-text-muted:#6B7280;
+  --border:rgba(255,255,255,0.08);
+  --border-soft:rgba(255,255,255,0.05);
 
-  --so-accent:#0F2744;
-  --so-accent-soft:#1F3A5F;
+  --text-main:#e8e4dc;
+  --text-muted:#8b8f98;
 
-  --so-radius:10px;
+  --accent:#c6a46c;
+  --accent-soft:#e0c48a;
 
-  --so-sidebar-width:240px;
+  --radius:16px;
+
+  --sidebar-width:250px;
 }
 
 /* =======================================================
-   BASE LAYOUT
+   BASE
 ======================================================= */
 
 .so-dashboard-root{
   display:flex;
   min-height:100vh;
-  background:var(--so-bg-page);
-  color:var(--so-text-main);
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  background:var(--bg-main);
+  color:var(--text-main);
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    Inter,
+    sans-serif;
+
+  -webkit-font-smoothing:antialiased;
 }
 
 /* =======================================================
-   SIDEBAR
+   SIDEBAR (🔥 NOT FLAT ANYMORE)
 ======================================================= */
 
 .so-sidebar{
-
-  width:var(--so-sidebar-width);
+  width:var(--sidebar-width);
   height:100vh;
+
   position:sticky;
   top:0;
 
-  background:#0F2744;
-  border-right:1px solid rgba(0,0,0,0.08);
+  background:linear-gradient(
+    180deg,
+    #0c0f14 0%,
+    #0a0d12 100%
+  );
+
+  backdrop-filter:blur(20px);
+
+  border-right:1px solid var(--border-soft);
 
   display:flex;
   flex-direction:column;
   justify-content:space-between;
 
-  padding:20px 16px;
+  padding:22px 16px;
 
   overflow-y:auto;
-
-  color:white;
 }
 
 /* =======================================================
-   BRAND
+   LOGO
 ======================================================= */
 
 .so-sidebar-brand{
   display:flex;
+  justify-content:center;
   align-items:center;
-  margin-bottom:20px;
+
+  padding:20px 0 26px;
+
+  position:relative;
 }
 
-.so-sidebar-logo{
-  width:90px;
+/* luxury divider */
+.so-sidebar-brand::after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:30%;
+  right:30%;
+  height:1px;
+
+  background:linear-gradient(
+    to right,
+    transparent,
+    rgba(198,164,108,0.35),
+    transparent
+  );
+}
+
+.so-logo-wrap{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.so-logo{
+  width:85px;
   height:auto;
+
+  object-fit:contain;
+
+  opacity:0.9;
+
+  transition:all 0.25s ease;
+}
+
+.so-logo:hover{
+  opacity:1;
+  transform:scale(1.05);
 }
 
 /* =======================================================
-   NAVIGATION
+   NAV
 ======================================================= */
 
 .so-sidebar-nav{
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:6px;
 }
 
 .so-sidebar-section-label{
   font-size:11px;
-  letter-spacing:.08em;
+  letter-spacing:.12em;
   text-transform:uppercase;
-  color:rgba(255,255,255,0.6);
-  margin-top:18px;
+  color:rgba(255,255,255,0.35);
+
+  margin-top:20px;
   margin-bottom:6px;
 }
 
-/* =======================================================
-   NAV ITEMS
-======================================================= */
+/* NAV ITEMS */
 
 .so-nav-item{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
 
   padding:10px 12px;
-
-  border-radius:8px;
+  border-radius:12px;
 
   font-size:14px;
 
-  cursor:pointer;
+  color:var(--text-muted);
 
-  transition:background .15s ease;
-
-  line-height:1;
+  transition:all .18s ease;
 }
 
 .so-nav-item:hover{
-  background:rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.04);
+  color:var(--text-main);
 }
 
+/* 🔥 BIG VISUAL UPGRADE */
 .so-nav-item--active{
-  background:rgba(255,255,255,0.18);
+  background:linear-gradient(
+    90deg,
+    rgba(198,164,108,0.18),
+    rgba(198,164,108,0.05)
+  );
+
+  color:var(--accent);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(198,164,108,0.15);
 }
 
-/* =======================================================
-   LOCK ICON
-======================================================= */
-
-.so-lock-icon{
-  width:14px;
-  height:14px;
-  opacity:0.55;
-  margin-right:6px;
-  flex:0 0 auto;
-}
-/* =======================================================
-   ICON
-======================================================= */
-
-.so-nav-icon-wrap{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex:0 0 auto;
-}
-
+/* ICON */
 .so-nav-icon{
-  width:16px;
-  height:16px;
+  width:18px;
+  height:18px;
   opacity:0.9;
-  flex:0 0 auto;
-}
-
-/* =======================================================
-   ARROW
-======================================================= */
-
-.so-nav-arrow{
-
-  width:14px;
-  height:14px;
-
-  margin-left:auto;
-
-  opacity:.65;
-
-  transition:
-    transform .18s ease,
-    opacity .15s ease;
-
-}
-
-.so-nav-arrow:hover{
-  opacity:1;
-}
-
-.so-nav-arrow-open{
-  transform:rotate(90deg);
-}
-
-/* =======================================================
-   SUBMENU
-======================================================= */
-
-.so-nav-group{
-  position:relative;
-}
-
-.so-nav-sub{
-
-  margin-left:26px;
-
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-
-  padding:6px 0;
-
-  animation:soSubMenu .16s ease;
-}
-
-@keyframes soSubMenu{
-
-  from{
-    opacity:0;
-    transform:translateY(-4px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-
-}
-
-.so-nav-sub-item{
-
-  font-size:13px;
-
-  color:rgba(255,255,255,0.75);
-
-  padding:6px 8px;
-
-  border-radius:6px;
-
-}
-
-.so-nav-sub-item:hover{
-  background:rgba(255,255,255,0.12);
-  color:white;
-}
-
-.so-nav-locked{
-  opacity:.4;
 }
 
 /* =======================================================
@@ -236,12 +193,12 @@
 ======================================================= */
 
 .so-sidebar-footer{
-  border-top:1px solid rgba(255,255,255,0.1);
+  border-top:1px solid var(--border-soft);
   padding-top:16px;
 
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:14px;
 }
 
 .so-sidebar-user{
@@ -251,158 +208,60 @@
 }
 
 .so-user-avatar{
-  width:32px;
-  height:32px;
+  width:34px;
+  height:34px;
   border-radius:50%;
 
-  background:var(--so-accent-soft);
+  background:rgba(255,255,255,0.08);
 
   display:flex;
   align-items:center;
   justify-content:center;
 
   font-weight:600;
-  color:white;
-}
-
-.so-user-meta{
-  display:flex;
-  flex-direction:column;
 }
 
 .so-user-name{
   font-size:13px;
+  color:var(--text-main);
 }
 
 .so-user-tag{
   font-size:11px;
-  opacity:0.7;
+  color:var(--text-muted);
 }
 
 .so-logout-btn{
-
-  border:1px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
 
   padding:8px 12px;
-  border-radius:6px;
+  border-radius:10px;
 
   font-size:13px;
+  text-align:center;
 
-  color:white;
-
-  cursor:pointer;
+  transition:.15s ease;
 }
 
 .so-logout-btn:hover{
-  background:rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.08);
 }
 
 /* =======================================================
-   MAIN CONTENT
+   MAIN
 ======================================================= */
 
 .so-main{
   flex:1;
-  padding:32px;
+  padding:48px 60px;
+
+  background:var(--bg-main);
   overflow-y:auto;
 }
 
 .so-main-inner{
-  max-width:1200px;
-  margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  gap:28px;
-}
-
-/* =======================================================
-   TOPBAR
-======================================================= */
-
-.so-topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:24px;
-}
-
-.so-topbar-title{
-  font-size:22px;
-  font-weight:600;
-}
-
-.so-topbar-sub{
-  font-size:13px;
-  color:var(--so-text-muted);
-}
-
-/* =======================================================
-   SEARCH
-======================================================= */
-
-.so-search{
-
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  border:1px solid var(--so-border);
-  background:white;
-
-  padding:8px 10px;
-  border-radius:8px;
-}
-
-.so-search-input{
-  background:transparent;
-  border:none;
-  outline:none;
-  color:var(--so-text-main);
-}
-
-/* =======================================================
-   BUTTONS
-======================================================= */
-
-.so-btn-primary{
-
-  background:var(--so-accent);
-  border:none;
-
-  padding:9px 14px;
-
-  border-radius:8px;
-
-  font-size:13px;
-  font-weight:600;
-
-  color:white;
-
-  cursor:pointer;
-
-  transition:all .15s ease;
-}
-
-.so-btn-primary:hover{
-  background:var(--so-accent-soft);
-}
-
-.so-btn-secondary{
-
-  background:white;
-  border:1px solid var(--so-border);
-
-  padding:8px 14px;
-  border-radius:8px;
-
-  font-size:13px;
-
-  cursor:pointer;
-}
-
-.so-btn-secondary:hover{
-  background:#f3f4f6;
+  display:contents;
 }
 
 /* =======================================================
@@ -410,64 +269,132 @@
 ======================================================= */
 
 .so-card{
+  background:var(--bg-card);
 
-  background:var(--so-panel);
-  border:1px solid var(--so-border);
-  border-radius:var(--so-radius);
+  border:1px solid var(--border-soft);
 
-  padding:18px;
+  border-radius:18px;
+
+  padding:22px;
+
+  backdrop-filter:blur(16px);
 
   box-shadow:
-  0 1px 2px rgba(0,0,0,0.04),
-  0 8px 24px rgba(0,0,0,0.06);
-
-}
-
-.so-card-title{
-
-  font-size:12px;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-
-  color:var(--so-text-muted);
-
+    inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* =======================================================
-   MODAL
+   INPUTS
 ======================================================= */
 
-.so-modal-backdrop{
+.so-input{
+  background:rgba(255,255,255,0.04);
 
-  position:fixed;
-  inset:0;
+  border:1px solid var(--border);
+  border-radius:14px;
 
-  background:rgba(0,0,0,0.25);
-  backdrop-filter:blur(4px);
+  padding:12px 16px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  color:var(--text-main);
 
-  z-index:999;
+  outline:none;
+
+  transition:.2s ease;
 }
 
-.so-modal{
+.so-input::placeholder{
+  color:rgba(255,255,255,0.35);
+}
 
-  width:640px;
-  max-width:92vw;
-
-  max-height:85vh;
-  overflow-y:auto;
-
-  background:white;
-
-  border:1px solid var(--so-border);
-  border-radius:18px;
-
-  padding:28px;
+.so-input:focus{
+  border-color:var(--accent);
 
   box-shadow:
-  0 20px 60px rgba(0,0,0,0.15);
+    0 0 0 1px rgba(198,164,108,0.3),
+    0 6px 20px rgba(198,164,108,0.15);
 
+  background:rgba(255,255,255,0.06);
+}
+
+/* =======================================================
+   BUTTONS
+======================================================= */
+
+.so-btn-primary{
+  background:linear-gradient(135deg,#d6b57a,#b8965a);
+  color:#0b0c0f;
+
+  border:none;
+
+  padding:12px 18px;
+  border-radius:14px;
+
+  font-size:13px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:.2s ease;
+
+  box-shadow:0 6px 18px rgba(198,164,108,0.25);
+}
+
+.so-btn-primary:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 28px rgba(198,164,108,0.35);
+}
+
+.so-btn-ghost{
+  background:transparent;
+  border:none;
+  color:var(--text-muted);
+  cursor:pointer;
+}
+
+.so-btn-ghost:hover{
+  color:var(--accent);
+}
+
+/* =======================================================
+   TEXT
+======================================================= */
+
+.so-title{
+  font-size:28px;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  color:var(--accent);
+}
+
+.so-sub{
+  font-size:13px;
+  color:var(--text-muted);
+}
+
+/* =======================================================
+   GRID
+======================================================= */
+
+.so-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(420px, 1fr));
+  gap:22px;
+}
+
+/* =======================================================
+   ITEM ROW
+======================================================= */
+
+.so-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:12px 0;
+
+  border-bottom:1px solid var(--border-soft);
+}
+
+.so-item:last-child{
+  border-bottom:none;
 }

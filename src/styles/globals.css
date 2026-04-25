@@ -2,22 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DESIGN TOKENS */
+/* ================= DESIGN TOKENS ================= */
 
 :root {
-  --bg: #1a0505;
-  --panel: #15181d;
-  --border: #23262d;
+  --bg: #05070a;              /* 🔥 unified background */
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
 
-  --text: #e6e7ea;
-  --text-muted: #8b8f98;
+  --text: #e8e4dc;
+  --text-muted: rgba(232,228,220,0.5);
 
-  --accent: #c9a96a;
+  --accent: #c6a46c;          /* champagne */
 
-  --radius: 8px;
+  --radius: 14px;
 }
 
-/* GLOBAL RESET */
+/* ================= GLOBAL ================= */
 
 *,
 *::before,
@@ -25,108 +25,177 @@
   box-sizing: border-box;
 }
 
-/* CORE VIEWPORT */
-
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
 
-  background: #2a0000;
+  background: var(--bg);      /* 🔥 FIXED */
   color: var(--text);
+
   font-family: "Inter", sans-serif;
 
-  overflow: hidden; /* 🔥 IMPORTANT */
+  overflow: hidden;
 }
 
-/* SAFE AREAS */
-
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* 🔥 REAL SCROLL CONTAINER */
+/* MAIN SCROLL */
 
 .app-container {
   height: 100dvh;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  background: #2a0000;
+  background: var(--bg);      /* 🔥 SAME COLOR */
 }
 
-/* PANEL */
+/* ================= SIDEBAR FIX ================= */
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+/* make sidebar match system */
+aside,
+.sidebar {
+  background: linear-gradient(
+    to bottom,
+    #06080c,
+    #05070a
+  );
+
+  border-right: 1px solid rgba(255,255,255,0.05);
 }
 
-/* BUTTON */
+/* sidebar text */
 
-.button {
-  @apply px-4 py-2 text-sm font-medium rounded-md;
-  background: var(--accent);
-  color: white;
-}
-
-.button-secondary {
-  @apply px-4 py-2 text-sm font-medium rounded-md;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-/* INPUT */
-
-.input {
-  @apply w-full px-3 py-2 text-sm rounded-md;
-  background: #1b1f26;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-/* TABLE */
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th {
-  text-align: left;
+aside *,
+.sidebar * {
   color: var(--text-muted);
+}
+
+aside .active,
+.sidebar .active {
+  color: var(--accent);
+}
+
+/* ================= PANELS ================= */
+
+.panel{
+  background: linear-gradient(
+    145deg,
+    rgba(255,255,255,0.04),
+    rgba(255,255,255,0.02)
+  );
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+
+  transition: all 0.3s ease;
+}
+
+/* ================= INPUT ================= */
+
+.input{
+  width: 100%;
+
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.03);
+
+  border: 1px solid var(--border);
+
+  color: var(--text);
+
+  font-size: 13px;
+
+  transition: all 0.25s ease;
+}
+
+.input::placeholder{
+  color: rgba(232,228,220,0.35);
+}
+
+.input:focus{
+  outline: none;
+
+  border-color: rgba(198,164,108,0.6);
+
+  box-shadow:
+    0 0 0 1px rgba(198,164,108,0.25),
+    0 6px 20px rgba(198,164,108,0.15);
+}
+
+/* ================= BUTTON ================= */
+
+.button{
+  padding: 12px 20px;
+
+  border-radius: 14px;
+
+  font-size: 13px;
   font-weight: 500;
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
+
+  background: linear-gradient(
+    135deg,
+    #d6b57a,
+    #b8965a
+  );
+
+  color: #0b0c0f;
+
+  box-shadow:
+    0 8px 20px rgba(198,164,108,0.25);
+
+  transition: all 0.25s ease;
 }
 
-.table td {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
+.button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(198,164,108,0.35);
 }
 
-.table tr:hover {
-  background: #1a1d23;
+/* ================= TYPOGRAPHY ================= */
+
+h1{
+  color: var(--accent); /* 🔥 champagne title */
+  font-weight: 400;
 }
 
-/* PAGE FADE */
-
-.page-fade {
-  animation: pageFadeIn 0.3s ease;
+h2{
+  color: var(--accent); /* 🔥 FIXED */
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 12px;
 }
 
-@keyframes pageFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+p{
+  color: var(--text-muted);
+}
+
+/* ================= REMOVE "BLACK BOX" ================= */
+
+/* THIS is what fixes your issue */
+.so-main{
+  background: transparent !important;
+}
+
+/* center layout nicely */
+.so-main-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ================= SCROLL ================= */
+
+::-webkit-scrollbar{
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
 }

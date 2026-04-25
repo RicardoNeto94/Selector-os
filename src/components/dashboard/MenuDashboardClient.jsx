@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import CreateMenuModal from "./CreateMenuModal";
 import { QRCodeSVG } from "qrcode.react";
+import CreateMenuModal from "./CreateMenuModal";
 
 export default function MenuDashboardClient({
   menus,
@@ -15,144 +16,157 @@ export default function MenuDashboardClient({
 
   const [showModal, setShowModal] = useState(false);
 
+  // ✅ HARD FIX → no hydration mismatch, no undefined
+  const BASE_URL = "https://selector-os.vercel.app";
+
   return (
-    <div className="page-fade">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="so-main-inner space-y-8">
 
-        {/* HEADER */}
-        <header className="flex items-center justify-between">
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
 
-          <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-emerald-600">
-              SELECTOROS • MENUS
-            </p>
+        <div>
+          <p className="text-xs uppercase tracking-widest text-slate-400">
+            MENUS
+          </p>
 
-            <h1 className="mt-2 text-2xl font-semibold">
-              Menus for{" "}
-              <span className="text-emerald-600">
-                {restaurant.name}
-              </span>
-            </h1>
+          <h1 className="text-2xl font-semibold text-white mt-1">
+            {restaurant.name}
+          </h1>
 
-            <p className="text-sm text-slate-600 mt-1">
-              Plan: <strong>{plan}</strong>{" "}
-              {typeof maxMenus === "number" && (
-                <>({menus.length}/{maxMenus})</>
-              )}
-            </p>
-          </div>
-
-          <button
-            onClick={() => setShowModal(true)}
-            disabled={isAtLimit}
-            className={`
-              flex items-center gap-2 px-4 py-2 rounded-full text-sm
-              ${
-                isAtLimit
-                  ? "bg-gray-200 text-gray-400"
-                  : "bg-emerald-500 text-white hover:bg-emerald-600"
-              }
-            `}
-          >
-            <PlusIcon className="h-4 w-4" />
-            Create Menu
-          </button>
-
-        </header>
-
-        {/* MENU LIST */}
-        <div className="so-card p-6">
-
-          {menus.length === 0 ? (
-            <p className="text-sm text-slate-600">
-              No menus yet.
-            </p>
-          ) : (
-            <div className="space-y-2">
-
-              {menus.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex justify-between items-center py-4 border-b"
-                >
-
-                  {/* LEFT */}
-                  <div>
-                    <div className="font-medium">{m.name}</div>
-                    <div className="text-xs text-slate-500">
-                      /menu/{m.public_slug}
-                    </div>
-                  </div>
-
-                  {/* RIGHT */}
-                  <div className="flex items-center gap-6">
-
-                    {/* OPEN */}
-                    <a
-                      href={`/menu/${m.public_slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-emerald-600 text-sm"
-                    >
-                      Open
-                    </a>
-
-                    {/* QR + DOWNLOAD */}
-                    <div className="flex flex-col items-center gap-2">
-
-                      <div id={`qr-${m.id}`} className="bg-white p-2 rounded">
-  <QRCodeSVG
-    value={`${process.env.NEXT_PUBLIC_APP_URL}/menu/${m.public_slug}`}
-    size={70}
-  />
-</div>
-
-                      <button
-                        onClick={() => {
-                          const svg = document
-                            .getElementById(`qr-${m.id}`)
-                            ?.querySelector("svg");
-
-                          if (!svg) return;
-
-                          const blob = new Blob([svg.outerHTML], {
-                            type: "image/svg+xml",
-                          });
-
-                          const url = URL.createObjectURL(blob);
-
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = `${m.name}-qr.svg`;
-                          a.click();
-
-                          URL.revokeObjectURL(url);
-                        }}
-                        className="text-xs text-slate-500 hover:text-black"
-                      >
-                        Download
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </div>
-              ))}
-
-            </div>
-          )}
-
+          <p className="text-sm text-slate-400 mt-1">
+            Plan: <strong>{plan}</strong>{" "}
+            {typeof maxMenus === "number" && (
+              <>({menus.length}/{maxMenus})</>
+            )}
+          </p>
         </div>
 
-        {/* CREATE MENU MODAL */}
-        <CreateMenuModal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          restaurantId={restaurant.id}
-        />
+        <button
+          onClick={() => setShowModal(true)}
+          disabled={isAtLimit}
+          className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium ${
+            isAtLimit
+              ? "bg-white/5 text-slate-500"
+              : "bg-white text-black hover:opacity-90"
+          }`}
+        >
+          <PlusIcon className="h-4 w-4" />
+          New Menu
+        </button>
 
       </div>
+
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {menus.length === 0 && (
+          <div className="so-card p-6 text-slate-400">
+            No menus yet.
+          </div>
+        )}
+
+        {menus.map((m) => {
+
+          const menuUrl = `${BASE_URL}/menu/${m.public_slug}`;
+
+          return (
+            <div
+              key={m.id}
+              className="so-card p-6 flex flex-col justify-between hover:shadow-xl transition"
+            >
+
+              {/* TOP */}
+              <div className="flex justify-between items-start">
+
+                <div>
+                  <div className="text-lg font-semibold text-white">
+                    {m.name}
+                  </div>
+
+                  <div className="text-xs text-slate-400 mt-1">
+                    /menu/{m.public_slug}
+                  </div>
+                </div>
+
+                <a
+                  href={menuUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-slate-400 hover:text-white"
+                >
+                  Open
+                </a>
+
+              </div>
+
+              {/* QR */}
+              <div className="flex justify-center py-6">
+
+                <div
+                  id={`qr-${m.id}`}
+                  className="bg-white p-3 rounded-2xl"
+                >
+                  <QRCodeSVG value={menuUrl} size={120} />
+                </div>
+
+              </div>
+
+              {/* ACTIONS */}
+              <div className="flex justify-between items-center">
+
+                {/* ✅ FIXED EDIT BUTTON */}
+                <Link
+                  href={`/dashboard/menu/${m.public_slug}`}
+                  className="text-sm text-blue-400 hover:text-white"
+                >
+                  Edit Menu
+                </Link>
+
+                {/* DOWNLOAD */}
+                <button
+                  onClick={() => {
+
+                    const svg = document
+                      .getElementById(`qr-${m.id}`)
+                      ?.querySelector("svg");
+
+                    if (!svg) return;
+
+                    const blob = new Blob([svg.outerHTML], {
+                      type: "image/svg+xml",
+                    });
+
+                    const url = URL.createObjectURL(blob);
+
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${m.name}-qr.svg`;
+                    a.click();
+
+                    URL.revokeObjectURL(url);
+
+                  }}
+                  className="text-sm text-slate-400 hover:text-white"
+                >
+                  Download QR
+                </button>
+
+              </div>
+
+            </div>
+          );
+        })}
+
+      </div>
+
+      {/* MODAL */}
+      <CreateMenuModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        restaurantId={restaurant.id}
+      />
+
     </div>
   );
 }

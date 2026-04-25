@@ -9,7 +9,13 @@ import LogoUploader from "./LogoUploader";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const supabase = createServerComponentClient({ cookies });
+
+  // ✅ FIX (Next.js 14 cookies)
+  const cookieStore = await cookies();
+
+  const supabase = createServerComponentClient({
+    cookies: () => cookieStore
+  });
 
   const {
     data: { user },
@@ -19,28 +25,30 @@ export default async function SettingsPage() {
     redirect("/sign-in");
   }
 
-  const { data: restaurant, error: restaurantError } = await supabase
+  const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("*")
     .eq("owner_id", user.id)
     .maybeSingle();
 
-  if (restaurantError || !restaurant) {
-    console.error("No restaurant for user", restaurantError);
+  if (error || !restaurant) {
+    console.error("No restaurant for user", error);
 
     return (
       <main className="so-main page-fade">
         <div className="so-main-inner mx-auto w-full max-w-[900px]">
 
-          <div className="so-card border border-red-400/30 bg-red-50/90">
-            <h1 className="mb-2 text-lg font-semibold text-red-800">
+          <div className="so-card border border-red-400/30 bg-red-500/10">
+
+            <h1 className="mb-2 text-lg font-semibold text-red-400">
               No restaurant found
             </h1>
 
-            <p className="text-sm text-red-700/90">
+            <p className="text-sm text-red-300">
               We couldn&apos;t find a restaurant linked to your account yet.
               Finish onboarding or contact support.
             </p>
+
           </div>
 
         </div>
@@ -53,29 +61,28 @@ export default async function SettingsPage() {
 
       <div className="so-main-inner mx-auto w-full max-w-[1200px]">
 
-        {/* PAGE TITLE */}
+        {/* HEADER */}
 
-        <div className="mb-8">
+        <div className="mb-10">
 
-          <h1 className="text-xl font-semibold text-white">
+          <h1 className="text-2xl font-semibold text-white">
             Settings
           </h1>
 
           <p className="text-sm text-slate-400 mt-1 max-w-xl">
-            Tune how SelectorOS looks and behaves for{" "}
+            Customize how SelectorOS looks and behaves for{" "}
             <span className="text-white font-medium">
               {restaurant.name || "your restaurant"}
-            </span>.
+            </span>
           </p>
 
         </div>
 
+        {/* GRID */}
 
-        {/* CONTENT GRID */}
+        <section className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 items-start">
 
-        <section className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6 items-start">
-
-          {/* APPEARANCE PANEL */}
+          {/* APPEARANCE */}
 
           <div className="so-card p-6">
 
@@ -89,13 +96,12 @@ export default async function SettingsPage() {
 
           </div>
 
-
-          {/* BRANDING PANEL */}
+          {/* BRANDING */}
 
           <aside className="so-card p-6 flex flex-col gap-5">
 
             <h2 className="text-sm font-semibold text-white">
-              Logo & branding
+              Logo & Branding
             </h2>
 
             <LogoUploader
@@ -107,12 +113,11 @@ export default async function SettingsPage() {
 
             <div className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-white/10 border border-white/10 text-slate-300 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-              More branding controls coming soon
+              More controls coming soon
             </div>
 
             <p className="text-sm text-slate-400 leading-relaxed">
-              Future updates will let you configure staff roles, table QR codes
-              and deeper theme options for your allergen view.
+              Soon you’ll manage QR codes, staff roles, and deeper visual controls.
             </p>
 
           </aside>

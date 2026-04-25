@@ -1,21 +1,31 @@
 import { createClient } from "@supabase/supabase-js";
-import MenuClientView from "./MenuClientView";
-import LandingSelector from "./LandingSelector";
+
+// MENU VIEWS
+import FoxDenMenuView from "@/components/menus/FoxDenMenuView";
+import ShangShiMenuView from "@/components/menus/ShangShiMenuView";
+import ServiceMenuView from "@/components/menus/ServiceMenuView";
+
+// LANDINGS
+import FoxDenLanding from "@/components/menu-landings/FoxDenLanding";
+import ShangShiLanding from "@/components/menu-landings/ShangShiLanding";
+import BurmanLanding from "@/components/menu-landings/BurmanLanding";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function PublicMenuPage({ params, searchParams }) {
 
-  const { slug } = await params;
-  const { type } = await searchParams;
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const slug = resolvedParams?.slug;
+  const typeFromUrl = resolvedSearchParams?.type;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 🔹 LOAD BASE MENU
+  // LOAD MENU
   const { data: menu } = await supabase
     .from("menus")
     .select("*")
@@ -23,55 +33,93 @@ export default async function PublicMenuPage({ params, searchParams }) {
     .maybeSingle();
 
   if (!menu) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Menu not found
-      </div>
-    );
+    return <div style={{ padding: 40 }}>Menu not found</div>;
   }
 
-  // 🔹 SAVE SLUG FOR PWA
-  const SlugSaver = () => {
-    "use client";
-    if (typeof window !== "undefined") {
-      localStorage.setItem("lastSlug", slug);
+  const design = menu.design_type || "foxden";
+
+  // =========================
+  // 🔥 FORCE BURMAN LANDING
+  // =========================
+  if (design === "burman" && !typeFromUrl) {
+    return <BurmanLanding menu={menu} />;
+  }
+
+  // =========================
+  // OTHER LANDINGS
+  // =========================
+  if (!typeFromUrl) {
+
+    let LandingComponent;
+
+    switch (design) {
+      case "foxden":
+        LandingComponent = FoxDenLanding;
+        break;
+      case "shangshi":
+        LandingComponent = ShangShiLanding;
+        break;
+      default:
+        LandingComponent = FoxDenLanding;
     }
-    return null;
-  };
 
-  // 🔥 SELECTOR PAGE
-  if (!type) {
-    return (
-      <>
-        <SlugSaver />
-        <LandingSelector slug={slug} menu={menu} />
-      </>
-    );
+    return <LandingComponent slug={slug} menu={menu} />;
   }
 
-  // 🔥 SHARED LOGIC (food + drinks)
-  const { data: categories } = await supabase
+  // =========================
+  // RESOLVE TYPE
+  // =========================
+  const type = typeFromUrl || menu.default_view || "food";
+
+  // LOAD DATA
+  const { data: categories = [] } = await supabase
     .from("menu_categories")
     .select("*")
     .eq("menu_id", menu.id)
-    .eq("type", type) // 🔥 dynamic
+    .eq("type", type)
     .order("position");
 
-  const { data: items } = await supabase
+  const { data: items = [] } = await supabase
     .from("menu_items")
     .select("*")
     .eq("menu_id", menu.id)
-    .eq("type", type) // 🔥 dynamic
+    .eq("type", type)
     .order("position");
 
-  return (
-    <main className="min-h-screen">
-      <SlugSaver />
-      <MenuClientView
+  // =========================
+  // SERVICES
+  // =========================
+  if (type === "services") {
+    return (
+      <ServiceMenuView
         menu={menu}
-        categories={categories || []}
-        items={items || []}
+        categories={categories}
+        items={items}
       />
-    </main>
+    );
+  }
+
+  // =========================
+  // NORMAL MENU
+  // =========================
+  let MenuComponent;
+
+  switch (design) {
+    case "foxden":
+      MenuComponent = FoxDenMenuView;
+      break;
+    case "shangshi":
+      MenuComponent = ShangShiMenuView;
+      break;
+      default:
+      MenuComponent = FoxDenMenuView;
+  }
+
+  return (
+    <MenuComponent
+      menu={menu}
+      categories={categories}
+      items={items}
+    />
   );
 }
