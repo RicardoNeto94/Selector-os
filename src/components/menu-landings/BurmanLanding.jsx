@@ -41,20 +41,18 @@ export default function BurmanLanding({ menu }) {
     loadData();
   }, [menu]);
 
-  // 🔥 PWA ICON OVERRIDE (KEY FIX)
+  // 🔥 PWA FIX (ICON + CORRECT LAUNCH PAGE)
   useEffect(() => {
 
-    // remove existing apple icons (Fox Den etc)
+    // ===== ICON FIX =====
     const existingIcons = document.querySelectorAll("link[rel='apple-touch-icon']");
     existingIcons.forEach(icon => icon.remove());
 
-    // create Burman icon
-    const link = document.createElement("link");
-    link.rel = "apple-touch-icon";
-    link.href = "/burman-icon.png";
-    document.head.appendChild(link);
+    const appleIcon = document.createElement("link");
+    appleIcon.rel = "apple-touch-icon";
+    appleIcon.href = "/burman-icon.png";
+    document.head.appendChild(appleIcon);
 
-    // update favicon as well
     const favicon =
       document.querySelector("link[rel='icon']") ||
       document.createElement("link");
@@ -63,14 +61,16 @@ export default function BurmanLanding({ menu }) {
     favicon.href = "/burman-icon.png";
     document.head.appendChild(favicon);
 
-    // 🔥 FIX START PAGE (VERY IMPORTANT)
-  // If app opens at wrong root → force correct page
-  if (
-    window.location.pathname === "/" ||
-    window.location.pathname === "/menu/foxden"
-  ) {
-    window.location.replace("/menu/burman-hotel");
-  }
+    // ===== START PAGE FIX (REAL FIX) =====
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    if (isStandalone) {
+      if (!window.location.pathname.includes("burman-hotel")) {
+        window.location.replace("/menu/burman-hotel");
+      }
+    }
 
   }, []);
 
@@ -121,14 +121,12 @@ export default function BurmanLanding({ menu }) {
         </a>
 
         <div className="burman-links">
-
           <a href={`${base}?type=services`}>Rooms</a>
           <a href={`${base}?type=food`}>Dining</a>
 
           <button onClick={() => setOpenSpa(true)}>Spa</button>
 
           <a href={`${base}?type=services`}>Club</a>
-
         </div>
 
         <button
@@ -222,13 +220,8 @@ export default function BurmanLanding({ menu }) {
                         <div>
                           <h4>{item.name}</h4>
 
-                          {item.description && (
-                            <p>{item.description}</p>
-                          )}
-
-                          {item.duration && (
-                            <span>{item.duration}</span>
-                          )}
+                          {item.description && <p>{item.description}</p>}
+                          {item.duration && <span>{item.duration}</span>}
                         </div>
 
                         <div>
