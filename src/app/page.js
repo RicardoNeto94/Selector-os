@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import "@/styles/vaxeron.css";
 
 export default function HomePage() {
   return (
