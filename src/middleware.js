@@ -3,14 +3,9 @@ import { NextResponse } from 'next/server';
 
 export async function middleware(req) {
 
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
-
-  await supabase.auth.getSession();
-
   const host = req.headers.get("host") || "";
 
-  // 🔥 FIX: use includes instead of strict match
+  // 🔥 DOMAIN ROUTING FIRST (VERY IMPORTANT)
 
   if (host.includes("burman.vaxeron.com")) {
     return NextResponse.rewrite(
@@ -23,6 +18,13 @@ export async function middleware(req) {
       new URL("/menu/foxden", req.url)
     );
   }
+
+  // 🔐 THEN run Supabase middleware
+
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
+
+  await supabase.auth.getSession();
 
   return res;
 }
