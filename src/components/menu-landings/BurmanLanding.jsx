@@ -63,6 +63,15 @@ export default function BurmanLanding({ menu }) {
     favicon.href = "/burman-icon.png";
     document.head.appendChild(favicon);
 
+    // 🔥 FIX START PAGE (VERY IMPORTANT)
+  // If app opens at wrong root → force correct page
+  if (
+    window.location.pathname === "/" ||
+    window.location.pathname === "/menu/foxden"
+  ) {
+    window.location.replace("/menu/burman-hotel");
+  }
+
   }, []);
 
   return (
