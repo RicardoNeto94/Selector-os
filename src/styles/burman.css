@@ -188,11 +188,11 @@ html, body{
 .burman-modal-backdrop{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(8px);
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(6px);
 }
 
-/* 🔥 UPDATED MODAL (MAIN IMPROVEMENT) */
+/* ================= MODAL CONTENT ================= */
 
 .burman-modal-content{
   position:relative;
@@ -200,40 +200,123 @@ html, body{
   border-radius:20px;
 
   width:92%;
-  max-width:1100px;
-
+  max-width:1000px;
   max-height:88vh;
 
-  padding:56px 64px;
+  padding:64px 72px;
 
   overflow-y:auto;
 
-  box-shadow:0 50px 140px rgba(0,0,0,0.25);
+  box-shadow:0 60px 160px rgba(0,0,0,0.25);
 
   animation:fadeUp 0.5s ease;
-
-  display:flex;
-  flex-direction:column;
 }
 
-/* 🔥 NEW STRUCTURE IMPROVEMENTS */
+/* ================= MODAL HEADER ================= */
+
+.burman-modal-header{
+  margin-bottom:20px;
+}
+
+.burman-modal-header h2{
+  font-size:18px;
+  letter-spacing:0.25em;
+  font-weight:500;
+  color:#8a3a2c;
+}
+
+.burman-modal-header p{
+  margin-top:10px;
+  font-size:14px;
+  color:#9a9a9a;
+}
+
+/* ================= BODY ================= */
 
 .burman-modal-body{
   margin-top:30px;
 }
 
-.burman-spa-section{
-  margin-bottom:80px;
-}
+/* ================= SECTION ================= */
 
-/* subtle divider */
+.burman-spa-section{
+  margin-bottom:70px;
+}
 
 .burman-spa-section:not(:last-child){
   border-bottom:1px solid rgba(0,0,0,0.08);
-  padding-bottom:60px;
+  padding-bottom:50px;
 }
 
-/* 🔥 SCROLL POLISH */
+.burman-spa-section h3{
+  font-size:14px;
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  margin-bottom:20px;
+}
+
+/* ================= ITEMS ================= */
+
+.burman-spa-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding:18px 0;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+}
+
+.burman-spa-item:last-child{
+  border-bottom:none;
+}
+
+.burman-spa-item > div:first-child{
+  max-width:65%;
+}
+
+.burman-spa-item h4{
+  font-size:16px;
+  font-weight:500;
+  margin-bottom:6px;
+}
+
+.burman-spa-item p{
+  font-size:13px;
+  color:#7a7a7a;
+  line-height:1.5;
+}
+
+.burman-spa-item span{
+  display:block;
+  margin-top:6px;
+  font-size:12px;
+  color:#a0a0a0;
+}
+
+.burman-spa-item > div:last-child{
+  font-size:15px;
+  font-weight:500;
+  min-width:80px;
+  text-align:right;
+}
+
+/* ================= CLOSE BUTTON ================= */
+
+.burman-modal-close{
+  position:absolute;
+  top:28px;
+  right:32px;
+  font-size:18px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  opacity:0.6;
+}
+
+.burman-modal-close:hover{
+  opacity:1;
+}
+
+/* ================= SCROLL ================= */
 
 .burman-modal-content::-webkit-scrollbar {
   width:6px;
@@ -272,7 +355,6 @@ html, body{
   background:none;
   border:none;
   cursor:pointer;
-  transition:opacity 0.3s ease;
 }
 
 .burman-fullscreen-links a:hover,
