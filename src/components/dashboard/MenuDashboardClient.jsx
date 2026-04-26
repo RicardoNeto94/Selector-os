@@ -21,7 +21,11 @@ export default function MenuDashboardClient({
   // 🔥 dynamic domain
   const BASE_URL =
     typeof window !== "undefined"
-      ? window.location.origin
+      ? window.location.hostname.includes("burman")
+        ? "https://burman.vaxeron.com"
+        : window.location.hostname.includes("foxden")
+        ? "https://foxden.vaxeron.com"
+        : window.location.origin
       : "";
 
   // 🔥 DELETE MENU
@@ -88,7 +92,7 @@ export default function MenuDashboardClient({
 
         {menus.map((m) => {
 
-          const menuUrl = `${BASE_URL}/menu/${m.public_slug}`;
+          const menuUrl = BASE_URL;
 
           return (
             <div
