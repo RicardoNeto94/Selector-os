@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { QRCodeSVG } from "qrcode.react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import CreateMenuModal from "./CreateMenuModal";
 
 export default function MenuDashboardClient({
@@ -15,12 +16,28 @@ export default function MenuDashboardClient({
 }) {
 
   const [showModal, setShowModal] = useState(false);
+  const supabase = createClientComponentClient();
 
-  // 🔥 FIX → dynamic domain (no more hardcoding)
+  // 🔥 dynamic domain
   const BASE_URL =
     typeof window !== "undefined"
       ? window.location.origin
       : "";
+
+  // 🔥 DELETE MENU
+  const handleDeleteMenu = async (menuId) => {
+    const confirmDelete = confirm("Delete this menu? This cannot be undone.");
+
+    if (!confirmDelete) return;
+
+    await supabase
+      .from("menus")
+      .delete()
+      .eq("id", menuId);
+
+    // 🔥 simple refresh
+    window.location.reload();
+  };
 
   return (
     <div className="so-main-inner space-y-8">
@@ -92,7 +109,6 @@ export default function MenuDashboardClient({
                   </div>
                 </div>
 
-                {/* 🔥 FIXED OPEN LINK */}
                 <a
                   href={`/menu/${m.public_slug}`}
                   target="_blank"
@@ -119,13 +135,25 @@ export default function MenuDashboardClient({
               {/* ACTIONS */}
               <div className="flex justify-between items-center">
 
-                {/* EDIT */}
-                <Link
-                  href={`/dashboard/menu/${m.public_slug}`}
-                  className="text-sm text-blue-400 hover:text-white"
-                >
-                  Edit Menu
-                </Link>
+                {/* LEFT ACTIONS */}
+                <div className="flex gap-4 items-center">
+
+                  <Link
+                    href={`/dashboard/menu/${m.public_slug}`}
+                    className="text-sm text-blue-400 hover:text-white"
+                  >
+                    Edit
+                  </Link>
+
+                  <button
+                    onClick={() => handleDeleteMenu(m.id)}
+                    className="text-sm text-red-400 hover:text-red-300 flex items-center gap-1"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                    Delete
+                  </button>
+
+                </div>
 
                 {/* DOWNLOAD */}
                 <button
