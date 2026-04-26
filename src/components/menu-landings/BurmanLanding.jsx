@@ -20,18 +20,17 @@ export default function BurmanLanding({ menu }) {
 
     const loadData = async () => {
 
+      // ✅ REMOVE type filter (this was breaking everything)
       const { data: cats = [] } = await supabase
         .from("menu_categories")
         .select("*")
         .eq("menu_id", menu.id)
-        .eq("type", "services")
         .order("position");
 
       const { data: its = [] } = await supabase
         .from("menu_items")
         .select("*")
         .eq("menu_id", menu.id)
-        .eq("type", "services")
         .order("position");
 
       setCategories(cats);
@@ -116,40 +115,6 @@ export default function BurmanLanding({ menu }) {
         </div>
       )}
 
-      {/* FULLSCREEN MENU */}
-      {menuOpen && (
-        <div className="burman-fullscreen-menu">
-
-          <button
-            className="burman-fullscreen-close"
-            onClick={() => setMenuOpen(false)}
-          >
-            ✕
-          </button>
-
-          <div className="burman-fullscreen-links">
-
-            <a href={`${base}?type=services`}>Rooms</a>
-            <a href={`${base}?type=food`}>Dining</a>
-
-            <button onClick={() => {
-              setOpenSpa(true);
-              setMenuOpen(false);
-            }}>
-              Spa
-            </button>
-
-            <a href={`${base}?type=services`}>Club</a>
-
-            <a href="https://maps.google.com" target="_blank">
-              Location
-            </a>
-
-          </div>
-
-        </div>
-      )}
-
       {/* SPA MODAL */}
       {openSpa && (
         <div className="burman-modal">
@@ -168,7 +133,7 @@ export default function BurmanLanding({ menu }) {
               ✕
             </button>
 
-            {/* ✅ CORRECT HEADER STRUCTURE */}
+            {/* HEADER */}
             <div className="burman-modal-title">
 
               <h2 className="burman-heading">
@@ -185,11 +150,11 @@ export default function BurmanLanding({ menu }) {
 
               <div className="burman-modal-intro">
                 <p>
-                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche.
+                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul.
                 </p>
 
                 <p>
-                  Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing. A haven designed for renewal and inner peace.
+                  Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing.
                 </p>
               </div>
 
@@ -198,60 +163,51 @@ export default function BurmanLanding({ menu }) {
             {/* BODY */}
             <div className="burman-modal-body">
 
+              {/* ✅ DEBUG SAFETY */}
+              {categories.length === 0 && (
+                <p style={{textAlign:"center"}}>No categories found</p>
+              )}
+
               {categories.map(cat => {
 
-            const catItems = items.filter(
-              i => i.category_id === cat.id
-            );
+                const catItems = items.filter(
+                  i => i.category_id === cat.id
+                );
 
-            if (!catItems.length) return null;
+                return (
+                  <div key={cat.id} className="burman-spa-section">
 
-            return (
-              <div key={cat.id} className="burman-spa-section">
+                    <h3>{cat.name}</h3>
 
-                <h3>{cat.name}</h3>
+                    {catItems.map(item => {
 
-                {catItems.map(item => {
+                      const prices = pricesMap[item.id] || [];
 
-                  const prices = pricesMap[item.id] || [];
+                      return (
+                        <div key={item.id} className="burman-spa-item">
 
-                  return (
-                    <div key={item.id} className="burman-spa-item">
+                          <div>
+                            <h4>{item.name}</h4>
+                            {item.description && <p>{item.description}</p>}
+                          </div>
 
-                      <div>
-                        <h4>{item.name}</h4>
-                        {item.description && <p>{item.description}</p>}
-                      </div>
+                          <div className="burman-pricing-horizontal">
 
-                      <div className="burman-pricing-horizontal">
+                            {prices.map(p => (
+                              <strong key={p.id}>€{p.price}</strong>
+                            ))}
 
-                        {prices.length > 0 && (
-                          <>
-                            <div className="burman-price-labels">
-                              {prices.map(p => (
-                                <span key={p.id}>{p.label}</span>
-                              ))}
-                            </div>
+                          </div>
 
-                            <div className="burman-price-values">
-                              {prices.map(p => (
-                                <strong key={p.id}>€{p.price}</strong>
-                              ))}
-                            </div>
-                          </>
-                        )}
+                        </div>
+                      );
 
-                      </div>
+                    })}
 
-                    </div>
-                  );
+                  </div>
+                );
 
-                })}
-
-              </div>
-            );
-
-          })}
+              })}
 
             </div>
 
