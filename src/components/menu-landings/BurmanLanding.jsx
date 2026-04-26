@@ -195,7 +195,7 @@ export default function BurmanLanding({ menu }) {
                             {prices.map(p => (
                               <div key={p.id} className="burman-price-row">
                                 <span className="burman-duration">
-                                  {p.label || p.duration || ""}
+                                  {p.label || p.duration}
                                 </span>
                                 <span className="burman-price">
                                   €{p.price}
