@@ -78,24 +78,6 @@ export default function MenuEditorPage() {
     setLoading(false);
   };
 
-  const updateItem = async (id, field, value) => {
-    await supabase
-      .from("menu_items")
-      .update({ [field]: value })
-      .eq("id", id);
-  };
-
-  const deleteItem = async (id) => {
-    if (!confirm("Delete this item?")) return;
-
-    await supabase
-      .from("menu_items")
-      .delete()
-      .eq("id", id);
-
-    loadAll();
-  };
-
   const addCategory = async () => {
     if (!newCategory.trim()) return;
 
@@ -122,7 +104,6 @@ export default function MenuEditorPage() {
       category_id: categoryId,
       name: input.name,
       description: input.description || "",
-      duration: input.duration || "",
       price: input.price ? Number(input.price) : 0,
       type: menuType,
       position: items.length + 1
@@ -156,7 +137,7 @@ export default function MenuEditorPage() {
   const updatePrice = async (id, value) => {
     await supabase
       .from("menu_item_prices")
-      .update({ price: value })
+      .update({ price: Number(value) })
       .eq("id", id);
   };
 
@@ -175,6 +156,13 @@ export default function MenuEditorPage() {
     });
   };
 
+  const deleteItem = async (id) => {
+    if (!confirm("Delete item?")) return;
+
+    await supabase.from("menu_items").delete().eq("id", id);
+    loadAll();
+  };
+
   if (loading) return <div className="p-10 text-white">Loading...</div>;
 
   return (
@@ -186,10 +174,12 @@ export default function MenuEditorPage() {
         <div className="flex justify-between items-center mb-12">
 
           <div>
-            <h1 className="text-3xl font-light text-[#c6a46c]">
+            <h1 className="text-3xl font-light tracking-wide text-[#c6a46c]">
               {menu?.name}
             </h1>
-            <p className="text-sm text-white/40">Menu editor</p>
+            <p className="text-sm text-white/40 mt-1">
+              Menu editor
+            </p>
           </div>
 
           <div className="flex gap-2 bg-white/5 p-1 rounded-full">
@@ -217,17 +207,17 @@ export default function MenuEditorPage() {
               placeholder="Category name"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-2 rounded-xl"
+              className="flex-1 bg-black/20 border px-4 py-2 rounded-xl"
             />
 
             <input
               placeholder="Description"
               value={newCategoryDesc}
               onChange={(e) => setNewCategoryDesc(e.target.value)}
-              className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-2 rounded-xl"
+              className="flex-1 bg-black/20 border px-4 py-2 rounded-xl"
             />
 
-            <button onClick={addCategory} className="bg-[#c6a46c] px-4 rounded-xl text-black">
+            <button onClick={addCategory} className="bg-[#c6a46c] px-4 rounded-xl">
               Add
             </button>
 
@@ -244,13 +234,18 @@ export default function MenuEditorPage() {
           return (
             <div key={cat.id} className="bg-white/5 border rounded-2xl p-6 mb-6">
 
-              {/* CATEGORY */}
+              {/* CATEGORY HEADER */}
               <div className="flex justify-between mb-4">
 
                 <input
-                  defaultValue={cat.name}
-                  onBlur={(e) => supabase.from("menu_categories").update({ name: e.target.value }).eq("id", cat.id)}
-                  className="bg-transparent border-b border-white/10 text-[#c6a46c]"
+                  value={cat.name}
+                  onChange={async (e) => {
+                    await supabase
+                      .from("menu_categories")
+                      .update({ name: e.target.value })
+                      .eq("id", cat.id);
+                  }}
+                  className="bg-transparent border-b text-[#c6a46c]"
                 />
 
                 <button
@@ -278,7 +273,6 @@ export default function MenuEditorPage() {
                       [cat.id]: { ...input, name: e.target.value }
                     }))
                   }
-                  className="bg-white/[0.03] border px-3 py-2 rounded-xl"
                 />
 
                 <input
@@ -290,56 +284,95 @@ export default function MenuEditorPage() {
                       [cat.id]: { ...input, description: e.target.value }
                     }))
                   }
-                  className="bg-white/[0.03] border px-3 py-2 rounded-xl"
                 />
 
-                <button onClick={() => addItem(cat.id)} className="bg-[#c6a46c] px-3 rounded-xl text-black">
-                  Add
-                </button>
+                <button onClick={() => addItem(cat.id)}>Add</button>
 
               </div>
 
               {/* ITEMS */}
               {catItems.map(item => (
-                <div key={item.id} className="border-b py-3">
+                <div key={item.id} className="border-b py-4">
 
-                  <div className="flex justify-between items-center">
+                  {/* EDITABLE ITEM */}
+                  <div className="flex justify-between items-center gap-4">
 
-                    <input
-                      defaultValue={item.name}
-                      onBlur={(e) => updateItem(item.id, "name", e.target.value)}
-                      className="bg-transparent border-b border-white/10"
-                    />
+                    <div className="flex flex-col gap-2 w-full">
 
-                    <button onClick={() => deleteItem(item.id)} className="text-red-400 text-sm">
+                      <input
+                        value={item.name}
+                        onChange={async (e) => {
+                          await supabase
+                            .from("menu_items")
+                            .update({ name: e.target.value })
+                            .eq("id", item.id);
+                        }}
+                        className="bg-transparent border-b"
+                      />
+
+                      <input
+                        value={item.description || ""}
+                        onChange={async (e) => {
+                          await supabase
+                            .from("menu_items")
+                            .update({ description: e.target.value })
+                            .eq("id", item.id);
+                        }}
+                        className="bg-transparent text-sm border-b"
+                      />
+
+                    </div>
+
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      className="text-red-400"
+                    >
                       Delete
                     </button>
 
                   </div>
 
-                  {menuType !== "services" && (
-                    <input
-                      defaultValue={item.price}
-                      onBlur={(e) => updateItem(item.id, "price", e.target.value)}
-                      className="mt-2 bg-transparent border-b border-white/10"
-                    />
-                  )}
-
+                  {/* PRICING */}
                   {menuType === "services" && (
                     <>
                       {(pricesMap[item.id] || []).map(p => (
-                        <div key={p.id} className="flex gap-2 mt-2">
+                        <div key={p.id} className="flex gap-3 mt-2">
 
                           <input
-                            defaultValue={p.label}
-                            onBlur={(e) =>
-                              supabase.from("menu_item_prices").update({ label: e.target.value }).eq("id", p.id)
-                            }
+                            value={p.label}
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              setPricesMap(prev => ({
+                                ...prev,
+                                [item.id]: prev[item.id].map(x =>
+                                  x.id === p.id ? { ...x, label: value } : x
+                                )
+                              }));
+                            }}
+                            onBlur={async (e) => {
+                              await supabase
+                                .from("menu_item_prices")
+                                .update({ label: e.target.value })
+                                .eq("id", p.id);
+                            }}
+                            className="w-28 bg-white/[0.05] border px-2"
                           />
 
                           <input
-                            defaultValue={p.price}
+                            value={p.price}
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              setPricesMap(prev => ({
+                                ...prev,
+                                [item.id]: prev[item.id].map(x =>
+                                  x.id === p.id ? { ...x, price: value } : x
+                                )
+                              }));
+                            }}
                             onBlur={(e) => updatePrice(p.id, e.target.value)}
+                            className="w-20 text-right bg-white/[0.05] border px-2"
                           />
 
                           <button onClick={() => deletePrice(p.id)}>✕</button>
