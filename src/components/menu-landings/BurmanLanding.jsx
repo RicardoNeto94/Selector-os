@@ -52,7 +52,6 @@ export default function BurmanLanding({ menu }) {
 
         setPricesMap(grouped);
       }
-
     };
 
     loadData();
@@ -61,12 +60,14 @@ export default function BurmanLanding({ menu }) {
   return (
     <div className="burman-root">
 
+      {/* HEADER */}
       <div className="burman-header">
         <div>HOTEL</div>
         <div className="burman-header-center">THE BURMAN</div>
         <div>TALLINN</div>
       </div>
 
+      {/* HERO */}
       <div className="burman-hero">
         <div className="burman-image-wrapper">
           <img
@@ -88,27 +89,32 @@ export default function BurmanLanding({ menu }) {
         </div>
       </div>
 
-      <div className="burman-nav">
-        <a
-          href="https://your-booking-link.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="burman-primary"
-        >
-          Check availability
-        </a>
+      {/* FLOATING NAV (hidden when modal/menu open) */}
+      {!openSpa && !menuOpen && (
+        <div className="burman-nav">
 
-        <div className="burman-links">
-          <a href={`${base}?type=services`}>Rooms</a>
-          <a href={`${base}?type=food`}>Dining</a>
-          <button onClick={() => setOpenSpa(true)}>Spa</button>
-          <a href={`${base}?type=services`}>Club</a>
+          <a
+            href="https://your-booking-link.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="burman-primary"
+          >
+            Check availability
+          </a>
+
+          <div className="burman-links">
+            <a href={`${base}?type=services`}>Rooms</a>
+            <a href={`${base}?type=food`}>Dining</a>
+            <button onClick={() => setOpenSpa(true)}>Spa</button>
+            <a href={`${base}?type=services`}>Club</a>
+          </div>
+
+          <button className="burman-menu" onClick={() => setMenuOpen(true)}>
+            ☰
+          </button>
+
         </div>
-
-        <button className="burman-menu" onClick={() => setMenuOpen(true)}>
-          ☰
-        </button>
-      </div>
+      )}
 
       {/* FULLSCREEN MENU */}
       {menuOpen && (
@@ -122,6 +128,7 @@ export default function BurmanLanding({ menu }) {
           </button>
 
           <div className="burman-fullscreen-links">
+
             <a href={`${base}?type=services`}>Rooms</a>
             <a href={`${base}?type=food`}>Dining</a>
 
@@ -137,6 +144,7 @@ export default function BurmanLanding({ menu }) {
             <a href="https://maps.google.com" target="_blank">
               Location
             </a>
+
           </div>
 
         </div>
@@ -151,7 +159,6 @@ export default function BurmanLanding({ menu }) {
             onClick={() => setOpenSpa(false)}
           />
 
-          {/* ✅ CLEAN MODAL */}
           <div className="burman-modal-content">
 
             <button
@@ -171,10 +178,10 @@ export default function BurmanLanding({ menu }) {
 
               <div className="burman-modal-intro">
                 <p>
-                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche, the prestigious Parisian brand renowned for its unique and highly effective therapies.
+                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche.
                 </p>
                 <p>
-                  Luxuriate in the transformative power of sensorial rejuvenation, and the elemental harmony of soothing sounds and crystal-clear waters. A haven of holistic wellbeing that will leave you with a sense of profound renewal and inner peace.
+                  Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing. A haven designed for renewal and inner peace.
                 </p>
               </div>
             </div>
@@ -194,12 +201,6 @@ export default function BurmanLanding({ menu }) {
 
                     <h3>{cat.name}</h3>
 
-                    {cat.description && (
-                      <p className="burman-spa-description">
-                        {cat.description}
-                      </p>
-                    )}
-
                     {catItems.map(item => {
 
                       const prices = pricesMap[item.id] || [];
@@ -214,7 +215,7 @@ export default function BurmanLanding({ menu }) {
 
                           <div className="burman-pricing-horizontal">
 
-                            {prices.length > 0 ? (
+                            {prices.length > 0 && (
                               <>
                                 <div className="burman-price-labels">
                                   {prices.map(p => (
@@ -228,8 +229,6 @@ export default function BurmanLanding({ menu }) {
                                   ))}
                                 </div>
                               </>
-                            ) : (
-                              item.price && <strong>€{item.price}</strong>
                             )}
 
                           </div>
