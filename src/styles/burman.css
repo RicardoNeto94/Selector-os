@@ -263,58 +263,92 @@ html, body{
   backdrop-filter:blur(6px);
 }
 
-/* ================= MODAL CONTENT ================= */
+/* ================= 🔥 FIXED FRAME SYSTEM ================= */
 
-.burman-modal-content{
+.burman-modal-shell{
   position:relative;
-  background:#f7f5f3;
-  border-radius:18px;
   width:92%;
   max-width:1000px;
-  max-height:88vh;
-  padding:64px 72px;
-  overflow-y:auto;
-
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-
-  box-shadow:0 60px 160px rgba(0,0,0,0.25);
-  animation:fadeUp 0.5s ease;
+  height:88vh;
 }
 
-/* hide scrollbar */
-.burman-modal-content::-webkit-scrollbar{
-  display:none;
+.burman-modal-shell::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:1px solid #8a3a2c;
+  border-radius:18px;
+  pointer-events:none;
+  z-index:2;
 }
 
-/* 🔥 INTERNAL FRAME (CORRECT — FIXED) */
-.burman-modal-content::before{
+.burman-modal-shell::after{
   content:"";
   position:absolute;
   inset:12px;
   border:1px solid #8a3a2c;
   border-radius:16px;
   pointer-events:none;
+  z-index:2;
 }
 
-/* 🔥 CLEAN CORNERS (NO SPAN HACKS) */
-.burman-modal-content::after{
-  content:"";
+/* corners */
+
+.burman-modal-shell span{
   position:absolute;
   inset:0;
   pointer-events:none;
-  background:
-    linear-gradient(#8a3a2c,#8a3a2c) 12px 12px / 36px 1px no-repeat,
-    linear-gradient(#8a3a2c,#8a3a2c) 12px 12px / 1px 36px no-repeat,
+  z-index:2;
+}
 
-    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) 12px / 36px 1px no-repeat,
-    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) 12px / 1px 36px no-repeat,
+.burman-modal-shell span::before,
+.burman-modal-shell span::after{
+  content:"";
+  position:absolute;
+  width:42px;
+  height:42px;
+  border:2px solid #8a3a2c;
+}
 
-    linear-gradient(#8a3a2c,#8a3a2c) 12px calc(100% - 12px) / 36px 1px no-repeat,
-    linear-gradient(#8a3a2c,#8a3a2c) 12px calc(100% - 12px) / 1px 36px no-repeat,
+.burman-modal-shell span::before{
+  top:12px;
+  left:12px;
+  border-right:none;
+  border-bottom:none;
+  border-radius:16px 0 0 0;
+}
 
-    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) calc(100% - 12px) / 36px 1px no-repeat,
-    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) calc(100% - 12px) / 1px 36px no-repeat;
+.burman-modal-shell span::after{
+  bottom:12px;
+  right:12px;
+  border-left:none;
+  border-top:none;
+  border-radius:0 0 16px 0;
+}
+
+/* ================= SCROLL LAYER ================= */
+
+.burman-modal-scroll{
+  position:absolute;
+  inset:0;
+  overflow-y:auto;
+
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+.burman-modal-scroll::-webkit-scrollbar{
+  display:none;
+}
+
+/* ================= CONTENT ================= */
+
+.burman-modal-content{
+  position:relative;
+  background:#f7f5f3;
+  border-radius:18px;
+  padding:64px 72px;
+  animation:fadeUp 0.5s ease;
 }
 
 /* ================= HEADER ================= */

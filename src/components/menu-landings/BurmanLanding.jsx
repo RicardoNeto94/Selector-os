@@ -153,105 +153,110 @@ export default function BurmanLanding({ menu }) {
             onClick={() => setOpenSpa(false)}
           />
 
-          {/* 🔥 FRAME ADDED */}
-          <div className="burman-modal-frame">
+          {/* ✅ CORRECT STRUCTURE */}
+          <div className="burman-modal-shell">
             <span></span>
 
-            <div className="burman-modal-content">
+            <div className="burman-modal-scroll">
 
-              <button
-                className="burman-modal-close"
-                onClick={() => setOpenSpa(false)}
-              >
-                ✕
-              </button>
+              <div className="burman-modal-content">
 
-              <div className="burman-modal-header">
-                <h2>
-                  AN OASIS <span>of</span><br />
-                  SERENITY
-                </h2>
+                <button
+                  className="burman-modal-close"
+                  onClick={() => setOpenSpa(false)}
+                >
+                  ✕
+                </button>
 
-                <div className="burman-modal-divider">✦</div>
+                <div className="burman-modal-header">
+                  <h2>
+                    AN OASIS <span>of</span><br />
+                    SERENITY
+                  </h2>
 
-                <div className="burman-modal-intro">
-                  <p>
-                    At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul.
-                  </p>
-                  <p>
-                    Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing.
-                  </p>
+                  <div className="burman-modal-divider">✦</div>
+
+                  <div className="burman-modal-intro">
+                    <p>
+                      At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche, the prestigious Parisian brand renowned for its unique and highly effective therapies.
+                    </p>
+                    <p>
+                      Luxuriate in the transformative power of sensorial rejuvenation, and the elemental harmony of soothing sounds and crystal-clear waters. A haven of holistic wellbeing that will leave you with a sense of profound renewal and inner peace.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="burman-modal-body">
+                <div className="burman-modal-body">
 
-                {categories.map(cat => {
+                  {categories.map(cat => {
 
-                  const catItems = items.filter(
-                    i => i.category_id === cat.id
-                  );
+                    const catItems = items.filter(
+                      i => i.category_id === cat.id
+                    );
 
-                  if (!catItems.length) return null;
+                    if (!catItems.length) return null;
 
-                  return (
-                    <div key={cat.id} className="burman-spa-section">
+                    return (
+                      <div key={cat.id} className="burman-spa-section">
 
-                      <h3>{cat.name}</h3>
+                        <h3>{cat.name}</h3>
 
-                      {cat.description && (
-                        <p className="burman-spa-description">
-                          {cat.description}
-                        </p>
-                      )}
+                        {cat.description && (
+                          <p className="burman-spa-description">
+                            {cat.description}
+                          </p>
+                        )}
 
-                      {catItems.map(item => {
+                        {catItems.map(item => {
 
-                        const prices = pricesMap[item.id] || [];
+                          const prices = pricesMap[item.id] || [];
 
-                        return (
-                          <div key={item.id} className="burman-spa-item">
+                          return (
+                            <div key={item.id} className="burman-spa-item">
 
-                            <div>
-                              <h4>{item.name}</h4>
-                              {item.description && <p>{item.description}</p>}
+                              <div>
+                                <h4>{item.name}</h4>
+                                {item.description && <p>{item.description}</p>}
+                              </div>
+
+                              <div className="burman-pricing-horizontal">
+
+                                {prices.length > 0 ? (
+                                  <>
+                                    <div className="burman-price-labels">
+                                      {prices.map(p => (
+                                        <span key={p.id}>{p.label}</span>
+                                      ))}
+                                    </div>
+
+                                    <div className="burman-price-values">
+                                      {prices.map(p => (
+                                        <strong key={p.id}>€{p.price}</strong>
+                                      ))}
+                                    </div>
+                                  </>
+                                ) : (
+                                  item.price && <strong>€{item.price}</strong>
+                                )}
+
+                              </div>
+
                             </div>
+                          );
 
-                            <div className="burman-pricing-horizontal">
+                        })}
 
-                              {prices.length > 0 ? (
-                                <>
-                                  <div className="burman-price-labels">
-                                    {prices.map(p => (
-                                      <span key={p.id}>{p.label}</span>
-                                    ))}
-                                  </div>
+                      </div>
+                    );
 
-                                  <div className="burman-price-values">
-                                    {prices.map(p => (
-                                      <strong key={p.id}>€{p.price}</strong>
-                                    ))}
-                                  </div>
-                                </>
-                              ) : (
-                                item.price && <strong>€{item.price}</strong>
-                              )}
+                  })}
 
-                            </div>
-
-                          </div>
-                        );
-
-                      })}
-
-                    </div>
-                  );
-
-                })}
+                </div>
 
               </div>
 
             </div>
+
           </div>
 
         </div>
