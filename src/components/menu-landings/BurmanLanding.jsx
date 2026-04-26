@@ -110,6 +110,40 @@ export default function BurmanLanding({ menu }) {
         </button>
       </div>
 
+      {/* FULLSCREEN MENU */}
+      {menuOpen && (
+        <div className="burman-fullscreen-menu">
+
+          <button
+            className="burman-fullscreen-close"
+            onClick={() => setMenuOpen(false)}
+          >
+            ✕
+          </button>
+
+          <div className="burman-fullscreen-links">
+
+            <a href={`${base}?type=services`}>Rooms</a>
+            <a href={`${base}?type=food`}>Dining</a>
+
+            <button onClick={() => {
+              setOpenSpa(true);
+              setMenuOpen(false);
+            }}>
+              Spa
+            </button>
+
+            <a href={`${base}?type=services`}>Club</a>
+
+            <a href="https://maps.google.com" target="_blank">
+              Location
+            </a>
+
+          </div>
+
+        </div>
+      )}
+
       {/* SPA */}
       {openSpa && (
         <div className="burman-modal">
@@ -119,103 +153,107 @@ export default function BurmanLanding({ menu }) {
             onClick={() => setOpenSpa(false)}
           />
 
-          <div className="burman-modal-content">
+          {/* 🔥 FRAME ADDED */}
+          <div className="burman-modal-frame">
+            <span></span>
 
-            <button
-              className="burman-modal-close"
-              onClick={() => setOpenSpa(false)}
-            >
-              ✕
-            </button>
+            <div className="burman-modal-content">
 
-            <div className="burman-modal-header">
-  <h2>
-    AN OASIS <span>of</span><br />
-    SERENITY
-  </h2>
+              <button
+                className="burman-modal-close"
+                onClick={() => setOpenSpa(false)}
+              >
+                ✕
+              </button>
 
-  <div className="burman-modal-divider">✦</div>
+              <div className="burman-modal-header">
+                <h2>
+                  AN OASIS <span>of</span><br />
+                  SERENITY
+                </h2>
 
-  <div className="burman-modal-intro">
-    <p>
-      At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul.
-    </p>
-    <p>
-      Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing.
-    </p>
-  </div>
-</div>
+                <div className="burman-modal-divider">✦</div>
 
-            <div className="burman-modal-body">
+                <div className="burman-modal-intro">
+                  <p>
+                    At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul.
+                  </p>
+                  <p>
+                    Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing.
+                  </p>
+                </div>
+              </div>
 
-              {categories.map(cat => {
+              <div className="burman-modal-body">
 
-                const catItems = items.filter(
-                  i => i.category_id === cat.id
-                );
+                {categories.map(cat => {
 
-                if (!catItems.length) return null;
+                  const catItems = items.filter(
+                    i => i.category_id === cat.id
+                  );
 
-                return (
-                  <div key={cat.id} className="burman-spa-section">
+                  if (!catItems.length) return null;
 
-                    <h3>{cat.name}</h3>
+                  return (
+                    <div key={cat.id} className="burman-spa-section">
 
-                    {cat.description && (
-                      <p className="burman-spa-description">
-                        {cat.description}
-                      </p>
-                    )}
+                      <h3>{cat.name}</h3>
 
-                    {catItems.map(item => {
+                      {cat.description && (
+                        <p className="burman-spa-description">
+                          {cat.description}
+                        </p>
+                      )}
 
-                      const prices = pricesMap[item.id] || [];
+                      {catItems.map(item => {
 
-                      return (
-                        <div key={item.id} className="burman-spa-item">
+                        const prices = pricesMap[item.id] || [];
 
-                          {/* LEFT */}
-                          <div>
-                            <h4>{item.name}</h4>
-                            {item.description && <p>{item.description}</p>}
+                        return (
+                          <div key={item.id} className="burman-spa-item">
+
+                            <div>
+                              <h4>{item.name}</h4>
+                              {item.description && <p>{item.description}</p>}
+                            </div>
+
+                            <div className="burman-pricing-horizontal">
+
+                              {prices.length > 0 ? (
+                                <>
+                                  <div className="burman-price-labels">
+                                    {prices.map(p => (
+                                      <span key={p.id}>{p.label}</span>
+                                    ))}
+                                  </div>
+
+                                  <div className="burman-price-values">
+                                    {prices.map(p => (
+                                      <strong key={p.id}>€{p.price}</strong>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : (
+                                item.price && <strong>€{item.price}</strong>
+                              )}
+
+                            </div>
+
                           </div>
+                        );
 
-                          {/* RIGHT — HORIZONTAL */}
-                          <div className="burman-pricing-horizontal">
+                      })}
 
-                            {prices.length > 0 ? (
-                              <>
-                                <div className="burman-price-labels">
-                                  {prices.map(p => (
-                                    <span key={p.id}>{p.label}</span>
-                                  ))}
-                                </div>
+                    </div>
+                  );
 
-                                <div className="burman-price-values">
-                                  {prices.map(p => (
-                                    <strong key={p.id}>€{p.price}</strong>
-                                  ))}
-                                </div>
-                              </>
-                            ) : (
-                              item.price && <strong>€{item.price}</strong>
-                            )}
+                })}
 
-                          </div>
-
-                        </div>
-                      );
-
-                    })}
-
-                  </div>
-                );
-
-              })}
+              </div>
 
             </div>
-
           </div>
+
         </div>
       )}
 
