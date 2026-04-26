@@ -196,12 +196,14 @@ html, body{
   display:flex;
   justify-content:center;
   align-items:center;
+  z-index:3000; /* FIX layering */
 }
 
 .burman-modal-backdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(6px); /* subtle luxury blur */
 }
 
 /* ================= MODAL CONTENT ================= */
@@ -213,35 +215,60 @@ html, body{
   width:92%;
   max-width:1000px;
   max-height:88vh;
-  padding:48px 64px;
+  padding:56px 72px;
   overflow-y:auto;
-  border:1px solid rgba(138,58,44,0.2);
+  border:1px solid rgba(138,58,44,0.15);
   box-shadow:0 40px 120px rgba(0,0,0,0.25);
 }
 
-/* ================= CATEGORY HEADER (FIXED) ================= */
+/* ================= MODAL TITLE ================= */
+
+.burman-modal-title{
+  text-align:center;
+  margin-bottom:56px;
+}
+
+.burman-modal-title h2{
+  font-size:28px;
+  font-weight:400;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:#3a2a24;
+}
+
+.burman-modal-title span{
+  display:block;
+  margin-top:10px;
+  font-size:16px;
+  font-style:italic;
+  letter-spacing:0.04em;
+  color:#8a7a70;
+}
+
+/* ================= CATEGORY ================= */
 
 .burman-spa-section{
-  margin-bottom:60px;
+  margin-bottom:72px;
 }
 
 .burman-spa-section h3{
   text-align:center;
-  font-size:22px;
-  font-weight:600;
-  letter-spacing:0.12em;
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0.35em;
+  text-transform:uppercase;
   color:#8a3a2c;
-  margin-bottom:12px;
+  margin-bottom:24px;
 }
 
 .burman-spa-section h3::after{
   content:"";
   display:block;
-  width:40px;
+  width:36px;
   height:1px;
   background:#8a3a2c;
-  margin:12px auto 0;
-  opacity:0.4;
+  margin:14px auto 0;
+  opacity:0.35;
 }
 
 /* ================= ITEMS ================= */
@@ -250,20 +277,24 @@ html, body{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  padding:18px 0;
-  border-bottom:1px solid rgba(0,0,0,0.06);
+  padding:22px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  gap:40px;
 }
 
 .burman-spa-item h4{
-  font-size:16px;
-  font-weight:600;
+  font-size:15px;
+  font-weight:500;
+  letter-spacing:0.02em;
   margin-bottom:6px;
+  color:#2f211c;
 }
 
 .burman-spa-item p{
-  font-size:14px;
-  color:#4a342a;
-  line-height:1.6;
+  font-size:13.5px;
+  color:#6b5a50;
+  line-height:1.7;
+  max-width:520px;
 }
 
 /* ================= PRICING ================= */
@@ -272,25 +303,27 @@ html, body{
   display:flex;
   flex-direction:column;
   align-items:flex-end;
-  gap:4px;
-  min-width:130px;
+  gap:6px;
+  min-width:140px;
 }
 
 .burman-price-labels{
   display:flex;
-  gap:14px;
-  font-size:11px;
-  color:#8a7a70;
+  gap:16px;
+  font-size:10px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:#a3948a;
 }
 
 .burman-price-values{
   display:flex;
-  gap:14px;
+  gap:16px;
 }
 
 .burman-price-values strong{
   font-size:15px;
-  font-weight:600;
+  font-weight:500;
   color:#8a3a2c;
 }
 
@@ -312,7 +345,7 @@ html, body{
 
   .burman-spa-item{
     flex-direction:column;
-    gap:8px;
+    gap:10px;
   }
 
   .burman-pricing-horizontal{
