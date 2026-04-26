@@ -99,7 +99,7 @@ html, body{
   opacity:0.75;
 }
 
-/* ================= 🔥 FLOATING NAV (RESTORED FULL DESIGN) ================= */
+/* ================= 🔥 FLOATING NAV (FULL RESTORED + ANIMATION) ================= */
 
 .burman-nav{
   position:fixed;
@@ -126,8 +126,6 @@ html, body{
   animation:navFadeUp 0.6s ease forwards;
 }
 
-/* animation */
-
 @keyframes navFadeUp{
   from{
     opacity:0;
@@ -149,7 +147,6 @@ html, body{
   font-size:13px;
   text-decoration:none;
   white-space:nowrap;
-
   transition:all 0.25s ease;
 }
 
@@ -180,14 +177,10 @@ html, body{
   transition:color 0.25s ease;
 }
 
-/* separators */
-
 .burman-links a:not(:last-child),
 .burman-links button:not(:last-child){
   border-right:1px solid rgba(0,0,0,0.06);
 }
-
-/* hover underline animation */
 
 .burman-links a::after,
 .burman-links button::after{
@@ -198,10 +191,8 @@ html, body{
   right:14px;
   height:1px;
   background:#8a3a2c;
-
   transform:scaleX(0);
   transform-origin:left;
-
   transition:transform 0.35s ease;
   opacity:0.6;
 }
@@ -224,6 +215,52 @@ html, body{
 
 .burman-menu:hover{
   transform:rotate(90deg);
+}
+
+/* ================= FULLSCREEN MENU ================= */
+
+.burman-fullscreen-menu{
+  position:fixed;
+  inset:0;
+  background:#f7f5f3;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+  animation:fadeIn 0.4s ease;
+}
+
+.burman-fullscreen-links{
+  display:flex;
+  flex-direction:column;
+  gap:28px;
+  text-align:center;
+}
+
+.burman-fullscreen-links a,
+.burman-fullscreen-links button{
+  font-size:22px;
+  letter-spacing:0.08em;
+  color:#6b4a38;
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-family:"Playfair Display", serif;
+}
+
+.burman-fullscreen-links a:hover,
+.burman-fullscreen-links button:hover{
+  opacity:0.5;
+}
+
+.burman-fullscreen-close{
+  position:absolute;
+  top:30px;
+  right:40px;
+  font-size:20px;
+  background:none;
+  border:none;
+  cursor:pointer;
 }
 
 /* ================= MODAL ================= */
@@ -293,20 +330,47 @@ html, body{
   animation:fadeUp 0.5s ease;
 }
 
-/* ================= TYPOGRAPHY ================= */
+/* ================= 🔥 HEADER (UPDATED LIKE IMAGE) ================= */
+
+.burman-modal-header{
+  text-align:center;
+  margin-bottom:40px;
+}
 
 .burman-modal-header h2{
-  font-size:20px;
-  letter-spacing:0.25em;
-  color:#6b4a38;
-  font-weight:600;
+  font-size:42px;
+  letter-spacing:0.1em;
+  color:#8a3a2c;
+  font-weight:400;
+  line-height:1.1;
 }
 
-.burman-modal-header p{
-  margin-top:10px;
-  font-size:14px;
-  color:#8c8c8c;
+.burman-modal-header h2 span{
+  font-style:italic;
+  font-size:28px;
 }
+
+.burman-modal-divider{
+  margin:18px 0;
+  font-size:18px;
+  color:#8a3a2c;
+}
+
+.burman-modal-intro{
+  display:flex;
+  gap:40px;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.burman-modal-intro p{
+  max-width:420px;
+  font-size:14px;
+  line-height:1.7;
+  color:#6b4a38;
+}
+
+/* ================= BODY ================= */
 
 .burman-modal-body{
   margin-top:40px;
@@ -354,11 +418,12 @@ html, body{
   font-size:17px;
   font-weight:600;
   margin-bottom:6px;
+  color:#6b4a38;
 }
 
 .burman-spa-item p{
   font-size:14px;
-  color:#6f6f6f;
+  color:#6b4a38;
   line-height:1.6;
 }
 
@@ -408,6 +473,11 @@ html, body{
   to{ opacity:1; transform:translateY(0); }
 }
 
+@keyframes fadeIn{
+  from{ opacity:0; }
+  to{ opacity:1; }
+}
+
 /* ================= MOBILE ================= */
 
 @media (max-width: 640px){
@@ -424,5 +494,15 @@ html, body{
   .burman-nav{
     flex-direction:column;
     width:90%;
+  }
+
+  .burman-modal-header h2{
+    font-size:28px;
+  }
+
+  .burman-modal-intro{
+    flex-direction:column;
+    gap:16px;
+    align-items:center;
   }
 }

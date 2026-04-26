@@ -129,9 +129,22 @@ export default function BurmanLanding({ menu }) {
             </button>
 
             <div className="burman-modal-header">
-              <h2>Burman Spa</h2>
-              <p>Luxury treatments designed to restore balance.</p>
-            </div>
+  <h2>
+    AN OASIS <span>of</span><br />
+    SERENITY
+  </h2>
+
+  <div className="burman-modal-divider">✦</div>
+
+  <div className="burman-modal-intro">
+    <p>
+      At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul.
+    </p>
+    <p>
+      Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing.
+    </p>
+  </div>
+</div>
 
             <div className="burman-modal-body">
 
