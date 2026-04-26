@@ -78,6 +78,24 @@ export default function MenuEditorPage() {
     setLoading(false);
   };
 
+  const updateItem = async (id, field, value) => {
+    await supabase
+      .from("menu_items")
+      .update({ [field]: value })
+      .eq("id", id);
+  };
+
+  const deleteItem = async (id) => {
+    if (!confirm("Delete this item?")) return;
+
+    await supabase
+      .from("menu_items")
+      .delete()
+      .eq("id", id);
+
+    loadAll();
+  };
+
   const addCategory = async () => {
     if (!newCategory.trim()) return;
 
@@ -168,12 +186,10 @@ export default function MenuEditorPage() {
         <div className="flex justify-between items-center mb-12">
 
           <div>
-            <h1 className="text-3xl font-light tracking-wide text-[#c6a46c]">
+            <h1 className="text-3xl font-light text-[#c6a46c]">
               {menu?.name}
             </h1>
-            <p className="text-sm text-white/40 mt-1">
-              Menu editor
-            </p>
+            <p className="text-sm text-white/40">Menu editor</p>
           </div>
 
           <div className="flex gap-2 bg-white/5 p-1 rounded-full">
@@ -201,17 +217,17 @@ export default function MenuEditorPage() {
               placeholder="Category name"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              className="flex-1 bg-black/20 border px-4 py-2 rounded-xl"
+              className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-2 rounded-xl"
             />
 
             <input
               placeholder="Description"
               value={newCategoryDesc}
               onChange={(e) => setNewCategoryDesc(e.target.value)}
-              className="flex-1 bg-black/20 border px-4 py-2 rounded-xl"
+              className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-2 rounded-xl"
             />
 
-            <button onClick={addCategory} className="bg-[#c6a46c] px-4 rounded-xl">
+            <button onClick={addCategory} className="bg-[#c6a46c] px-4 rounded-xl text-black">
               Add
             </button>
 
@@ -228,18 +244,13 @@ export default function MenuEditorPage() {
           return (
             <div key={cat.id} className="bg-white/5 border rounded-2xl p-6 mb-6">
 
-              {/* EDIT CATEGORY */}
+              {/* CATEGORY */}
               <div className="flex justify-between mb-4">
 
                 <input
                   defaultValue={cat.name}
-                  onBlur={async (e) => {
-                    await supabase
-                      .from("menu_categories")
-                      .update({ name: e.target.value })
-                      .eq("id", cat.id);
-                  }}
-                  className="bg-transparent border-b text-[#c6a46c]"
+                  onBlur={(e) => supabase.from("menu_categories").update({ name: e.target.value }).eq("id", cat.id)}
+                  className="bg-transparent border-b border-white/10 text-[#c6a46c]"
                 />
 
                 <button
@@ -267,6 +278,7 @@ export default function MenuEditorPage() {
                       [cat.id]: { ...input, name: e.target.value }
                     }))
                   }
+                  className="bg-white/[0.03] border px-3 py-2 rounded-xl"
                 />
 
                 <input
@@ -278,9 +290,12 @@ export default function MenuEditorPage() {
                       [cat.id]: { ...input, description: e.target.value }
                     }))
                   }
+                  className="bg-white/[0.03] border px-3 py-2 rounded-xl"
                 />
 
-                <button onClick={() => addItem(cat.id)}>Add</button>
+                <button onClick={() => addItem(cat.id)} className="bg-[#c6a46c] px-3 rounded-xl text-black">
+                  Add
+                </button>
 
               </div>
 
@@ -288,12 +303,28 @@ export default function MenuEditorPage() {
               {catItems.map(item => (
                 <div key={item.id} className="border-b py-3">
 
-                  <div className="flex justify-between">
-                    <div>{item.name}</div>
-                    {menuType !== "services" && <div>€{item.price}</div>}
+                  <div className="flex justify-between items-center">
+
+                    <input
+                      defaultValue={item.name}
+                      onBlur={(e) => updateItem(item.id, "name", e.target.value)}
+                      className="bg-transparent border-b border-white/10"
+                    />
+
+                    <button onClick={() => deleteItem(item.id)} className="text-red-400 text-sm">
+                      Delete
+                    </button>
+
                   </div>
 
-                  {/* FIXED INPUTS */}
+                  {menuType !== "services" && (
+                    <input
+                      defaultValue={item.price}
+                      onBlur={(e) => updateItem(item.id, "price", e.target.value)}
+                      className="mt-2 bg-transparent border-b border-white/10"
+                    />
+                  )}
+
                   {menuType === "services" && (
                     <>
                       {(pricesMap[item.id] || []).map(p => (
@@ -301,12 +332,9 @@ export default function MenuEditorPage() {
 
                           <input
                             defaultValue={p.label}
-                            onBlur={async (e) => {
-                              await supabase
-                                .from("menu_item_prices")
-                                .update({ label: e.target.value })
-                                .eq("id", p.id);
-                            }}
+                            onBlur={(e) =>
+                              supabase.from("menu_item_prices").update({ label: e.target.value }).eq("id", p.id)
+                            }
                           />
 
                           <input
