@@ -168,13 +168,17 @@ export default function BurmanLanding({ menu }) {
               ✕
             </button>
 
-            {/* ✅ FIXED HEADER */}
+            {/* ✅ CORRECT HEADER STRUCTURE */}
             <div className="burman-modal-title">
 
-              <h2>
-                <span className="line-top">AN OASIS</span>
-                <span className="line-middle">OF</span>
-                <span className="line-bottom">SERENITY</span>
+              <h2 className="burman-heading">
+                <span className="line-top">
+                  AN OASIS <span className="of">OF</span>
+                </span>
+
+                <span className="line-bottom">
+                  SERENITY
+                </span>
               </h2>
 
               <div className="burman-divider"></div>
@@ -196,58 +200,58 @@ export default function BurmanLanding({ menu }) {
 
               {categories.map(cat => {
 
-                const catItems = items.filter(
-                  i => i.category_id === cat.id
-                );
+            const catItems = items.filter(
+              i => i.category_id === cat.id
+            );
 
-                if (!catItems.length) return null;
+            if (!catItems.length) return null;
 
-                return (
-                  <div key={cat.id} className="burman-spa-section">
+            return (
+              <div key={cat.id} className="burman-spa-section">
 
-                    <h3>{cat.name}</h3>
+                <h3>{cat.name}</h3>
 
-                    {catItems.map(item => {
+                {catItems.map(item => {
 
-                      const prices = pricesMap[item.id] || [];
+                  const prices = pricesMap[item.id] || [];
 
-                      return (
-                        <div key={item.id} className="burman-spa-item">
+                  return (
+                    <div key={item.id} className="burman-spa-item">
 
-                          <div>
-                            <h4>{item.name}</h4>
-                            {item.description && <p>{item.description}</p>}
-                          </div>
+                      <div>
+                        <h4>{item.name}</h4>
+                        {item.description && <p>{item.description}</p>}
+                      </div>
 
-                          <div className="burman-pricing-horizontal">
+                      <div className="burman-pricing-horizontal">
 
-                            {prices.length > 0 && (
-                              <>
-                                <div className="burman-price-labels">
-                                  {prices.map(p => (
-                                    <span key={p.id}>{p.label}</span>
-                                  ))}
-                                </div>
+                        {prices.length > 0 && (
+                          <>
+                            <div className="burman-price-labels">
+                              {prices.map(p => (
+                                <span key={p.id}>{p.label}</span>
+                              ))}
+                            </div>
 
-                                <div className="burman-price-values">
-                                  {prices.map(p => (
-                                    <strong key={p.id}>€{p.price}</strong>
-                                  ))}
-                                </div>
-                              </>
-                            )}
+                            <div className="burman-price-values">
+                              {prices.map(p => (
+                                <strong key={p.id}>€{p.price}</strong>
+                              ))}
+                            </div>
+                          </>
+                        )}
 
-                          </div>
+                      </div>
 
-                        </div>
-                      );
+                    </div>
+                  );
 
-                    })}
+                })}
 
-                  </div>
-                );
+              </div>
+            );
 
-              })}
+          })}
 
             </div>
 
