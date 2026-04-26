@@ -20,7 +20,6 @@ export default function BurmanLanding({ menu }) {
 
     const loadData = async () => {
 
-      // ✅ REMOVE type filter (this was breaking everything)
       const { data: cats = [] } = await supabase
         .from("menu_categories")
         .select("*")
@@ -150,11 +149,11 @@ export default function BurmanLanding({ menu }) {
 
               <div className="burman-modal-intro">
                 <p>
-                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul.
+                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche, the prestigious Parisian brand renowned for its unique and highly effective therapies.
                 </p>
 
                 <p>
-                  Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing.
+                  Luxuriate in the transformative power of sensorial rejuvenation, and the elemental harmony of soothing sounds and crystal-clear waters. A haven of holistic wellbeing that will leave you with a sense of profound renewal and inner peace.
                 </p>
               </div>
 
@@ -163,7 +162,6 @@ export default function BurmanLanding({ menu }) {
             {/* BODY */}
             <div className="burman-modal-body">
 
-              {/* ✅ DEBUG SAFETY */}
               {categories.length === 0 && (
                 <p style={{textAlign:"center"}}>No categories found</p>
               )}
@@ -191,10 +189,18 @@ export default function BurmanLanding({ menu }) {
                             {item.description && <p>{item.description}</p>}
                           </div>
 
-                          <div className="burman-pricing-horizontal">
+                          {/* ✅ FIXED PRICING */}
+                          <div className="burman-pricing-vertical">
 
                             {prices.map(p => (
-                              <strong key={p.id}>€{p.price}</strong>
+                              <div key={p.id} className="burman-price-row">
+                                <span className="burman-duration">
+                                  {p.label || p.duration || ""}
+                                </span>
+                                <span className="burman-price">
+                                  €{p.price}
+                                </span>
+                              </div>
                             ))}
 
                           </div>
