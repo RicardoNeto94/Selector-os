@@ -13,9 +13,8 @@ export default function BurmanLanding({ menu }) {
 
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
-  const [pricesMap, setPricesMap] = useState({}); // 🔥 NEW
+  const [pricesMap, setPricesMap] = useState({});
 
-  // 🔥 LOAD DATA
   useEffect(() => {
     if (!menu?.id) return;
 
@@ -38,7 +37,6 @@ export default function BurmanLanding({ menu }) {
       setCategories(cats);
       setItems(its);
 
-      // 🔥 LOAD PRICES
       if (its.length) {
         const { data: prices = [] } = await supabase
           .from("menu_item_prices")
@@ -63,14 +61,12 @@ export default function BurmanLanding({ menu }) {
   return (
     <div className="burman-root">
 
-      {/* HEADER */}
       <div className="burman-header">
         <div>HOTEL</div>
         <div className="burman-header-center">THE BURMAN</div>
         <div>TALLINN</div>
       </div>
 
-      {/* HERO */}
       <div className="burman-hero">
         <div className="burman-image-wrapper">
           <img
@@ -92,9 +88,7 @@ export default function BurmanLanding({ menu }) {
         </div>
       </div>
 
-      {/* NAV */}
       <div className="burman-nav">
-
         <a
           href="https://your-booking-link.com"
           target="_blank"
@@ -111,16 +105,12 @@ export default function BurmanLanding({ menu }) {
           <a href={`${base}?type=services`}>Club</a>
         </div>
 
-        <button
-          className="burman-menu"
-          onClick={() => setMenuOpen(true)}
-        >
+        <button className="burman-menu" onClick={() => setMenuOpen(true)}>
           ☰
         </button>
-
       </div>
 
-      {/* SPA MODAL */}
+      {/* SPA */}
       {openSpa && (
         <div className="burman-modal">
 
@@ -177,16 +167,23 @@ export default function BurmanLanding({ menu }) {
                             {item.description && <p>{item.description}</p>}
                           </div>
 
-                          {/* RIGHT (MULTI PRICE) */}
-                          <div className="burman-pricing">
+                          {/* RIGHT — HORIZONTAL */}
+                          <div className="burman-pricing-horizontal">
 
                             {prices.length > 0 ? (
-                              prices.map(p => (
-                                <div key={p.id} className="burman-price-row">
-                                  <span>{p.label}</span>
-                                  <strong>€{p.price}</strong>
+                              <>
+                                <div className="burman-price-labels">
+                                  {prices.map(p => (
+                                    <span key={p.id}>{p.label}</span>
+                                  ))}
                                 </div>
-                              ))
+
+                                <div className="burman-price-values">
+                                  {prices.map(p => (
+                                    <strong key={p.id}>€{p.price}</strong>
+                                  ))}
+                                </div>
+                              </>
                             ) : (
                               item.price && <strong>€{item.price}</strong>
                             )}
