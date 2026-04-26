@@ -12,6 +12,7 @@ export default function MenuEditorPage() {
   const [menu, setMenu] = useState(null);
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
+  const [pricesMap, setPricesMap] = useState({}); // 🔥 NEW
 
   const [menuType, setMenuType] = useState("services");
 
@@ -58,6 +59,23 @@ export default function MenuEditorPage() {
     setCategories(cats);
     setItems(its);
 
+    // 🔥 LOAD PRICES
+    if (its.length) {
+      const { data: prices = [] } = await supabase
+        .from("menu_item_prices")
+        .select("*")
+        .in("menu_item_id", its.map(i => i.id))
+        .order("position");
+
+      const grouped = {};
+      prices.forEach(p => {
+        if (!grouped[p.menu_item_id]) grouped[p.menu_item_id] = [];
+        grouped[p.menu_item_id].push(p);
+      });
+
+      setPricesMap(grouped);
+    }
+
     setLoading(false);
   };
 
@@ -99,6 +117,50 @@ export default function MenuEditorPage() {
     }));
 
     loadAll();
+  };
+
+  // 🔥 ADD PRICE
+  const addPrice = async (itemId) => {
+
+    const { data } = await supabase
+      .from("menu_item_prices")
+      .insert({
+        menu_item_id: itemId,
+        label: "60 min",
+        price: 0
+      })
+      .select()
+      .single();
+
+    setPricesMap(prev => ({
+      ...prev,
+      [itemId]: [...(prev[itemId] || []), data]
+    }));
+  };
+
+  // 🔥 UPDATE PRICE
+  const updatePrice = async (id, value) => {
+    await supabase
+      .from("menu_item_prices")
+      .update({ price: value })
+      .eq("id", id);
+  };
+
+  // 🔥 DELETE PRICE
+  const deletePrice = async (id) => {
+
+    await supabase
+      .from("menu_item_prices")
+      .delete()
+      .eq("id", id);
+
+    setPricesMap(prev => {
+      const updated = { ...prev };
+      for (let key in updated) {
+        updated[key] = updated[key].filter(p => p.id !== id);
+      }
+      return updated;
+    });
   };
 
   if (loading) return <div className="p-10 text-white">Loading...</div>;
@@ -151,19 +213,19 @@ export default function MenuEditorPage() {
               placeholder="Category name"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              className="flex-1 bg-white/[0.03] border border-white/10 px-5 py-3 rounded-2xl focus:outline-none focus:border-[#c6a46c] transition"
+              className="flex-1 bg-white/[0.03] border border-white/10 px-5 py-3 rounded-2xl"
             />
 
             <input
               placeholder="Category description"
               value={newCategoryDesc}
               onChange={(e) => setNewCategoryDesc(e.target.value)}
-              className="flex-1 bg-white/[0.03] border border-white/10 px-5 py-3 rounded-2xl focus:outline-none focus:border-[#c6a46c] transition"
+              className="flex-1 bg-white/[0.03] border border-white/10 px-5 py-3 rounded-2xl"
             />
 
             <button
               onClick={addCategory}
-              className="px-6 py-3 bg-[#c6a46c] text-black rounded-2xl font-medium hover:opacity-90 transition"
+              className="px-6 py-3 bg-[#c6a46c] text-black rounded-2xl"
             >
               Add
             </button>
@@ -181,28 +243,12 @@ export default function MenuEditorPage() {
             const input = dishInputs[cat.id] || {};
 
             return (
-              <div
-                key={cat.id}
-                className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
-              >
+              <div key={cat.id} className="bg-white/5 border rounded-2xl p-6">
 
-                {/* HEADER */}
-                <div className="mb-6 border-b border-white/10 pb-4">
-
-                  <h2 className="text-lg tracking-wide text-[#c6a46c]">
-                    {cat.name}
-                  </h2>
-
-                  {cat.description && (
-                    <p className="text-sm text-white/40 mt-2 max-w-md">
-                      {cat.description}
-                    </p>
-                  )}
-
-                </div>
+                <h2 className="text-lg text-[#c6a46c] mb-4">{cat.name}</h2>
 
                 {/* ADD ITEM */}
-                <div className="flex gap-3 mb-6 items-center">
+                <div className="flex gap-3 mb-6">
 
                   <input
                     placeholder="Name"
@@ -213,48 +259,12 @@ export default function MenuEditorPage() {
                         [cat.id]: { ...input, name: e.target.value }
                       }))
                     }
-                    className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
-                  />
-
-                  <input
-                    placeholder="Description"
-                    value={input.description || ""}
-                    onChange={(e) =>
-                      setDishInputs(prev => ({
-                        ...prev,
-                        [cat.id]: { ...input, description: e.target.value }
-                      }))
-                    }
-                    className="flex-1 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
-                  />
-
-                  <input
-                    placeholder="Duration"
-                    value={input.duration || ""}
-                    onChange={(e) =>
-                      setDishInputs(prev => ({
-                        ...prev,
-                        [cat.id]: { ...input, duration: e.target.value }
-                      }))
-                    }
-                    className="w-32 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
-                  />
-
-                  <input
-                    placeholder="Price"
-                    value={input.price || ""}
-                    onChange={(e) =>
-                      setDishInputs(prev => ({
-                        ...prev,
-                        [cat.id]: { ...input, price: e.target.value }
-                      }))
-                    }
-                    className="w-28 bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl"
+                    className="flex-1 bg-white/[0.03] border px-4 py-2 rounded-xl"
                   />
 
                   <button
                     onClick={() => addItem(cat.id)}
-                    className="px-5 py-3 bg-[#c6a46c] text-black rounded-2xl"
+                    className="px-4 py-2 bg-[#c6a46c] text-black rounded-xl"
                   >
                     Add
                   </button>
@@ -265,34 +275,56 @@ export default function MenuEditorPage() {
                 <div className="space-y-4">
 
                   {catItems.map(item => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between items-start border-b border-white/10 pb-4"
-                    >
+                    <div key={item.id} className="border-b pb-4">
 
-                      <div className="max-w-[70%]">
+                      <div className="flex justify-between">
+                        <div>{item.name}</div>
 
-                        <div className="text-white text-[15px]">
-                          {item.name}
-                        </div>
-
-                        {item.description && (
-                          <div className="text-sm text-white/40 mt-1">
-                            {item.description}
-                          </div>
+                        {menuType !== "services" && (
+                          <div>€{item.price}</div>
                         )}
-
-                        {item.duration && (
-                          <div className="text-xs text-white/30 mt-1">
-                            {item.duration}
-                          </div>
-                        )}
-
                       </div>
 
-                      <div className="text-[#c6a46c] font-medium text-[15px]">
-                        €{item.price}
-                      </div>
+                      {/* 🔥 SERVICES PRICING */}
+                      {menuType === "services" && (
+                        <>
+                          <div className="mt-2 space-y-1">
+                            {(pricesMap[item.id] || []).map(p => (
+                              <div key={p.id} className="flex gap-3">
+
+                                <input
+                                  value={p.label}
+                                  onChange={async (e) => {
+                                    await supabase
+                                      .from("menu_item_prices")
+                                      .update({ label: e.target.value })
+                                      .eq("id", p.id);
+                                  }}
+                                  className="w-24 bg-transparent border-b"
+                                />
+
+                                <input
+                                  value={p.price}
+                                  onChange={(e) => updatePrice(p.id, e.target.value)}
+                                  className="w-20 text-right bg-transparent border-b"
+                                />
+
+                                <button onClick={() => deletePrice(p.id)}>
+                                  ✕
+                                </button>
+
+                              </div>
+                            ))}
+                          </div>
+
+                          <button
+                            onClick={() => addPrice(item.id)}
+                            className="text-xs text-blue-400 mt-2"
+                          >
+                            + Add Price
+                          </button>
+                        </>
+                      )}
 
                     </div>
                   ))}
