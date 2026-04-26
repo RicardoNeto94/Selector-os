@@ -263,65 +263,7 @@ html, body{
   backdrop-filter:blur(6px);
 }
 
-/* ================= FRAME ================= */
-
-.burman-modal-frame{
-  position:relative;
-  padding:18px;
-  border:1px solid #c9b8a8;
-  border-radius:22px;
-}
-
-/* 🔥 FULL CORNER SYSTEM */
-
-.burman-modal-frame::before,
-.burman-modal-frame::after,
-.burman-modal-frame span::before,
-.burman-modal-frame span::after{
-  content:"";
-  position:absolute;
-  width:40px;
-  height:40px;
-  border:1.5px solid #c9b8a8;
-}
-
-/* top-left */
-.burman-modal-frame::before{
-  top:-1px;
-  left:-1px;
-  border-right:none;
-  border-bottom:none;
-  border-radius:18px 0 0 0;
-}
-
-/* top-right */
-.burman-modal-frame::after{
-  top:-1px;
-  right:-1px;
-  border-left:none;
-  border-bottom:none;
-  border-radius:0 18px 0 0;
-}
-
-/* bottom-left */
-.burman-modal-frame span::before{
-  bottom:-1px;
-  left:-1px;
-  border-right:none;
-  border-top:none;
-  border-radius:0 0 0 18px;
-}
-
-/* bottom-right */
-.burman-modal-frame span::after{
-  bottom:-1px;
-  right:-1px;
-  border-left:none;
-  border-top:none;
-  border-radius:0 0 18px 0;
-}
-
-/* ================= MODAL CONTENT ================= */
+/* ================= MODAL CONTENT WITH INTERNAL FRAME ================= */
 
 .burman-modal-content{
   position:relative;
@@ -338,10 +280,66 @@ html, body{
 
   box-shadow:0 60px 160px rgba(0,0,0,0.25);
   animation:fadeUp 0.5s ease;
+
+  /* 🔥 MAIN FRAME */
+  border:1px solid #8a3a2c;
 }
 
+/* hide scrollbar */
 .burman-modal-content::-webkit-scrollbar{
   display:none;
+}
+
+/* 🔥 INNER FRAME */
+.burman-modal-content::before{
+  content:"";
+  position:absolute;
+  inset:14px;
+  border:1px solid #8a3a2c;
+  border-radius:14px;
+  pointer-events:none;
+}
+
+/* 🔥 CORNERS */
+.burman-modal-content::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+/* corner elements */
+.burman-modal-content span{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.burman-modal-content span::before,
+.burman-modal-content span::after{
+  content:"";
+  position:absolute;
+  width:42px;
+  height:42px;
+  border:2px solid #8a3a2c;
+}
+
+/* top-left */
+.burman-modal-content span::before{
+  top:14px;
+  left:14px;
+  border-right:none;
+  border-bottom:none;
+  border-radius:16px 0 0 0;
+}
+
+/* bottom-right */
+.burman-modal-content span::after{
+  bottom:14px;
+  right:14px;
+  border-left:none;
+  border-top:none;
+  border-radius:0 0 16px 0;
 }
 
 /* ================= HEADER ================= */
