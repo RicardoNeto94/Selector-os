@@ -155,9 +155,12 @@ export default function BurmanLanding({ menu }) {
 
           {/* ✅ CORRECT STRUCTURE */}
           <div className="burman-modal-shell">
-            <span></span>
+  <span></span>
 
-            <div className="burman-modal-scroll">
+  {/* 🔥 FIXED FRAME */}
+  <div className="burman-modal-frame" />
+
+  <div className="burman-modal-scroll">
 
               <div className="burman-modal-content">
 

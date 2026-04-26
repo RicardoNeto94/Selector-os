@@ -131,120 +131,6 @@ html, body{
   }
 }
 
-.burman-primary{
-  background:#8a3a2c;
-  color:white;
-  padding:10px 18px;
-  border-radius:8px;
-  font-size:13px;
-  text-decoration:none;
-  white-space:nowrap;
-  transition:all 0.25s ease;
-}
-
-.burman-primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 6px 18px rgba(0,0,0,0.2);
-}
-
-.burman-links{
-  display:flex;
-  align-items:center;
-  border-radius:10px;
-  background:#f4f2f0;
-  overflow:hidden;
-}
-
-.burman-links a,
-.burman-links button{
-  position:relative;
-  font-size:13px;
-  color:#8a3a2c;
-  border:none;
-  background:none;
-  cursor:pointer;
-  padding:10px 14px;
-}
-
-.burman-links a:not(:last-child),
-.burman-links button:not(:last-child){
-  border-right:1px solid rgba(0,0,0,0.06);
-}
-
-.burman-links a::after,
-.burman-links button::after{
-  content:"";
-  position:absolute;
-  bottom:6px;
-  left:14px;
-  right:14px;
-  height:1px;
-  background:#8a3a2c;
-  transform:scaleX(0);
-  transform-origin:left;
-  transition:transform 0.35s ease;
-  opacity:0.6;
-}
-
-.burman-links a:hover::after,
-.burman-links button:hover::after{
-  transform:scaleX(1);
-}
-
-.burman-menu{
-  font-size:18px;
-  background:none;
-  border:none;
-  cursor:pointer;
-  padding:8px 12px;
-  transition:transform 0.25s ease;
-}
-
-.burman-menu:hover{
-  transform:rotate(90deg);
-}
-
-/* ================= FULLSCREEN MENU ================= */
-
-.burman-fullscreen-menu{
-  position:fixed;
-  inset:0;
-  background:#f7f5f3;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:2000;
-  animation:fadeIn 0.4s ease;
-}
-
-.burman-fullscreen-links{
-  display:flex;
-  flex-direction:column;
-  gap:28px;
-  text-align:center;
-}
-
-.burman-fullscreen-links a,
-.burman-fullscreen-links button{
-  font-size:22px;
-  letter-spacing:0.08em;
-  color:#6b4a38;
-  background:none;
-  border:none;
-  cursor:pointer;
-  font-family:"Playfair Display", serif;
-}
-
-.burman-fullscreen-close{
-  position:absolute;
-  top:30px;
-  right:40px;
-  font-size:20px;
-  background:none;
-  border:none;
-  cursor:pointer;
-}
-
 /* ================= MODAL ================= */
 
 .burman-modal{
@@ -272,6 +158,7 @@ html, body{
   height:88vh;
 }
 
+/* OUTER FRAME */
 .burman-modal-shell::before{
   content:"";
   position:absolute;
@@ -279,9 +166,10 @@ html, body{
   border:1px solid #8a3a2c;
   border-radius:18px;
   pointer-events:none;
-  z-index:2;
+  z-index:3;
 }
 
+/* INNER FRAME */
 .burman-modal-shell::after{
   content:"";
   position:absolute;
@@ -289,16 +177,15 @@ html, body{
   border:1px solid #8a3a2c;
   border-radius:16px;
   pointer-events:none;
-  z-index:2;
+  z-index:3;
 }
 
-/* corners */
-
+/* CORNERS */
 .burman-modal-shell span{
   position:absolute;
   inset:0;
   pointer-events:none;
-  z-index:2;
+  z-index:3;
 }
 
 .burman-modal-shell span::before,
@@ -333,6 +220,9 @@ html, body{
   inset:0;
   overflow-y:auto;
 
+  /* 🔥 CRITICAL FIX */
+  z-index:1;
+
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
@@ -349,6 +239,9 @@ html, body{
   border-radius:18px;
   padding:64px 72px;
   animation:fadeUp 0.5s ease;
+
+  /* 🔥 spacing so content never touches frame */
+  margin:12px;
 }
 
 /* ================= HEADER ================= */
@@ -397,26 +290,6 @@ html, body{
   margin-top:40px;
 }
 
-/* ================= SECTIONS ================= */
-
-.burman-spa-section{
-  margin-bottom:80px;
-}
-
-.burman-spa-section:not(:last-child){
-  border-bottom:1px solid rgba(0,0,0,0.08);
-  padding-bottom:60px;
-}
-
-.burman-spa-section h3{
-  font-size:18px;
-  letter-spacing:0.25em;
-  font-weight:600;
-  text-transform:uppercase;
-  margin-bottom:30px;
-  color:#5a3d2c;
-}
-
 /* ================= ITEMS ================= */
 
 .burman-spa-item{
@@ -425,54 +298,6 @@ html, body{
   align-items:flex-start;
   padding:20px 0;
   border-bottom:1px solid rgba(0,0,0,0.06);
-}
-
-.burman-spa-item:last-child{
-  border-bottom:none;
-}
-
-.burman-spa-item > div:first-child{
-  max-width:65%;
-}
-
-.burman-spa-item h4{
-  font-size:17px;
-  font-weight:600;
-  margin-bottom:6px;
-  color:#6b4a38;
-}
-
-.burman-spa-item p{
-  font-size:14px;
-  color:#6b4a38;
-  line-height:1.6;
-}
-
-/* ================= PRICING ================= */
-
-.burman-pricing-horizontal{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:6px;
-  min-width:160px;
-}
-
-.burman-price-labels{
-  display:flex;
-  gap:20px;
-  font-size:12px;
-  color:#9a9a9a;
-}
-
-.burman-price-values{
-  display:flex;
-  gap:20px;
-}
-
-.burman-price-values strong{
-  font-size:16px;
-  font-weight:600;
 }
 
 /* ================= CLOSE ================= */
@@ -485,6 +310,7 @@ html, body{
   background:none;
   border:none;
   cursor:pointer;
+  z-index:4;
 }
 
 /* ================= ANIMATION ================= */
@@ -492,38 +318,4 @@ html, body{
 @keyframes fadeUp{
   from{ opacity:0; transform:translateY(30px); }
   to{ opacity:1; transform:translateY(0); }
-}
-
-@keyframes fadeIn{
-  from{ opacity:0; }
-  to{ opacity:1; }
-}
-
-/* ================= MOBILE ================= */
-
-@media (max-width: 640px){
-
-  .burman-modal-content{
-    padding:32px 20px;
-  }
-
-  .burman-pricing-horizontal{
-    align-items:flex-start;
-    margin-top:10px;
-  }
-
-  .burman-nav{
-    flex-direction:column;
-    width:90%;
-  }
-
-  .burman-modal-header h2{
-    font-size:28px;
-  }
-
-  .burman-modal-intro{
-    flex-direction:column;
-    gap:16px;
-    align-items:center;
-  }
 }
