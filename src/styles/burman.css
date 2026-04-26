@@ -14,7 +14,7 @@ html, body{
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  font-family: "Playfair Display", serif;
+  font-family:"Playfair Display", serif;
   color:#3a2a24;
   position:relative;
 }
@@ -31,7 +31,6 @@ html, body{
   letter-spacing:0.2em;
   color:#8a3a2c;
   text-transform:uppercase;
-  flex-shrink:0;
 }
 
 .burman-header-center{
@@ -59,7 +58,6 @@ html, body{
   width:100%;
   height:100%;
   object-fit:cover;
-  object-position:center 40%;
 }
 
 .burman-image-wrapper::after{
@@ -79,7 +77,6 @@ html, body{
   text-align:center;
   color:white;
   width:60%;
-  text-shadow:0 12px 50px rgba(0,0,0,0.75);
 }
 
 .burman-overlay h1{
@@ -117,7 +114,6 @@ html, body{
   z-index:999;
 }
 
-/* primary button */
 .burman-primary{
   background:#8a3a2c;
   color:white;
@@ -125,21 +121,14 @@ html, body{
   border-radius:10px;
   font-size:13px;
   text-decoration:none;
-  transition:all 0.25s ease;
 }
 
-.burman-primary:hover{
-  transform:translateY(-2px);
-}
-
-/* links */
 .burman-links{
   display:flex;
   gap:4px;
   background:#f4f2f0;
   border-radius:10px;
   padding:4px;
-  align-items:center;
 }
 
 .burman-links a,
@@ -148,11 +137,9 @@ html, body{
   color:#8a3a2c;
   border:none;
   background:none;
-  cursor:pointer;
   padding:10px 14px;
   border-radius:8px;
-  transition:all 0.2s ease;
-  white-space:nowrap; /* 🔥 prevents collapsing text */
+  cursor:pointer;
 }
 
 .burman-links a:hover,
@@ -160,32 +147,23 @@ html, body{
   background:rgba(138,58,44,0.08);
 }
 
-/* menu button */
 .burman-menu{
   font-size:18px;
-  background:none;
   border:none;
+  background:none;
   cursor:pointer;
-  padding:8px 12px;
 }
 
-/* ================= FULLSCREEN MENU (FIXED) ================= */
+/* ================= FULLSCREEN MENU ================= */
 
 .burman-fullscreen-menu{
   position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-
+  inset:0;
   background:#f7f5f3;
-
   display:flex;
   justify-content:center;
   align-items:center;
-
   z-index:2000;
-  animation:fadeIn 0.3s ease;
 }
 
 .burman-fullscreen-links{
@@ -193,8 +171,6 @@ html, body{
   flex-direction:column;
   gap:28px;
   text-align:center;
-  width:100%;
-  max-width:400px;
 }
 
 .burman-fullscreen-links a,
@@ -202,21 +178,14 @@ html, body{
   font-size:22px;
   letter-spacing:0.08em;
   color:#6b4a38;
-  background:none;
   border:none;
-  cursor:pointer;
-  font-family:"Playfair Display", serif;
+  background:none;
 }
 
 .burman-fullscreen-close{
   position:absolute;
   top:30px;
   right:40px;
-  font-size:20px;
-  background:none;
-  border:none;
-  cursor:pointer;
-  z-index:2100;
 }
 
 /* ================= MODAL ================= */
@@ -227,86 +196,52 @@ html, body{
   display:flex;
   justify-content:center;
   align-items:center;
-  z-index:1000;
 }
 
 .burman-modal-backdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.55);
-  backdrop-filter:blur(6px);
 }
 
-/* ================= CLEAN MODAL ================= */
+/* ================= MODAL CONTENT ================= */
 
 .burman-modal-content{
   position:relative;
   background:#f7f5f3;
   border-radius:20px;
-
   width:92%;
   max-width:1000px;
   max-height:88vh;
-
-  padding:56px 72px;
-
+  padding:48px 64px;
   overflow-y:auto;
-
-  border:1px solid rgba(138,58,44,0.25);
+  border:1px solid rgba(138,58,44,0.2);
   box-shadow:0 40px 120px rgba(0,0,0,0.25);
-
-  animation:fadeUp 0.4s ease;
 }
 
-.burman-modal-content::-webkit-scrollbar{
-  display:none;
+/* ================= CATEGORY HEADER (FIXED) ================= */
+
+.burman-spa-section{
+  margin-bottom:60px;
 }
 
-/* ================= HEADER ================= */
-
-.burman-modal-header{
+.burman-spa-section h3{
   text-align:center;
-  margin-bottom:40px;
-}
-
-.burman-modal-header h2{
-  font-size:42px;
-  letter-spacing:0.1em;
+  font-size:22px;
+  font-weight:600;
+  letter-spacing:0.12em;
   color:#8a3a2c;
-  font-weight:400;
-  line-height:1.1;
+  margin-bottom:12px;
 }
 
-.burman-modal-header h2 span{
-  font-style:italic;
-  font-size:28px;
-}
-
-.burman-modal-divider{
-  margin:18px 0;
-  font-size:18px;
-  color:#8a3a2c;
-}
-
-.burman-modal-intro{
-  display:flex;
-  gap:40px;
-  justify-content:center;
-  margin-top:20px;
-}
-
-.burman-modal-intro p{
-  max-width:420px;
-  font-size:14.5px;
-  line-height:1.7;
-  color:#4a342a;
-  opacity:0.9;
-}
-
-/* ================= BODY ================= */
-
-.burman-modal-body{
-  margin-top:40px;
+.burman-spa-section h3::after{
+  content:"";
+  display:block;
+  width:40px;
+  height:1px;
+  background:#8a3a2c;
+  margin:12px auto 0;
+  opacity:0.4;
 }
 
 /* ================= ITEMS ================= */
@@ -315,55 +250,46 @@ html, body{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  padding:20px 0;
+  padding:18px 0;
   border-bottom:1px solid rgba(0,0,0,0.06);
 }
 
 .burman-spa-item h4{
-  font-size:17px;
+  font-size:16px;
   font-weight:600;
   margin-bottom:6px;
 }
 
 .burman-spa-item p{
-  font-size:14.5px;
+  font-size:14px;
   color:#4a342a;
-  line-height:1.7;
-  opacity:0.9;
+  line-height:1.6;
 }
 
-.burman-spa-section h3{
-  font-size:20px;
-  font-weight:600;
-  letter-spacing:0.08em;
-  color:#8a3a2c;
-  margin-bottom:20px;
-}
 /* ================= PRICING ================= */
 
 .burman-pricing-horizontal{
   display:flex;
   flex-direction:column;
   align-items:flex-end;
-  gap:6px;
-  min-width:140px;
-  flex-shrink:0;
+  gap:4px;
+  min-width:130px;
 }
 
 .burman-price-labels{
   display:flex;
-  gap:18px;
-  font-size:12px;
-  color:#8a3a2c;
+  gap:14px;
+  font-size:11px;
+  color:#8a7a70;
 }
 
 .burman-price-values{
   display:flex;
-  gap:18px;
+  gap:14px;
 }
 
 .burman-price-values strong{
-  font-size:16px;
+  font-size:15px;
   font-weight:600;
   color:#8a3a2c;
 }
@@ -372,22 +298,32 @@ html, body{
 
 .burman-modal-close{
   position:absolute;
-  top:28px;
-  right:32px;
-  font-size:18px;
-  background:none;
-  border:none;
-  cursor:pointer;
+  top:24px;
+  right:28px;
 }
 
-/* ================= ANIMATION ================= */
+/* ================= MOBILE ================= */
 
-@keyframes fadeUp{
-  from{ opacity:0; transform:translateY(20px); }
-  to{ opacity:1; transform:translateY(0); }
-}
+@media (max-width:768px){
 
-@keyframes fadeIn{
-  from{ opacity:0; }
-  to{ opacity:1; }
+  .burman-modal-content{
+    padding:32px 20px;
+  }
+
+  .burman-spa-item{
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .burman-pricing-horizontal{
+    align-items:flex-start;
+  }
+
+  .burman-overlay{
+    width:90%;
+  }
+
+  .burman-overlay h1{
+    font-size:32px;
+  }
 }
