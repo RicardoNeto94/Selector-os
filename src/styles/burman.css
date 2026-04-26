@@ -16,7 +16,6 @@ html, body{
   flex-direction:column;
   font-family:"Playfair Display", serif;
   color:#3a2a24;
-  position:relative;
 }
 
 /* ================= HEADER ================= */
@@ -34,7 +33,7 @@ html, body{
 }
 
 .burman-header-center{
-  font-size:22px;
+  font-size:20px;
   letter-spacing:0.25em;
   font-weight:500;
 }
@@ -80,9 +79,9 @@ html, body{
 }
 
 .burman-overlay h1{
-  font-size:56px;
+  font-size:52px;
   font-weight:300;
-  line-height:1.15;
+  line-height:1.2;
 }
 
 .burman-overlay span{
@@ -96,7 +95,7 @@ html, body{
   opacity:0.75;
 }
 
-/* ================= FLOATING NAV ================= */
+/* ================= NAV ================= */
 
 .burman-nav{
   position:fixed;
@@ -142,52 +141,6 @@ html, body{
   cursor:pointer;
 }
 
-.burman-links a:hover,
-.burman-links button:hover{
-  background:rgba(138,58,44,0.08);
-}
-
-.burman-menu{
-  font-size:18px;
-  border:none;
-  background:none;
-  cursor:pointer;
-}
-
-/* ================= FULLSCREEN MENU ================= */
-
-.burman-fullscreen-menu{
-  position:fixed;
-  inset:0;
-  background:#f7f5f3;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:2000;
-}
-
-.burman-fullscreen-links{
-  display:flex;
-  flex-direction:column;
-  gap:28px;
-  text-align:center;
-}
-
-.burman-fullscreen-links a,
-.burman-fullscreen-links button{
-  font-size:22px;
-  letter-spacing:0.08em;
-  color:#6b4a38;
-  border:none;
-  background:none;
-}
-
-.burman-fullscreen-close{
-  position:absolute;
-  top:30px;
-  right:40px;
-}
-
 /* ================= MODAL ================= */
 
 .burman-modal{
@@ -196,136 +149,110 @@ html, body{
   display:flex;
   justify-content:center;
   align-items:center;
-  z-index:3000; /* FIX layering */
+  z-index:3000;
 }
 
 .burman-modal-backdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.55);
-  backdrop-filter:blur(6px); /* subtle luxury blur */
+  backdrop-filter:blur(6px);
 }
-
-/* ================= MODAL CONTENT ================= */
-
-/* ================= MODAL HEADER — CORRECT FINAL ================= */
 
 .burman-modal-content{
   position:relative;
   background:#f7f5f3;
   border-radius:20px;
   width:92%;
-  max-width:1200px;
+  max-width:1100px;
   max-height:88vh;
   padding:56px 72px;
   overflow-y:auto;
-  border:1px solid rgba(138,58,44,0.15);
+  border:1px solid rgba(138,58,44,0.12);
   box-shadow:0 40px 120px rgba(0,0,0,0.25);
 }
 
-/* CONTAINER */
+/* ================= MODAL HEADER ================= */
 
 .burman-modal-title{
   text-align:center;
-  margin-bottom:70px;
+  margin-bottom:64px;
 }
-
-/* HEADING */
 
 .burman-heading{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:8px;
-  margin:0;
+  gap:6px;
 }
 
-/* FIRST LINE */
+/* refined scale */
 
 .line-top{
-  font-size:52px;
-  letter-spacing:0.22em;
+  font-size:36px;
+  letter-spacing:0.18em;
   text-transform:uppercase;
   color:#8c3b2d;
 }
-
-/* INLINE "OF" */
 
 .line-top .of{
-  font-size:20px;
+  font-size:14px;
   font-style:italic;
-  letter-spacing:0.12em;
+  letter-spacing:0.1em;
   color:#b0897c;
-  margin-left:10px;
+  margin-left:6px;
   position:relative;
-  top:-4px;
+  top:-2px;
 }
-
-/* SECOND LINE */
 
 .line-bottom{
-  font-size:78px;
-  letter-spacing:0.26em;
+  font-size:52px;
+  letter-spacing:0.20em;
   text-transform:uppercase;
   color:#8c3b2d;
-  line-height:1;
 }
 
-/* DIVIDER */
-
 .burman-divider{
-  margin:28px 0 48px;
+  margin:24px 0 40px;
   display:flex;
   justify-content:center;
 }
 
 .burman-divider::before{
   content:"✦";
-  font-size:14px;
+  font-size:12px;
   color:#8c3b2d;
 }
 
-/* INTRO */
+/* intro */
 
 .burman-modal-intro{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:80px;
-  max-width:920px;
+  gap:60px;
+  max-width:820px;
   margin:0 auto;
 }
 
 .burman-modal-intro p{
-  font-size:15px;
-  line-height:2;
+  font-size:14px;
+  line-height:1.9;
   color:#8a3a2c;
-  margin:0;
 }
 
 /* ================= CATEGORY ================= */
 
 .burman-spa-section{
-  margin-bottom:72px;
+  margin-bottom:64px;
 }
 
 .burman-spa-section h3{
   text-align:center;
-  font-size:14px;
-  font-weight:500;
-  letter-spacing:0.35em;
+  font-size:16px;
+  letter-spacing:0.28em;
   text-transform:uppercase;
   color:#8a3a2c;
   margin-bottom:24px;
-}
-
-.burman-spa-section h3::after{
-  content:"";
-  display:block;
-  width:36px;
-  height:1px;
-  background:#8a3a2c;
-  margin:14px auto 0;
-  opacity:0.35;
 }
 
 /* ================= ITEMS ================= */
@@ -334,52 +261,48 @@ html, body{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  padding:22px 0;
+  padding:18px 0;
   border-bottom:1px solid rgba(0,0,0,0.05);
   gap:40px;
 }
 
-.burman-spa-item h4{
-  font-size:15px;
+.burman-spa-item h3{
+  font-size:16px;
   font-weight:500;
-  letter-spacing:0.02em;
   margin-bottom:6px;
-  color:#2f211c;
 }
 
 .burman-spa-item p{
-  font-size:13.5px;
+  font-size:13px;
   color:#6b5a50;
-  line-height:1.7;
+  line-height:1.6;
   max-width:520px;
 }
 
-/* ================= PRICING ================= */
+/* ================= PRICING (FIXED PROPERLY) ================= */
 
-.burman-pricing-horizontal{
+.burman-pricing-vertical{
   display:flex;
   flex-direction:column;
-  align-items:flex-end;
-  gap:6px;
+  gap:8px;
   min-width:140px;
 }
 
-.burman-price-labels{
+.burman-price-row{
   display:flex;
-  gap:16px;
-  font-size:10px;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  color:#a3948a;
+  justify-content:space-between;
+  align-items:center;
+  gap:24px;
 }
 
-.burman-price-values{
-  display:flex;
-  gap:16px;
+.burman-duration{
+  font-size:13px;
+  letter-spacing:0.06em;
+  color:#8a7a70;
 }
 
-.burman-price-values strong{
-  font-size:15px;
+.burman-price{
+  font-size:16px;
   font-weight:500;
   color:#8a3a2c;
 }
@@ -402,11 +325,6 @@ html, body{
 
   .burman-spa-item{
     flex-direction:column;
-    gap:10px;
-  }
-
-  .burman-pricing-horizontal{
-    align-items:flex-start;
   }
 
   .burman-overlay{
@@ -414,6 +332,10 @@ html, body{
   }
 
   .burman-overlay h1{
-    font-size:32px;
+    font-size:30px;
+  }
+
+  .burman-modal-intro{
+    grid-template-columns:1fr;
   }
 }
