@@ -114,6 +114,42 @@ export default function BurmanLanding({ menu }) {
         </div>
       )}
 
+      {/* ✅ FULLSCREEN MENU (THIS WAS MISSING) */}
+      {menuOpen && (
+        <div className="burman-fullscreen-menu">
+
+          <button
+            className="burman-fullscreen-close"
+            onClick={() => setMenuOpen(false)}
+          >
+            ✕
+          </button>
+
+          <div className="burman-fullscreen-links">
+
+            <a href={`${base}?type=services`}>Rooms</a>
+            <a href={`${base}?type=food`}>Dining</a>
+
+            <button
+              onClick={() => {
+                setOpenSpa(true);
+                setMenuOpen(false);
+              }}
+            >
+              Spa
+            </button>
+
+            <a href={`${base}?type=services`}>Club</a>
+
+            <a href="https://maps.google.com" target="_blank">
+              Location
+            </a>
+
+          </div>
+
+        </div>
+      )}
+
       {/* SPA MODAL */}
       {openSpa && (
         <div className="burman-modal">
@@ -132,7 +168,6 @@ export default function BurmanLanding({ menu }) {
               ✕
             </button>
 
-            {/* HEADER */}
             <div className="burman-modal-title">
 
               <h2 className="burman-heading">
@@ -149,22 +184,17 @@ export default function BurmanLanding({ menu }) {
 
               <div className="burman-modal-intro">
                 <p>
-                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche, the prestigious Parisian brand renowned for its unique and highly effective therapies.
+                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment.
                 </p>
 
                 <p>
-                  Luxuriate in the transformative power of sensorial rejuvenation, and the elemental harmony of soothing sounds and crystal-clear waters. A haven of holistic wellbeing that will leave you with a sense of profound renewal and inner peace.
+                  Luxuriate in the transformative power of sensorial rejuvenation.
                 </p>
               </div>
 
             </div>
 
-            {/* BODY */}
             <div className="burman-modal-body">
-
-              {categories.length === 0 && (
-                <p style={{textAlign:"center"}}>No categories found</p>
-              )}
 
               {categories.map(cat => {
 
@@ -189,7 +219,6 @@ export default function BurmanLanding({ menu }) {
                             {item.description && <p>{item.description}</p>}
                           </div>
 
-                          {/* ✅ FIXED PRICING */}
                           <div className="burman-pricing-vertical">
 
                             {prices.map(p => (
