@@ -263,7 +263,7 @@ html, body{
   backdrop-filter:blur(6px);
 }
 
-/* ================= MODAL CONTENT WITH INTERNAL FRAME ================= */
+/* ================= MODAL CONTENT ================= */
 
 .burman-modal-content{
   position:relative;
@@ -280,9 +280,6 @@ html, body{
 
   box-shadow:0 60px 160px rgba(0,0,0,0.25);
   animation:fadeUp 0.5s ease;
-
-  /* 🔥 MAIN FRAME */
-  border:1px solid #8a3a2c;
 }
 
 /* hide scrollbar */
@@ -290,56 +287,34 @@ html, body{
   display:none;
 }
 
-/* 🔥 INNER FRAME */
+/* 🔥 INTERNAL FRAME (CORRECT — FIXED) */
 .burman-modal-content::before{
   content:"";
   position:absolute;
-  inset:14px;
+  inset:12px;
   border:1px solid #8a3a2c;
-  border-radius:14px;
+  border-radius:16px;
   pointer-events:none;
 }
 
-/* 🔥 CORNERS */
+/* 🔥 CLEAN CORNERS (NO SPAN HACKS) */
 .burman-modal-content::after{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
-}
+  background:
+    linear-gradient(#8a3a2c,#8a3a2c) 12px 12px / 36px 1px no-repeat,
+    linear-gradient(#8a3a2c,#8a3a2c) 12px 12px / 1px 36px no-repeat,
 
-/* corner elements */
-.burman-modal-content span{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-}
+    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) 12px / 36px 1px no-repeat,
+    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) 12px / 1px 36px no-repeat,
 
-.burman-modal-content span::before,
-.burman-modal-content span::after{
-  content:"";
-  position:absolute;
-  width:42px;
-  height:42px;
-  border:2px solid #8a3a2c;
-}
+    linear-gradient(#8a3a2c,#8a3a2c) 12px calc(100% - 12px) / 36px 1px no-repeat,
+    linear-gradient(#8a3a2c,#8a3a2c) 12px calc(100% - 12px) / 1px 36px no-repeat,
 
-/* top-left */
-.burman-modal-content span::before{
-  top:14px;
-  left:14px;
-  border-right:none;
-  border-bottom:none;
-  border-radius:16px 0 0 0;
-}
-
-/* bottom-right */
-.burman-modal-content span::after{
-  bottom:14px;
-  right:14px;
-  border-left:none;
-  border-top:none;
-  border-radius:0 0 16px 0;
+    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) calc(100% - 12px) / 36px 1px no-repeat,
+    linear-gradient(#8a3a2c,#8a3a2c) calc(100% - 12px) calc(100% - 12px) / 1px 36px no-repeat;
 }
 
 /* ================= HEADER ================= */
