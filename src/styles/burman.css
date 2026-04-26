@@ -223,26 +223,73 @@ html, body{
 
 /* ================= MODAL TITLE ================= */
 
+/* ================= MODAL HEADER — FINAL ================= */
+
 .burman-modal-title{
   text-align:center;
-  margin-bottom:56px;
+  margin-bottom:80px;
 }
 
-.burman-modal-title h2{
-  font-size:28px;
+/* MAIN HEADING */
+
+.burman-heading{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  margin:0;
+}
+
+/* TOP + BOTTOM */
+
+.line-top,
+.line-bottom{
+  font-size:68px;
   font-weight:400;
-  letter-spacing:0.28em;
+  letter-spacing:0.42em;
   text-transform:uppercase;
-  color:#3a2a24;
+  color:#8c3b2d;
+  line-height:1;
 }
 
-.burman-modal-title span{
-  display:block;
-  margin-top:10px;
-  font-size:16px;
+/* "OF" */
+
+.line-middle{
+  font-size:22px;
   font-style:italic;
-  letter-spacing:0.04em;
-  color:#8a7a70;
+  letter-spacing:0.35em;
+  color:#b0897c;
+}
+
+/* DIVIDER */
+
+.burman-divider{
+  margin:36px 0 56px;
+  display:flex;
+  justify-content:center;
+}
+
+.burman-divider::before{
+  content:"✦";
+  font-size:14px;
+  color:#8c3b2d;
+}
+
+/* INTRO TEXT */
+
+.burman-modal-intro{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  max-width:920px;
+  margin:0 auto;
+}
+
+.burman-modal-intro p{
+  font-size:15px;
+  line-height:2;
+  color:#5a463d;
+  margin:0;
 }
 
 /* ================= CATEGORY ================= */
