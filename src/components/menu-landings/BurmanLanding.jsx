@@ -122,7 +122,6 @@ export default function BurmanLanding({ menu }) {
           </button>
 
           <div className="burman-fullscreen-links">
-
             <a href={`${base}?type=services`}>Rooms</a>
             <a href={`${base}?type=food`}>Dining</a>
 
@@ -138,13 +137,12 @@ export default function BurmanLanding({ menu }) {
             <a href="https://maps.google.com" target="_blank">
               Location
             </a>
-
           </div>
 
         </div>
       )}
 
-      {/* SPA */}
+      {/* SPA MODAL */}
       {openSpa && (
         <div className="burman-modal">
 
@@ -153,110 +151,98 @@ export default function BurmanLanding({ menu }) {
             onClick={() => setOpenSpa(false)}
           />
 
-          {/* ✅ CORRECT STRUCTURE */}
-          <div className="burman-modal-shell">
-  <span></span>
+          {/* ✅ CLEAN MODAL */}
+          <div className="burman-modal-content">
 
-  {/* 🔥 FIXED FRAME */}
-  <div className="burman-modal-frame" />
+            <button
+              className="burman-modal-close"
+              onClick={() => setOpenSpa(false)}
+            >
+              ✕
+            </button>
 
-  <div className="burman-modal-scroll">
+            <div className="burman-modal-header">
+              <h2>
+                AN OASIS <span>of</span><br />
+                SERENITY
+              </h2>
 
-              <div className="burman-modal-content">
+              <div className="burman-modal-divider">✦</div>
 
-                <button
-                  className="burman-modal-close"
-                  onClick={() => setOpenSpa(false)}
-                >
-                  ✕
-                </button>
-
-                <div className="burman-modal-header">
-                  <h2>
-                    AN OASIS <span>of</span><br />
-                    SERENITY
-                  </h2>
-
-                  <div className="burman-modal-divider">✦</div>
-
-                  <div className="burman-modal-intro">
-                    <p>
-                      At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche, the prestigious Parisian brand renowned for its unique and highly effective therapies.
-                    </p>
-                    <p>
-                      Luxuriate in the transformative power of sensorial rejuvenation, and the elemental harmony of soothing sounds and crystal-clear waters. A haven of holistic wellbeing that will leave you with a sense of profound renewal and inner peace.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="burman-modal-body">
-
-                  {categories.map(cat => {
-
-                    const catItems = items.filter(
-                      i => i.category_id === cat.id
-                    );
-
-                    if (!catItems.length) return null;
-
-                    return (
-                      <div key={cat.id} className="burman-spa-section">
-
-                        <h3>{cat.name}</h3>
-
-                        {cat.description && (
-                          <p className="burman-spa-description">
-                            {cat.description}
-                          </p>
-                        )}
-
-                        {catItems.map(item => {
-
-                          const prices = pricesMap[item.id] || [];
-
-                          return (
-                            <div key={item.id} className="burman-spa-item">
-
-                              <div>
-                                <h4>{item.name}</h4>
-                                {item.description && <p>{item.description}</p>}
-                              </div>
-
-                              <div className="burman-pricing-horizontal">
-
-                                {prices.length > 0 ? (
-                                  <>
-                                    <div className="burman-price-labels">
-                                      {prices.map(p => (
-                                        <span key={p.id}>{p.label}</span>
-                                      ))}
-                                    </div>
-
-                                    <div className="burman-price-values">
-                                      {prices.map(p => (
-                                        <strong key={p.id}>€{p.price}</strong>
-                                      ))}
-                                    </div>
-                                  </>
-                                ) : (
-                                  item.price && <strong>€{item.price}</strong>
-                                )}
-
-                              </div>
-
-                            </div>
-                          );
-
-                        })}
-
-                      </div>
-                    );
-
-                  })}
-
-                </div>
-
+              <div className="burman-modal-intro">
+                <p>
+                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche, the prestigious Parisian brand renowned for its unique and highly effective therapies.
+                </p>
+                <p>
+                  Luxuriate in the transformative power of sensorial rejuvenation, and the elemental harmony of soothing sounds and crystal-clear waters. A haven of holistic wellbeing that will leave you with a sense of profound renewal and inner peace.
+                </p>
               </div>
+            </div>
+
+            <div className="burman-modal-body">
+
+              {categories.map(cat => {
+
+                const catItems = items.filter(
+                  i => i.category_id === cat.id
+                );
+
+                if (!catItems.length) return null;
+
+                return (
+                  <div key={cat.id} className="burman-spa-section">
+
+                    <h3>{cat.name}</h3>
+
+                    {cat.description && (
+                      <p className="burman-spa-description">
+                        {cat.description}
+                      </p>
+                    )}
+
+                    {catItems.map(item => {
+
+                      const prices = pricesMap[item.id] || [];
+
+                      return (
+                        <div key={item.id} className="burman-spa-item">
+
+                          <div>
+                            <h4>{item.name}</h4>
+                            {item.description && <p>{item.description}</p>}
+                          </div>
+
+                          <div className="burman-pricing-horizontal">
+
+                            {prices.length > 0 ? (
+                              <>
+                                <div className="burman-price-labels">
+                                  {prices.map(p => (
+                                    <span key={p.id}>{p.label}</span>
+                                  ))}
+                                </div>
+
+                                <div className="burman-price-values">
+                                  {prices.map(p => (
+                                    <strong key={p.id}>€{p.price}</strong>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              item.price && <strong>€{item.price}</strong>
+                            )}
+
+                          </div>
+
+                        </div>
+                      );
+
+                    })}
+
+                  </div>
+                );
+
+              })}
 
             </div>
 

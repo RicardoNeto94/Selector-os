@@ -105,30 +105,66 @@ html, body{
   position:fixed;
   bottom:20px;
   left:50%;
-  transform:translateX(-50%) translateY(20px);
+  transform:translateX(-50%);
   display:flex;
   align-items:center;
   gap:10px;
-  max-width:calc(100% - 20px);
-  flex-wrap:wrap;
   background:rgba(255,255,255,0.92);
   backdrop-filter:blur(14px);
-  padding:10px 12px;
+  padding:8px;
   border-radius:14px;
   box-shadow:0 15px 40px rgba(0,0,0,0.18);
   z-index:999;
-  animation:navFadeUp 0.6s ease forwards;
 }
 
-@keyframes navFadeUp{
-  from{
-    opacity:0;
-    transform:translateX(-50%) translateY(40px);
-  }
-  to{
-    opacity:1;
-    transform:translateX(-50%) translateY(0);
-  }
+/* primary button */
+.burman-primary{
+  background:#8a3a2c;
+  color:white;
+  padding:10px 18px;
+  border-radius:10px;
+  font-size:13px;
+  text-decoration:none;
+  transition:all 0.25s ease;
+}
+
+.burman-primary:hover{
+  transform:translateY(-2px);
+}
+
+/* links */
+.burman-links{
+  display:flex;
+  gap:6px;
+  background:#f4f2f0;
+  border-radius:10px;
+  padding:4px;
+}
+
+.burman-links a,
+.burman-links button{
+  font-size:13px;
+  color:#8a3a2c;
+  border:none;
+  background:none;
+  cursor:pointer;
+  padding:10px 14px;
+  border-radius:8px;
+  transition:all 0.2s ease;
+}
+
+.burman-links a:hover,
+.burman-links button:hover{
+  background:rgba(138,58,44,0.08);
+}
+
+/* menu button */
+.burman-menu{
+  font-size:18px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:8px 12px;
 }
 
 /* ================= MODAL ================= */
@@ -149,103 +185,29 @@ html, body{
   backdrop-filter:blur(6px);
 }
 
-/* ================= FIXED FRAME ================= */
-
-.burman-modal-shell{
-  position:relative;
-  width:92%;
-  max-width:1000px;
-  height:88vh;
-}
-
-/* OUTER FRAME */
-.burman-modal-shell::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border:1px solid #8a3a2c;
-  border-radius:18px;
-  pointer-events:none;
-  z-index:3;
-}
-
-/* INNER FRAME */
-.burman-modal-shell::after{
-  content:"";
-  position:absolute;
-  inset:12px;
-  border:1px solid #8a3a2c;
-  border-radius:16px;
-  pointer-events:none;
-  z-index:3;
-}
-
-/* CORNERS */
-.burman-modal-shell span{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:3;
-}
-
-.burman-modal-shell span::before,
-.burman-modal-shell span::after{
-  content:"";
-  position:absolute;
-  width:42px;
-  height:42px;
-  border:2px solid #8a3a2c;
-}
-
-.burman-modal-shell span::before{
-  top:12px;
-  left:12px;
-  border-right:none;
-  border-bottom:none;
-  border-radius:16px 0 0 0;
-}
-
-.burman-modal-shell span::after{
-  bottom:12px;
-  right:12px;
-  border-left:none;
-  border-top:none;
-  border-radius:0 0 16px 0;
-}
-
-/* ================= SCROLL ================= */
-
-.burman-modal-scroll{
-  position:absolute;
-  inset:0;
-  overflow-y:auto;
-
-  /* 🔥 SAFE AREA (CRITICAL) */
-  padding-top:60px;
-  padding-bottom:40px;
-
-  z-index:1;
-
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-}
-
-.burman-modal-scroll::-webkit-scrollbar{
-  display:none;
-}
-
-/* ================= CONTENT ================= */
+/* ================= CLEAN MODAL ================= */
 
 .burman-modal-content{
   position:relative;
   background:#f7f5f3;
-  border-radius:18px;
+  border-radius:20px;
 
-  padding:40px 72px 64px;
+  width:92%;
+  max-width:1000px;
+  max-height:88vh;
 
-  animation:fadeUp 0.5s ease;
+  padding:56px 72px;
 
-  margin:12px;
+  overflow-y:auto;
+
+  border:1px solid rgba(138,58,44,0.25);
+  box-shadow:0 40px 120px rgba(0,0,0,0.25);
+
+  animation:fadeUp 0.4s ease;
+}
+
+.burman-modal-content::-webkit-scrollbar{
+  display:none;
 }
 
 /* ================= HEADER ================= */
@@ -302,13 +264,9 @@ html, body{
   align-items:flex-start;
   padding:20px 0;
   border-bottom:1px solid rgba(0,0,0,0.06);
-
-  position:relative;
-  z-index:1;
 }
 
-/* pricing fix */
-
+/* pricing */
 .burman-pricing-horizontal{
   min-width:160px;
   flex-shrink:0;
@@ -324,12 +282,11 @@ html, body{
   background:none;
   border:none;
   cursor:pointer;
-  z-index:4;
 }
 
 /* ================= ANIMATION ================= */
 
 @keyframes fadeUp{
-  from{ opacity:0; transform:translateY(30px); }
+  from{ opacity:0; transform:translateY(20px); }
   to{ opacity:1; transform:translateY(0); }
 }
