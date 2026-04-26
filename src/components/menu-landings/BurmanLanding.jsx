@@ -89,7 +89,7 @@ export default function BurmanLanding({ menu }) {
         </div>
       </div>
 
-      {/* FLOATING NAV (hidden when modal/menu open) */}
+      {/* FLOATING NAV */}
       {!openSpa && !menuOpen && (
         <div className="burman-nav">
 
@@ -168,24 +168,30 @@ export default function BurmanLanding({ menu }) {
               ✕
             </button>
 
-            <div className="burman-modal-header">
+            {/* ✅ FIXED HEADER */}
+            <div className="burman-modal-title">
+
               <h2>
-                AN OASIS <span>of</span><br />
-                SERENITY
+                <span className="line-top">AN OASIS</span>
+                <span className="line-middle">OF</span>
+                <span className="line-bottom">SERENITY</span>
               </h2>
 
-              <div className="burman-modal-divider">✦</div>
+              <div className="burman-divider"></div>
 
               <div className="burman-modal-intro">
                 <p>
                   At the boutique Burman Spa, discover an oasis of serenity and quiet contentment; a tranquil experience for mind, body and soul. Immerse yourself in a bespoke wellness journey with customised treatments in partnership with Biologique Recherche.
                 </p>
+
                 <p>
                   Luxuriate in the transformative power of sensorial rejuvenation and holistic wellbeing. A haven designed for renewal and inner peace.
                 </p>
               </div>
+
             </div>
 
+            {/* BODY */}
             <div className="burman-modal-body">
 
               {categories.map(cat => {
