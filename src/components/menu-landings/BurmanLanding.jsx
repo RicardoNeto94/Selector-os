@@ -13,6 +13,7 @@ export default function BurmanLanding({ menu }) {
 
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
+  const [pricesMap, setPricesMap] = useState({}); // 🔥 NEW
 
   // 🔥 LOAD DATA
   useEffect(() => {
@@ -36,6 +37,24 @@ export default function BurmanLanding({ menu }) {
 
       setCategories(cats);
       setItems(its);
+
+      // 🔥 LOAD PRICES
+      if (its.length) {
+        const { data: prices = [] } = await supabase
+          .from("menu_item_prices")
+          .select("*")
+          .in("menu_item_id", its.map(i => i.id))
+          .order("position");
+
+        const grouped = {};
+        prices.forEach(p => {
+          if (!grouped[p.menu_item_id]) grouped[p.menu_item_id] = [];
+          grouped[p.menu_item_id].push(p);
+        });
+
+        setPricesMap(grouped);
+      }
+
     };
 
     loadData();
@@ -53,7 +72,6 @@ export default function BurmanLanding({ menu }) {
 
       {/* HERO */}
       <div className="burman-hero">
-
         <div className="burman-image-wrapper">
           <img
             src="https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp"
@@ -72,7 +90,6 @@ export default function BurmanLanding({ menu }) {
             MICHELIN Opening of the Year Award 2025
           </p>
         </div>
-
       </div>
 
       {/* NAV */}
@@ -90,9 +107,7 @@ export default function BurmanLanding({ menu }) {
         <div className="burman-links">
           <a href={`${base}?type=services`}>Rooms</a>
           <a href={`${base}?type=food`}>Dining</a>
-
           <button onClick={() => setOpenSpa(true)}>Spa</button>
-
           <a href={`${base}?type=services`}>Club</a>
         </div>
 
@@ -105,43 +120,10 @@ export default function BurmanLanding({ menu }) {
 
       </div>
 
-      {/* FULLSCREEN MENU */}
-      {menuOpen && (
-        <div className="burman-fullscreen-menu">
-
-          <button
-            className="burman-fullscreen-close"
-            onClick={() => setMenuOpen(false)}
-          >
-            ✕
-          </button>
-
-          <div className="burman-fullscreen-links">
-
-            <a href={`${base}?type=services`}>Rooms</a>
-            <a href={`${base}?type=food`}>Dining</a>
-
-            <button onClick={() => {
-              setOpenSpa(true);
-              setMenuOpen(false);
-            }}>
-              Spa
-            </button>
-
-            <a href={`${base}?type=services`}>Bombay Club</a>
-
-            <a href="https://maps.google.com" target="_blank">
-              Location
-            </a>
-
-          </div>
-
-        </div>
-      )}
-
       {/* SPA MODAL */}
       {openSpa && (
         <div className="burman-modal">
+
           <div
             className="burman-modal-backdrop"
             onClick={() => setOpenSpa(false)}
@@ -162,6 +144,7 @@ export default function BurmanLanding({ menu }) {
             </div>
 
             <div className="burman-modal-body">
+
               {categories.map(cat => {
 
                 const catItems = items.filter(
@@ -181,26 +164,45 @@ export default function BurmanLanding({ menu }) {
                       </p>
                     )}
 
-                    {catItems.map(item => (
-                      <div key={item.id} className="burman-spa-item">
+                    {catItems.map(item => {
 
-                        <div>
-                          <h4>{item.name}</h4>
+                      const prices = pricesMap[item.id] || [];
 
-                          {item.description && <p>{item.description}</p>}
-                          {item.duration && <span>{item.duration}</span>}
+                      return (
+                        <div key={item.id} className="burman-spa-item">
+
+                          {/* LEFT */}
+                          <div>
+                            <h4>{item.name}</h4>
+                            {item.description && <p>{item.description}</p>}
+                          </div>
+
+                          {/* RIGHT (MULTI PRICE) */}
+                          <div className="burman-pricing">
+
+                            {prices.length > 0 ? (
+                              prices.map(p => (
+                                <div key={p.id} className="burman-price-row">
+                                  <span>{p.label}</span>
+                                  <strong>€{p.price}</strong>
+                                </div>
+                              ))
+                            ) : (
+                              item.price && <strong>€{item.price}</strong>
+                            )}
+
+                          </div>
+
                         </div>
+                      );
 
-                        <div>
-                          {item.price ? `€${item.price}` : ""}
-                        </div>
-
-                      </div>
-                    ))}
+                    })}
 
                   </div>
                 );
+
               })}
+
             </div>
 
           </div>
