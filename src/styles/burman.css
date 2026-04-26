@@ -99,7 +99,7 @@ html, body{
   opacity:0.75;
 }
 
-/* ================= 🔥 FLOATING NAV (FULL RESTORED + ANIMATION) ================= */
+/* ================= FLOATING NAV ================= */
 
 .burman-nav{
   position:fixed;
@@ -109,20 +109,14 @@ html, body{
   display:flex;
   align-items:center;
   gap:10px;
-
   max-width:calc(100% - 20px);
   flex-wrap:wrap;
-
   background:rgba(255,255,255,0.92);
   backdrop-filter:blur(14px);
-
   padding:10px 12px;
   border-radius:14px;
-
   box-shadow:0 15px 40px rgba(0,0,0,0.18);
-
   z-index:999;
-
   animation:navFadeUp 0.6s ease forwards;
 }
 
@@ -136,8 +130,6 @@ html, body{
     transform:translateX(-50%) translateY(0);
   }
 }
-
-/* ================= PRIMARY BUTTON ================= */
 
 .burman-primary{
   background:#8a3a2c;
@@ -154,8 +146,6 @@ html, body{
   transform:translateY(-2px);
   box-shadow:0 6px 18px rgba(0,0,0,0.2);
 }
-
-/* ================= LINKS ================= */
 
 .burman-links{
   display:flex;
@@ -174,7 +164,6 @@ html, body{
   background:none;
   cursor:pointer;
   padding:10px 14px;
-  transition:color 0.25s ease;
 }
 
 .burman-links a:not(:last-child),
@@ -201,8 +190,6 @@ html, body{
 .burman-links button:hover::after{
   transform:scaleX(1);
 }
-
-/* ================= MENU BUTTON ================= */
 
 .burman-menu{
   font-size:18px;
@@ -246,11 +233,6 @@ html, body{
   border:none;
   cursor:pointer;
   font-family:"Playfair Display", serif;
-}
-
-.burman-fullscreen-links a:hover,
-.burman-fullscreen-links button:hover{
-  opacity:0.5;
 }
 
 .burman-fullscreen-close{
@@ -326,11 +308,20 @@ html, body{
   max-height:88vh;
   padding:64px 72px;
   overflow-y:auto;
+
+  /* 🔥 SCROLLBAR HIDDEN */
+  scrollbar-width:none;        /* Firefox */
+  -ms-overflow-style:none;     /* IE */
+
   box-shadow:0 60px 160px rgba(0,0,0,0.25);
   animation:fadeUp 0.5s ease;
 }
 
-/* ================= 🔥 HEADER (UPDATED LIKE IMAGE) ================= */
+.burman-modal-content::-webkit-scrollbar{
+  display:none;                /* Chrome / Safari */
+}
+
+/* ================= HEADER ================= */
 
 .burman-modal-header{
   text-align:center;
