@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "@/styles/burman.css";
 
-// OPTIONAL (safe — remove if not created yet)
 import BurmanWeather from "@/components/BurmanWeather";
 
 export default function BurmanLanding({ menu }) {
@@ -12,23 +11,20 @@ export default function BurmanLanding({ menu }) {
   const supabase = createClientComponentClient();
 
   const [openSpa, setOpenSpa] = useState(false);
+  const [openRoomService, setOpenRoomService] = useState(false); // ✅ NEW
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // ✅ NEW
-  const [openRoomService, setOpenRoomService] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [pricesMap, setPricesMap] = useState({});
 
-  // 🔥 FIX: allow scroll when modal/menu is open
   useEffect(() => {
-    if (openSpa || menuOpen || openRoomService) {
+    if (openSpa || openRoomService || menuOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [openSpa, menuOpen, openRoomService]);
+  }, [openSpa, openRoomService, menuOpen]);
 
   useEffect(() => {
     if (!menu?.id) return;
@@ -106,10 +102,10 @@ export default function BurmanLanding({ menu }) {
       </div>
 
       {/* FLOATING NAV */}
-      {!openSpa && !menuOpen && !openRoomService && (
+      {!openSpa && !openRoomService && !menuOpen && (
         <div className="burman-nav">
 
-          {/* 🔥 UPDATED BUTTON */}
+          {/* 🔥 CHANGED BUTTON */}
           <button
             onClick={() => setOpenRoomService(true)}
             className="burman-primary"
@@ -127,7 +123,6 @@ export default function BurmanLanding({ menu }) {
           <button
             className="burman-menu"
             onClick={() => setMenuOpen(true)}
-            style={{ zIndex: 6000 }}
           >
             ☰
           </button>
@@ -137,7 +132,7 @@ export default function BurmanLanding({ menu }) {
 
       {/* FULLSCREEN MENU */}
       {menuOpen && (
-        <div className="burman-fullscreen-menu" style={{ zIndex: 5000 }}>
+        <div className="burman-fullscreen-menu">
 
           <button
             className="burman-fullscreen-close"
@@ -151,27 +146,26 @@ export default function BurmanLanding({ menu }) {
             <a href={`${base}?type=services`}>Rooms</a>
             <a href={`${base}?type=food`}>Dining</a>
 
-            <button
-              onClick={() => {
-                setOpenSpa(true);
-                setMenuOpen(false);
-              }}
-            >
+            <button onClick={() => {
+              setOpenSpa(true);
+              setMenuOpen(false);
+            }}>
               Spa
             </button>
 
-            <a href={`${base}?type=services`}>Club</a>
-
-            <a href="https://maps.google.com" target="_blank">
-              Location
-            </a>
+            <button onClick={() => {
+              setOpenRoomService(true);
+              setMenuOpen(false);
+            }}>
+              Room Service
+            </button>
 
           </div>
 
         </div>
       )}
 
-      {/* ✅ ROOM SERVICE MODAL */}
+      {/* ================= ROOM SERVICE MODAL ================= */}
       {openRoomService && (
         <div className="burman-modal">
 
@@ -197,7 +191,7 @@ export default function BurmanLanding({ menu }) {
                 </span>
 
                 <span className="line-bottom">
-                  DINING
+                  MENU
                 </span>
               </h2>
 
@@ -205,11 +199,11 @@ export default function BurmanLanding({ menu }) {
 
               <div className="burman-modal-intro">
                 <p>
-                  Enjoy a curated selection of dishes delivered directly to your room.
+                  Enjoy a curated selection of dining and comfort services delivered directly to your room.
                 </p>
 
                 <p>
-                  Available throughout the day and night for your comfort.
+                  From signature dishes to personalised enhancements, your stay is tailored to perfection.
                 </p>
               </div>
 
@@ -218,21 +212,18 @@ export default function BurmanLanding({ menu }) {
             <div className="burman-modal-body">
 
               <div className="burman-spa-section">
+                <h3>Dining</h3>
+              </div>
 
-                <h3>Options</h3>
+              <div className="burman-spa-section">
+                <h3>Beverages</h3>
+              </div>
 
-                <div className="burman-spa-item">
-                  <h4>Breakfast Selection</h4>
-                </div>
-
-                <div className="burman-spa-item">
-                  <h4>All Day Dining</h4>
-                </div>
-
-                <div className="burman-spa-item">
-                  <h4>Late Night Menu</h4>
-                </div>
-
+              <div className="burman-spa-section">
+                <h3>Enhancements</h3>
+                <p style={{textAlign:"center", marginTop:"10px"}}>
+                  Pillow Menu • Bath Rituals • Special Requests
+                </p>
               </div>
 
             </div>
@@ -242,17 +233,15 @@ export default function BurmanLanding({ menu }) {
         </div>
       )}
 
-      {/* SPA MODAL */}
+      {/* ================= SPA MODAL ================= */}
       {openSpa && (
         <div className="burman-modal">
-
           <div
             className="burman-modal-backdrop"
             onClick={() => setOpenSpa(false)}
           />
 
           <div className="burman-modal-content">
-
             <button
               className="burman-modal-close"
               onClick={() => setOpenSpa(false)}
@@ -261,37 +250,26 @@ export default function BurmanLanding({ menu }) {
             </button>
 
             <div className="burman-modal-title">
-
               <h2 className="burman-heading">
                 <span className="line-top">
                   AN OASIS <span className="of">OF</span>
                 </span>
-
-                <span className="line-bottom">
-                  SERENITY
-                </span>
+                <span className="line-bottom">SERENITY</span>
               </h2>
 
               <div className="burman-divider"></div>
 
               <div className="burman-modal-intro">
                 <p>
-                  At the boutique Burman Spa, discover an oasis of serenity and quiet contentment.
+                  Discover tranquillity and personalised wellness treatments.
                 </p>
-
                 <p>
-                  Luxuriate in the transformative power of sensorial rejuvenation.
+                  A sanctuary designed for restoration and balance.
                 </p>
               </div>
-
             </div>
 
             <div className="burman-modal-body">
-
-              {categories.length === 0 && (
-                <p style={{ textAlign: "center" }}>No services available</p>
-              )}
-
               {categories.map(cat => {
 
                 const catItems = items.filter(
@@ -341,11 +319,9 @@ export default function BurmanLanding({ menu }) {
                 );
 
               })}
-
             </div>
 
           </div>
-
         </div>
       )}
 
