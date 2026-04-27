@@ -14,18 +14,21 @@ export default function BurmanLanding({ menu }) {
   const [openSpa, setOpenSpa] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // ✅ NEW
+  const [openRoomService, setOpenRoomService] = useState(false);
+
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [pricesMap, setPricesMap] = useState({});
 
   // 🔥 FIX: allow scroll when modal/menu is open
   useEffect(() => {
-    if (openSpa || menuOpen) {
+    if (openSpa || menuOpen || openRoomService) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [openSpa, menuOpen]);
+  }, [openSpa, menuOpen, openRoomService]);
 
   useEffect(() => {
     if (!menu?.id) return;
@@ -80,7 +83,6 @@ export default function BurmanLanding({ menu }) {
       {/* HERO */}
       <div className="burman-hero">
 
-        {/* WEATHER (safe optional) */}
         <BurmanWeather />
 
         <div className="burman-image-wrapper">
@@ -104,17 +106,16 @@ export default function BurmanLanding({ menu }) {
       </div>
 
       {/* FLOATING NAV */}
-      {!openSpa && !menuOpen && (
+      {!openSpa && !menuOpen && !openRoomService && (
         <div className="burman-nav">
 
-          <a
-            href="https://your-booking-link.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* 🔥 UPDATED BUTTON */}
+          <button
+            onClick={() => setOpenRoomService(true)}
             className="burman-primary"
           >
-            Check availability
-          </a>
+            Room Service
+          </button>
 
           <div className="burman-links">
             <a href={`${base}?type=services`}>Rooms</a>
@@ -123,7 +124,6 @@ export default function BurmanLanding({ menu }) {
             <a href={`${base}?type=services`}>Club</a>
           </div>
 
-          {/* 🔥 FIX: ensure button is always clickable */}
           <button
             className="burman-menu"
             onClick={() => setMenuOpen(true)}
@@ -165,6 +165,77 @@ export default function BurmanLanding({ menu }) {
             <a href="https://maps.google.com" target="_blank">
               Location
             </a>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ✅ ROOM SERVICE MODAL */}
+      {openRoomService && (
+        <div className="burman-modal">
+
+          <div
+            className="burman-modal-backdrop"
+            onClick={() => setOpenRoomService(false)}
+          />
+
+          <div className="burman-modal-content">
+
+            <button
+              className="burman-modal-close"
+              onClick={() => setOpenRoomService(false)}
+            >
+              ✕
+            </button>
+
+            <div className="burman-modal-title">
+
+              <h2 className="burman-heading">
+                <span className="line-top">
+                  IN ROOM <span className="of">SERVICE</span>
+                </span>
+
+                <span className="line-bottom">
+                  DINING
+                </span>
+              </h2>
+
+              <div className="burman-divider"></div>
+
+              <div className="burman-modal-intro">
+                <p>
+                  Enjoy a curated selection of dishes delivered directly to your room.
+                </p>
+
+                <p>
+                  Available throughout the day and night for your comfort.
+                </p>
+              </div>
+
+            </div>
+
+            <div className="burman-modal-body">
+
+              <div className="burman-spa-section">
+
+                <h3>Options</h3>
+
+                <div className="burman-spa-item">
+                  <h4>Breakfast Selection</h4>
+                </div>
+
+                <div className="burman-spa-item">
+                  <h4>All Day Dining</h4>
+                </div>
+
+                <div className="burman-spa-item">
+                  <h4>Late Night Menu</h4>
+                </div>
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -217,7 +288,6 @@ export default function BurmanLanding({ menu }) {
 
             <div className="burman-modal-body">
 
-              {/* 🔥 SAFE GUARD */}
               {categories.length === 0 && (
                 <p style={{ textAlign: "center" }}>No services available</p>
               )}
