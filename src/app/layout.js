@@ -3,19 +3,30 @@ import "../styles/theme.css";
 import ServiceWorkerRegister from "../components/ServiceWorkerRegister";
 
 export const metadata = {
-  title: "SelectorOS",
-  description: "Restaurant menu & allergen cockpit",
+  title: "Vexaron Systems",
+  description: "Powerfull hospitality system.",
   manifest: "/manifest.json",
 
   icons: {
     icon: "/favicon.ico",
-    apple: "/icon-192.png",
+    apple: "/icon-512.png",
   },
 };
 
-export const viewport = {
-  themeColor: "#2a0000",
-};
+export function generateViewport({ params }) {
+
+  const slug = params?.slug || "";
+
+  if (slug.includes("burman")) {
+    return { themeColor: "#eae6e2" };
+  }
+
+  if (slug.includes("foxden")) {
+    return { themeColor: "#07090c" };
+  }
+
+  return { themeColor: "#2a0000" };
+}
 
 export default function RootLayout({ children }) {
   return (
