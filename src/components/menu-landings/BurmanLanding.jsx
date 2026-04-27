@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "@/styles/burman.css";
 
+// OPTIONAL (safe — remove if not created yet)
+import BurmanWeather from "@/components/BurmanWeather";
+
 export default function BurmanLanding({ menu }) {
 
   const base = `/menu/${menu.public_slug}`;
@@ -14,6 +17,15 @@ export default function BurmanLanding({ menu }) {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [pricesMap, setPricesMap] = useState({});
+
+  // 🔥 FIX: allow scroll when modal/menu is open
+  useEffect(() => {
+    if (openSpa || menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [openSpa, menuOpen]);
 
   useEffect(() => {
     if (!menu?.id) return;
@@ -67,6 +79,10 @@ export default function BurmanLanding({ menu }) {
 
       {/* HERO */}
       <div className="burman-hero">
+
+        {/* WEATHER (safe optional) */}
+        <BurmanWeather />
+
         <div className="burman-image-wrapper">
           <img
             src="https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp"
@@ -107,16 +123,21 @@ export default function BurmanLanding({ menu }) {
             <a href={`${base}?type=services`}>Club</a>
           </div>
 
-          <button className="burman-menu" onClick={() => setMenuOpen(true)}>
+          {/* 🔥 FIX: ensure button is always clickable */}
+          <button
+            className="burman-menu"
+            onClick={() => setMenuOpen(true)}
+            style={{ zIndex: 6000 }}
+          >
             ☰
           </button>
 
         </div>
       )}
 
-      {/* ✅ FULLSCREEN MENU (THIS WAS MISSING) */}
+      {/* FULLSCREEN MENU */}
       {menuOpen && (
-        <div className="burman-fullscreen-menu">
+        <div className="burman-fullscreen-menu" style={{ zIndex: 5000 }}>
 
           <button
             className="burman-fullscreen-close"
@@ -196,11 +217,18 @@ export default function BurmanLanding({ menu }) {
 
             <div className="burman-modal-body">
 
+              {/* 🔥 SAFE GUARD */}
+              {categories.length === 0 && (
+                <p style={{ textAlign: "center" }}>No services available</p>
+              )}
+
               {categories.map(cat => {
 
                 const catItems = items.filter(
                   i => i.category_id === cat.id
                 );
+
+                if (!catItems.length) return null;
 
                 return (
                   <div key={cat.id} className="burman-spa-section">

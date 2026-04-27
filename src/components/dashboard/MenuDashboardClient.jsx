@@ -18,20 +18,15 @@ export default function MenuDashboardClient({
   const [showModal, setShowModal] = useState(false);
   const supabase = createClientComponentClient();
 
-  // 🔥 dynamic domain
-  const BASE_URL =
-    typeof window !== "undefined"
-      ? window.location.hostname.includes("burman")
-        ? "https://burman.vaxeron.com"
-        : window.location.hostname.includes("foxden")
-        ? "https://foxden.vaxeron.com"
-        : window.location.origin
-      : "";
+  // ✅ STABLE DOMAIN RESOLVER
+  const getDomainForMenu = (slug) => {
+    if (slug.includes("burman")) return "https://burman.vaxeron.com";
+    if (slug.includes("foxden")) return "https://foxden.vaxeron.com";
+    return "https://selector-os.vercel.app"; // fallback
+  };
 
-  // 🔥 DELETE MENU
   const handleDeleteMenu = async (menuId) => {
     const confirmDelete = confirm("Delete this menu? This cannot be undone.");
-
     if (!confirmDelete) return;
 
     await supabase
@@ -39,7 +34,6 @@ export default function MenuDashboardClient({
       .delete()
       .eq("id", menuId);
 
-    // 🔥 simple refresh
     window.location.reload();
   };
 
@@ -92,7 +86,8 @@ export default function MenuDashboardClient({
 
         {menus.map((m) => {
 
-          const menuUrl = BASE_URL;
+          // ✅ FIXED QR URL
+          const menuUrl = getDomainForMenu(m.public_slug);
 
           return (
             <div
@@ -129,9 +124,16 @@ export default function MenuDashboardClient({
 
                 <div
                   id={`qr-${m.id}`}
-                  className="bg-white p-3 rounded-2xl"
+                  className="bg-white p-4 rounded-lg"
                 >
-                  <QRCodeSVG value={menuUrl} size={120} />
+                  <QRCodeSVG
+                    value={menuUrl}
+                    size={200}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                    level="H"
+                    includeMargin={true}
+                  />
                 </div>
 
               </div>
@@ -139,7 +141,6 @@ export default function MenuDashboardClient({
               {/* ACTIONS */}
               <div className="flex justify-between items-center">
 
-                {/* LEFT ACTIONS */}
                 <div className="flex gap-4 items-center">
 
                   <Link

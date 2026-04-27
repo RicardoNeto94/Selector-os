@@ -349,3 +349,92 @@ html, body{
     grid-template-columns:1fr;
   }
 }
+
+/* ================= WEATHER WIDGET ================= */
+
+.burman-weather{
+  position:absolute;
+  top:60px;
+  left:60px;
+
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(14px);
+
+  padding:20px 24px;
+  border-radius:16px;
+
+  width:190px;
+
+  box-shadow:0 12px 30px rgba(0,0,0,0.15);
+  border:1px solid rgba(0,0,0,0.05);
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  z-index:5; /* stays above image, below nav */
+}
+
+/* LOCATION */
+
+.burman-weather-location{
+  font-size:11px;
+  letter-spacing:0.25em;
+  text-transform:uppercase;
+  color:#8a3a2c;
+}
+
+/* MAIN ROW */
+
+.burman-weather-main{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* ICON */
+
+.burman-weather-icon{
+  font-size:26px;
+  color:#8a3a2c;
+  opacity:0.8;
+}
+
+/* TEMP */
+
+.burman-weather-temp{
+  font-size:32px;
+  font-weight:400;
+  color:#8a3a2c;
+}
+
+/* CONDITION */
+
+.burman-weather-condition{
+  font-size:13px;
+  color:#5a463d;
+}
+
+/* EXTRA */
+
+.burman-weather-feels{
+  font-size:12px;
+  color:#8a7a70;
+}
+
+/* ================= MOBILE WEATHER ================= */
+
+@media (max-width:768px){
+
+  .burman-weather{
+    top:20px;
+    left:20px;
+    width:160px;
+    padding:16px;
+  }
+
+  .burman-weather-temp{
+    font-size:26px;
+  }
+
+}
