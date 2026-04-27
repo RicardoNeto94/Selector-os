@@ -4,6 +4,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
+import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 
 export default function BurmanLanding({ menu }) {
 
@@ -220,11 +221,10 @@ export default function BurmanLanding({ menu }) {
               </div>
 
               <div className="burman-spa-section">
-                <h3>Enhancements</h3>
-                <p style={{textAlign:"center", marginTop:"10px"}}>
-                  Pillow Menu • Bath Rituals • Special Requests
-                </p>
-              </div>
+  <h3>Pillow Menu</h3>
+
+  <BurmanPillowMenu />
+</div>
 
             </div>
 
