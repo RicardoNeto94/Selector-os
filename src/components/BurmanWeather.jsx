@@ -17,27 +17,37 @@ export default function BurmanWeather() {
         const data = await res.json();
 
         const conditionMap = {
-          0: "Clear sky",
-          1: "Mainly clear",
-          2: "Partly cloudy",
-          3: "Cloudy",
-          45: "Fog",
-          48: "Fog",
-          51: "Light drizzle",
-          61: "Rain",
-          71: "Snow",
-          80: "Rain showers",
-          95: "Thunderstorm",
+          0: { label: "Clear sky", icon: "☀️" },
+          1: { label: "Mainly clear", icon: "🌤" },
+          2: { label: "Partly cloudy", icon: "⛅" },
+          3: { label: "Cloudy", icon: "☁️" },
+          45: { label: "Fog", icon: "🌫" },
+          48: { label: "Fog", icon: "🌫" },
+          51: { label: "Light drizzle", icon: "🌦" },
+          61: { label: "Rain", icon: "🌧" },
+          71: { label: "Snow", icon: "❄️" },
+          80: { label: "Rain showers", icon: "🌦" },
+          95: { label: "Thunderstorm", icon: "⛈" },
+        };
+
+        const current = data?.current_weather;
+
+        if (!current) return;
+
+        const mapped = conditionMap[current.weathercode] || {
+          label: "Clear",
+          icon: "☀️"
         };
 
         setWeather({
-          temp: Math.round(data.current_weather.temperature),
-          wind: Math.round(data.current_weather.windspeed),
-          condition: conditionMap[data.current_weather.weathercode] || "Clear",
+          temp: Math.round(current.temperature),
+          wind: Math.round(current.windspeed),
+          condition: mapped.label,
+          icon: mapped.icon,
         });
 
       } catch (err) {
-        console.error(err);
+        console.error("Weather error:", err);
       }
     };
 
@@ -46,8 +56,7 @@ export default function BurmanWeather() {
         fetchWeather(pos.coords.latitude, pos.coords.longitude);
       },
       () => {
-        // fallback Tallinn
-        fetchWeather(59.437, 24.7536);
+        fetchWeather(59.437, 24.7536); // Tallinn fallback
       }
     );
 
@@ -56,14 +65,24 @@ export default function BurmanWeather() {
   if (!weather) return null;
 
   return (
-    <div className="burman-weather">
+    <div
+      className="burman-weather"
+      style={{
+        position: "absolute",
+        top: "60px",
+        left: "60px",
+        zIndex: 50   // 🔥 THIS FIXES IT
+      }}
+    >
 
-      <div className="burman-weather-top">
-        <span className="burman-weather-location">TALLINN</span>
+      <div className="burman-weather-location">
+        Tallinn
       </div>
 
       <div className="burman-weather-main">
-        <div className="burman-weather-icon">❄</div>
+        <div className="burman-weather-icon">
+          {weather.icon}
+        </div>
 
         <div className="burman-weather-temp">
           {weather.temp}°C
