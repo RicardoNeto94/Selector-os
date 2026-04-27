@@ -141,6 +141,221 @@ html, body{
   cursor:pointer;
 }
 
+/* ================= GLOBAL LOCK ================= */
+
+html, body{
+  height:100%;
+  margin:0;
+}
+
+/* ================= BURMAN ROOT ================= */
+
+.burman-root{
+  background:#eae6e2;
+  height:100dvh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  font-family:"Playfair Display", serif;
+  color:#3a2a24;
+}
+
+/* ================= HEADER ================= */
+
+.burman-header{
+  height:80px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 40px;
+  font-size:11px;
+  letter-spacing:0.2em;
+  color:#8a3a2c;
+  text-transform:uppercase;
+}
+
+.burman-header-center{
+  font-size:20px;
+  letter-spacing:0.25em;
+  font-weight:500;
+}
+
+/* ================= HERO ================= */
+
+.burman-hero{
+  position:relative;
+  flex:1;
+  margin:0 40px;
+  border:1px solid #d6d2cd;
+  overflow:hidden;
+}
+
+.burman-image-wrapper{
+  position:absolute;
+  inset:0;
+}
+
+.burman-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.burman-image-wrapper::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.55));
+}
+
+/* ================= HERO TEXT ================= */
+
+.burman-overlay{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -55%);
+  text-align:center;
+  color:white;
+  width:60%;
+}
+
+.burman-overlay h1{
+  font-size:52px;
+  font-weight:300;
+  line-height:1.2;
+}
+
+.burman-overlay span{
+  font-style:italic;
+}
+
+.burman-award{
+  margin-top:24px;
+  font-size:11px;
+  letter-spacing:0.2em;
+  opacity:0.75;
+}
+
+/* ================= NAV ================= */
+
+.burman-nav{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(14px);
+  padding:8px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.18);
+  z-index:999;
+}
+
+/* ================= FULLSCREEN MENU FIX ================= */
+
+.burman-fullscreen-menu{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  background:#f7f5f3;
+
+  z-index:5000;
+}
+
+.burman-fullscreen-links{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  gap:32px;
+  width:100%;
+  max-width:600px;
+
+  text-align:center;
+}
+
+.burman-fullscreen-links a,
+.burman-fullscreen-links button{
+  font-size:22px;
+  letter-spacing:0.12em;
+  color:#6b4a38;
+  border:none;
+  background:none;
+  cursor:pointer;
+}
+
+.burman-fullscreen-close{
+  position:absolute;
+  top:30px;
+  right:40px;
+  font-size:22px;
+  background:none;
+  border:none;
+  cursor:pointer;
+}
+
+/* ================= MODAL ================= */
+
+.burman-modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:3000;
+}
+
+.burman-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(6px);
+}
+
+.burman-modal-content{
+  position:relative;
+  background:#f7f5f3;
+  border-radius:20px;
+  width:92%;
+  max-width:1100px;
+  max-height:88vh;
+  padding:56px 72px;
+  overflow-y:auto;
+  border:1px solid rgba(138,58,44,0.12);
+  box-shadow:0 40px 120px rgba(0,0,0,0.25);
+}
+
+/* ================= WEATHER (UNCHANGED) ================= */
+
+.burman-weather{
+  position:absolute;
+  top:60px;
+  left:60px;
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(14px);
+  padding:20px 24px;
+  border-radius:16px;
+  width:190px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.15);
+  border:1px solid rgba(0,0,0,0.05);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  z-index:5;
+}
+
 /* ================= MODAL ================= */
 
 .burman-modal{
