@@ -18,22 +18,17 @@ export default function MenuDashboardClient({
   const [showModal, setShowModal] = useState(false);
   const supabase = createClientComponentClient();
 
-  // ✅ STABLE DOMAIN RESOLVER
   const getDomainForMenu = (slug) => {
     if (slug.includes("burman")) return "https://burman.vaxeron.com";
     if (slug.includes("foxden")) return "https://foxden.vaxeron.com";
-    return "https://selector-os.vercel.app"; // fallback
+    return "https://selector-os.vercel.app";
   };
 
   const handleDeleteMenu = async (menuId) => {
     const confirmDelete = confirm("Delete this menu? This cannot be undone.");
     if (!confirmDelete) return;
 
-    await supabase
-      .from("menus")
-      .delete()
-      .eq("id", menuId);
-
+    await supabase.from("menus").delete().eq("id", menuId);
     window.location.reload();
   };
 
@@ -44,15 +39,15 @@ export default function MenuDashboardClient({
       <div className="flex items-center justify-between">
 
         <div>
-          <p className="text-xs uppercase tracking-widest text-slate-400">
+          <p className="text-xs uppercase tracking-widest text-[var(--so-text-muted)]">
             MENUS
           </p>
 
-          <h1 className="text-2xl font-semibold text-white mt-1">
+          <h1 className="text-2xl font-semibold mt-1">
             {restaurant.name}
           </h1>
 
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-[var(--so-text-muted)] mt-1">
             Plan: <strong>{plan}</strong>{" "}
             {typeof maxMenus === "number" && (
               <>({menus.length}/{maxMenus})</>
@@ -65,8 +60,8 @@ export default function MenuDashboardClient({
           disabled={isAtLimit}
           className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium ${
             isAtLimit
-              ? "bg-white/5 text-slate-500"
-              : "bg-white text-black hover:opacity-90"
+              ? "opacity-50 border border-[var(--so-border-subtle)]"
+              : "button"
           }`}
         >
           <PlusIcon className="h-4 w-4" />
@@ -79,31 +74,30 @@ export default function MenuDashboardClient({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {menus.length === 0 && (
-          <div className="so-card p-6 text-slate-400">
+          <div className="panel p-6 text-[var(--so-text-muted)]">
             No menus yet.
           </div>
         )}
 
         {menus.map((m) => {
 
-          // ✅ FIXED QR URL
           const menuUrl = getDomainForMenu(m.public_slug);
 
           return (
             <div
               key={m.id}
-              className="so-card p-6 flex flex-col justify-between hover:shadow-xl transition"
+              className="panel p-6 flex flex-col justify-between transition hover:shadow-lg"
             >
 
               {/* TOP */}
               <div className="flex justify-between items-start">
 
                 <div>
-                  <div className="text-lg font-semibold text-white">
+                  <div className="text-lg font-semibold">
                     {m.name}
                   </div>
 
-                  <div className="text-xs text-slate-400 mt-1">
+                  <div className="text-xs text-[var(--so-text-muted)] mt-1">
                     /menu/{m.public_slug}
                   </div>
                 </div>
@@ -112,7 +106,7 @@ export default function MenuDashboardClient({
                   href={`/menu/${m.public_slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm text-slate-400 hover:text-white"
+                  className="text-sm text-[var(--so-text-muted)] hover:text-[var(--so-accent)]"
                 >
                   Open
                 </a>
@@ -122,10 +116,7 @@ export default function MenuDashboardClient({
               {/* QR */}
               <div className="flex justify-center py-6">
 
-                <div
-                  id={`qr-${m.id}`}
-                  className="bg-white p-4 rounded-lg"
-                >
+                <div className="bg-white p-4 rounded-lg">
                   <QRCodeSVG
                     value={menuUrl}
                     size={200}
@@ -145,14 +136,14 @@ export default function MenuDashboardClient({
 
                   <Link
                     href={`/dashboard/menu/${m.public_slug}`}
-                    className="text-sm text-blue-400 hover:text-white"
+                    className="text-sm text-[var(--so-accent)]"
                   >
                     Edit
                   </Link>
 
                   <button
                     onClick={() => handleDeleteMenu(m.id)}
-                    className="text-sm text-red-400 hover:text-red-300 flex items-center gap-1"
+                    className="text-sm text-red-500 flex items-center gap-1"
                   >
                     <TrashIcon className="h-4 w-4" />
                     Delete
@@ -160,7 +151,6 @@ export default function MenuDashboardClient({
 
                 </div>
 
-                {/* DOWNLOAD */}
                 <button
                   onClick={() => {
 
@@ -184,7 +174,7 @@ export default function MenuDashboardClient({
                     URL.revokeObjectURL(url);
 
                   }}
-                  className="text-sm text-slate-400 hover:text-white"
+                  className="text-sm text-[var(--so-text-muted)] hover:text-[var(--so-accent)]"
                 >
                   Download QR
                 </button>

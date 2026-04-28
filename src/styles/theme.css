@@ -1,46 +1,39 @@
 :root {
-  /* === BRAND COLORS ======================================== */
-  --so-primary: #020617;          /* deep navy for main CTAs */
-  --so-primary-soft: #0b1220;
-  --so-accent: #0f766e;           /* teal accent */
-  --so-accent-soft: #22c55e;
+  /* === BRAND COLORS (IVORY + GOLD) ========================== */
+  --so-primary: #8a3a2c;            /* Burman brown */
+  --so-primary-soft: #a15a4d;
+
+  --so-accent: #c6a15b;             /* gold */
+  --so-accent-soft: #e0c48a;
 
   /* === BACKGROUND ========================================== */
-  --so-bg-page: radial-gradient(
-    circle at 20% 0%,
-    #e6f3ff 0,
-    #c7e2ff 30%,
-    #98c6ff 70%,
-    #79aaf0 100%
-  );
-  --so-vignette: inset 0 0 120px rgba(15, 23, 42, 0.18);
+  --so-bg-page: #eae6e2;            /* main ivory background */
+  --so-bg-surface: #f7f5f3;         /* cards / panels */
 
   /* === GLASS SURFACES ====================================== */
-  /* light frosted glass (cards, main panels) */
-  --so-glass-light-bg: rgba(255, 255, 255, 0.85);
-  --so-glass-light-border: rgba(255, 255, 255, 0.7);
+  --so-glass-light-bg: rgba(255, 255, 255, 0.75);
+  --so-glass-light-border: rgba(198, 161, 91, 0.25);
   --so-glass-light-shadow:
-    0 22px 40px rgba(15, 23, 42, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.7);
+    0 20px 50px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(198, 161, 91, 0.12);
 
-  /* dark frosted glass (sidebar, dark widgets) */
-  --so-glass-dark-bg: rgba(15, 23, 42, 0.78);
-  --so-glass-dark-border: rgba(15, 23, 42, 0.8);
+  --so-glass-dark-bg: rgba(40, 30, 20, 0.65);
+  --so-glass-dark-border: rgba(198, 161, 91, 0.2);
   --so-glass-dark-shadow:
-    0 22px 40px rgba(15, 23, 42, 0.6),
-    0 0 0 1px rgba(15, 23, 42, 0.7);
+    0 20px 60px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(198, 161, 91, 0.15);
 
   /* === TYPOGRAPHY ========================================== */
-  --so-text-main: #020617;
-  --so-text-muted: #6b7280;
-  --so-text-soft: #9ca3af;
-  --so-text-on-dark: #e5e7eb;
+  --so-text-main: #3a2a24;
+  --so-text-muted: #7a6a60;
+  --so-text-soft: #a89a90;
+  --so-text-on-dark: #f5f2ee;
 
-  /* === RADII & ELEVATION =================================== */
-  --so-radius-card: 28px;
-  --so-radius-card-lg: 32px;
+  /* === RADII =============================================== */
+  --so-radius-card: 24px;
+  --so-radius-card-lg: 28px;
   --so-radius-pill: 999px;
 
-  /* === MISC ================================================ */
-  --so-border-subtle: rgba(148, 163, 184, 0.35);
+  /* === BORDERS ============================================= */
+  --so-border-subtle: rgba(138, 58, 44, 0.12);
 }

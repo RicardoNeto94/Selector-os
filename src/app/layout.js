@@ -9,7 +9,7 @@ export const metadata = {
 
   icons: {
     icon: "/favicon.ico",
-    apple: "/icon-512.png",
+    apple: "/burman-icon.png",
   },
 };
 
@@ -25,28 +25,25 @@ export function generateViewport({ params }) {
     return { themeColor: "#07090c" };
   }
 
-  return { themeColor: "#2a0000" };
+  return { themeColor: "#eae6e2" };
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* PWA */}
         <link rel="manifest" href="/manifest.json" />
 
-        {/* iOS FIX (🔥 important) */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="SelectorOS" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
         <link rel="apple-touch-icon" href="/icon-192.png" />
-
-        {/* fallback */}
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      <body className="bg-[#2a0000]">
+      {/* 🔥 FIXED: removed hardcoded background */}
+      <body>
         <div id="app-scroll" className="app-container">
           {children}
         </div>

@@ -102,10 +102,18 @@ export default function BurmanLanding({ menu }) {
             EXTRAORDINARY<br />
             LIVING, <span>crafted for you</span>
           </h1>
+          <div className="burman-overlay">
 
           <p className="burman-award">
             MICHELIN Opening of the Year Award 2025
           </p>
+    
+           {/* 🔥 ADD THIS */}
+  <div className="burman-michelin">
+    <img src="/Clefs_Michelin-1.svg" alt="Michelin Keys Award" />
+    <img src="/Clefs_Michelin-1.svg" alt="Michelin Keys Award" />
+  </div>
+</div>
         </div>
       </div>
 
@@ -129,13 +137,51 @@ export default function BurmanLanding({ menu }) {
 
           <button
             className="burman-menu"
-            onClick={() => setMenuOpen(true)}
+            onClick={() => setMenuOpen(prev => !prev)}
           >
             ☰
           </button>
 
         </div>
       )}
+
+      {menuOpen && (
+  <div className="burman-full-menu">
+
+    <button
+      className="burman-full-close"
+      onClick={() => setMenuOpen(false)}
+    >
+      ✕
+    </button>
+
+    <div className="burman-full-links">
+
+      <a onClick={() => setMenuOpen(false)} href={`${base}?type=services`}>
+        Rooms
+      </a>
+
+      <a onClick={() => setMenuOpen(false)} href={`${base}?type=food`}>
+        Dining
+      </a>
+
+      <button
+        onClick={() => {
+          setMenuOpen(false);
+          setOpenSpa(true);
+        }}
+      >
+        Spa
+      </button>
+
+      <a onClick={() => setMenuOpen(false)} href={`${base}?type=services`}>
+        Club
+      </a>
+
+    </div>
+
+  </div>
+)}
 
       {/* ROOM SERVICE MODAL */}
       {openRoomService && (

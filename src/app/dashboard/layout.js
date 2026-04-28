@@ -18,8 +18,6 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const FULL_LOGO_SRC = "/selectoros-logo.png";
-
 function NavItem({ href, isActive, icon: Icon, label }) {
   return (
     <Link
@@ -59,17 +57,17 @@ export default function DashboardLayout({ children }) {
 
           {/* LOGO */}
           <div className="so-sidebar-brand">
-  <div className="so-logo-wrap">
-    <Image
-      src="/selectoros-logo.png"
-      alt="SelectorOS"
-      width={140}
-      height={60}
-      className="so-logo"
-      priority
-    />
-  </div>
-</div>
+            <div className="so-logo-wrap">
+              <Image
+                src="/selectoros-logo.png"
+                alt="SelectorOS"
+                width={140}
+                height={60}
+                className="so-logo"
+                priority
+              />
+            </div>
+          </div>
 
           {/* NAV */}
           <nav className="so-sidebar-nav">
@@ -163,8 +161,14 @@ export default function DashboardLayout({ children }) {
 
       </aside>
 
-      {/* MAIN — FIXED (NO INNER WRAPPER) */}
-      <main className="so-main">
+      {/* 🔥 CRITICAL FIX HERE */}
+      <main
+        className="so-main"
+        style={{
+          background: "var(--so-bg-page)",
+          color: "var(--so-text-main)"
+        }}
+      >
         {children}
       </main>
 

@@ -5,14 +5,14 @@
 /* ================= DESIGN TOKENS ================= */
 
 :root {
-  --bg: #05070a;              /* 🔥 unified background */
-  --panel: rgba(255,255,255,0.04);
-  --border: rgba(255,255,255,0.08);
+  --bg: #eae6e2;                     /* ivory base */
+  --panel: #f7f5f3;                  /* surface */
+  --border: rgba(138,58,44,0.12);
 
-  --text: #e8e4dc;
-  --text-muted: rgba(232,228,220,0.5);
+  --text: #3a2a24;
+  --text-muted: #7a6a60;
 
-  --accent: #c6a46c;          /* champagne */
+  --accent: #c6a15b;                 /* gold */
 
   --radius: 14px;
 }
@@ -31,7 +31,7 @@ body {
   margin: 0;
   padding: 0;
 
-  background: var(--bg);      /* 🔥 FIXED */
+  background: var(--bg);
   color: var(--text);
 
   font-family: "Inter", sans-serif;
@@ -44,24 +44,17 @@ body {
 .app-container {
   height: 100dvh;
   overflow-y: auto;
-  background: var(--bg);      /* 🔥 SAME COLOR */
+  background: var(--bg);
 }
 
-/* ================= SIDEBAR FIX ================= */
+/* ================= SIDEBAR ================= */
 
-/* make sidebar match system */
 aside,
 .sidebar {
-  background: linear-gradient(
-    to bottom,
-    #06080c,
-    #05070a
-  );
+  background: #f7f5f3;
 
-  border-right: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid var(--border);
 }
-
-/* sidebar text */
 
 aside *,
 .sidebar * {
@@ -76,21 +69,14 @@ aside .active,
 /* ================= PANELS ================= */
 
 .panel{
-  background: linear-gradient(
-    145deg,
-    rgba(255,255,255,0.04),
-    rgba(255,255,255,0.02)
-  );
+  background: var(--panel);
 
   border: 1px solid var(--border);
 
   border-radius: var(--radius);
 
-  backdrop-filter: blur(18px);
-
   box-shadow:
-    0 20px 60px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.05);
+    0 20px 50px rgba(0,0,0,0.08);
 
   transition: all 0.3s ease;
 }
@@ -104,7 +90,7 @@ aside .active,
 
   border-radius: 14px;
 
-  background: rgba(255,255,255,0.03);
+  background: #ffffff;
 
   border: 1px solid var(--border);
 
@@ -116,17 +102,17 @@ aside .active,
 }
 
 .input::placeholder{
-  color: rgba(232,228,220,0.35);
+  color: #a89a90;
 }
 
 .input:focus{
   outline: none;
 
-  border-color: rgba(198,164,108,0.6);
+  border-color: var(--accent);
 
   box-shadow:
-    0 0 0 1px rgba(198,164,108,0.25),
-    0 6px 20px rgba(198,164,108,0.15);
+    0 0 0 1px rgba(198,161,91,0.25),
+    0 6px 20px rgba(198,161,91,0.15);
 }
 
 /* ================= BUTTON ================= */
@@ -141,32 +127,32 @@ aside .active,
 
   background: linear-gradient(
     135deg,
-    #d6b57a,
-    #b8965a
+    #e0c48a,
+    #c6a15b
   );
 
-  color: #0b0c0f;
+  color: #3a2a24;
 
   box-shadow:
-    0 8px 20px rgba(198,164,108,0.25);
+    0 8px 20px rgba(198,161,91,0.25);
 
   transition: all 0.25s ease;
 }
 
 .button:hover{
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(198,164,108,0.35);
+  box-shadow: 0 12px 30px rgba(198,161,91,0.35);
 }
 
 /* ================= TYPOGRAPHY ================= */
 
 h1{
-  color: var(--accent); /* 🔥 champagne title */
+  color: var(--accent);
   font-weight: 400;
 }
 
 h2{
-  color: var(--accent); /* 🔥 FIXED */
+  color: var(--accent);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-size: 12px;
@@ -176,14 +162,12 @@ p{
   color: var(--text-muted);
 }
 
-/* ================= REMOVE "BLACK BOX" ================= */
+/* ================= LAYOUT FIX ================= */
 
-/* THIS is what fixes your issue */
 .so-main{
   background: transparent !important;
 }
 
-/* center layout nicely */
 .so-main-inner{
   max-width: 1100px;
   margin: 0 auto;
@@ -196,6 +180,6 @@ p{
 }
 
 ::-webkit-scrollbar-thumb{
-  background: rgba(255,255,255,0.15);
+  background: rgba(138,58,44,0.2);
   border-radius: 10px;
 }

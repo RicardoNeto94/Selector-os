@@ -1,21 +1,21 @@
 /* =======================================================
-   SELECTOR OS — PREMIUM DARK (FINAL MASTER)
+   SELECTOR OS — IVORY SYSTEM
 ======================================================= */
 
 :root{
 
-  --bg-main:#07090c;
-  --bg-surface:#0e1116;
-  --bg-card:rgba(255,255,255,0.035);
+  --bg-main:var(--so-bg-page);
+  --bg-surface:var(--so-bg-surface);
+  --bg-card:rgba(255,255,255,0.7);
 
-  --border:rgba(255,255,255,0.08);
-  --border-soft:rgba(255,255,255,0.05);
+  --border:var(--so-border-subtle);
+  --border-soft:rgba(138,58,44,0.08);
 
-  --text-main:#e8e4dc;
-  --text-muted:#8b8f98;
+  --text-main:var(--so-text-main);
+  --text-muted:var(--so-text-muted);
 
-  --accent:#c6a46c;
-  --accent-soft:#e0c48a;
+  --accent:var(--so-accent);
+  --accent-soft:var(--so-accent-soft);
 
   --radius:16px;
 
@@ -28,7 +28,8 @@
 
 .so-dashboard-root{
   display:flex;
-  min-height:100vh;
+  height:100dvh;              /* 🔥 lock full height */
+  overflow:hidden;            /* 🔥 prevent global scroll */
   background:var(--bg-main);
   color:var(--text-main);
 
@@ -43,25 +44,18 @@
 }
 
 /* =======================================================
-   SIDEBAR (🔥 NOT FLAT ANYMORE)
+   SIDEBAR (NO SCROLL)
 ======================================================= */
 
 .so-sidebar{
   width:var(--sidebar-width);
-  height:100vh;
+  height:100%;                /* 🔥 match parent height */
 
-  position:sticky;
-  top:0;
+  position:relative;          /* 🔥 no sticky */
+  
+  background:var(--bg-surface);
 
-  background:linear-gradient(
-    180deg,
-    #0c0f14 0%,
-    #0a0d12 100%
-  );
-
-  backdrop-filter:blur(20px);
-
-  border-right:1px solid var(--border-soft);
+  border-right:1px solid var(--border);
 
   display:flex;
   flex-direction:column;
@@ -69,7 +63,7 @@
 
   padding:22px 16px;
 
-  overflow-y:auto;
+  overflow:hidden;            /* 🔥 remove scroll completely */
 }
 
 /* =======================================================
@@ -86,7 +80,6 @@
   position:relative;
 }
 
-/* luxury divider */
 .so-sidebar-brand::after{
   content:"";
   position:absolute;
@@ -103,26 +96,9 @@
   );
 }
 
-.so-logo-wrap{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
 .so-logo{
   width:85px;
-  height:auto;
-
-  object-fit:contain;
-
   opacity:0.9;
-
-  transition:all 0.25s ease;
-}
-
-.so-logo:hover{
-  opacity:1;
-  transform:scale(1.05);
 }
 
 /* =======================================================
@@ -139,13 +115,11 @@
   font-size:11px;
   letter-spacing:.12em;
   text-transform:uppercase;
-  color:rgba(255,255,255,0.35);
+  color:var(--text-muted);
 
   margin-top:20px;
   margin-bottom:6px;
 }
-
-/* NAV ITEMS */
 
 .so-nav-item{
   display:flex;
@@ -163,37 +137,21 @@
 }
 
 .so-nav-item:hover{
-  background:rgba(255,255,255,0.04);
+  background:rgba(138,58,44,0.06);
   color:var(--text-main);
 }
 
-/* 🔥 BIG VISUAL UPGRADE */
 .so-nav-item--active{
-  background:linear-gradient(
-    90deg,
-    rgba(198,164,108,0.18),
-    rgba(198,164,108,0.05)
-  );
-
+  background:rgba(198,164,108,0.15);
   color:var(--accent);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(198,164,108,0.15);
-}
-
-/* ICON */
-.so-nav-icon{
-  width:18px;
-  height:18px;
-  opacity:0.9;
 }
 
 /* =======================================================
-   SIDEBAR FOOTER
+   FOOTER
 ======================================================= */
 
 .so-sidebar-footer{
-  border-top:1px solid var(--border-soft);
+  border-top:1px solid var(--border);
   padding-top:16px;
 
   display:flex;
@@ -201,24 +159,16 @@
   gap:14px;
 }
 
-.so-sidebar-user{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
 .so-user-avatar{
   width:34px;
   height:34px;
   border-radius:50%;
 
-  background:rgba(255,255,255,0.08);
+  background:rgba(138,58,44,0.08);
 
   display:flex;
   align-items:center;
   justify-content:center;
-
-  font-weight:600;
 }
 
 .so-user-name{
@@ -231,37 +181,21 @@
   color:var(--text-muted);
 }
 
-.so-logout-btn{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,0.03);
-
-  padding:8px 12px;
-  border-radius:10px;
-
-  font-size:13px;
-  text-align:center;
-
-  transition:.15s ease;
-}
-
-.so-logout-btn:hover{
-  background:rgba(255,255,255,0.08);
-}
-
 /* =======================================================
-   MAIN
+   MAIN (ONLY SCROLL AREA)
 ======================================================= */
 
 .so-main{
   flex:1;
+  height:100%;
+  overflow-y:auto;            /* 🔥 only this scrolls */
   padding:48px 60px;
 
   background:var(--bg-main);
-  overflow-y:auto;
 }
 
 .so-main-inner{
-  display:contents;
+  display:block;
 }
 
 /* =======================================================
@@ -271,49 +205,13 @@
 .so-card{
   background:var(--bg-card);
 
-  border:1px solid var(--border-soft);
+  border:1px solid var(--border);
 
   border-radius:18px;
 
   padding:22px;
 
-  backdrop-filter:blur(16px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05);
-}
-
-/* =======================================================
-   INPUTS
-======================================================= */
-
-.so-input{
-  background:rgba(255,255,255,0.04);
-
-  border:1px solid var(--border);
-  border-radius:14px;
-
-  padding:12px 16px;
-
-  color:var(--text-main);
-
-  outline:none;
-
-  transition:.2s ease;
-}
-
-.so-input::placeholder{
-  color:rgba(255,255,255,0.35);
-}
-
-.so-input:focus{
-  border-color:var(--accent);
-
-  box-shadow:
-    0 0 0 1px rgba(198,164,108,0.3),
-    0 6px 20px rgba(198,164,108,0.15);
-
-  background:rgba(255,255,255,0.06);
+  box-shadow:0 10px 30px rgba(0,0,0,0.05);
 }
 
 /* =======================================================
@@ -321,8 +219,8 @@
 ======================================================= */
 
 .so-btn-primary{
-  background:linear-gradient(135deg,#d6b57a,#b8965a);
-  color:#0b0c0f;
+  background:linear-gradient(135deg,#e0c48a,#c6a15b);
+  color:#2a1e19;
 
   border:none;
 
@@ -334,21 +232,13 @@
 
   cursor:pointer;
 
-  transition:.2s ease;
-
   box-shadow:0 6px 18px rgba(198,164,108,0.25);
-}
-
-.so-btn-primary:hover{
-  transform:translateY(-1px);
-  box-shadow:0 10px 28px rgba(198,164,108,0.35);
 }
 
 .so-btn-ghost{
   background:transparent;
   border:none;
   color:var(--text-muted);
-  cursor:pointer;
 }
 
 .so-btn-ghost:hover{
@@ -362,7 +252,6 @@
 .so-title{
   font-size:28px;
   font-weight:500;
-  letter-spacing:-0.01em;
   color:var(--accent);
 }
 
@@ -382,19 +271,71 @@
 }
 
 /* =======================================================
-   ITEM ROW
+   INPUTS (🔥 MISSING PIECE)
+======================================================= */
+
+.so-input{
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+  border: 1px solid rgba(138,58,44,0.18);
+
+  color: var(--so-text-main);
+
+  font-size: 13px;
+
+  transition: all 0.2s ease;
+
+  /* 🔥 FIX */
+  width: auto;
+  min-width: 0;
+  flex-shrink: 0;
+}
+/* allow main inputs to expand only when needed */
+.flex .so-input.flex-1{
+  width: 100%;
+  flex: 1;
+}
+
+.so-input::placeholder{
+  color: var(--so-text-muted);
+}
+
+.so-input:focus{
+  outline: none;
+
+  border-color: var(--so-accent);
+
+  box-shadow:
+    0 0 0 1px rgba(198,161,91,0.25),
+    0 6px 18px rgba(198,161,91,0.12);
+}
+/* =======================================================
+   ITEM ROW FIX (CRITICAL)
 ======================================================= */
 
 .so-item{
   display:flex;
-  justify-content:space-between;
-  align-items:center;
+  flex-direction:column;
 
-  padding:12px 0;
+  gap:10px;
 
-  border-bottom:1px solid var(--border-soft);
+  padding:14px;
+
+  border:1px solid rgba(138,58,44,0.08);
+  border-radius:12px;
+
+  background:#fff;
 }
 
-.so-item:last-child{
-  border-bottom:none;
+/* FORCE CLEAN INLINE ROW BEHAVIOR */
+.so-item > div{
+  align-items:center !important;
+}
+
+/* PREVENT INPUT OVERFLOW BUG */
+.so-item input{
+  min-width:0;
 }
