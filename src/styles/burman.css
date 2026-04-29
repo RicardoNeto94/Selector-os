@@ -245,28 +245,54 @@ html, body{
 
 .burman-modal-title{
   text-align:center;
-  margin-bottom:64px;
+  margin-bottom:40px;
+
+  letter-spacing:0.02em; /* subtle refinement */
+}
+
+.burman-modal-title::after{
+  content:"";
+  display:block;
+  width:60px;
+  height:1px;
+  margin:20px auto 0;
+
+  background:linear-gradient(
+    to right,
+    transparent,
+    rgba(198,164,108,0.6),
+    transparent
+  );
 }
 
 .burman-heading{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:6px;
+  gap:4px;
+  animation: burmanFade 0.6s ease;
+
 }
 
 .line-top{
-  font-size:36px;
-  letter-spacing:0.18em;
+  font-size:28px;
+  letter-spacing:0.35em;
   text-transform:uppercase;
   color:#8c3b2d;
+  font-weight: 300;
+  opacity:0.8;
 }
 
 .line-bottom{
   font-size:52px;
-  letter-spacing:0.20em;
+  letter-spacing:0.14em;  /* was 0.20 → too wide */
   text-transform:uppercase;
-  color:#8c3b2d;
+
+  font-family:"Playfair Display", serif;
+  font-style:italic;
+
+  font-weight:300;
+  line-height:1.1;
 }
 
 .burman-divider{
@@ -299,7 +325,7 @@ html, body{
 /* ================= SPA STRUCTURE (FIXED) ================= */
 
 .burman-spa-section{
-  margin-bottom:64px;
+  margin-bottom:80px;
 }
 
 .burman-spa-section h3{
@@ -322,7 +348,7 @@ html, body{
   content:"";
   flex:1;
   height:1px;
-  background:rgba(138,58,44,0.25);
+  background:rgba(138,58,44,0.08);
 }
 
 .burman-spa-section h3::before{
@@ -399,21 +425,35 @@ html, body{
 .burman-section-toggle{
   text-align:center;
   font-size:16px;
-  letter-spacing:0.28em;
+  letter-spacing:0.35em;
+  padding: 18px 0;
   text-transform:uppercase;
   color:#8a3a2c;
+  border-top:1px solid rgba(138,58,44,0.15);
   margin-bottom:24px;
   cursor:pointer;
+    transition: all 0.25s ease;
+
+}
+.burman-section-toggle:last-child{
+  border-bottom:1px solid rgba(138,58,44,0.15);
 }
 
 .burman-section-content{
   max-height:0;
   overflow:hidden;
-  transition:max-height 0.4s ease;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    max-height 0.6s ease,
+    opacity 0.5s ease,
+    transform 0.5s ease;
 }
 
 .burman-section-content.open{
   max-height:800px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ================= PILLOW ================= */
@@ -458,7 +498,7 @@ html, body{
 }
 
 .burman-weather-location{
-  font-size:10px;
+  font-size:15px;
   letter-spacing:0.28em;
   color:#8a3a2c;
 }
@@ -691,4 +731,84 @@ html, body{
     width: 200px;
   }
 
+}
+.burman-info-box{
+  margin-bottom:20px;
+  padding:14px 18px;
+  border-radius:12px;
+
+  background:rgba(138,58,44,0.06);
+  border:1px solid rgba(138,58,44,0.12);
+
+  text-align:center;
+}
+
+.burman-info-box strong{
+  display:block;
+  font-size:12px;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  margin-bottom:6px;
+  color:#8a3a2c;
+}
+
+.burman-info-box p{
+  font-size:14px;
+  color:#5a463d;
+}
+
+.burman-disclaimer{
+  margin-top:20px;
+  font-size:12px;
+  color:#8a3a2c;
+  opacity:0.8;
+  text-align:center;
+}
+.burman-carousel{
+  overflow:hidden;
+  margin-top:20px;
+  border-radius:14px;
+  position:relative;
+}
+
+.burman-carousel-track{
+  display:flex;
+  gap:16px;
+  width:max-content;
+
+  animation: burmanScroll 70s linear infinite;
+}
+
+.burman-carousel img{
+  height:140px;
+  width:auto;
+  border-radius:12px;
+  object-fit:cover;
+  flex-shrink:0;
+}
+
+@keyframes burmanScroll{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+
+/* edge fade (luxury touch) */
+.burman-carousel::before,
+.burman-carousel::after{
+  content:"";
+  position:absolute;
+  top:0;
+  width:60px;
+  height:100%;
+  z-index:2;
+}
+
+.burman-carousel::before{
+  left:0;
+  background:linear-gradient(to right, #f7f5f3, transparent);
+}
+
+.burman-carousel::after{
+  right:0;
+  background:linear-gradient(to left, #f7f5f3, transparent);
 }

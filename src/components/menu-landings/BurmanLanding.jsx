@@ -15,6 +15,8 @@ export default function BurmanLanding({ menu }) {
   const [openRoomService, setOpenRoomService] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openSection, setOpenSection] = useState(null);
+  const [openDining, setOpenDining] = useState(false);
+  const [openDiningVenue, setOpenDiningVenue] = useState(null);
 
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
@@ -129,11 +131,16 @@ export default function BurmanLanding({ menu }) {
           </button>
 
           <div className="burman-links">
-            <a href={`${base}?type=services`}>Rooms</a>
-            <a href={`${base}?type=food`}>Dining</a>
-            <button onClick={() => setOpenSpa(true)}>Spa</button>
-            <a href={`${base}?type=services`}>Club</a>
-          </div>
+  <a href={`${base}?type=services`}>Rooms</a>
+
+  <button onClick={() => setOpenDining(true)}>
+    Dining
+  </button>
+
+  <button onClick={() => setOpenSpa(true)}>Spa</button>
+
+  <a href={`${base}?type=services`}>Club</a>
+</div>
 
           <button
             className="burman-menu"
@@ -249,6 +256,7 @@ export default function BurmanLanding({ menu }) {
           </div>
         </div>
       )}
+      
 
       {/* SPA MODAL */}
       {openSpa && (
@@ -330,6 +338,187 @@ export default function BurmanLanding({ menu }) {
               })}
 
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* DINING MODAL */}
+      {openDining && (
+        <div className="burman-modal">
+
+          <div
+            className="burman-modal-backdrop"
+            onClick={() => setOpenDining(false)}
+          />
+
+          <div className="burman-modal-content">
+
+            <button
+              className="burman-modal-close"
+              onClick={() => setOpenDining(false)}
+            >
+              ✕
+            </button>
+
+            <div className="burman-modal-title">
+              <h2 className="burman-heading">
+                <span className="line-top">Dining</span>
+                <span className="line-bottom">EXPERIENCES</span>
+              </h2>
+            </div>
+
+            <div className="burman-modal-body">
+
+  {[
+    { key: "koyo", name: "Koyo — Omakase" },
+    { key: "shang", name: "Shang Shi — Asian" },
+    { key: "lumen", name: "Lumen — European" }
+  ].map(v => {
+
+    const isOpen = openDiningVenue === v.key;
+
+    return (
+      <div key={v.key} className="burman-spa-section">
+
+        {/* HEADER */}
+<div
+  className="burman-section-toggle"
+  onClick={(e) => {
+  const el = e.currentTarget; // ✅ store element BEFORE timeout
+
+  if (isOpen) {
+    setOpenDiningVenue(null);
+
+    const modal = document.querySelector(".burman-modal-content");
+    if (modal) {
+      modal.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+  } else {
+    setOpenDiningVenue(v.key);
+
+    setTimeout(() => {
+      if (el) {
+        el.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    }, 100);
+  }
+}}
+>
+  {v.name} {isOpen ? "–" : "+"}
+</div>
+
+{/* CONTENT */}
+<div
+  className={`burman-section-content ${isOpen ? "open" : ""}`}
+  style={{
+    maxHeight: isOpen ? "500px" : "0px",
+    overflow: "hidden",
+  }}
+>
+
+  {v.key === "koyo" && (
+    <>
+      <div className="burman-info-box">
+        <strong>Schedule</strong>
+        <p>18:00 – 20:00 | 20:30 – 22:30</p>
+      </div>
+
+      <div className="burman-spa-item">
+        <div>
+          <h4>Omakase Experience</h4>
+          <p>Chef curated seasonal tasting</p>
+        </div>
+        <span className="burman-price">€195</span>
+      </div>
+
+      <div className="burman-spa-item">
+        <div>
+          <h4>Sake Pairing</h4>
+          <p>Premium selection</p>
+        </div>
+        <span className="burman-price">€95</span>
+      </div>
+
+      <div className="burman-disclaimer">
+        Reservations required. Full experience only.
+      </div>
+    </>
+  )}
+
+  {v.key === "shang" && (
+    <>
+      <div className="burman-info-box">
+        <strong>Schedule</strong>
+        <p>17:00 – 23:00</p>
+      </div>
+
+      <div className="burman-spa-item">
+        <div>
+          <h4>Peking Duck</h4>
+          <p>Signature Cantonese preparation</p>
+        </div>
+        <span className="burman-price">€120</span>
+      </div>
+
+      <div className="burman-spa-item">
+        <div>
+          <h4>Dim Sum Selection</h4>
+          <p>Chef’s assortment</p>
+        </div>
+        <span className="burman-price">€48</span>
+      </div>
+
+      <div className="burman-disclaimer">
+        Peking Duck requires 24h pre-order. Please inform staff of allergies.
+      </div>
+    </>
+  )}
+
+  {v.key === "lumen" && (
+    <>
+      <div className="burman-spa-item">
+        <div>
+          <h4>Tasting Menu</h4>
+          <p>Seasonal European cuisine</p>
+        </div>
+        <span className="burman-price">€135</span>
+      </div>
+
+      <div className="burman-spa-item">
+        <div>
+          <h4>À La Carte</h4>
+          <p>Classic & modern dishes</p>
+        </div>
+        <span className="burman-price">from €28</span>
+      </div>
+
+      <div className="burman-carousel">
+        <div className="burman-carousel-track">
+          <img src="/lumen1.jpg" />
+          <img src="/lumen2.jpg" />
+          <img src="/lumen3.jpg" />
+          <img src="/lumen1.jpg" />
+          <img src="/lumen2.jpg" />
+          <img src="/lumen3.jpg" />
+        </div>
+      </div>
+    </>
+  )}
+
+</div>
+
+      </div>
+    );
+  })}
+              </div>
 
           </div>
         </div>
