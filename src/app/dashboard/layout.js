@@ -114,6 +114,12 @@ export default function DashboardLayout({ children }) {
               icon={BookOpenIcon}
               label="Wine Menus"
             />
+            <NavItem
+  href="/dashboard/experiences"
+  isActive={isActive("/dashboard/experiences")}
+  icon={RectangleStackIcon}
+  label="Experiences"
+/>
 
             <div className="so-sidebar-section-label">
               Account
