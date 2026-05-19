@@ -462,7 +462,7 @@ html, body{
 }
 
 .burman-section-content.open{
-  max-height:800px;
+  max-height:2000px;
   opacity: 1;
   transform: translateY(0);
 }
@@ -560,6 +560,7 @@ html, body{
 
 .burman-modal-content{
   animation:burmanFade 0.45s ease;
+  scroll-behavior: smooth;
 }
 
 .burman-full-links{
@@ -744,28 +745,27 @@ html, body{
 
 }
 .burman-info-box{
-  margin-bottom:20px;
-  padding:14px 18px;
-  border-radius:12px;
+  margin: 24px 0 40px;
 
-  background:rgba(138,58,44,0.06);
-  border:1px solid rgba(138,58,44,0.12);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
 
   text-align:center;
 }
 
 .burman-info-box strong{
-  display:block;
-  font-size:12px;
-  letter-spacing:0.2em;
+  font-size:11px;
+  letter-spacing:0.25em;
   text-transform:uppercase;
-  margin-bottom:6px;
-  color:#8a3a2c;
+  color:#8a7a70;
 }
 
 .burman-info-box p{
-  font-size:14px;
-  color:#5a463d;
+  font-size:15px;
+  color:#3a2a24;
+  letter-spacing:0.08em;
 }
 
 .burman-disclaimer{
@@ -968,4 +968,157 @@ html, body{
   color:rgba(255,255,255,0.75);
   font-size:13px;
   margin-top:6px;
+}
+/* ================= SPA INFO GRID ================= */
+
+.burman-spa-info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:24px;
+  margin-top:60px;
+}
+
+.burman-spa-info-card{
+  background:#f7f3ef;
+  border:1px solid rgba(58,42,36,0.08);
+  border-radius:22px;
+  padding:28px;
+}
+
+.burman-spa-info-card h4{
+  font-size:12px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:#8a3a2c;
+  margin-bottom:18px;
+}
+
+.burman-spa-info-card p{
+  font-size:15px;
+  line-height:1.9;
+  color:#5c4a43;
+  margin-bottom:14px;
+}
+
+.burman-info-row{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(58,42,36,0.08);
+  font-size:14px;
+  color:#3a2a24;
+}
+
+.burman-info-row:last-child{
+  border-bottom:none;
+}
+
+@media (max-width: 900px){
+
+  .burman-spa-info-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+.burman-spa-details-heading{
+  margin-top:70px;
+  margin-bottom:28px;
+  font-size:14px;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:#8a3a2c;
+  text-align:center;
+  opacity:0.8;
+}
+.burman-room-subtitle{
+  text-align:center;
+  font-size:11px;
+  letter-spacing:0.24em;
+  text-transform:uppercase;
+  color:#8a7a70;
+  margin-bottom:24px;
+  margin-top:24px;
+}
+
+/* ROOM SERVICE ITEMS */
+
+.burman-spa-item{
+  padding:22px 0;
+}
+.burman-spa-details-heading{
+  text-align:center;
+  margin:90px 0 50px;
+  font-size:11px;
+  letter-spacing:0.32em;
+  text-transform:uppercase;
+  color:#8a7a70;
+  position:relative;
+}
+
+.burman-spa-details-heading::before,
+.burman-spa-details-heading::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  width:32%;
+  height:1px;
+  background:rgba(138,122,112,0.18);
+}
+
+.burman-spa-details-heading::before{
+  left:0;
+}
+
+.burman-spa-details-heading::after{
+  right:0;
+}
+
+.burman-spa-info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:24px;
+  margin-top:20px;
+}
+
+.burman-spa-info-card{
+  padding:32px;
+  border:1px solid rgba(138,122,112,0.12);
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(8px);
+  border-radius:24px;
+}
+
+.burman-spa-info-card h4{
+  font-size:13px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  margin-bottom:20px;
+  color:#8a3a2c;
+}
+
+.burman-spa-info-card p{
+  font-size:15px;
+  line-height:1.9;
+  color:#5f5149;
+}
+
+.burman-info-row{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(138,122,112,0.08);
+}
+
+.burman-info-row:last-child{
+  border-bottom:none;
+}
+
+@media (max-width: 900px){
+
+  .burman-spa-info-grid{
+    grid-template-columns:1fr;
+  }
+
 }

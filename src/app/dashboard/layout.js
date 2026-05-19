@@ -107,6 +107,12 @@ export default function DashboardLayout({ children }) {
               icon={BeakerIcon}
               label="Wine Cellar"
             />
+            <NavItem
+  href="/dashboard/wine-cellar/inventory"
+  isActive={isActive("/dashboard/wine-cellar/inventory")}
+  icon={BeakerIcon}
+  label="Inventory"
+/>
 
             <NavItem
               href="/dashboard/wine-menus"
@@ -129,7 +135,7 @@ export default function DashboardLayout({ children }) {
               href="/dashboard/billing"
               isActive={isActive("/dashboard/billing")}
               icon={CreditCardIcon}
-              label="Billing"
+              label="In Progress"
             />
 
             <NavItem
@@ -151,10 +157,10 @@ export default function DashboardLayout({ children }) {
 
             <div className="so-user-meta">
               <div className="so-user-name">
-                Operator
+                Burman Hotel OÜ
               </div>
               <div className="so-user-tag">
-                Starter Plan
+                Premium Plan
               </div>
             </div>
           </div>

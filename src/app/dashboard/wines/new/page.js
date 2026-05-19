@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
@@ -23,9 +23,34 @@ export default function NewWinePage() {
   const [grapes, setGrapes] = useState("");
   const [subregion, setSubregion] = useState("");
   const [description, setDescription] = useState("");
-
+const [locations, setLocations] = useState([]);
+const [selectedLocation, setSelectedLocation] = useState("");
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+  loadLocations();
+}, []);
+async function loadLocations() {
 
+  const { data } = await supabase
+    .from("wine_locations")
+    .select("*")
+    .order("name");
+
+  if (!data) return;
+
+  if (data.length > 0) {
+
+    console.log("Loaded locations:", data);
+
+    setLocations(data);
+
+    if (!selectedLocation) {
+      setSelectedLocation(data[0].id);
+    }
+
+  }
+
+}
   const handleSubmit = async (e) => {
 
     console.log("Submit triggered");
@@ -70,7 +95,6 @@ export default function NewWinePage() {
           vintage,
           size,
           price: price ? Number(price) : null,
-          stock: Number(stock),
           description
         }
       ])
@@ -83,6 +107,31 @@ export default function NewWinePage() {
     }
 
     console.log("Inserted wine:", data);
+    const createdWine = data?.[0];
+
+console.log("Created wine:", createdWine);
+console.log("Selected location:", selectedLocation);
+console.log("Stock:", stock);
+
+if (createdWine && selectedLocation) {
+
+  const { data: inventoryData, error: inventoryError } = await supabase
+  .from("wine_inventory")
+  .insert({
+    wine_id: createdWine.id,
+    location_id: selectedLocation,
+    quantity: Number(stock)
+  })
+  .select();
+  
+
+  console.log("Inventory insert:", inventoryData);
+
+  if (inventoryError) {
+    console.error("Inventory insert error:", inventoryError);
+  }
+
+}
 
     router.push("/dashboard/wines");
   };
@@ -177,7 +226,24 @@ export default function NewWinePage() {
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
+<select
+  className="so-input text-[#3a2a24]"
+  value={selectedLocation}
+  onChange={(e) => setSelectedLocation(e.target.value)}
+>
 
+  {locations.map((location) => (
+
+    <option
+      key={location.id}
+      value={location.id}
+    >
+      {location.name}
+    </option>
+
+  ))}
+
+</select>
           <input
             className="so-input"
             type="number"

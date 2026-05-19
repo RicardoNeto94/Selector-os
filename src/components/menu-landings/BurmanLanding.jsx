@@ -10,15 +10,31 @@ export default function BurmanLanding({ menu }) {
   
 const supabase = createClientComponentClient();  
 const base = `/menu/${menu?.public_slug}`;
+const [roomTab, setRoomTab] = useState("snacks");
 
 const [experiences, setExperiences] = useState([]);
 const [openSpa, setOpenSpa] = useState(false);
+const [openSpaInfo, setOpenSpaInfo] = useState(false);
 const [openRoomService, setOpenRoomService] = useState(false);
 const [menuOpen, setMenuOpen] = useState(false);
 const [openSection, setOpenSection] = useState(null);
 const [openDining, setOpenDining] = useState(false);
 const [openDiningVenue, setOpenDiningVenue] = useState(null);
+const [selectedDining, setSelectedDining] = useState(null);
+const roomServiceExp = experiences.find(
+  exp => exp.type === "room_service"
+);
 
+useEffect(() => {
+  if (experiences.length && !selectedDining) {
+    const firstDining = experiences.find(
+      exp => exp.type?.toLowerCase() === "dining"
+    );
+    if (firstDining) {
+      setSelectedDining(firstDining.id);
+    }
+  }
+}, [experiences]);
 const [categories, setCategories] = useState([]);
 const [items, setItems] = useState([]);
 const [pricesMap, setPricesMap] = useState({});
@@ -76,11 +92,14 @@ useEffect(() => {
         name,
         type,
         image_url,
+        schedule,
+        footer,
         position,
         experience_sections (
           id,
           name,
           position,
+          type,
           experience_items (
             id,
             name,
@@ -96,19 +115,20 @@ useEffect(() => {
       `)
       .order("position", { ascending: true });
 
-    if (!error) {
-      setExperiences(data);
-    } else {
-      console.error(error);
-    }
+    if (error) {
+  console.error("EXPERIENCES ERROR:", error);
+} else {
+  console.log("EXPERIENCES DATA:", data);
+  setExperiences(data);
+}
   };
 
   // 🔥 ONLY RUN WHEN DINING OPENS
-  if (openDining) {
-    loadExperiences();
-  }
+  if (openDining || openRoomService) {
+  loadExperiences();
+}
 
-}, [openDining]);
+}, [openDining,openRoomService]);
 
   // ================= SCROLL LOCK =================
   useEffect(() => {
@@ -170,14 +190,12 @@ useEffect(() => {
   <div className={`burman-nav ${menuOpen ? "menu-open" : ""}`}>
 
           <button onClick={() => setOpenRoomService(true)} className="burman-primary">
-            Room Service
+            In-Room Selection
           </button>
 
           <div className="burman-links">
-            <a href={`${base}?type=services`}>Rooms</a>
             <button onClick={() => setOpenDining(true)}>Dining</button>
             <button onClick={() => setOpenSpa(true)}>Spa</button>
-            <a href={`${base}?type=services`}>Club</a>
           </div>
 
           <button className="burman-menu" onClick={() => setMenuOpen(prev => !prev)}>
@@ -201,57 +219,121 @@ useEffect(() => {
             <div className="burman-modal-title">
               <h2 className="burman-heading">
                 <span className="line-top">
-                  IN ROOM <span className="of">SERVICE</span>
+                  In Room <span className="of"></span>
                 </span>
-                <span className="line-bottom">MENU</span>
+                <span className="line-bottom">SELECTION</span>
               </h2>
             </div>
 
             <div className="burman-modal-body">
+              
+  <div className="burman-modal-intro" style={{ textAlign: "center", marginBottom: 30 }}>
+    <p>
+      A refined selection of in-room comforts, curated to elevate your stay with
+    ease, privacy, and understated elegance.
+    </p>
 
-              {/* SNACKS */}
-              <div className="burman-spa-section">
-                <div className="burman-section-toggle" onClick={() => toggleSection("snacks")}>
-                  Room Snacks {openSection === "snacks" ? "–" : "+"}
-                </div>
+    <p>From light snacks and carefully selected beverages to a personalised pillow
+    menu, each element is designed to enhance relaxation and create a sense of
+    quiet indulgence within your room.
+  </p>
+  </div>
 
-                <div className={`burman-section-content ${openSection === "snacks" ? "open" : ""}`}>
-                  <div className="burman-spa-item">
-                    <h4>Club Sandwich</h4>
-                    <span className="burman-price">€18</span>
+<div className="burman-divider" />
+<div className="burman-room-subtitle">
+  Curated comforts for your stay
+</div>
+  {/* TABS */}
+  <div style={{
+    display: "flex",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 30
+  }}>
+    {[
+      { key: "snacks", label: "Snacks" },
+      { key: "drinks", label: "Drinks" },
+      { key: "amenities", label: "Amenities" },
+      { key: "pillow", label: "Pillow" }
+    ].map(tab => (
+      <button
+        key={tab.key}
+        onClick={() => setRoomTab(tab.key)}
+        style={{
+          padding: "8px 0",
+          margin: "0 14px",
+          border: "none",
+          background: "transparent",
+          color: roomTab === tab.key ? "#3a2a24" : "#8a7a70",
+          fontSize: 14,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          cursor: "pointer"
+        }}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+
+  {/* EMPTY STATE */}
+  {!roomServiceExp && (
+    <div style={{ textAlign: "center", opacity: 0.6 }}>
+      No room service available
+    </div>
+  )}
+
+  {/* SNACKS / DRINKS / AMENITIES */}
+  {["snacks", "drinks", "amenities"].includes(roomTab) && (
+    roomServiceExp?.experience_sections
+  ?.filter(section =>
+    section.type === roomTab &&
+    section.experience_items?.length
+  )
+      ?.sort((a, b) => a.position - b.position)
+      .map(section => (
+        <div key={section.id} className="burman-spa-section">
+
+          <h3>{section.name}</h3>
+
+          {section.experience_items
+            ?.sort((a, b) => a.position - b.position)
+            .map(item => {
+              const price = item.experience_prices?.[0]?.price;
+              const label = item.experience_prices?.[0]?.label;
+
+              return (
+                <div key={item.id} className="burman-spa-item">
+                  <div>
+                    <h4>{item.name}</h4>
+                    {item.description && <p>{item.description}</p>}
                   </div>
-                </div>
-              </div>
 
-              {/* BEVERAGES */}
-              <div className="burman-spa-section">
-                <div className="burman-section-toggle" onClick={() => toggleSection("bev")}>
-                  Room Beverages {openSection === "bev" ? "–" : "+"}
+                  {price && (
+                    <span className="burman-price">
+                      {label && <span>{label} — </span>}€{price}
+                    </span>
+                  )}
                 </div>
+              );
+            })}
 
-                <div className={`burman-section-content ${openSection === "bev" ? "open" : ""}`}>
-                  <div className="burman-spa-item">
-                    <h4>Champagne</h4>
-                    <span className="burman-price">€16</span>
-                  </div>
-                </div>
-              </div>
+        </div>
+      ))
+  )}
 
-              {/* PILLOW */}
-              <div className="burman-spa-section">
-                <div className="burman-section-toggle" onClick={() => toggleSection("pillow")}>
-                  Pillow Menu {openSection === "pillow" ? "–" : "+"}
-                </div>
+  {/* FOOTER */}
+  {roomServiceExp?.footer?.trim() && (
+    <div className="burman-disclaimer">
+      {roomServiceExp.footer}
+    </div>
+  )}
 
-                <div className={`burman-section-content ${openSection === "pillow" ? "open" : ""}`}>
-                  <BurmanPillowMenu />
-                </div>
-              </div>
+</div>
 
             </div>
 
           </div>
-        </div>
       )}
       
 
@@ -312,46 +394,177 @@ useEffect(() => {
       <div className="burman-modal-body">
 
               {categories.map(cat => {
-                const catItems = items.filter(i => i.category_id === cat.id);
+  const catItems = items.filter(i => i.category_id === cat.id);
 
-                if (!catItems.length) return null;
+  if (!catItems.length) return null;
 
-                return (
-                  <div key={cat.id} className="burman-spa-section">
+  return (
+    <div key={cat.id} className="burman-spa-section">
 
-                    <h3>{cat.name}</h3>
+      <h3>{cat.name}</h3>
 
-                    {catItems.map(item => {
-                      const prices = pricesMap[item.id] || [];
+      {catItems.map(item => {
+        const prices = pricesMap[item.id] || [];
 
-                      return (
-                        <div key={item.id} className="burman-spa-item">
-                          <div>
-                            <h4>{item.name}</h4>
-                            {item.description && <p>{item.description}</p>}
-                          </div>
-
-                          <div className="burman-pricing-vertical">
-                            {prices.map(p => (
-                              <div key={p.id} className="burman-price-row">
-                                <span>{p.label || p.duration}</span>
-                                <span>€{p.price}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                  </div>
-                );
-              })}
-
+        return (
+          <div key={item.id} className="burman-spa-item">
+            <div>
+              <h4>{item.name}</h4>
+              {item.description && <p>{item.description}</p>}
             </div>
 
+            <div className="burman-pricing-vertical">
+              {prices.map(p => (
+                <div key={p.id} className="burman-price-row">
+                  <span>{p.label || p.duration}</span>
+                  <span>€{p.price}</span>
+                </div>
+              ))}
+            </div>
           </div>
+        );
+      })}
+
+    </div>
+  );
+})}
+<div className="burman-spa-info-trigger-wrap">
+
+  <button
+    className="burman-spa-info-trigger"
+    onClick={() => setOpenSpaInfo(true)}
+  >
+    Wellness Information
+  </button>
+
+</div>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
+      {/* SPA INFO MODAL */}
+{openSpaInfo && (
+  <div className="burman-modal">
+
+    <div
+      className="burman-modal-backdrop"
+      onClick={() => setOpenSpaInfo(false)}
+    />
+
+    <div className="burman-modal-content burman-spa-info-modal">
+
+      <button
+        className="burman-modal-close"
+        onClick={() => setOpenSpaInfo(false)}
+      >
+        ✕
+      </button>
+
+      <div className="burman-modal-title">
+
+        <h2 className="burman-heading">
+          <span className="line-top">
+            WELLNESS
+          </span>
+
+          <span className="line-bottom">
+            INFORMATION
+          </span>
+        </h2>
+
+      </div>
+
+      <div className="burman-modal-body">
+
+        <div className="burman-spa-info-grid">
+
+          <div className="burman-spa-info-card">
+            <h4>Opening Hours</h4>
+
+            <div className="burman-info-row">
+              <span>Spa Facilities</span>
+              <span>08AM — 10PM</span>
+            </div>
+
+            <div className="burman-info-row">
+              <span>Treatments</span>
+              <span>10AM — 9PM</span>
+            </div>
+          </div>
+
+          <div className="burman-spa-info-card">
+            <h4>External Guests</h4>
+
+            <p>
+              External guests may access the spa facilities
+              for €100 per person, subject to availability.
+            </p>
+
+            <p>
+              Guests booking a treatment receive
+              complimentary access to all spa facilities.
+            </p>
+          </div>
+
+          <div className="burman-spa-info-card">
+            <h4>Wellness Etiquette</h4>
+
+            <p>
+              To preserve the atmosphere of tranquillity,
+              guests are kindly requested to maintain
+              a digital detox within the spa environment.
+            </p>
+
+            <p>
+              Bathing attire is required within all
+              thermal and wellness facilities.
+            </p>
+          </div>
+
+          <div className="burman-spa-info-card">
+            <h4>Appointments</h4>
+
+            <p>
+              We recommend arriving at least
+              15 minutes prior to your treatment.
+            </p>
+
+            <p>
+              Advance booking is highly recommended
+              to ensure preferred availability.
+            </p>
+          </div>
+
+          <div className="burman-spa-info-card">
+            <h4>Cancellation Policy</h4>
+
+            <p>
+              Treatments cancelled within 24 hours
+              will incur the full treatment fee.
+            </p>
+          </div>
+
+          <div className="burman-spa-info-card">
+            <h4>Health & Wellness</h4>
+
+            <p>
+              Please inform your therapist of any
+              medical conditions, pregnancy,
+              or ongoing treatments prior to arrival.
+            </p>
+          </div>
+
         </div>
-      )}
+
+      </div>
+
+    </div>
+
+  </div>
+)}
 
       {/* DINING MODAL */}
       {openDining && (
@@ -373,7 +586,7 @@ useEffect(() => {
 
             <div className="burman-modal-title">
               <h2 className="burman-heading">
-                <span className="line-top">Dining</span>
+                <span className="line-top">In Room Dining</span>
                 <span className="line-bottom">EXPERIENCES</span>
               </h2>
             </div>
@@ -381,10 +594,41 @@ useEffect(() => {
             <div className="burman-modal-body">
 
   <div className="burman-modal-body">
+    <div style={{
+  display: "flex",
+  justifyContent: "center",
+  gap: 10,
+  marginBottom: 30
+}}>
+  {experiences
+    .filter(exp => exp.type?.toLowerCase() === "dining")
+    .map(exp => (
+      <button
+        key={exp.id}
+        onClick={() => setSelectedDining(exp.id)}
+        style={{
+  padding: "8px 0",
+  margin: "0 14px",
+  border: "none",
+  background: "transparent",
+  color: selectedDining === exp.id ? "#3a2a24" : "#8a7a70",
+  fontSize: 14,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  cursor: "pointer",
+  position: "relative"
+}}
+      >
+        {exp.name}
+      </button>
+    ))}
+</div>
 
   {experiences
-    .filter(exp => exp.type === "dining")
-    .map(exp => {
+.filter(exp => 
+  exp.type?.toLowerCase() === "dining" &&
+  exp.id === selectedDining
+)  .map(exp => {
 
       const isOpen = openDiningVenue === exp.id;
 
@@ -417,17 +661,25 @@ useEffect(() => {
               <h3>{exp.name}</h3>
             </div>
           </div>
-
+{exp.schedule && (
+  <div className="burman-info-box">
+    <strong>Available</strong>
+    <p>{exp.schedule}</p>
+  </div>
+)}
           {/* CONTENT */}
           <div className={`burman-section-content ${isOpen ? "open" : ""}`}>
 
-            {exp.experience_sections?.map(section => (
-              <div key={section.id} className="burman-spa-section">
+{exp.experience_sections
+  ?.filter(section => section.experience_items?.length)
+  ?.sort((a, b) => a.position - b.position)
+  .map(section => (              <div key={section.id} className="burman-spa-section">
 
                 <h3>{section.name}</h3>
 
-                {section.experience_items?.map(item => {
-const price = item.experience_prices?.[0]?.price;
+{section.experience_items
+  ?.sort((a, b) => a.position - b.position)
+  .map(item => {const price = item.experience_prices?.[0]?.price;
 const label = item.experience_prices?.[0]?.label;
                   return (
                     <div key={item.id} className="burman-spa-item">
@@ -447,6 +699,11 @@ const label = item.experience_prices?.[0]?.label;
 
               </div>
             ))}
+            {exp.footer && (
+  <div className="burman-disclaimer">
+    {exp.footer}
+  </div>
+)}
 
           </div>
 
