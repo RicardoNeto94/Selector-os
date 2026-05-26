@@ -1,8 +1,10 @@
 "use client";
 
 import "../../styles/dashboard.css";
+
 import Link from "next/link";
 import Image from "next/image";
+
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 
@@ -18,8 +20,15 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function NavItem({ href, isActive, icon: Icon, label }) {
+function NavItem({
+  href,
+  isActive,
+  icon: Icon,
+  label
+}) {
+
   return (
+
     <Link
       href={href}
       className={
@@ -27,37 +36,59 @@ function NavItem({ href, isActive, icon: Icon, label }) {
         (isActive ? "so-nav-item--active" : "")
       }
     >
+
       <div className="so-nav-icon-wrap">
         <Icon className="so-nav-icon" />
       </div>
 
-      <span className="so-nav-label">{label}</span>
+      <span className="so-nav-label">
+        {label}
+      </span>
+
     </Link>
+
   );
+
 }
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({
+  children
+}) {
 
   const pathname = usePathname();
 
   const isActive = useMemo(() => {
+
     return (href) => {
-      if (href === "/dashboard") return pathname === "/dashboard";
+
+      if (href === "/dashboard") {
+        return pathname === "/dashboard";
+      }
+
       return pathname?.startsWith(href);
+
     };
+
   }, [pathname]);
 
   return (
+
     <div className="so-dashboard-root">
 
-      {/* SIDEBAR */}
+      {/* =======================================================
+          DESKTOP / TABLET SIDEBAR
+      ======================================================= */}
+
       <aside className="so-sidebar">
 
         <div>
 
           {/* LOGO */}
+
           <div className="so-sidebar-brand">
+
             <div className="so-logo-wrap">
+
               <Image
                 src="/selectoros-logo.png"
                 alt="SelectorOS"
@@ -66,11 +97,16 @@ export default function DashboardLayout({ children }) {
                 className="so-logo"
                 priority
               />
+
             </div>
+
           </div>
 
           {/* NAV */}
+
           <nav className="so-sidebar-nav">
+
+            {/* OVERVIEW */}
 
             <div className="so-sidebar-section-label">
               Overview
@@ -82,6 +118,8 @@ export default function DashboardLayout({ children }) {
               icon={Squares2X2Icon}
               label="Dashboard"
             />
+
+            {/* OPERATIONS */}
 
             <div className="so-sidebar-section-label">
               Operations
@@ -107,12 +145,13 @@ export default function DashboardLayout({ children }) {
               icon={BeakerIcon}
               label="Wine Cellar"
             />
+
             <NavItem
-  href="/dashboard/wine-cellar/inventory"
-  isActive={isActive("/dashboard/wine-cellar/inventory")}
-  icon={BeakerIcon}
-  label="Inventory"
-/>
+              href="/dashboard/wine-cellar/inventory"
+              isActive={isActive("/dashboard/wine-cellar/inventory")}
+              icon={BeakerIcon}
+              label="Inventory"
+            />
 
             <NavItem
               href="/dashboard/wine-menus"
@@ -120,12 +159,15 @@ export default function DashboardLayout({ children }) {
               icon={BookOpenIcon}
               label="Wine Menus"
             />
+
             <NavItem
-  href="/dashboard/experiences"
-  isActive={isActive("/dashboard/experiences")}
-  icon={RectangleStackIcon}
-  label="Experiences"
-/>
+              href="/dashboard/experiences"
+              isActive={isActive("/dashboard/experiences")}
+              icon={RectangleStackIcon}
+              label="Experiences"
+            />
+
+            {/* ACCOUNT */}
 
             <div className="so-sidebar-section-label">
               Account
@@ -150,22 +192,33 @@ export default function DashboardLayout({ children }) {
         </div>
 
         {/* FOOTER */}
+
         <div className="so-sidebar-footer">
 
           <div className="so-sidebar-user">
-            <div className="so-user-avatar">R</div>
+
+            <div className="so-user-avatar">
+              R
+            </div>
 
             <div className="so-user-meta">
+
               <div className="so-user-name">
                 Burman Hotel OÜ
               </div>
+
               <div className="so-user-tag">
                 Premium Plan
               </div>
+
             </div>
+
           </div>
 
-          <Link href="/logout" className="so-logout-btn">
+          <Link
+            href="/logout"
+            className="so-logout-btn"
+          >
             Log out
           </Link>
 
@@ -173,7 +226,10 @@ export default function DashboardLayout({ children }) {
 
       </aside>
 
-      {/* 🔥 CRITICAL FIX HERE */}
+      {/* =======================================================
+          MAIN CONTENT
+      ======================================================= */}
+
       <main
         className="so-main"
         style={{
@@ -181,9 +237,111 @@ export default function DashboardLayout({ children }) {
           color: "var(--so-text-main)"
         }}
       >
+
         {children}
+
       </main>
 
+      {/* =======================================================
+          MOBILE BOTTOM NAV
+      ======================================================= */}
+
+      <div className="so-mobile-nav">
+
+        <Link
+          href="/dashboard"
+          className={
+            "so-mobile-nav-item " +
+            (isActive("/dashboard")
+              ? "so-mobile-nav-item--active"
+              : "")
+          }
+        >
+
+          <Squares2X2Icon className="so-mobile-nav-icon" />
+
+          <span>
+            Dashboard
+          </span>
+
+        </Link>
+
+        <Link
+          href="/dashboard/wines"
+          className={
+            "so-mobile-nav-item " +
+            (isActive("/dashboard/wines")
+              ? "so-mobile-nav-item--active"
+              : "")
+          }
+        >
+
+          <BeakerIcon className="so-mobile-nav-icon" />
+
+          <span>
+            Wines
+          </span>
+
+        </Link>
+
+        <Link
+          href="/dashboard/wine-cellar/inventory"
+          className={
+            "so-mobile-nav-item " +
+            (isActive("/dashboard/wine-cellar/inventory")
+              ? "so-mobile-nav-item--active"
+              : "")
+          }
+        >
+
+          <RectangleStackIcon className="so-mobile-nav-icon" />
+
+          <span>
+            Inventory
+          </span>
+
+        </Link>
+
+        <Link
+          href="/dashboard/menu"
+          className={
+            "so-mobile-nav-item " +
+            (isActive("/dashboard/menu")
+              ? "so-mobile-nav-item--active"
+              : "")
+          }
+        >
+
+          <SwatchIcon className="so-mobile-nav-icon" />
+
+          <span>
+            Menus
+          </span>
+
+        </Link>
+
+        <Link
+          href="/dashboard/settings"
+          className={
+            "so-mobile-nav-item " +
+            (isActive("/dashboard/settings")
+              ? "so-mobile-nav-item--active"
+              : "")
+          }
+        >
+
+          <Cog6ToothIcon className="so-mobile-nav-icon" />
+
+          <span>
+            Settings
+          </span>
+
+        </Link>
+
+      </div>
+
     </div>
+
   );
+
 }

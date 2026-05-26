@@ -1,131 +1,211 @@
 export const dynamic = "force-dynamic";
 
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  createServerComponentClient
+} from "@supabase/auth-helpers-nextjs";
+
 import { cookies } from "next/headers";
 
 import WineClientView from "./WineClientView";
-export default async function Page({ params }) {
 
-  const cookieStore = await cookies();
+export default async function Page({
+  params
+}) {
+
+  const { slug } = await params;
+
+  const cookieStore =
+    await cookies();
 
   const supabase =
     createServerComponentClient({
       cookies: () => cookieStore
     });
 
-const slug = "shang-shi-wine";
-  // MENU
+  /* =======================================================
+     MENU
+  ======================================================= */
 
-  const { data: menu, error: menuError } =
-    await supabase
-      .from("wine_menus")
-      .select("*")
-      .eq("slug", slug)
-      .single();
+  const {
+    data: menu,
+    error: menuError
+  } = await supabase
+    .from("wine_menus")
+    .select("*")
+    .eq("slug", slug)
+    .single();
 
-  if (menuError || !menu) {
-
-    console.log(menuError);
+  if (
+    menuError ||
+    !menu
+  ) {
 
     return (
-      <div className="
+
+      <div
+        className="
         min-h-screen
         flex
         items-center
         justify-center
         bg-black
         text-white
-      ">
+      "
+      >
+
         Menu not found
+
       </div>
+
     );
 
   }
 
-  // WINES
+  /* =======================================================
+     LOCATION
+  ======================================================= */
 
-  const { data: items, error: itemsError } =
-    await supabase
-      .from("wine_menu_items")
-      .select(`
+  let location = null;
+
+  if (menu.location_id) {
+
+    const {
+      data: locationData
+    } = await supabase
+      .from("wine_locations")
+      .select("*")
+      .eq(
+        "id",
+        menu.location_id
+      )
+      .single();
+
+    location =
+      locationData;
+
+  }
+
+  /* =======================================================
+     MENU WINES
+  ======================================================= */
+
+  const {
+    data: items,
+    error: itemsError
+  } = await supabase
+    .from("wine_menu_items")
+    .select(`
+      id,
+      position,
+      wine_id,
+
+      wines:wine_id (
         id,
-        position,
-        wine_id,
-
-        wines:wine_id (
-          id,
-          name,
-          producer,
-          country,
-          region,
-          subregion,
-          wine_type,
-          grapes,
-          vintage,
-          price,
-          description
-        )
-      `)
-      .eq("wine_menu_id", menu.id)
-      .order("position", {
-        ascending: true
-      });
-
-  console.log(items);
+        name,
+        producer,
+        country,
+        region,
+        subregion,
+        wine_type,
+        grapes,
+        vintage,
+        price,
+        description
+      )
+    `)
+    .eq(
+      "wine_menu_id",
+      menu.id
+    )
+    .order(
+      "position",
+      {
+        ascending:true
+      }
+    );
 
   const safeItems =
     itemsError
       ? []
       : items || [];
 
+  /* =======================================================
+     INVENTORY
+  ======================================================= */
+
+  let inventoryMap = {};
+
+  if (location) {
+
+    const {
+      data: inventoryRows
+    } = await supabase
+      .from("wine_inventory")
+      .select(`
+        wine_id,
+        quantity
+      `)
+      .eq(
+        "location_id",
+        location.id
+      );
+
+    inventoryMap =
+      Object.fromEntries(
+        (inventoryRows || [])
+          .map(row => [
+            row.wine_id,
+            row.quantity
+          ])
+      );
+
+  }
+
+  /* =======================================================
+     FILTER + MERGE INVENTORY
+  ======================================================= */
+
+  const inventoryItems =
+    safeItems
+      .filter(item => {
+
+        const quantity =
+          inventoryMap[
+            item.wine_id
+          ] || 0;
+
+        return quantity > 0;
+
+      })
+      .map(item => ({
+
+        ...item,
+
+        quantity:
+          inventoryMap[
+            item.wine_id
+          ] || 0
+
+      }));
+
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
 
     <main
-      className="min-h-screen w-full"
-      style={{
-        background:
-          "linear-gradient(180deg, #003223 0%, #001a12 100%)"
-      }}
+      className="
+      min-h-screen
+      w-full
+    "
     >
 
-      <div className="
-        max-w-5xl
-        mx-auto
-        px-6
-        py-10
-      ">
-
-        {/* HEADER */}
-
-        <div className="
-          text-center
-          text-white
-          mb-10
-        ">
-
-          <img
-            src="/shangshi-logo.png"
-            className="h-20 mx-auto mb-4"
-          />
-
-          <p className="
-            tracking-[0.3em]
-            text-sm
-            opacity-80
-          ">
-            WINE SELECTION
-          </p>
-
-        </div>
-
-        {/* CONTENT */}
-
-        <WineClientView
-          menu={menu}
-          items={safeItems}
-        />
-
-      </div>
+      <WineClientView
+        menu={menu}
+        items={inventoryItems}
+      />
 
     </main>
 

@@ -859,3 +859,215 @@ thead{
   }
 
 }
+/* =======================================================
+   VAXERON RESPONSIVE STABILIZATION
+======================================================= */
+
+.so-inventory-table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+.so-inventory-table-head,
+.so-inventory-row{
+  min-width:920px;
+}
+
+/* -------------------------------------------------------
+   LARGE LAPTOPS
+------------------------------------------------------- */
+
+@media(max-width:1400px){
+
+  .so-main{
+    padding:22px;
+  }
+
+  .so-dashboard-card{
+    padding:20px;
+  }
+
+}
+
+/* -------------------------------------------------------
+   TABLETS
+------------------------------------------------------- */
+
+@media(max-width:1100px){
+
+  .so-dashboard-root{
+    flex-direction:column;
+    height:auto;
+  }
+
+  .so-sidebar{
+    width:100%;
+    height:auto;
+
+    border-right:none;
+    border-bottom:1px solid var(--border);
+
+    padding:14px;
+  }
+
+  .so-sidebar-footer{
+    display:none;
+  }
+
+  .so-main{
+    padding:18px;
+  }
+
+  .so-dashboard-card{
+    border-radius:22px;
+    padding:18px;
+  }
+
+}
+
+/* -------------------------------------------------------
+   MOBILE
+------------------------------------------------------- */
+
+@media(max-width:700px){
+
+  .so-main{
+    padding:14px;
+  }
+
+  .so-card,
+  .so-dashboard-card{
+    padding:16px;
+    border-radius:18px;
+  }
+
+  .so-title{
+    font-size:15px;
+  }
+
+  .so-dashboard-title{
+    font-size:14px;
+  }
+
+  .so-dashboard-wine-row{
+    gap:10px;
+    padding:10px;
+  }
+
+  .so-dashboard-wine-thumb{
+    width:22px;
+    height:54px;
+  }
+
+  .so-sidebar{
+    padding:12px 10px;
+  }
+
+  .so-nav-item{
+    padding:8px 10px;
+  }
+
+}
+
+/* -------------------------------------------------------
+   SMALL MOBILE
+------------------------------------------------------- */
+
+@media(max-width:520px){
+
+  .so-main{
+    padding:12px;
+  }
+
+  .so-dashboard-card{
+    padding:14px;
+  }
+
+  .so-input{
+    font-size:16px;
+  }
+
+}
+/* =======================================================
+   MOBILE NAVIGATION SYSTEM
+======================================================= */
+
+.so-mobile-nav{
+  display:none;
+}
+
+.so-mobile-nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+
+  color:#8e8177;
+
+  text-decoration:none;
+
+  font-size:10px;
+  font-weight:500;
+
+  transition:all .18s ease;
+}
+
+.so-mobile-nav-item--active{
+  color:#8a3a2c;
+}
+
+.so-mobile-nav-icon{
+  width:20px;
+  height:20px;
+}
+
+/* =======================================================
+   MOBILE LAYOUT
+======================================================= */
+
+@media(max-width:900px){
+
+  .so-sidebar{
+    display:none;
+  }
+
+  .so-dashboard-root{
+    display:block;
+  }
+
+  .so-main{
+    padding:
+      16px
+      16px
+      90px;
+  }
+
+  .so-mobile-nav{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+    right:0;
+
+    height:72px;
+
+    background:
+      rgba(255,255,255,0.82);
+
+    backdrop-filter:blur(20px);
+
+    border-top:
+      1px solid rgba(138,58,44,0.08);
+
+    display:grid;
+
+    grid-template-columns:
+      repeat(5,1fr);
+
+    align-items:center;
+
+    z-index:9999;
+  }
+
+}
