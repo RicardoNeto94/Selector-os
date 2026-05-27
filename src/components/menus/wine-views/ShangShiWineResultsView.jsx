@@ -6,11 +6,67 @@ const ITEMS_PER_PAGE = 12;
 
 function getWine(item){
 
-if(Array.isArray(item?.wines)){
+if(!item) return {};
+
+if(
+Array.isArray(item?.wines)
+){
 return item.wines[0] || {};
 }
 
-return item?.wines || item || {};
+if(
+item?.wines
+){
+return item.wines;
+}
+
+/* defensive fallbacks */
+
+return{
+
+id:
+item.id || "",
+
+name:
+item.name ||
+item.wine_name ||
+item.title ||
+"Unknown Wine",
+
+producer:
+item.producer ||
+item.winery ||
+"",
+
+country:
+item.country ||
+"",
+
+region:
+item.region ||
+"",
+
+subregion:
+item.subregion ||
+"",
+
+wine_type:
+item.wine_type ||
+"Collection",
+
+vintage:
+item.vintage ||
+"NV",
+
+price:
+item.price ??
+0,
+
+description:
+item.description ||
+""
+
+};
 
 }
 
