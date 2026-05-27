@@ -428,14 +428,53 @@ useEffect(() => {
     </div>
   );
 })}
-<div className="burman-spa-info-trigger-wrap">
+<div
+className="
+burman-spa-info-trigger-wrap
+"
+style={{
+marginTop:"70px",
+marginBottom:"20px",
+display:"flex",
+justifyContent:"center"
+}}
+>
 
-  <button
-    className="burman-spa-info-trigger"
-    onClick={() => setOpenSpaInfo(true)}
-  >
-    Wellness Information
-  </button>
+<button
+onClick={() => setOpenSpaInfo(true)}
+style={{
+
+padding:"18px 34px",
+
+background:"rgba(255,255,255,.03)",
+
+border:"1px solid rgba(138,122,112,.15)",
+
+borderRadius:"999px",
+
+backdropFilter:"blur(25px)",
+
+color:"#8a3a2c",
+
+fontSize:"11px",
+
+letterSpacing:"0.32em",
+
+textTransform:"uppercase",
+
+cursor:"pointer",
+
+transition:"all .4s ease",
+
+boxShadow:
+"0 10px 40px rgba(0,0,0,.06)"
+
+}}
+>
+
+Wellness Information
+
+</button>
 
 </div>
 
