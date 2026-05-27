@@ -215,7 +215,15 @@ export default async function Page({
      FILTER + MERGE INVENTORY
   ======================================================= */
 
-  const inventoryItems =
+  /* =======================================================
+   FILTER + MERGE INVENTORY
+======================================================= */
+
+let inventoryItems = [];
+
+if(location){
+
+  inventoryItems =
     safeItems
       .filter(item => {
 
@@ -238,6 +246,17 @@ export default async function Page({
 
       }));
 
+}else{
+
+  inventoryItems =
+    safeItems.map(item => ({
+
+      ...item,
+      quantity:null
+
+    }));
+
+}
   /* =======================================================
      RENDER
   ======================================================= */
