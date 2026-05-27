@@ -99,7 +99,7 @@ export default async function Page({
       position,
       wine_id,
 
-      wines:wine_id (
+      wines!wine_id (
         id,
         name,
         producer,
