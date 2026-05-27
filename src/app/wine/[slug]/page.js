@@ -115,9 +115,9 @@ let items = [];
 if(rawItems?.length){
 
   const wineIds =
-    rawItems.map(
-      i => i.wine_id
-    );
+  rawItems
+    .map(i => i.wine_id)
+    .filter(Boolean);
 
   const {
     data:winesData=[]
