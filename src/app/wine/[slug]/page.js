@@ -210,53 +210,24 @@ export default async function Page({
       );
 
   }
+    /*  
+======================================================= */
 
-  /* =======================================================
-     FILTER + MERGE INVENTORY
-  ======================================================= */
-
-  /* =======================================================
+/* =======================================================
    FILTER + MERGE INVENTORY
 ======================================================= */
 
-let inventoryItems = [];
+const inventoryItems =
+  safeItems.map(item => ({
 
-if(location){
+    ...item,
 
-  inventoryItems =
-    safeItems
-      .filter(item => {
+    quantity:
+      inventoryMap[
+        item.wine_id
+      ] || null
 
-        const quantity =
-          inventoryMap[
-            item.wine_id
-          ] || 0;
-
-        return quantity > 0;
-
-      })
-      .map(item => ({
-
-        ...item,
-
-        quantity:
-          inventoryMap[
-            item.wine_id
-          ] || 0
-
-      }));
-
-}else{
-
-  inventoryItems =
-    safeItems.map(item => ({
-
-      ...item,
-      quantity:null
-
-    }));
-
-}
+  }));
   /* =======================================================
      RENDER
   ======================================================= */
