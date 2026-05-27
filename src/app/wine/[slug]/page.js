@@ -161,66 +161,66 @@ const safeItems =
      INVENTORY
   ======================================================= */
 
-  let inventoryMap = {};
-
-  if (location) {
-
-    const {
-      data: inventoryRows
-    } = await supabase
-      .from("wine_inventory")
-      .select(`
-        wine_id,
-        quantity
-      `)
-      .eq(
-        "location_id",
-        location.id
-      );
-
-    inventoryMap =
-      Object.fromEntries(
-        (inventoryRows || [])
-          .map(row => [
-            row.wine_id,
-            row.quantity
-          ])
-      );
-
-  }
-
   /* =======================================================
-     MERGE INVENTORY
-  ======================================================= */
+   INVENTORY
+======================================================= */
 
-  /* =======================================================
+let inventoryMap = {};
+
+if(location){
+
+  const {
+    data: inventoryRows
+  } = await supabase
+    .from("wine_inventory")
+    .select(`
+      wine_id,
+      quantity
+    `)
+    .eq(
+      "location_id",
+      location.id
+    );
+
+  inventoryMap = {};
+
+  (inventoryRows || []).forEach(row=>{
+
+    inventoryMap[
+      String(row.wine_id)
+    ] = Number(
+      row.quantity || 0
+    );
+
+  });
+
+}
+
+
+/* =======================================================
    FILTER + MERGE INVENTORY
 ======================================================= */
 
 const inventoryItems =
   safeItems
-    .filter(item => {
+    .filter(item=>{
 
       const quantity =
-        Number(
-          inventoryMap[
-            item.wine_id
-          ] || 0
-        );
+        inventoryMap[
+          String(item.wine_id)
+        ] || 0;
 
       return quantity > 0;
 
     })
-    .map(item => ({
+    .map(item=>({
 
       ...item,
 
       quantity:
-        Number(
-          inventoryMap[
-            item.wine_id
-          ] || 0
-        )
+        inventoryMap[
+          String(item.wine_id)
+        ] || 0
 
     }));
 
