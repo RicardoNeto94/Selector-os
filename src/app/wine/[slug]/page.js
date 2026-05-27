@@ -85,49 +85,92 @@ export default async function Page({
 
   }
 
-  /* =======================================================
-     MENU WINES
-  ======================================================= */
+ /* =======================================================
+   MENU WINES
+======================================================= */
 
-  const {
-    data: items,
-    error: itemsError
-  } = await supabase
-    .from("wine_menu_items")
-    .select(`
-      id,
-      position,
-      wine_id,
+const {
+  data: rawItems,
+  error: itemsError
+} = await supabase
+  .from("wine_menu_items")
+  .select(`
+    id,
+    position,
+    wine_id
+  `)
+  .eq(
+    "wine_menu_id",
+    menu.id
+  )
+  .order(
+    "position",
+    {
+      ascending:true
+    }
+  );
 
-      wines!wine_id (
-        id,
-        name,
-        producer,
-        country,
-        region,
-        subregion,
-        wine_type,
-        grapes,
-        vintage,
-        price,
-        description
-      )
-    `)
-    .eq(
-      "wine_menu_id",
-      menu.id
-    )
-    .order(
-      "position",
-      {
-        ascending:true
-      }
+let items = [];
+
+if(rawItems?.length){
+
+  const wineIds =
+    rawItems.map(
+      i => i.wine_id
     );
 
-  const safeItems =
-    itemsError
-      ? []
-      : items || [];
+  const {
+    data:winesData=[]
+  } = await supabase
+    .from("wines")
+    .select(`
+      id,
+      name,
+      producer,
+      country,
+      region,
+      subregion,
+      wine_type,
+      grapes,
+      vintage,
+      price,
+      description
+    `)
+    .in(
+      "id",
+      wineIds
+    );
+
+  const winesMap =
+    Object.fromEntries(
+
+      winesData.map(w => [
+        w.id,
+        w
+      ])
+
+    );
+
+  items =
+    rawItems.map(item => ({
+
+      ...item,
+
+      wines:
+        winesMap[
+          item.wine_id
+        ] || null
+
+    }));
+
+}
+
+const safeItems =
+  itemsError
+    ? []
+    : items || [];
+
+ 
 
   /* =======================================================
      INVENTORY
