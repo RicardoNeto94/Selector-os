@@ -89,29 +89,19 @@ export default async function Page({
    MENU WINES
 ======================================================= */
 
+/* =======================================================
+   MENU WINES
+======================================================= */
+
 const {
-  data: items,
+  data: rawItems,
   error: itemsError
 } = await supabase
   .from("wine_menu_items")
   .select(`
     id,
     position,
-    wine_id,
-
-    wines:wine_id (
-      id,
-      name,
-      producer,
-      country,
-      region,
-      subregion,
-      wine_type,
-      grapes,
-      vintage,
-      price,
-      description
-    )
+    wine_id
   `)
   .eq(
     "wine_menu_id",
@@ -124,10 +114,48 @@ const {
     }
   );
 
+const {
+  data: winesData,
+  error: winesError
+} = await supabase
+  .from("wines")
+  .select(`
+    id,
+    name,
+    producer,
+    country,
+    region,
+    subregion,
+    wine_type,
+    grapes,
+    vintage,
+    price,
+    description
+  `);
+
+const winesMap =
+  Object.fromEntries(
+
+    (winesData || []).map(w => [
+      w.id,
+      w
+    ])
+
+  );
+
 const safeItems =
   itemsError
     ? []
-    : items || [];
+    : (rawItems || []).map(item => ({
+
+        ...item,
+
+        wines:
+          winesMap[
+            item.wine_id
+          ] || null
+
+      }));
 
   /* =======================================================
      INVENTORY
