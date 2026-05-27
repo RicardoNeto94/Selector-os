@@ -12,10 +12,10 @@ export default async function Page({
   params
 }) {
 
-  const { slug } = await params;
+  const { slug } = params;
 
   const cookieStore =
-    await cookies();
+    cookies();
 
   const supabase =
     createServerComponentClient({
@@ -62,167 +62,72 @@ export default async function Page({
   }
 
   /* =======================================================
-     LOCATION
+     MENU WINES
   ======================================================= */
 
-  let location = null;
+  const {
+    data: rawItems,
+    error: itemsError
+  } = await supabase
+    .from("wine_menu_items")
+    .select(`
+      id,
+      wine_id,
+      position
+    `)
+    .eq(
+      "wine_menu_id",
+      menu.id
+    )
+    .order(
+      "position",
+      {
+        ascending:true
+      }
+    );
 
-  if (menu.location_id) {
+  const {
+    data: winesData,
+    error: winesError
+  } = await supabase
+    .from("wines")
+    .select(`
+      id,
+      name,
+      producer,
+      country,
+      region,
+      subregion,
+      wine_type,
+      grapes,
+      vintage,
+      price,
+      description
+    `);
 
-    const {
-      data: locationData
-    } = await supabase
-      .from("wine_locations")
-      .select("*")
-      .eq(
-        "id",
-        menu.location_id
-      )
-      .single();
+  const winesMap = {};
 
-    location =
-      locationData;
+  (winesData || []).forEach(wine => {
 
-  }
+    winesMap[
+      String(wine.id)
+    ] = wine;
 
-  /* =======================================================
-   MENU WINES
-======================================================= */
+  });
 
-/* =======================================================
-   MENU WINES
-======================================================= */
-
-const {
-  data: rawItems,
-  error: itemsError
-} = await supabase
-  .from("wine_menu_items")
-  .select(`
-    id,
-    position,
-    wine_id
-  `)
-  .eq(
-    "wine_menu_id",
-    menu.id
-  )
-  .order(
-    "position",
-    {
-      ascending:true
-    }
-  );
-
-const {
-  data: winesData,
-  error: winesError
-} = await supabase
-  .from("wines")
-  .select(`
-    id,
-    name,
-    producer,
-    country,
-    region,
-    subregion,
-    wine_type,
-    grapes,
-    vintage,
-    price,
-    description
-  `);
-
-const winesMap =
-  Object.fromEntries(
-
-    (winesData || []).map(w => [
-      w.id,
-      w
-    ])
-
-  );
-
-const safeItems =
-  itemsError
-    ? []
-    : (rawItems || []).map(item => ({
+  const safeItems =
+    (rawItems || [])
+      .map(item => ({
 
         ...item,
 
         wines:
           winesMap[
-            item.wine_id
+            String(item.wine_id)
           ] || null
 
-      }));
-
-  /* =======================================================
-     INVENTORY
-  ======================================================= */
-
-  /* =======================================================
-   INVENTORY
-======================================================= */
-
-let inventoryMap = {};
-
-if(location){
-
-  const {
-    data: inventoryRows
-  } = await supabase
-    .from("wine_inventory")
-    .select(`
-      wine_id,
-      quantity
-    `)
-    .eq(
-      "location_id",
-      location.id
-    );
-
-  inventoryMap = {};
-
-  (inventoryRows || []).forEach(row=>{
-
-    inventoryMap[
-      String(row.wine_id)
-    ] = Number(
-      row.quantity || 0
-    );
-
-  });
-
-}
-
-
-/* =======================================================
-   FILTER + MERGE INVENTORY
-======================================================= */
-
-const inventoryItems =
-  safeItems
-    .filter(item=>{
-
-      const quantity =
-        inventoryMap[
-          String(item.wine_id)
-        ] || 0;
-
-      return quantity > 0;
-
-    })
-    .map(item=>({
-
-      ...item,
-
-      quantity:
-        inventoryMap[
-          String(item.wine_id)
-        ] || 0
-
-    }));
+      }))
+      .filter(item => item.wines);
 
   /* =======================================================
      RENDER
@@ -239,7 +144,7 @@ const inventoryItems =
 
       <WineClientView
         menu={menu}
-        items={inventoryItems}
+        items={safeItems}
       />
 
     </main>
