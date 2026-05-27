@@ -37,7 +37,13 @@ self.addEventListener("activate", (event) => {
 
 // FETCH
 self.addEventListener("fetch", (event) => {
+
   const { request } = event;
+
+  // 🚫 never cache non-GET
+  if(request.method !== "GET"){
+    return;
+  }
 
   // 🚫 NEVER cache API
   if (request.url.includes("/api/")) {
@@ -51,22 +57,57 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ✅ Static files only (CSS, JS)
-  if (
-    request.url.includes("/_next/") ||
-    request.url.endsWith(".css") ||
-    request.url.endsWith(".js")
-  ) {
+  // 🚫 NEVER cache Next.js dynamic chunks
+  if (request.url.includes("/_next/")) {
+
     event.respondWith(
-      caches.match(request).then((cached) => {
-        return cached || fetch(request);
-      })
+      fetch(request)
     );
+
     return;
   }
 
-  // 🌐 Pages → always network first
+  // ✅ cache only static assets
+  if (
+    request.url.endsWith(".css") ||
+    request.url.endsWith(".js") ||
+    request.url.endsWith(".png") ||
+    request.url.endsWith(".jpg") ||
+    request.url.endsWith(".svg")
+  ) {
+
+    event.respondWith(
+
+      caches.match(request).then((cached)=>{
+
+        return cached || fetch(request).then((response)=>{
+
+          const responseClone =
+            response.clone();
+
+          caches.open(CACHE_NAME).then((cache)=>{
+            cache.put(request,responseClone);
+          });
+
+          return response;
+
+        });
+
+      })
+
+    );
+
+    return;
+
+  }
+
+  // 🌐 pages = always network first
   event.respondWith(
-    fetch(request).catch(() => caches.match("/"))
+
+    fetch(request).catch(()=>
+      caches.match("/")
+    )
+
   );
+
 });
