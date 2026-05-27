@@ -85,92 +85,99 @@ export default async function Page({
 
   }
 
- /* =======================================================
-   MENU WINES
-======================================================= */
-
-const {
-  data: rawItems,
-  error: itemsError
-} = await supabase
-  .from("wine_menu_items")
-  .select(`
-    id,
-    position,
-    wine_id
-  `)
-  .eq(
-    "wine_menu_id",
-    menu.id
-  )
-  .order(
-    "position",
-    {
-      ascending:true
-    }
-  );
-
-let items = [];
-
-if(rawItems?.length){
-
-  const wineIds =
-  rawItems
-    .map(i => i.wine_id)
-    .filter(Boolean);
+  /* =======================================================
+     MENU WINES
+  ======================================================= */
 
   const {
-    data:winesData=[]
+    data: rawItems,
+    error: itemsError
   } = await supabase
-    .from("wines")
+    .from("wine_menu_items")
     .select(`
       id,
-      name,
-      producer,
-      country,
-      region,
-      subregion,
-      wine_type,
-      grapes,
-      vintage,
-      price,
-      description
+      position,
+      wine_id
     `)
-    .in(
-      "id",
-      wineIds
+    .eq(
+      "wine_menu_id",
+      menu.id
+    )
+    .order(
+      "position",
+      {
+        ascending:true
+      }
     );
 
-  const winesMap =
-    Object.fromEntries(
+  let items = [];
 
-      winesData.map(w => [
-        w.id,
-        w
-      ])
+  if(rawItems?.length){
 
-    );
+    const wineIds =
+      rawItems
+        .map(i => i.wine_id)
+        .filter(Boolean);
 
-  items =
-    rawItems.map(item => ({
+    if(wineIds.length > 0){
 
-      ...item,
+      const {
+        data:winesData=[],
+        error:winesError
+      } = await supabase
+        .from("wines")
+        .select(`
+          id,
+          name,
+          producer,
+          country,
+          region,
+          subregion,
+          wine_type,
+          grapes,
+          vintage,
+          price,
+          description
+        `)
+        .in(
+          "id",
+          wineIds
+        );
 
-      wines:
-        winesMap[
-          item.wine_id
-        ] || null
+      if(!winesError){
 
-    }));
+        const winesMap =
+          Object.fromEntries(
 
-}
+            winesData.map(w => [
+              w.id,
+              w
+            ])
 
-const safeItems =
-  itemsError
-    ? []
-    : items || [];
+          );
 
- 
+        items =
+          rawItems.map(item => ({
+
+            ...item,
+
+            wines:
+              winesMap[
+                item.wine_id
+              ] || null
+
+          }));
+
+      }
+
+    }
+
+  }
+
+  const safeItems =
+    itemsError
+      ? []
+      : items || [];
 
   /* =======================================================
      INVENTORY
@@ -230,7 +237,6 @@ const safeItems =
           ] || 0
 
       }));
-
 
   /* =======================================================
      RENDER
