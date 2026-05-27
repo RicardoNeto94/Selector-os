@@ -86,93 +86,48 @@ export default async function Page({
   }
 
   /* =======================================================
-     MENU WINES
-  ======================================================= */
+   MENU WINES
+======================================================= */
 
-  const {
-    data: rawItems,
-    error: itemsError
-  } = await supabase
-    .from("wine_menu_items")
-    .select(`
+const {
+  data: items,
+  error: itemsError
+} = await supabase
+  .from("wine_menu_items")
+  .select(`
+    id,
+    position,
+    wine_id,
+
+    wines (
       id,
-      position,
-      wine_id
-    `)
-    .eq(
-      "wine_menu_id",
-      menu.id
+      name,
+      producer,
+      country,
+      region,
+      subregion,
+      wine_type,
+      grapes,
+      vintage,
+      price,
+      description
     )
-    .order(
-      "position",
-      {
-        ascending:true
-      }
-    );
-
-  let items = [];
-
-  if(
-    !itemsError &&
-    rawItems?.length
-  ){
-
-    for(
-      const rawItem
-      of rawItems
-    ){
-
-      if(
-        !rawItem.wine_id
-      ){
-        continue;
-      }
-
-      const {
-        data:wine,
-        error:wineError
-      } = await supabase
-        .from("wines")
-        .select(`
-          id,
-          name,
-          producer,
-          country,
-          region,
-          subregion,
-          wine_type,
-          grapes,
-          vintage,
-          price,
-          description
-        `)
-        .eq(
-          "id",
-          rawItem.wine_id
-        )
-        .single();
-
-      if(
-        wineError ||
-        !wine
-      ){
-        continue;
-      }
-
-      items.push({
-
-        ...rawItem,
-
-        wines:wine
-
-      });
-
+  `)
+  .eq(
+    "wine_menu_id",
+    menu.id
+  )
+  .order(
+    "position",
+    {
+      ascending:true
     }
+  );
 
-  }
-
-  const safeItems =
-    items || [];
+const safeItems =
+  itemsError
+    ? []
+    : items || [];
 
   /* =======================================================
      INVENTORY
