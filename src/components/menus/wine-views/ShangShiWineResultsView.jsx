@@ -104,7 +104,9 @@ useEffect(()=>{
 
 setCurrentPage(1);
 
-},[localFilters]);
+},[
+JSON.stringify(localFilters)
+]);
 
 
 /* =====================================
