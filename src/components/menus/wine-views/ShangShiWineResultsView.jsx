@@ -89,7 +89,16 @@ const [expandedWine,setExpandedWine] =
 useState(null);
 
 const [localFilters,setLocalFilters] =
-useState(filters);
+useState({
+
+wine_type:"",
+country:"",
+region:"",
+vintage:"",
+name:"",
+...(filters || {})
+
+});
 
 useEffect(()=>{
 
