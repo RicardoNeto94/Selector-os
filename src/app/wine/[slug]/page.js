@@ -99,7 +99,7 @@ const {
     position,
     wine_id,
 
-    wines (
+    wines:wine_id (
       id,
       name,
       producer,
