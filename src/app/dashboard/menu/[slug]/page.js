@@ -355,12 +355,101 @@ export default function MenuEditorPage() {
                         <div className="mt-2 space-y-2">
 
                           {(pricesMap[item.id] || []).map(p => (
-                            <div key={p.id} className="flex gap-3">
-                              <input className="so-input w-32" value={p.label} />
-                              <input className="so-input w-24 text-right" value={p.price} />
-                              <button onClick={() => deletePrice(p.id)}>✕</button>
-                            </div>
-                          ))}
+
+<div
+key={p.id}
+className="flex gap-3 items-center"
+>
+
+<input
+className="so-input w-32"
+value={p.label || ""}
+placeholder="60 min"
+onChange={async(e)=>{
+
+const val=e.target.value;
+
+setPricesMap(prev=>({
+
+...prev,
+
+[item.id]:
+prev[item.id].map(x=>
+
+x.id===p.id
+? {...x,label:val}
+: x
+
+)
+
+}));
+
+await supabase
+.from("menu_item_prices")
+.update({
+label:val
+})
+.eq("id",p.id);
+
+}}
+/>
+
+<input
+className="
+so-input
+w-24
+text-right
+"
+type="number"
+value={p.price || ""}
+placeholder="€"
+onChange={async(e)=>{
+
+const val=
+Number(
+e.target.value
+);
+
+setPricesMap(prev=>({
+
+...prev,
+
+[item.id]:
+prev[item.id].map(x=>
+
+x.id===p.id
+? {...x,price:val}
+: x
+
+)
+
+}));
+
+await supabase
+.from("menu_item_prices")
+.update({
+price:val
+})
+.eq("id",p.id);
+
+}}
+/>
+
+<button
+onClick={()=>
+deletePrice(
+p.id
+)
+}
+>
+
+✕
+
+</button>
+
+</div>
+
+))}
 
                           <button onClick={() => addPrice(item.id)} className="so-btn-ghost text-sm">
                             + Add Price
