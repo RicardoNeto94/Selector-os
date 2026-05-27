@@ -112,18 +112,25 @@ export default async function Page({
 
   let items = [];
 
-  if(rawItems?.length){
+  if(
+    !itemsError &&
+    rawItems?.length
+  ){
 
-    const wineIds =
-      rawItems
-        .map(i => i.wine_id)
-        .filter(Boolean);
+    for(
+      const rawItem
+      of rawItems
+    ){
 
-    if(wineIds.length > 0){
+      if(
+        !rawItem.wine_id
+      ){
+        continue;
+      }
 
       const {
-        data:winesData=[],
-        error:winesError
+        data:wine,
+        error:wineError
       } = await supabase
         .from("wines")
         .select(`
@@ -139,45 +146,33 @@ export default async function Page({
           price,
           description
         `)
-        .in(
+        .eq(
           "id",
-          wineIds
-        );
+          rawItem.wine_id
+        )
+        .single();
 
-      if(!winesError){
-
-        const winesMap =
-          Object.fromEntries(
-
-            winesData.map(w => [
-              w.id,
-              w
-            ])
-
-          );
-
-        items =
-          rawItems.map(item => ({
-
-            ...item,
-
-            wines:
-              winesMap[
-                item.wine_id
-              ] || null
-
-          }));
-
+      if(
+        wineError ||
+        !wine
+      ){
+        continue;
       }
+
+      items.push({
+
+        ...rawItem,
+
+        wines:wine
+
+      });
 
     }
 
   }
 
   const safeItems =
-    itemsError
-      ? []
-      : items || [];
+    items || [];
 
   /* =======================================================
      INVENTORY
@@ -210,24 +205,23 @@ export default async function Page({
       );
 
   }
-    /*  
-======================================================= */
 
-/* =======================================================
-   FILTER + MERGE INVENTORY
-======================================================= */
+  /* =======================================================
+     MERGE INVENTORY
+  ======================================================= */
 
-const inventoryItems =
-  safeItems.map(item => ({
+  const inventoryItems =
+    safeItems.map(item => ({
 
-    ...item,
+      ...item,
 
-    quantity:
-      inventoryMap[
-        item.wine_id
-      ] || null
+      quantity:
+        inventoryMap[
+          item.wine_id
+        ] || null
 
-  }));
+    }));
+
   /* =======================================================
      RENDER
   ======================================================= */
