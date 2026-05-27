@@ -6,90 +6,72 @@ const ITEMS_PER_PAGE = 12;
 
 function getWine(item){
 
-if(!item) return {};
+  if(!item){
+    return null;
+  }
 
-/* array relation */
+  const wine =
+    item.wines ||
+    item.wine ||
+    null;
 
-if(
-Array.isArray(item?.wines)
-){
+  if(!wine){
+    return null;
+  }
 
-if(item.wines.length > 0){
-return item.wines[0];
-}
+  return {
 
-return {};
+    id:
+      wine.id || "",
 
-}
+    name:
+      wine.name || "Unknown Wine",
 
-/* object relation */
+    producer:
+      wine.producer || "",
 
-if(
-item?.wines &&
-typeof item.wines === "object"
-){
-return item.wines;
-}
+    country:
+      wine.country || "",
 
-/* defensive fallback */
+    region:
+      wine.region || "",
 
-return{
+    subregion:
+      wine.subregion || "",
 
-id:
-item.id || "",
+    wine_type:
+      wine.wine_type || "Collection",
 
-name:
-item.name ||
-item.wine_name ||
-item.title ||
-"Unknown Wine",
+    vintage:
+      wine.vintage || "NV",
 
-producer:
-item.producer ||
-item.winery ||
-"",
+    price:
+      wine.price ?? 0,
 
-country:
-item.country ||
-"",
+    description:
+      wine.description || ""
 
-region:
-item.region ||
-"",
-
-subregion:
-item.subregion ||
-"",
-
-wine_type:
-item.wine_type ||
-"Collection",
-
-vintage:
-item.vintage ||
-"NV",
-
-price:
-item.price ??
-0,
-
-description:
-item.description ||
-""
-
-};
+  };
 
 }
 
 function matches(value,filter){
 
-if(!filter) return true;
+  if(!filter){
+    return true;
+  }
 
-return String(value||"")
-.toLowerCase()
-.includes(
-filter.toLowerCase()
-);
+  return (
+    String(value || "")
+      .trim()
+      .toLowerCase()
+
+    ===
+
+    String(filter || "")
+      .trim()
+      .toLowerCase()
+  );
 
 }
 
@@ -106,7 +88,6 @@ useState(1);
 const [expandedWine,setExpandedWine] =
 useState(null);
 
-/* FIXED ONLY THIS */
 const [localFilters,setLocalFilters] =
 useState(filters);
 
@@ -128,6 +109,10 @@ return items.filter(item=>{
 
 const w =
 getWine(item);
+
+if(!w){
+return false;
+}
 
 return(
 
@@ -174,7 +159,6 @@ localFilters
 ]);
 
 
-
 /* =====================================
 CATEGORIES
 ===================================== */
@@ -183,10 +167,14 @@ const categories =
 [
 ...new Set(
 
-filtered.map(item=>{
+items.map(item=>{
 
 const w =
 getWine(item);
+
+if(!w){
+return null;
+}
 
 return (
 w.wine_type ||
@@ -197,7 +185,7 @@ w.wine_type ||
 
 )
 
-];
+].filter(Boolean);
 
 
 /* =====================================
@@ -217,13 +205,13 @@ getWine(b);
 return (
 
 Number(
-wa.price||0
+wa?.price||0
 )
 
 -
 
 Number(
-wb.price||0
+wb?.price||0
 )
 
 );
@@ -496,6 +484,10 @@ space-y-6
 
 const w =
 getWine(item);
+
+if(!w){
+return null;
+}
 
 const expanded =
 expandedWine===item.id;
