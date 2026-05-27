@@ -165,15 +165,34 @@ const safeItems =
      MERGE INVENTORY
   ======================================================= */
 
-  const inventoryItems =
-    safeItems.map(item => ({
+  /* =======================================================
+   FILTER + MERGE INVENTORY
+======================================================= */
+
+const inventoryItems =
+  safeItems
+    .filter(item => {
+
+      const quantity =
+        Number(
+          inventoryMap[
+            item.wine_id
+          ] || 0
+        );
+
+      return quantity > 0;
+
+    })
+    .map(item => ({
 
       ...item,
 
       quantity:
-        inventoryMap[
-          item.wine_id
-        ] || null
+        Number(
+          inventoryMap[
+            item.wine_id
+          ] || 0
+        )
 
     }));
 
