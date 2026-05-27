@@ -8,19 +8,30 @@ function getWine(item){
 
 if(!item) return {};
 
+/* array relation */
+
 if(
 Array.isArray(item?.wines)
 ){
-return item.wines[0] || {};
+
+if(item.wines.length > 0){
+return item.wines[0];
 }
 
+return {};
+
+}
+
+/* object relation */
+
 if(
-item?.wines
+item?.wines &&
+typeof item.wines === "object"
 ){
 return item.wines;
 }
 
-/* defensive fallbacks */
+/* defensive fallback */
 
 return{
 
