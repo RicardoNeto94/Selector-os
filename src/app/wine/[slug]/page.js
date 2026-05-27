@@ -1,10 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import {
-  createServerComponentClient
-} from "@supabase/auth-helpers-nextjs";
-
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
 import WineClientView from "./WineClientView";
 
@@ -12,15 +8,17 @@ export default async function Page({
   params
 }) {
 
-  const { slug } = params;
+  const { slug } = await params;
 
-  const cookieStore =
-    cookies();
+  /* =======================================================
+     SUPABASE
+  ======================================================= */
 
   const supabase =
-    createServerComponentClient({
-      cookies: () => cookieStore
-    });
+    createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
 
   /* =======================================================
      MENU
@@ -35,10 +33,20 @@ export default async function Page({
     .eq("slug", slug)
     .single();
 
+  console.log(
+    "MENU:",
+    menu
+  );
+
   if (
     menuError ||
     !menu
   ) {
+
+    console.error(
+      "MENU ERROR:",
+      menuError
+    );
 
     return (
 
@@ -62,11 +70,11 @@ export default async function Page({
   }
 
   /* =======================================================
-     MENU WINES
+     MENU ITEMS
   ======================================================= */
 
   const {
-    data: rawItems,
+    data: rawItems = [],
     error: itemsError
   } = await supabase
     .from("wine_menu_items")
@@ -86,8 +94,26 @@ export default async function Page({
       }
     );
 
+  if(itemsError){
+
+    console.error(
+      "MENU ITEMS ERROR:",
+      itemsError
+    );
+
+  }
+
+  console.log(
+    "RAW ITEMS:",
+    rawItems.length
+  );
+
+  /* =======================================================
+     WINES
+  ======================================================= */
+
   const {
-    data: winesData,
+    data: winesData = [],
     error: winesError
   } = await supabase
     .from("wines")
@@ -105,29 +131,130 @@ export default async function Page({
       description
     `);
 
+  if(winesError){
+
+    console.error(
+      "WINES ERROR:",
+      winesError
+    );
+
+  }
+
+  console.log(
+    "WINES:",
+    winesData.length
+  );
+
   const winesMap = {};
 
   (winesData || []).forEach(wine => {
 
     winesMap[
       String(wine.id)
+        .trim()
+        .toLowerCase()
     ] = wine;
 
   });
 
-  const safeItems =
-    (rawItems || [])
-      .map(item => ({
+  /* =======================================================
+     INVENTORY
+  ======================================================= */
 
-        ...item,
+  let inventoryMap = {};
 
-        wines:
+  if(menu.location_id){
+
+    const {
+      data: inventoryRows = [],
+      error: inventoryError
+    } = await supabase
+      .from("wine_inventory")
+      .select(`
+        wine_id,
+        quantity,
+        location_id
+      `)
+      .eq(
+        "location_id",
+        menu.location_id
+      );
+
+    if(inventoryError){
+
+      console.error(
+        "INVENTORY ERROR:",
+        inventoryError
+      );
+
+    }
+
+    console.log(
+      "INVENTORY:",
+      inventoryRows.length
+    );
+
+    inventoryRows.forEach(row => {
+
+      inventoryMap[
+        String(row.wine_id)
+          .trim()
+          .toLowerCase()
+      ] = Number(
+        row.quantity || 0
+      );
+
+    });
+
+  }
+
+  /* =======================================================
+     FINAL ITEMS
+  ======================================================= */
+
+  const finalItems =
+    rawItems
+      .map(item => {
+
+        const wine =
           winesMap[
             String(item.wine_id)
-          ] || null
+              .trim()
+              .toLowerCase()
+          ];
 
-      }))
-      .filter(item => item.wines);
+        if(!wine){
+          return null;
+        }
+
+        const quantity =
+          inventoryMap[
+            String(item.wine_id)
+              .trim()
+              .toLowerCase()
+          ] || 0;
+
+        if(quantity <= 0){
+          return null;
+        }
+
+        return {
+
+          ...item,
+
+          quantity,
+
+          wines:wine
+
+        };
+
+      })
+      .filter(Boolean);
+
+  console.log(
+    "FINAL WINES:",
+    finalItems.length
+  );
 
   /* =======================================================
      RENDER
@@ -144,7 +271,7 @@ export default async function Page({
 
       <WineClientView
         menu={menu}
-        items={safeItems}
+        items={finalItems}
       />
 
     </main>

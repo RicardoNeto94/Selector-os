@@ -3,86 +3,182 @@
 import { useEffect, useState } from "react";
 
 function getWine(item) {
-  if (Array.isArray(item?.wines)) return item.wines[0] || {};
-  return item?.wines || item || {};
+
+  // NEW SAFE STRUCTURE
+
+  if (item?.wine) {
+    return item.wine;
+  }
+
+  if (item?.wines) {
+
+    if (Array.isArray(item.wines)) {
+      return item.wines[0] || {};
+    }
+
+    return item.wines || {};
+  }
+
+  return item || {};
 }
 
 function matches(value, filter) {
+
   if (!filter) return true;
-  return String(value || "").toLowerCase().includes(filter.toLowerCase());
+
+  return String(value || "")
+    .toLowerCase()
+    .includes(
+      String(filter)
+        .toLowerCase()
+    );
 }
 
-export default function WineResultsView({ menu, items, filters = {}, onBack }) {
+export default function WineResultsView({
+  menu,
+  items = [],
+  filters = {},
+  onBack
+}) {
 
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeCategory, setActiveCategory] =
+    useState(null);
 
   useEffect(() => {
+
     const handleScroll = () => {
-      const sections = document.querySelectorAll("[data-category]");
+
+      const sections =
+        document.querySelectorAll(
+          "[data-category]"
+        );
 
       let current = null;
 
       sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
+
+        const rect =
+          section.getBoundingClientRect();
 
         if (rect.top <= 80) {
-          current = section.getAttribute("data-category");
+
+          current =
+            section.getAttribute(
+              "data-category"
+            );
+
         }
+
       });
 
       setActiveCategory(current);
+
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener(
+      "scroll",
+      handleScroll
+    );
+
     handleScroll();
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () =>
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+
   }, []);
 
-  const filtered = items.filter(item => {
-    const w = getWine(item);
+  const filtered =
+    items.filter(item => {
 
-    return (
-      matches(w.wine_type, filters.wine_type) &&
-      matches(w.country, filters.country) &&
-      matches(w.region, filters.region) &&
-      matches(w.vintage, filters.vintage) &&
-      matches(w.name, filters.name)
-    );
-  });
+      const w =
+        getWine(item);
 
-  const grouped = filtered.reduce((acc, item) => {
-    const wine = getWine(item);
-    const type = wine.wine_type || "Other";
+      return (
 
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(item);
+        matches(
+          w.wine_type,
+          filters.wine_type
+        ) &&
 
-    return acc;
-  }, {});
+        matches(
+          w.country,
+          filters.country
+        ) &&
+
+        matches(
+          w.region,
+          filters.region
+        ) &&
+
+        matches(
+          w.vintage,
+          filters.vintage
+        ) &&
+
+        matches(
+          w.name,
+          filters.name
+        )
+
+      );
+
+    });
+
+  const grouped =
+    filtered.reduce((acc, item) => {
+
+      const wine =
+        getWine(item);
+
+      const type =
+        wine.wine_type || "Other";
+
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+
+      acc[type].push(item);
+
+      return acc;
+
+    }, {});
 
   return (
+
     <div
       className="min-h-screen px-6 py-10"
       style={{
-        background: "linear-gradient(180deg, #003223 0%, #001a12 100%)"
+        background:
+          "linear-gradient(180deg, #003223 0%, #001a12 100%)"
       }}
     >
+
       <div className="max-w-[720px] mx-auto">
 
         {/* HEADER */}
+
         <div className="text-center text-white mb-16">
-          <img src="/shangshi-logo.png" className="h-20 mx-auto mb-5" />
+
+          <img
+            src="/shangshi-logo.png"
+            className="h-20 mx-auto mb-5"
+          />
 
           <p className="tracking-[0.35em] text-xs opacity-70">
             WINE SELECTION
           </p>
+
         </div>
 
         {/* TOP BAR */}
+
         <div className="flex justify-between items-center mb-16 text-white">
 
           <div>
+
             <p className="text-[11px] tracking-[0.35em] uppercase text-[#c9a96a]">
               {menu?.name}
             </p>
@@ -90,6 +186,7 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
             <p className="text-xs text-white/40 mt-1">
               {filtered.length} wines
             </p>
+
           </div>
 
           <button
@@ -107,27 +204,41 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
         </div>
 
         {/* LIST */}
+
         <div className="space-y-24">
 
           {Object.entries(grouped).map(([type, wines]) => {
 
-            const isActive = activeCategory === type;
+            const isActive =
+              activeCategory === type;
 
-            // ✅ SORT BY PRICE (ascending)
-            const sortedWines = [...wines].sort((a, b) => {
-              const wa = getWine(a);
-              const wb = getWine(b);
+            const sortedWines =
+              [...wines].sort((a, b) => {
 
-              return Number(wa.price || 0) - Number(wb.price || 0);
-            });
+                const wa =
+                  getWine(a);
+
+                const wb =
+                  getWine(b);
+
+                return (
+                  Number(wa.price || 0) -
+                  Number(wb.price || 0)
+                );
+
+              });
 
             return (
-              <div key={type} data-category={type}>
 
-                {/* 🔥 SMART STICKY HEADER */}
+              <div
+                key={type}
+                data-category={type}
+              >
+
+                {/* CATEGORY HEADER */}
+
                 <div className="sticky top-0 z-30">
 
-                  {/* FULL WIDTH GLASS */}
                   <div
                     className={`
                       absolute left-1/2 -translate-x-1/2 w-screen h-full
@@ -135,25 +246,27 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
                       ${isActive ? "opacity-100 backdrop-blur-xl" : "opacity-0"}
                     `}
                     style={{
-                      background: "rgba(255,255,255,0.03)"
+                      background:
+                        "rgba(255,255,255,0.03)"
                     }}
                   />
 
-                  {/* CONTENT */}
-                  <div className={`
-                    relative py-5 text-center
-                    transition-all duration-500
-                    ${isActive ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}
-                  `}>
-
-                    <p className={`
-                      text-xs
-                      tracking-[0.5em]
-                      uppercase
-                      text-[#c9a96a]
+                  <div
+                    className={`
+                      relative py-5 text-center
                       transition-all duration-500
-                      ${isActive ? "scale-100" : "scale-95"}
-                    `}>
+                      ${isActive ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}
+                    `}
+                  >
+
+                    <p
+                      className={`
+                        text-xs
+                        tracking-[0.5em]
+                        uppercase
+                        text-[#c9a96a]
+                      `}
+                    >
                       {type}
                     </p>
 
@@ -164,22 +277,25 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
                 </div>
 
                 {/* WINES */}
+
                 <div className="space-y-8 mt-8">
 
                   {sortedWines.map((item) => {
-                    const w = getWine(item);
+
+                    const w =
+                      getWine(item);
 
                     return (
+
                       <div
                         key={item.id}
                         className="
                           flex justify-between items-start
                           pb-6
                           border-b border-white/10
-                          hover:border-white/30
-                          transition
                         "
                       >
+
                         <div className="max-w-[75%]">
 
                           <p className="
@@ -188,7 +304,7 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
                             leading-snug
                             tracking-wide
                           ">
-                            {w.name}
+                            {w.name || "Unknown Wine"}
                           </p>
 
                           <p className="
@@ -196,7 +312,9 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
                             text-white/50
                             mt-2
                           ">
-                            {w.producer} · {w.country} · {w.vintage}
+                            {w.producer || ""}
+                            {w.country ? ` · ${w.country}` : ""}
+                            {w.vintage ? ` · ${w.vintage}` : ""}
                           </p>
 
                         </div>
@@ -206,22 +324,29 @@ export default function WineResultsView({ menu, items, filters = {}, onBack }) {
                           text-[16px]
                           tracking-wide
                         ">
-                          €{w.price}
+                          €{w.price || 0}
                         </div>
 
                       </div>
+
                     );
+
                   })}
 
                 </div>
 
               </div>
+
             );
+
           })}
 
         </div>
 
       </div>
+
     </div>
+
   );
+
 }
