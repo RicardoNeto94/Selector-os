@@ -147,15 +147,15 @@ export default async function Page({
 
   const winesMap = {};
 
-  (winesData || []).forEach(wine => {
+(winesData || []).forEach(wine => {
 
-    winesMap[
-      String(wine.id)
-        .trim()
-        .toLowerCase()
-    ] = wine;
+  winesMap[
+    String(wine.id)
+      .trim()
+      .toLowerCase()
+  ] = wine;
 
-  });
+});
 
   /* =======================================================
      INVENTORY
@@ -198,8 +198,6 @@ export default async function Page({
 
       inventoryMap[
         String(row.wine_id)
-          .trim()
-          .toLowerCase()
       ] = Number(
         row.quantity || 0
       );
@@ -216,27 +214,25 @@ export default async function Page({
     rawItems
       .map(item => {
 
-        const wine =
-          winesMap[
-            String(item.wine_id)
-              .trim()
-              .toLowerCase()
-          ];
+       const wine =
+  winesMap[
+    String(item.wine_id)
+      .trim()
+      .toLowerCase()
+  ];
 
-        if(!wine){
-          return null;
-        }
+  if(!wine){
+  return null;
+}
 
         const quantity =
-          inventoryMap[
-            String(item.wine_id)
-              .trim()
-              .toLowerCase()
-          ] || 0;
+  inventoryMap[
+    String(item.wine_id)
+  ] || 0;
 
-        if(quantity <= 0){
-          return null;
-        }
+  if(quantity <= 0){
+  return null;
+}
 
         return {
 
@@ -262,20 +258,20 @@ export default async function Page({
 
   return (
 
-    <main
-      className="
+  <main
+    className="
       min-h-screen
       w-full
     "
-    >
+  >
 
-      <WineClientView
-        menu={menu}
-        items={finalItems}
-      />
+    <WineClientView
+      menu={menu}
+      items={finalItems}
+    />
 
-    </main>
+  </main>
 
-  );
+);
 
 }
