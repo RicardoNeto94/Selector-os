@@ -1,9 +1,24 @@
+"use client";
+import { useEffect } from "react";
+
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import Image from "next/image";
 
 export default function BurmanSpaPage() {
+
+  useEffect(() => {
+
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+
+  return () => {
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  };
+
+}, []);
 
   return (
 
