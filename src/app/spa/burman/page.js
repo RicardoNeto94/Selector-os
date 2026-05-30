@@ -17,10 +17,10 @@ export default function BurmanSpaPage() {
 
       <div
         className="
-        min-h-screen
-        grid
-        lg:grid-cols-[40%_60%]
-      "
+h-screen
+grid
+xl:grid-cols-[38%_62%]
+"
       >
 
         {/* IMAGE */}
@@ -29,7 +29,7 @@ export default function BurmanSpaPage() {
           className="
           relative
           hidden
-          lg:block
+         xl:block
         "
         >
 <div
@@ -66,7 +66,8 @@ export default function BurmanSpaPage() {
           px-10
           lg:px-16
 
-          py-16
+          py-6
+xl:py-12
         "
         >
 
@@ -84,8 +85,8 @@ export default function BurmanSpaPage() {
               <Image
                 src="/spa/spa-logo.png"
                 alt="Burman Spa"
-                width={200}
-                height={200}
+                width={140}
+                height={140}
                 className="mx-auto mb-6"
               />
 
@@ -108,8 +109,9 @@ export default function BurmanSpaPage() {
               <h1
   className="
   text-[#b79a63]
-  text-[34px]
-  lg:text-[42px]
+  text-[28px]
+  md:text-[34px]
+  xl:text-[42px]
   tracking-[0.04em]
   mb-8
 "
@@ -142,11 +144,11 @@ export default function BurmanSpaPage() {
 
                 tracking-[0.10em]
 
-                leading-10
+                leading-6
 
                 text-[10px]
 
-                mb-20
+                mb-8
               "
               >
                 Discover our curated wellness products
@@ -162,9 +164,9 @@ export default function BurmanSpaPage() {
               className="
               grid
               md:grid-cols-2
-              gap-8
+              gap-4
 
-              mb-20
+              mb-8
             "
             >
 
@@ -182,7 +184,7 @@ export default function BurmanSpaPage() {
 
                 p-8
 
-                min-h-[220px]
+                min-h-[170px]
 
                 flex
                 flex-col
