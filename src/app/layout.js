@@ -5,7 +5,6 @@ import ServiceWorkerRegister from "../components/ServiceWorkerRegister";
 export const metadata = {
   title: "Vexaron Systems",
   description: "Powerfull hospitality system.",
-  manifest: "/manifest.json",
 
   icons: {
     icon: "/favicon.ico",
@@ -32,8 +31,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/manifest.json" />
-
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="SelectorOS" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
