@@ -8,11 +8,12 @@ export default function BurmanSpaPage() {
   return (
 
     <main
-      className="
-      min-h-screen
-      bg-[#f5f1e8]
-    "
-    >
+  className="
+  h-screen
+  overflow-hidden
+  bg-[#f5f1e8]
+"
+>
 
       <div
         className="
@@ -78,7 +79,7 @@ export default function BurmanSpaPage() {
 
             {/* LOGO */}
 
-            <div className="text-center mb-10">
+            <div className="text-center mb-6">
 
               <Image
                 src="/spa/spa-logo.png"
@@ -179,9 +180,9 @@ export default function BurmanSpaPage() {
 
                 rounded-[20px]
 
-                p-10
+                p-8
 
-                min-h-[280px]
+                min-h-[220px]
 
                 flex
                 flex-col
@@ -268,9 +269,9 @@ export default function BurmanSpaPage() {
 
                 rounded-[20px]
 
-                p-10
+                p-8
 
-                min-h-[280px]
+                min-h-[220px]
 
                 flex
                 flex-col
