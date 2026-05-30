@@ -12,7 +12,7 @@ export default function BurmanSpaPage() {
 h-screen
 overflow-hidden
 bg-[#f5f1e8]
-
+overscroll-none
 "
 >
 
@@ -20,6 +20,7 @@ bg-[#f5f1e8]
         className="
 h-screen
 overflow-hidden
+overscroll-none
 grid
 md:grid-cols-[30%_70%]
 "
