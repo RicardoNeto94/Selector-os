@@ -199,31 +199,6 @@ export default function KoyoWineView({
 
     });
 
-  if(showResults){
-
-    return(
-
-      <WineResultsView
-        menu={menu}
-        items={filteredItems}
-        filters={filters}
-
-        onBack={()=>{
-
-          setShowResults(false);
-
-          setTimeout(()=>{
-
-            setTransitioning(false);
-
-          },50);
-
-        }}
-      />
-
-    );
-
-  }
 
   return(
 
@@ -311,7 +286,36 @@ export default function KoyoWineView({
 
         }}
       />
+{/* JAPANESE STAMP */}
 
+<div
+  className="
+  absolute
+
+  bottom-[80px]
+  left-[30px]
+
+  w-[140px]
+  h-[140px]
+
+  pointer-events-none
+
+  opacity-[0.05]
+"
+  style={{
+
+    backgroundImage:`
+      url('/textures/japanese-stamp.png')
+    `,
+
+    backgroundRepeat:"no-repeat",
+    backgroundSize:"contain",
+    backgroundPosition:"center",
+
+    mixBlendMode:"multiply"
+
+  }}
+/>
       {/* ATMOSPHERIC INK */}
 
       <div
@@ -343,7 +347,36 @@ export default function KoyoWineView({
 
         }}
       />
+{/* CALLIGRAPHY */}
 
+<div
+  className="
+  absolute
+
+  top-[140px]
+  left-[20px]
+
+  w-[120px]
+  h-[70vh]
+
+  pointer-events-none
+
+  opacity-[0.04]
+"
+  style={{
+
+    backgroundImage:`
+      url('/textures/japanese-calligraphy.png')
+    `,
+
+    backgroundRepeat:"no-repeat",
+    backgroundSize:"contain",
+    backgroundPosition:"top left",
+
+    mixBlendMode:"multiply"
+
+  }}
+/>
       {/* CONTENT */}
 
       <div
@@ -357,8 +390,8 @@ export default function KoyoWineView({
           md:px-10
           lg:px-14
 
-pt-[12vh]
-md:pt-[14vh]
+pt-[9vh]
+md:pt-[10vh]
           pb-20
 
           transition-all
@@ -405,7 +438,7 @@ md:pt-[14vh]
 
             tracking-[0.45em]
 
-            text-[10px]
+            text-[9px]
 
             mb-4
           "
@@ -448,7 +481,7 @@ md:pt-[14vh]
 
             text-[#a19080]
 
-            text-[10px]
+            text-[9px]
 
             tracking-[0.35em]
 
@@ -510,7 +543,7 @@ md:pt-[14vh]
 
                 tracking-[0.22em]
 
-                text-[10px]
+                text-[9px]
 
                 transition-all
 
@@ -534,125 +567,218 @@ md:pt-[14vh]
 
         {/* ADVANCED */}
 
-        <div
-          className="
-          text-center
-          mb-6
-        "
-        >
+<div
+  className="
+  flex
+  items-center
+  justify-center
 
-          <button
-            onClick={()=>
-              setShowAdvanced(
-                !showAdvanced
-              )
-            }
-            className="
-            text-[#8e7b67]
+  gap-5
 
-            text-[10px]
+  mb-8
+"
+>
 
-            uppercase
+  <button
+    onClick={()=>
+      setShowAdvanced(
+        !showAdvanced
+      )
+    }
+    className="
+px-5
+h-8
 
-            tracking-[0.28em]
-          "
+rounded-full
+
+border
+border-[#d8cabc]
+
+bg-[rgba(255,255,255,0.35)]
+
+backdrop-blur-sm
+
+text-[#6f5c4d]
+
+text-[9px]
+
+uppercase
+
+tracking-[0.28em]
+
+transition-all
+
+hover:bg-[#efe6db]
+hover:border-[#cdb9a6]
+"
+  >
+
+    Advanced Filters
+
+  </button>
+
+  <div
+    className="
+    w-[40px]
+    h-[1px]
+
+    bg-[#d7cabd]
+  "
+  />
+
+  <button
+
+    onClick={()=>{
+
+      setFilters({
+
+        wine_type:"",
+        country:"",
+        region:"",
+        vintage:"",
+        grapes:"",
+        price:""
+
+      });
+
+    }}
+
+    className="
+px-5
+h-8
+
+rounded-full
+
+border
+border-[#d8cabc]
+
+bg-[rgba(255,255,255,0.25)]
+
+backdrop-blur-sm
+
+text-[#8b7563]
+
+text-[9px]
+
+uppercase
+
+tracking-[0.28em]
+
+transition-all
+
+hover:bg-[#efe6db]
+hover:border-[#cdb9a6]
+"
+  >
+
+    Reset Filters
+
+  </button>
+
+</div>
+{showAdvanced && (
+
+  <div
+    className="
+    grid
+    grid-cols-2
+md:grid-cols-4
+
+    gap-x-10
+    gap-y-8
+
+    mb-14
+  "
+  >
+
+    {[
+
+      {
+        key:"country",
+        label:"Country",
+        values:countries
+      },
+
+      {
+        key:"region",
+        label:"Region",
+        values:regions
+      },
+
+      {
+        key:"vintage",
+        label:"Vintage",
+        values:vintages
+      },
+
+      {
+        key:"grapes",
+        label:"Grape",
+        values:grapes
+      }
+
+    ].map(field=>(
+
+      <select
+        key={field.key}
+        value={filters[field.key]}
+        onChange={(e)=>
+          setFilters({
+            ...filters,
+            [field.key]:
+              e.target.value
+          })
+        }
+        className="
+h-11
+
+rounded-full
+
+border
+border-[#ddd0c2]
+
+bg-[rgba(255,255,255,0.35)]
+
+backdrop-blur-sm
+
+px-5
+
+text-[#6b5849]
+
+text-[11px]
+
+tracking-[0.05em]
+
+transition-all
+
+hover:bg-[rgba(255,255,255,0.55)]
+focus:outline-none
+focus:border-[#c9b39d]
+"
+      >
+
+        <option value="">
+          {field.label}
+        </option>
+
+        {field.values.map(v=>(
+
+          <option
+            key={v}
+            className="text-black"
           >
+            {v}
+          </option>
 
-            Advanced Filters
+        ))}
 
-          </button>
+      </select>
 
-        </div>
+    ))}
 
-        {showAdvanced && (
+  </div>
 
-          <div
-            className="
-            grid
-            grid-cols-1
-            md:grid-cols-2
-
-            gap-x-10
-            gap-y-8
-
-            mb-14
-          "
-          >
-
-            {[
-
-              {
-                key:"country",
-                label:"Country",
-                values:countries
-              },
-
-              {
-                key:"region",
-                label:"Region",
-                values:regions
-              },
-
-              {
-                key:"vintage",
-                label:"Vintage",
-                values:vintages
-              },
-
-              {
-                key:"grapes",
-                label:"Grape",
-                values:grapes
-              }
-
-            ].map(field=>(
-
-              <select
-                key={field.key}
-                value={filters[field.key]}
-                onChange={(e)=>
-                  setFilters({
-                    ...filters,
-                    [field.key]:
-                      e.target.value
-                  })
-                }
-                className="
-                bg-transparent
-
-                border-b
-                border-[#d7cabd]
-
-                pb-3
-
-                text-[#5e4c3f]
-
-                text-[11px]
-              "
-              >
-
-                <option value="">
-                  {field.label}
-                </option>
-
-                {field.values.map(v=>(
-
-                  <option
-                    key={v}
-                    className="text-black"
-                  >
-                    {v}
-                  </option>
-
-                ))}
-
-              </select>
-
-            ))}
-
-          </div>
-
-        )}
+)}
 
         {/* BUTTON */}
 
@@ -671,27 +797,45 @@ md:pt-[14vh]
 
             }}
             className="
-            w-full
+w-full
+max-w-[340px]
 
-            border-b
-            border-[#d7cabd]
+mx-auto
 
-            pb-4
+h-12
 
-            text-[#5e4c3f]
+bg-[rgba(255,255,255,0.45)]
 
-            uppercase
+shadow-[0_10px_40px_rgba(120,90,40,0.06)]
 
-            tracking-[0.45em]
+hover:scale-[1.01]
 
-            text-[10px]
+rounded-full
 
-            opacity-80
+border
+border-[#d8cabc]
 
-            hover:opacity-100
+bg-[rgba(255,255,255,0.30)]
 
-            transition-all
-          "
+backdrop-blur-sm
+
+text-[#5e4c3f]
+
+uppercase
+
+tracking-[0.38em]
+
+text-[9px]
+
+transition-all
+
+hover:bg-[#efe6db]
+hover:border-[#cdb9a6]
+
+flex
+items-center
+justify-center
+"
           >
 
             Explore Selection
@@ -702,8 +846,46 @@ md:pt-[14vh]
 
       </div>
 
+      {
+        showResults && (
+
+          <div
+            className="
+            fixed
+            inset-0
+            z-50
+
+            bg-[#f5f1e8]
+
+            overflow-y-auto
+          "
+          >
+
+            <WineResultsView
+              menu={menu}
+items={filteredItems}
+              filters={filters}
+
+              onBack={()=>{
+
+                setShowResults(false);
+
+                setTimeout(()=>{
+
+                  setTransitioning(false);
+
+                },50);
+
+              }}
+            />
+
+          </div>
+
+        )
+      }
+
     </div>
 
   );
 
-}
+}  

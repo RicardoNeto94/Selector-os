@@ -16,6 +16,7 @@ export default function WineMenusPage() {
   const [showModal, setShowModal] = useState(false);
   const [menuName, setMenuName] = useState("");
   const [logoFile, setLogoFile] = useState(null);
+  const [accentColor, setAccentColor] = useState("#0F2744");
 
   useEffect(() => {
     loadMenus();
@@ -217,12 +218,18 @@ export default function WineMenusPage() {
                 </a>
 
                 <a
-                  href={`/wine/${restaurant.slug}/${menu.slug}`}
-                  target="_blank"
-                  className="text-sm font-medium text-[#0F2744]"
-                >
-                  Guest View
-                </a>
+  href={`/wine/${menu.slug}`}
+  target="_blank"
+  className="
+    text-sm
+    font-medium
+    text-[#0F2744]
+    hover:opacity-70
+    transition-all
+  "
+>
+  Guest View
+</a>
 
                 <button
                   onClick={() => deleteMenu(menu.id)}

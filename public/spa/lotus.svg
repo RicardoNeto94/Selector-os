@@ -1,0 +1,21 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 10C23 13 24 17 20 21C16 17 17 13 20 10Z"
+        stroke="#B79A63"
+        stroke-width="1.5"/>
+
+  <path d="M12 18C16 18 18 21 18 25C14 25 12 22 12 18Z"
+        stroke="#B79A63"
+        stroke-width="1.5"/>
+
+  <path d="M28 18C24 18 22 21 22 25C26 25 28 22 28 18Z"
+        stroke="#B79A63"
+        stroke-width="1.5"/>
+
+  <path d="M8 24C13 24 16 27 18 30C13 30 10 29 8 24Z"
+        stroke="#B79A63"
+        stroke-width="1.5"/>
+
+  <path d="M32 24C27 24 24 27 22 30C27 30 30 29 32 24Z"
+        stroke="#B79A63"
+        stroke-width="1.5"/>
+</svg>

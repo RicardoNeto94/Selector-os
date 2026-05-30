@@ -1,0 +1,171 @@
+/* ==================================================
+   BURMAN SPA
+================================================== */
+
+.spa-page{
+  background:#f5f1e8;
+  min-height:100vh;
+}
+
+.spa-container{
+  max-width:1000px;
+  margin:0 auto;
+}
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.spa-back{
+  color:#9b866f;
+  text-decoration:none;
+  font-size:14px;
+  letter-spacing:.05em;
+}
+
+.spa-header{
+  text-align:center;
+  margin-bottom:100px;
+}
+
+.spa-eyebrow{
+  font-size:11px;
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  color:#9b866f;
+  margin-bottom:18px;
+}
+
+.spa-title{
+  font-size:42px;
+  font-weight:300;
+  color:#33271f;
+  letter-spacing:.03em;
+  margin:0;
+}
+
+.spa-divider{
+  width:60px;
+  height:1px;
+  background:#d8cabb;
+  margin:30px auto;
+}
+
+.spa-subtitle{
+  max-width:620px;
+  margin:0 auto;
+  color:#786756;
+  font-size:15px;
+  line-height:2;
+}
+
+/* ==================================================
+   CATEGORY
+================================================== */
+
+.spa-category{
+  margin-bottom:80px;
+}
+
+.spa-category-header{
+  margin-bottom:30px;
+}
+
+.spa-category-title{
+  font-size:22px;
+  font-weight:300;
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  color:#33271f;
+}
+
+.spa-category-count{
+  margin-top:10px;
+  color:#9b866f;
+  font-size:11px;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+}
+
+/* ==================================================
+   PRODUCT
+================================================== */
+
+.spa-product{
+  padding:22px 0;
+  border-bottom:1px solid #e3d7ca;
+}
+
+.spa-product-row{
+  display:flex;
+  justify-content:space-between;
+  gap:24px;
+  align-items:flex-start;
+}
+
+.spa-product-name{
+  font-size:20px;
+  font-weight:300;
+  color:#9b866f;
+  margin-bottom:8px;
+}
+
+.spa-product-brand{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.35em;
+  color:#9b866f;
+  margin-bottom:10px;
+}
+
+.spa-product-description{
+  color:#9b866f;
+  line-height:1.8;
+  font-size:14px;
+}
+
+.spa-product-price{
+  font-size:22px;
+  font-weight:300;
+  color:#9b866f;
+  white-space:nowrap;
+}
+/* PAGE FADE */
+
+.spa-page{
+  animation: spaFade .35s ease-out;
+}
+
+@keyframes spaFade{
+
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+}
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+@media(max-width:768px){
+
+  .spa-title{
+    font-size:32px;
+  }
+
+  .spa-product-row{
+    flex-direction:column;
+  }
+
+  .spa-product-price{
+    margin-top:12px;
+  }
+
+}

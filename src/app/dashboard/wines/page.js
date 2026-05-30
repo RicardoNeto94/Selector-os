@@ -70,6 +70,7 @@ const [newLocation, setNewLocation] = useState({
 
 }, []);
 
+
   async function loadWines() {
 
   setLoading(true);
@@ -115,6 +116,26 @@ const [newLocation, setNewLocation] = useState({
   setLoading(false);
 }
 
+async function loadLocations() {
+
+  const { data, error } =
+    await supabase
+      .from("wine_locations")
+      .select("*")
+      .order("name", {
+        ascending: true
+      });
+
+  if (error) {
+
+    console.error(error);
+    return;
+
+  }
+
+  setLocations(data || []);
+
+}
 
 async function createLocation() {
 

@@ -70,45 +70,6 @@ export default async function Page({
   }
 
   /* =======================================================
-     MENU ITEMS
-  ======================================================= */
-
-  const {
-    data: rawItems = [],
-    error: itemsError
-  } = await supabase
-    .from("wine_menu_items")
-    .select(`
-      id,
-      wine_id,
-      position
-    `)
-    .eq(
-      "wine_menu_id",
-      menu.id
-    )
-    .order(
-      "position",
-      {
-        ascending:true
-      }
-    );
-
-  if(itemsError){
-
-    console.error(
-      "MENU ITEMS ERROR:",
-      itemsError
-    );
-
-  }
-
-  console.log(
-    "RAW ITEMS:",
-    rawItems.length
-  );
-
-  /* =======================================================
      WINES
   ======================================================= */
 
@@ -210,47 +171,48 @@ export default async function Page({
      FINAL ITEMS
   ======================================================= */
 
-  const finalItems =
-    rawItems
-      .map(item => {
+/* =======================================================
+   FINAL ITEMS
+======================================================= */
 
-       const wine =
-  winesMap[
-    String(item.wine_id)
-      .trim()
-      .toLowerCase()
-  ];
+const finalItems =
+  Object.entries(inventoryMap)
+    .map(([wineId,quantity]) => {
 
-  if(!wine){
-  return null;
-}
+      const wine =
+        winesMap[
+          String(wineId)
+            .trim()
+            .toLowerCase()
+        ];
 
-        const quantity =
-  inventoryMap[
-    String(item.wine_id)
-  ] || 0;
+      if(!wine){
+        return null;
+      }
 
-  if(quantity <= 0){
-  return null;
-}
+      if(quantity <= 0){
+        return null;
+      }
 
-        return {
+      return {
 
-          ...item,
+        id: wineId,
 
-          quantity,
+        wine_id: wineId,
 
-          wines:wine
+        quantity,
 
-        };
+        wines: wine
 
-      })
-      .filter(Boolean);
+      };
 
-  console.log(
-    "FINAL WINES:",
-    finalItems.length
-  );
+    })
+    .filter(Boolean);
+
+console.log(
+  "FINAL WINES:",
+  finalItems.length
+);
 
   /* =======================================================
      RENDER
