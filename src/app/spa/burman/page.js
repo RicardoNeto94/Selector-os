@@ -9,7 +9,8 @@ export default function BurmanSpaPage() {
 
     <main
   className="
-min-h-screen
+h-screen
+overflow-hidden
 bg-[#f5f1e8]
 
 "
@@ -17,9 +18,10 @@ bg-[#f5f1e8]
 
       <div
         className="
-min-h-screen
+h-screen
+overflow-hidden
 grid
-xl:grid-cols-[30%_70%]
+md:grid-cols-[30%_70%]
 "
       >
 
@@ -29,7 +31,7 @@ xl:grid-cols-[30%_70%]
           className="
           relative
           hidden
-          xl:block
+          md:block
         "
         >
 <div
@@ -113,7 +115,7 @@ xl:py-12
   md:text-[34px]
   xl:text-[42px]
   tracking-[0.04em]
-  mb-8
+  mb-3
 "
   style={{
     fontFamily: "Cormorant Garamond, serif",
@@ -129,7 +131,7 @@ xl:py-12
                 h-px
                 bg-[#d9cdbf]
                 mx-auto
-                mb-8
+                mb-3
               "
               />
 
@@ -229,7 +231,7 @@ xl:py-12
                   w-12
                   h-px
                   bg-[#d9cdbf]
-                  mb-8
+                  mb-3      
                 "
                 />
 
@@ -247,7 +249,7 @@ xl:py-12
 
                 <div
                   className="
-                  mt-10
+                  mt-4
 
                   text-[#c3a463]
 
@@ -335,7 +337,7 @@ xl:py-12
 
                 <div
                   className="
-                  mt-10
+                  mt-4
 
                   text-[#c3a463]
 
