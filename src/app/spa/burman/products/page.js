@@ -117,8 +117,8 @@ export default function BurmanSpaProductsPage() {
     <Image
       src="/spa/leaf.svg"
       alt="Natural Ingredients"
-      width={36}
-      height={36}
+      width="36"
+      height="36"
       className="mx-auto mb-3"
     />
 
@@ -147,8 +147,8 @@ export default function BurmanSpaProductsPage() {
     <Image
       src="/spa/drop.svg"
       alt="Skin Balance"
-      width={36}
-      height={36}
+      width="36"
+      height="36"
       className="mx-auto mb-3"
     />
 
@@ -177,8 +177,8 @@ export default function BurmanSpaProductsPage() {
     <Image
       src="/spa/lotus.svg"
       alt="Expert Care"
-      width={36}
-      height={36}
+      width="36"
+      height="36"
       className="mx-auto mb-3"
     />
 
