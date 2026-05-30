@@ -1,0 +1,28 @@
+{
+  "name": "Burman Spa",
+  "short_name": "Spa",
+  "description": "Burman Spa",
+
+  "start_url": "/spa/burman",
+
+  "scope": "/spa/burman",
+
+  "display": "standalone",
+  "orientation": "portrait",
+
+  "background_color": "#f5f1e8",
+  "theme_color": "#f5f1e8",
+
+  "icons": [
+    {
+      "src": "/spa/spa-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/spa/spa-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
