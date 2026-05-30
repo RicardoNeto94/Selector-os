@@ -9,17 +9,17 @@ export default function BurmanSpaPage() {
 
     <main
   className="
-  h-screen
-  overflow-hidden
-  bg-[#f5f1e8]
+min-h-screen
+bg-[#f5f1e8]
+
 "
 >
 
       <div
         className="
-h-screen
+min-h-screen
 grid
-xl:grid-cols-[38%_62%]
+xl:grid-cols-[30%_70%]
 "
       >
 
@@ -29,7 +29,7 @@ xl:grid-cols-[38%_62%]
           className="
           relative
           hidden
-         xl:block
+          xl:block
         "
         >
 <div
@@ -85,8 +85,8 @@ xl:py-12
               <Image
                 src="/spa/spa-logo.png"
                 alt="Burman Spa"
-                width={140}
-                height={140}
+                width={200}
+                height={200}
                 className="mx-auto mb-6"
               />
 
@@ -182,7 +182,7 @@ xl:py-12
 
                 rounded-[20px]
 
-                p-8
+                p-5
 
                 min-h-[170px]
 
@@ -236,7 +236,7 @@ xl:py-12
                 <p
                   className="
                   text-[#7c6958]
-                  leading-9
+                  leading-6
                 "
                 >
                   Explore skincare, body care,
@@ -271,9 +271,9 @@ xl:py-12
 
                 rounded-[20px]
 
-                p-8
+                p-5
 
-                min-h-[220px]
+                min-h-[170px]
 
                 flex
                 flex-col
@@ -325,7 +325,7 @@ xl:py-12
                 <p
                   className="
                   text-[#7c6958]
-                  leading-9
+                  leading-6
                 "
                 >
                   Browse fresh juices, smoothies,
