@@ -178,245 +178,281 @@ xl:py-12
 
             {/* CARDS */}
 
-            <div
-              className="
-              grid
-              md:grid-cols-2
-              gap-4
+<div
+  className="
+  grid
+  md:grid-cols-3
+  gap-4
+  mb-8
+"
+>
 
-              mb-8
-            "
-            >
+{/* TREATMENTS */}
 
-              <Link
-                href="/spa/burman/products"
-                className="
-                group
+  <Link
+    href="/spa/burman/treatments"
+    className="
+    group
 
-                bg-[rgba(255,255,255,0.55)]
+bg-[rgba(255,255,255,0.55)]
 
-                border
-                border-[#e4d8cb]
+border
+border-[#e4d8cb]
 
-                rounded-[20px]
+rounded-[20px]
 
-                p-5
+p-5
 
-                min-h-[170px]
+min-h-[170px]
 
-                flex
-                flex-col
-                items-center
-                justify-center
+flex
+flex-col
+items-center
+justify-center
 
-                text-center
+text-center
 
-                transition-all
-                duration-300
+transition-all
+duration-300
 
-                hover:bg-white/80
-              "
-              >
+hover:bg-white/80
 
-                <div
-                  className="
-                  text-[#c3a463]
-                  text-3xl
-                  mb-8
-                "
-                >
-                  ❦
-                </div>
+"
 
-                <h2
-                  className="
-                  text-[#33271f]
+>
 
-                  text-[20px]
+<div
+  className="
+  text-[#c3a463]
+  text-3xl
+  mb-8
+"
+>
+  ✦
+</div>
 
-                  font-light
+<h2
+  className="
+  text-[#33271f]
+  text-[20px]
+  font-light
+  mb-6
+"
+>
+  Treatments
+</h2>
 
-                  mb-6
-                "
-                >
-                  Self Care
-                </h2>
+<div
+  className="
+  w-12
+  h-px
+  bg-[#d9cdbf]
+  mb-3
+"
+/>
 
-                <div
-                  className="
-                  w-12
-                  h-px
-                  bg-[#d9cdbf]
-                  mb-3      
-                "
-                />
+<p
+  className="
+  text-[#7c6958]
+  leading-6
+"
+>
+  Massages, facials,
+  body rituals and
+  wellness journeys.
+</p>
 
-                <p
-                  className="
-                  text-[#7c6958]
-                  leading-6
-                "
-                >
-                  Explore skincare, body care,
-                  bath rituals, oils, tea collections
-                  and wellness products available
-                  at Burman Spa.
-                </p>
+<div
+  className="
+  mt-4
+  text-[#c3a463]
+  text-3xl
+"
+>
+  →
+</div>
 
-                <div
-                  className="
-                  mt-4
+  </Link>
 
-                  text-[#c3a463]
+{/* SELF CARE */}
 
-                  text-3xl
-                "
-                >
-                  →
-                </div>
+  <Link
+    href="/spa/burman/products"
+    className="
+    group
 
-              </Link>
 
-              <Link
-                href="/spa/burman/fnb"
-                className="
-                group
+bg-[rgba(255,255,255,0.55)]
 
-                bg-[rgba(255,255,255,0.55)]
+border
+border-[#e4d8cb]
 
-                border
-                border-[#e4d8cb]
+rounded-[20px]
 
-                rounded-[20px]
+p-5
 
-                p-5
+min-h-[170px]
 
-                min-h-[170px]
+flex
+flex-col
+items-center
+justify-center
 
-                flex
-                flex-col
-                items-center
-                justify-center
+text-center
 
-                text-center
+transition-all
+duration-300
 
-                transition-all
-                duration-300
+hover:bg-white/80
 
-                hover:bg-white/80
-              "
-              >
+"
 
-                <div
-                  className="
-                  text-[#c3a463]
-                  text-3xl
-                  mb-8
-                "
-                >
-                  ◇
-                </div>
+>
 
-                <h2
-                  className="
-                  text-[#33271f]
+<div
+  className="
+  text-[#c3a463]
+  text-3xl
+  mb-8
+"
+>
+  ❦
+</div>
 
-                  text-[20px]
+<h2
+  className="
+  text-[#33271f]
+  text-[20px]
+  font-light
+  mb-6
+"
+>
+  Self Care
+</h2>
 
-                  font-light
+<div
+  className="
+  w-12
+  h-px
+  bg-[#d9cdbf]
+  mb-3
+"
+/>
 
-                  mb-6
-                "
-                >
-                  Food & Beverage
-                </h2>
+<p
+  className="
+  text-[#7c6958]
+  leading-6
+"
+>
+  Explore skincare,
+  body care, oils,
+  rituals and wellness
+  products.
+</p>
 
-                <div
-                  className="
-                  w-12
-                  h-px
-                  bg-[#d9cdbf]
-                  mb-8
-                "
-                />
+<div
+  className="
+  mt-4
+  text-[#c3a463]
+  text-3xl
+"
+>
+  →
+</div>
 
-                <p
-                  className="
-                  text-[#7c6958]
-                  leading-6
-                "
-                >
-                  Browse fresh juices, smoothies,
-                  teas, healthy snacks and beverages
-                  curated for your wellness journey.
-                </p>
+  </Link>
 
-                <div
-                  className="
-                  mt-4
+{/* FOOD & BEVERAGE */}
 
-                  text-[#c3a463]
+  <Link
+    href="/spa/burman/fnb"
+    className="
+    group
 
-                  text-3xl
-                "
-                >
-                  →
-                </div>
+bg-[rgba(255,255,255,0.55)]
 
-              </Link>
+border
+border-[#e4d8cb]
 
-            </div>
+rounded-[20px]
 
-            {/* FOOTER */}
+p-5
 
-            <div
-              className="
-              flex
-              items-center
-              gap-6
-            "
-            >
+min-h-[170px]
 
-              <div
-                className="
-                flex-1
-                h-px
-                bg-[#e2d7ca]
-              "
-              />
+flex
+flex-col
+items-center
+justify-center
 
-              <div
-                className="
-                text-[#b79a63]
-                text-xl
-              "
-              >
-                B
-              </div>
+text-center
 
-              <div
-                className="
-                text-[#9b866f]
+transition-all
+duration-300
 
-                uppercase
+hover:bg-white/80
 
-                tracking-[0.35em]
+"
 
-                text-[12px]
-              "
-              >
-                Burman Hotel · Tallinn
-              </div>
+>
 
-              <div
-                className="
-                flex-1
-                h-px
-                bg-[#e2d7ca]
-              "
-              />
+<div
+  className="
+  text-[#c3a463]
+  text-3xl
+  mb-8
+"
+>
+  ◇
+</div>
 
-            </div>
+<h2
+  className="
+  text-[#33271f]
+  text-[20px]
+  font-light
+  mb-6
+"
+>
+  Food & Beverage
+</h2>
+
+<div
+  className="
+  w-12
+  h-px
+  bg-[#d9cdbf]
+  mb-3
+"
+/>
+
+<p
+  className="
+  text-[#7c6958]
+  leading-6
+"
+>
+  Fresh juices,
+  smoothies, teas,
+  healthy snacks and
+  beverages.
+</p>
+
+<div
+  className="
+  mt-4
+  text-[#c3a463]
+  text-3xl
+"
+>
+  →
+</div>
+
+  </Link>
+
+</div>
+
 
           </div>
 
