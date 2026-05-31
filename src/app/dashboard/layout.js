@@ -121,9 +121,11 @@ export default function DashboardLayout({
 
             {/* OPERATIONS */}
 
-            <div className="so-sidebar-section-label">
-              Operations
-            </div>
+            {/* CONTENT */}
+
+<div className="so-sidebar-section-label">
+  Content
+</div>
 
             <NavItem
               href="/dashboard/dishes"
@@ -140,20 +142,6 @@ export default function DashboardLayout({
             />
 
             <NavItem
-              href="/dashboard/wines"
-              isActive={isActive("/dashboard/wines")}
-              icon={BeakerIcon}
-              label="Wine Cellar"
-            />
-
-            <NavItem
-              href="/dashboard/wine-cellar/inventory"
-              isActive={isActive("/dashboard/wine-cellar/inventory")}
-              icon={BeakerIcon}
-              label="Inventory"
-            />
-
-            <NavItem
               href="/dashboard/wine-menus"
               isActive={isActive("/dashboard/wine-menus")}
               icon={BookOpenIcon}
@@ -164,21 +152,35 @@ export default function DashboardLayout({
               href="/dashboard/experiences"
               isActive={isActive("/dashboard/experiences")}
               icon={RectangleStackIcon}
-              label="Experiences"
+              label="Dinning Experiences"
             />
+            <NavItem
+  href="/dashboard/spa"
+  isActive={isActive("/dashboard/spa")}
+  icon={SwatchIcon}
+  label="Spa"
+/>
+<div className="so-sidebar-section-label">
+  Inventory
+</div>  
 
+<NavItem
+              href="/dashboard/wine-cellar/inventory"
+              isActive={isActive("/dashboard/wine-cellar/inventory")}
+              icon={BeakerIcon}
+              label="Inventory"
+            />
+             <NavItem
+              href="/dashboard/wines"
+              isActive={isActive("/dashboard/wines")}
+              icon={BeakerIcon}
+              label="Wine Cellar"
+            />
             {/* ACCOUNT */}
 
             <div className="so-sidebar-section-label">
               Account
             </div>
-
-            <NavItem
-              href="/dashboard/billing"
-              isActive={isActive("/dashboard/billing")}
-              icon={CreditCardIcon}
-              label="In Progress"
-            />
 
             <NavItem
               href="/dashboard/settings"

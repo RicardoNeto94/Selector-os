@@ -186,24 +186,38 @@ useEffect(() => {
       </div>
 
       {/* NAV */}
-      {!openSpa && !openRoomService && (
-  <div className={`burman-nav ${menuOpen ? "menu-open" : ""}`}>
+{!openSpa && !openRoomService && (
+  <>
+    <div className="burman-nav">
 
-          <button onClick={() => setOpenRoomService(true)} className="burman-primary">
-            In-Room Selection
-          </button>
+      <button
+        className="burman-nav-link"
+        onClick={() => setOpenRoomService(true)}
+      >
+        Room Service
+      </button>
 
-          <div className="burman-links">
-            <button onClick={() => setOpenDining(true)}>Dining</button>
-            <button onClick={() => setOpenSpa(true)}>Spa</button>
-          </div>
+      <span className="burman-nav-divider" />
 
-          <button className="burman-menu" onClick={() => setMenuOpen(prev => !prev)}>
-            ☰
-          </button>
+      <button
+        className="burman-nav-link"
+        onClick={() => setOpenDining(true)}
+      >
+        Dining
+      </button>
 
-        </div>
-      )}
+      <span className="burman-nav-divider" />
+
+      <button
+        className="burman-nav-link"
+        onClick={() => setOpenSpa(true)}
+      >
+        Spa
+      </button>
+
+    </div>
+  </>
+)}
 
       {/* ROOM SERVICE MODAL */}
       {openRoomService && (
@@ -502,8 +516,13 @@ Wellness Information
         ✕
       </button>
 
-      <div className="burman-modal-title">
-
+<div
+className="burman-modal-title"
+style={{
+marginBottom:"50px",
+textAlign:"center"
+}}
+>
         <h2 className="burman-heading">
           <span className="line-top">
             WELLNESS

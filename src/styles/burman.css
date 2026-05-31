@@ -42,6 +42,7 @@ html, body{
 .burman-hero{
   position:relative;
   flex:1;
+  min-height:0;
   margin:0 40px;
   border:1px solid #d6d2cd;
   overflow:hidden;
@@ -104,60 +105,129 @@ html, body{
 
 .burman-nav{
   position:fixed;
-  bottom:20px;
+
+  bottom:35px;
   left:50%;
+
   transform:translateX(-50%);
+
+  width:auto;
+  min-width:300px;
+
   display:flex;
   align-items:center;
-  gap:8px;
-  background:rgba(255,255,255,0.92);
-  backdrop-filter:blur(12px);
-  padding:10px 16px;
-  clip-path: polygon(
-    12px 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    12px 100%,
-    0 calc(100% - 12px),
-    0 12px
-  );
-  box-shadow:0 15px 40px rgba(0,0,0,0.18);
+  justify-content:center;
+
+  padding:0;
+
+  background:rgba(255,255,255,0.08);
+
+  backdrop-filter:blur(30px);
+  -webkit-backdrop-filter:blur(30px);
+
+  border:1px solid rgba(255,255,255,0.18);
+
+  border-radius:1000px;
+
+  overflow:hidden;
+
+  box-shadow:
+    0 12px 50px rgba(0,0,0,0.12);
+
   z-index:1000;
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 4px;
 }
 
 .burman-primary{
   background:#8a3a2c;
   color:white;
-  padding:10px 18px;
+
+  height:48px;
+
+  padding:0 18px;
+
   border-radius:10px;
+
   font-size:13px;
+  letter-spacing:.08em;
+
   border:none;
   cursor:pointer;
+
+  white-space:nowrap;
 }
 
 .burman-links{
   display:flex;
-  gap:4px;
-  background:#f4f2f0;
-  border-radius:10px;
-  padding:4px;
+  align-items:center;
+  justify-content:center;
+
+  gap:0;
 }
 
 .burman-links a,
 .burman-links button{
-  font-size:13px;
-  color:#8a3a2c;
-  border:none;
+
+  position:relative;
+
   background:none;
-  padding:10px 14px;
-  border-radius:8px;
+  border:none;
+
+  color:white;
+
+  height:72px;
+
+  min-width:170px;
+
+  font-size:13px;
+
+  letter-spacing:.24em;
+
+  text-transform:uppercase;
+
+  font-weight:400;
+
   cursor:pointer;
+
+  transition:all .35s ease;
+}
+.burman-links button:not(:last-child)::after,
+.burman-links a:not(:last-child)::after{
+  content:"";
+
+  position:absolute;
+
+  right:0;
+  top:50%;
+
+  transform:translateY(-50%);
+
+  width:1px;
+  height:26px;
+
+  background:rgba(255,255,255,0.22);
 }
 
+.burman-nav-link{
+  background:none;
+  border:none;
+
+  color:white;
+
+  font-size:12px;
+
+  letter-spacing:.28em;
+  text-transform:uppercase;
+
+  cursor:pointer;
+
+  padding:0 24px;
+}
+.burman-nav-divider{
+  width:1px;
+  height:18px;
+
+  background:rgba(255,255,255,.25);
+}
 /* ================= FULLSCREEN MENU ================= */
 
 .burman-fullscreen-menu{
@@ -495,38 +565,52 @@ html, body{
   position:absolute;
   top:60px;
   left:60px;
-  background:rgba(255,255,255,0.92);
-  backdrop-filter:blur(16px);
-  padding:20px 24px;
+
+  padding:18px 22px;
+
+  background:rgba(255,255,255,0.10);
+
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+
+  border:1px solid rgba(255,255,255,0.18);
+
   border-radius:18px;
-  width:200px;
-  border:1px solid rgba(138,58,44,0.12);
-  box-shadow:0 20px 50px rgba(0,0,0,0.15);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,0.08);
+
   z-index:50;
 }
 
 .burman-weather-location{
-  font-size:15px;
-  letter-spacing:0.28em;
-  color:#8a3a2c;
+  color:white;
+  opacity:.85;
+
+  font-size:11px;
+  letter-spacing:.35em;
+  text-transform:uppercase;
 }
 
 .burman-weather-temp{
-  font-size:34px;
-  color:#8a3a2c;
+  color:white;
+
+  font-size:48px;
+  font-weight:300;
+  line-height:1;
 }
 
 .burman-weather-condition{
-  font-size:13px;
-  color:#5a463d;
+  color:rgba(255,255,255,.85);
+
+  font-size:12px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
 }
 
 .burman-weather-feels{
   font-size:12px;
-  color:#8a7a70;
+  color:#ffffff;
 }
 .burman-full-menu{
   position:fixed;
@@ -630,25 +714,31 @@ html, body{
 
 
 /* ================= TABLET (iPad) ================= */
-@media (min-width: 769px) and (max-width: 1200px){
+@media (min-width:769px) and (max-width:1200px){
 
   .burman-nav{
-    padding: 14px 22px;
+    width:min(640px,88vw);
   }
 
   .burman-primary{
-    padding: 14px 22px;
-    font-size: 16px;
+    height:44px;
+    font-size:13px;
   }
 
-  .burman-links a,
   .burman-links button{
-    font-size: 15px;
+    min-width:84px;
+    height:44px;
+    font-size:13px;
   }
 
-  .burman-menu{
-    font-size: 22px;
+  .burman-weather{
+    width:100px;
   }
+
+  .burman-overlay{
+    width:72%;
+  }
+
 }
 
 
@@ -722,7 +812,7 @@ html, body{
   }
 
   .burman-weather{
-    width: 150px;
+    width: 100px;
     padding: 12px;
   }
 
@@ -740,7 +830,7 @@ html, body{
   }
 
   .burman-weather{
-    width: 200px;
+    width: 100px;
   }
 
 }

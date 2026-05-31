@@ -277,8 +277,66 @@ export default function ExperiencesPage() {
               ✕
             </button>
 
-            <h2 style={{ marginBottom: 20 }}>{selectedExp.name}</h2>
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20
+  }}
+>
 
+  <h2>{selectedExp.name}</h2>
+  <input
+  className="so-input"
+  placeholder="Image URL"
+  defaultValue={selectedExp.image_url || ""}
+  onBlur={async (e) => {
+
+    await supabase
+      .from("experiences")
+      .update({
+        image_url: e.target.value
+      })
+      .eq("id", selectedExp.id);
+
+    loadExperiences();
+
+  }}
+/>
+
+  <button
+    style={{
+      background: "#b91c1c",
+      color: "#fff",
+      border: "none",
+      padding: "10px 16px",
+      borderRadius: 8,
+      cursor: "pointer"
+    }}
+    onClick={async () => {
+
+      const confirmed = window.confirm(
+        `Delete "${selectedExp.name}"?`
+      );
+
+      if (!confirmed) return;
+
+      await supabase
+        .from("experiences")
+        .delete()
+        .eq("id", selectedExp.id);
+
+      setSelectedExp(null);
+
+      loadExperiences();
+
+    }}
+  >
+    Delete Experience
+  </button>
+
+</div>
             <button
               className="so-btn-secondary"
               onClick={() => addSection(selectedExp.id)}
