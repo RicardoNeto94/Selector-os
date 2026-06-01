@@ -120,7 +120,7 @@ html, body{
 
   padding:0;
 
-  background:rgba(255,255,255,0.08);
+background:rgba(255,255,255,0.16);
 
   backdrop-filter:blur(30px);
   -webkit-backdrop-filter:blur(30px);
@@ -595,7 +595,7 @@ html, body{
 .burman-weather-temp{
   color:white;
 
-  font-size:48px;
+  font-size:34px;
   font-weight:300;
   line-height:1;
 }
@@ -776,7 +776,7 @@ html, body{
 
 /* WEATHER WIDGET SCALING */
 .burman-weather{
-  width: clamp(160px, 22vw, 240px);
+width: clamp(120px, 16vw, 180px);
   padding: clamp(14px, 2vw, 22px);
   top: clamp(20px, 4vw, 60px);
   left: clamp(20px, 4vw, 60px);
