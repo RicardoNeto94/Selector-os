@@ -116,8 +116,7 @@ export default function SpaCategoryProductsPage() {
 
       <div className="panel p-6">
 
-        <div className="grid md:grid-cols-3 gap-4">
-
+<div className="grid md:grid-cols-5 gap-4">
           <input
             className="so-input"
             placeholder="Product Name"
@@ -303,66 +302,88 @@ export default function SpaCategoryProductsPage() {
   />
 
   <input
-    className="so-input"
-    placeholder="Duration (e.g. 60 min)"
-    value={product.duration || ""}
-    onChange={(e) => {
+  className="so-input"
+  placeholder="Duration 1 (e.g. 60 min)"
+  value={product.duration_1 || ""}
+  onChange={(e) => {
 
-      setProducts(
-        products.map(p =>
-          p.id === product.id
-            ? {
-                ...p,
-                duration: e.target.value
-              }
-            : p
-        )
-      );
+    setProducts(
+      products.map(p =>
+        p.id === product.id
+          ? {
+              ...p,
+              duration_1: e.target.value
+            }
+          : p
+      )
+    );
 
-    }}
-  />
+  }}
+/>
 
-  <input
-    className="so-input"
-    placeholder="Price"
-    value={product.price || ""}
-    onChange={(e) => {
+<input
+  className="so-input"
+  placeholder="Price 1"
+  value={product.price_1 || ""}
+  onChange={(e) => {
 
-      setProducts(
-        products.map(p =>
-          p.id === product.id
-            ? {
-                ...p,
-                price: e.target.value
-              }
-            : p
-        )
-      );
+    setProducts(
+      products.map(p =>
+        p.id === product.id
+          ? {
+              ...p,
+              price_1: e.target.value
+            }
+          : p
+      )
+    );
 
-    }}
-  />
+  }}
+/>
+
+<input
+  className="so-input"
+  placeholder="Duration 2 (e.g. 90 min)"
+  value={product.duration_2 || ""}
+  onChange={(e) => {
+
+    setProducts(
+      products.map(p =>
+        p.id === product.id
+          ? {
+              ...p,
+              duration_2: e.target.value
+            }
+          : p
+      )
+    );
+
+  }}
+/>
+
+<input
+  className="so-input"
+  placeholder="Price 2"
+  value={product.price_2 || ""}
+  onChange={(e) => {
+
+    setProducts(
+      products.map(p =>
+        p.id === product.id
+          ? {
+              ...p,
+              price_2: e.target.value
+            }
+          : p
+      )
+    );
+
+  }}
+/>
 
 </div>
 
-                <input
-                  className="so-input"
-                  placeholder="Price"
-                  value={product.price || ""}
-                  onChange={(e) => {
-
-                    setProducts(
-                      products.map(p =>
-                        p.id === product.id
-                          ? {
-                              ...p,
-                              price: e.target.value
-                            }
-                          : p
-                      )
-                    );
-
-                  }}
-                />
+                
 
                 <label
                   className="
@@ -411,9 +432,11 @@ export default function SpaCategoryProductsPage() {
                         name: product.name,
                         description:
                           product.description,
-                            duration: product.duration,
+                          duration_1: product.duration_1,
+price_1: product.price_1,
+duration_2: product.duration_2,
+price_2: product.price_2,
                         brand: product.brand,
-                        price: product.price,
                         is_visible:
                           product.is_visible
                       })

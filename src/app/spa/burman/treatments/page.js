@@ -292,22 +292,7 @@ for restoration and relaxation.
                             </div>
 
                           )}
-                          {product.duration && (
-
-  <div
-    className="
-    text-[#b79a63]
-    text-[12px]
-    tracking-[0.12em]
-    uppercase
-    mb-2
-  "
-  >
-    {product.duration}
-  </div>
-
-)}
-
+                          
                           <div
                             className="
                             text-[#4b3a2e]
@@ -336,18 +321,73 @@ for restoration and relaxation.
 
                         </div>
 
-                        <div
-                          className="
-                          text-[#b79a63]
-                          text-[16px]
-                          font-light
-                          whitespace-nowrap
-                          min-w-[80px]
-                          text-right
-                        "
-                        >
-                          €{product.price || 0}
-                        </div>
+                       <div
+  className="
+  min-w-[220px]
+  text-right
+  space-y-4
+"
+>
+
+  {product.duration_1 && product.price_1 && (
+
+    <div
+      className="
+      flex
+      justify-end
+      gap-10
+      text-[#8a3a2c]
+    "
+    >
+
+      <div className="text-[16px] font-light">
+        {product.duration_1}
+      </div>
+
+      <div
+        className="
+        text-[16px]
+        font-light
+        min-w-[80px]
+      "
+      >
+        €{product.price_1}
+      </div>
+
+    </div>
+
+  )}
+
+  {product.duration_2 && product.price_2 && (
+
+    <div
+      className="
+      flex
+      justify-end
+      gap-10
+      text-[#8a3a2c]
+    "
+    >
+
+      <div className="text-[16px] font-light">
+        {product.duration_2}
+      </div>
+
+      <div
+        className="
+        text-[16px]
+        font-light
+        min-w-[80px]
+      "
+      >
+        €{product.price_2}
+      </div>
+
+    </div>
+
+  )}
+
+</div>
 
                       </div>
 
