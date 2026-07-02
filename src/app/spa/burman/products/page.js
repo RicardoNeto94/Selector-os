@@ -18,17 +18,44 @@ export default function BurmanSpaProductsPage() {
     async function loadData() {
 
       const { data: categoriesData = [] } =
-        await supabase
-          .from("spa_categories")
-          .select(`
-            *,
-            spa_products(*)
-          `)
-          .eq("type", "selfcare")
-          .order("position");
+  await supabase
+    .from("spa_categories")
+    .select(`
+      *,
+      spa_products(*)
+    `)
+    .eq("type", "selfcare")
+    .order("position");
 
-      setCategories(categoriesData);
-      setLoading(false);
+const productIds = categoriesData
+  .flatMap((category) => category.spa_products || [])
+  .map((product) => product.id);
+
+const { data: variantsData = [] } =
+  await supabase
+    .from("spa_product_variants")
+    .select("*")
+    .in("product_id", productIds)
+    .order("position");
+
+const categoriesWithVariants = categoriesData.map((category) => ({
+
+  ...category,
+
+  spa_products: (category.spa_products || []).map((product) => ({
+
+    ...product,
+
+    variants: variantsData.filter(
+      (variant) => variant.product_id === product.id
+    )
+
+  }))
+
+}));
+
+setCategories(categoriesWithVariants);
+setLoading(false);
 
     }
 
@@ -322,17 +349,57 @@ export default function BurmanSpaProductsPage() {
                         </div>
 
                         <div
-                          className="
-                          text-[#b79a63]
-                          text-[16px]
-                          font-light
-                          whitespace-nowrap
-                          min-w-[80px]
-                          text-right
-                        "
-                        >
-                          €{product.price || 0}
-                        </div>
+  className="
+  min-w-[180px]
+  text-right
+"
+>
+
+  {(product.variants || []).length > 0 ? (
+
+    <div className="space-y-2">
+
+      {product.variants.map((variant) => (
+
+        <div
+          key={variant.id}
+          className="
+          flex
+          justify-end
+          gap-8
+          text-[#b79a63]
+          text-[16px]
+          font-light
+        "
+        >
+
+          <span>{variant.name}</span>
+
+          <span>
+            €{variant.price}
+          </span>
+
+        </div>
+
+      ))}
+
+    </div>
+
+  ) : (
+
+    <div
+      className="
+      text-[#b79a63]
+      text-[16px]
+      font-light
+    "
+    >
+      €{product.price || 0}
+    </div>
+
+  )}
+
+</div>
 
                       </div>
 

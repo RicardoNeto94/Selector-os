@@ -24,37 +24,22 @@ export default function SpaCategoryProductsPage() {
 
   async function loadData() {
 
-  const { data: categoryData } = await supabase
-    .from("spa_categories")
-    .select("*")
-    .eq("id", categoryId)
-    .single();
+    const { data: categoryData } = await supabase
+      .from("merchandise_categories")
+      .select("*")
+      .eq("id", categoryId)
+      .single();
 
-  const { data: productsData = [] } = await supabase
-    .from("spa_products")
-    .select("*")
-    .eq("category_id", categoryId)
-    .order("position");
+    const { data: productsData } = await supabase
+      .from("merchandise_products")
+      .select("*")
+      .eq("category_id", categoryId)
+      .order("position");
 
-  const productIds = productsData.map((p) => p.id);
+    setCategory(categoryData);
+    setProducts(productsData || []);
 
-  const { data: variantsData = [] } = await supabase
-    .from("spa_product_variants")
-    .select("*")
-    .in("product_id", productIds)
-    .order("position");
-
-  const productsWithVariants = productsData.map((product) => ({
-    ...product,
-    variants: variantsData.filter(
-      (variant) => variant.product_id === product.id
-    ),
-  }));
-
-  setCategory(categoryData);
-  setProducts(productsWithVariants);
-
-}
+  }
 
   useEffect(() => {
 
@@ -69,14 +54,15 @@ export default function SpaCategoryProductsPage() {
     if (!newName.trim()) return;
 
     await supabase
-      .from("spa_products")
+      .from("merchandise_products")
       .insert([
         {
-          category_id: categoryId,
-          name: newName,
-          price: newPrice || null,
-          position: products.length + 1
-        }
+  category_id: categoryId,
+  name: newName,
+  price: newPrice || null,
+  brand: "Bombay",
+  position: products.length + 1
+}
       ]);
 
     setNewName("");
@@ -95,7 +81,7 @@ export default function SpaCategoryProductsPage() {
     if (!confirmed) return;
 
     await supabase
-      .from("spa_products")
+      .from("merchandise_products")
       .delete()
       .eq("id", id);
 
@@ -118,7 +104,7 @@ export default function SpaCategoryProductsPage() {
           mb-3
         "
         >
-          Burman Spa
+Bombay Collection
         </div>
 
         <h1 className="text-3xl font-light">
@@ -292,6 +278,25 @@ export default function SpaCategoryProductsPage() {
 
                 }}
               />
+              <input
+  className="so-input"
+  placeholder="Image URL"
+  value={product.image_url || ""}
+  onChange={(e) => {
+
+    setProducts(
+      products.map(p =>
+        p.id === product.id
+          ? {
+              ...p,
+              image_url: e.target.value
+            }
+          : p
+      )
+    );
+
+  }}
+/>
 
               <div className="grid md:grid-cols-3 gap-4">
 
@@ -369,176 +374,28 @@ export default function SpaCategoryProductsPage() {
                 </label>
 
               </div>
-{/* AVAILABLE FORMATS */}
 
-<div className="border-t border-[var(--border)] pt-5">
-
-  <div className="font-medium mb-4">
-    Available Formats
-  </div>
-
-  {(product.variants || []).map((variant) => (
-
-    <div
-  key={variant.id}
-  className="grid grid-cols-[1fr_120px_100px] gap-3 mb-3"
->
-
-      <input
-  className="so-input"
-  value={variant.name}
-  onChange={(e) => {
-
-    setProducts(
-      products.map((p) =>
-        p.id === product.id
-          ? {
-              ...p,
-              variants: p.variants.map((v) =>
-                v.id === variant.id
-                  ? {
-                      ...v,
-                      name: e.target.value,
-                    }
-                  : v
-              ),
-            }
-          : p
-      )
-    );
-
-  }}
-/>
-<button
-  className="button"
-  onClick={() => {
-    setProducts(
-      products.map((p) =>
-        p.id === product.id
-          ? {
-              ...p,
-              variants: p.variants.filter(
-                (v) => v.id !== variant.id
-              ),
-            }
-          : p
-      )
-    );
-  }}
->
-  Delete
-</button>
-<input
-  className="so-input"
-  value={variant.price}
-  onChange={(e) => {
-
-    setProducts(
-      products.map((p) =>
-        p.id === product.id
-          ? {
-              ...p,
-              variants: p.variants.map((v) =>
-                v.id === variant.id
-                  ? {
-                      ...v,
-                      price: e.target.value,
-                    }
-                  : v
-              ),
-            }
-          : p
-      )
-    );
-
-  }}
-/>
-
-    </div>
-
-  ))}
-
- <button
-  className="button"
-  onClick={() => {
-
-    setProducts(
-      products.map((p) =>
-        p.id === product.id
-          ? {
-              ...p,
-              variants: [
-                ...(p.variants || []),
-                {
-                  id: crypto.randomUUID(),
-                  product_id: product.id,
-                  name: "",
-                  price: "",
-                  isNew: true,
-                },
-              ],
-            }
-          : p
-      )
-    );
-
-  }}
->
-  + Add Format
-</button>
-
-</div>
               <div className="flex gap-3">
 
                 <button
                   className="button"
                   onClick={async () => {
 
-  // Save product
+                    await supabase
+  .from("merchandise_products")
+  .update({
+    name: product.name,
+    description: product.description,
+    brand: product.brand,
+    price: product.price,
+    image_url: product.image_url,
+    is_visible: product.is_visible
+  })
+  .eq("id", product.id);
 
-  await supabase
-    .from("spa_products")
-    .update({
-      name: product.name,
-      description: product.description,
-      brand: product.brand,
-      price: product.price,
-      is_visible: product.is_visible
-    })
-    .eq("id", product.id);
+                    loadData();
 
-  // Delete existing formats
-
-  await supabase
-    .from("spa_product_variants")
-    .delete()
-    .eq("product_id", product.id);
-
-  // Save formats
-
-  if ((product.variants || []).length) {
-
-    await supabase
-      .from("spa_product_variants")
-      .insert(
-
-        product.variants.map((variant, index) => ({
-
-          product_id: product.id,
-          name: variant.name,
-          price: Number(variant.price),
-          position: index + 1,
-          is_active: true
-
-        }))
-
-      );
-
-  }
-
-  loadData();
-
-}}
+                  }}
                 >
                   Save
                 </button>
@@ -573,7 +430,7 @@ export default function SpaCategoryProductsPage() {
       <div>
 
         <Link
-          href="/dashboard/spa/selfcare"
+          href="/dashboard/merchandise"
           className="text-sm text-[var(--text-muted)]"
         >
           ← Back to Categories
