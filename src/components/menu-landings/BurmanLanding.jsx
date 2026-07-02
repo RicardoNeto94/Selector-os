@@ -214,7 +214,14 @@ useEffect(() => {
       >
         Spa
       </button>
+<span className="burman-nav-divider" />
 
+<button
+  className="burman-nav-link"
+  onClick={() => window.location.href = "/collection"}
+>
+  Collection
+</button>
     </div>
   </>
 )}
