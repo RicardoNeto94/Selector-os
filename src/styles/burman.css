@@ -567,17 +567,17 @@ background:rgba(255,255,255,0.16);
 
 .burman-weather{
 
-    position:absolute;
+    position:relative;
 
-    top:60px;
+    width:clamp(210px,18vw,270px);
 
-    right:10px;
+    min-width:210px;
 
-    width:270px;
+    max-width:270px;
 
-    padding:26px;
+    padding:clamp(16px,1.4vw,24px);
 
-    border-radius:24px;
+    border-radius:clamp(18px,1.5vw,24px);
 
     background:rgba(18,18,18,.26);
 
@@ -587,27 +587,35 @@ background:rgba(255,255,255,0.16);
 
     -webkit-backdrop-filter:blur(18px);
 
-    box-shadow:
-
-        0 20px 60px rgba(0,0,0,.28);
+    box-shadow:0 20px 60px rgba(0,0,0,.28);
 
     color:white;
 
-    z-index:50;
+    display:flex;
+
+    flex-direction:column;
+
+    gap:0;
+
+    overflow:hidden;
+
+    box-sizing:border-box;
 
 }
 
+/* ---------- Header ---------- */
+
 .burman-weather-location{
 
-    font-size:10px;
+    font-size:clamp(8px,.6vw,10px);
 
     letter-spacing:.42em;
 
     text-transform:uppercase;
 
-    color:rgba(255,255,255,.55);
+    color:rgba(255,255,255,.60);
 
-    margin-bottom:14px;
+    margin-bottom:10px;
 
 }
 
@@ -617,7 +625,7 @@ background:rgba(255,255,255,0.16);
 
     align-items:flex-end;
 
-    gap:12px;
+    gap:10px;
 
     margin-bottom:8px;
 
@@ -625,31 +633,31 @@ background:rgba(255,255,255,0.16);
 
 .burman-weather-icon{
 
-    font-size:24px;
+    font-size:clamp(16px,1.3vw,22px);
 
     line-height:1;
 
-    margin-bottom:4px;
+    flex-shrink:0;
 
 }
 
 .burman-weather-temp{
 
-    font-size:54px;
+    font-family:"Cormorant Garamond",serif;
+
+    font-size:clamp(42px,3vw,58px);
+
+    line-height:.88;
 
     font-weight:300;
 
-    line-height:.9;
-
-    font-family:"Cormorant Garamond",serif;
-
-    color:white;
+    white-space:nowrap;
 
 }
 
 .burman-weather-condition{
 
-    font-size:11px;
+    font-size:clamp(9px,.75vw,11px);
 
     letter-spacing:.28em;
 
@@ -657,17 +665,23 @@ background:rgba(255,255,255,0.16);
 
     color:rgba(255,255,255,.72);
 
+    white-space:nowrap;
+
 }
+
+/* ---------- Divider ---------- */
 
 .burman-weather-divider{
 
     height:1px;
 
-    margin:18px 0;
-
     background:rgba(255,255,255,.08);
 
+    margin:14px 0;
+
 }
+
+/* ---------- Sections ---------- */
 
 .burman-weather-section{
 
@@ -675,13 +689,13 @@ background:rgba(255,255,255,0.16);
 
     flex-direction:column;
 
-    gap:4px;
+    gap:3px;
 
 }
 
 .burman-weather-section span{
 
-    font-size:9px;
+    font-size:clamp(8px,.6vw,9px);
 
     letter-spacing:.34em;
 
@@ -693,41 +707,85 @@ background:rgba(255,255,255,0.16);
 
 .burman-weather-section strong{
 
-    font-size:15px;
+    font-size:clamp(12px,.9vw,15px);
+
+    line-height:1.4;
 
     font-weight:400;
 
-    line-height:1.45;
-
     color:white;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
 
 }
 
-/* ==================== iPad ==================== */
+/* ===========================
+   Desktop
+=========================== */
 
-@media (max-width:1200px){
+@media (min-width:1600px){
 
     .burman-weather{
 
         width:270px;
 
-        padding:22px;
-
-        top:34px;
-
-        right:34px;
-
     }
 
-    .burman-weather-temp{
+}
 
-        font-size:48px;
+/* ===========================
+   Laptop
+=========================== */
+
+@media (max-width:1400px){
+
+    .burman-weather{
+
+        width:240px;
 
     }
 
 }
 
-/* ==================== iPhone ==================== */
+/* ===========================
+   iPad Landscape
+=========================== */
+
+@media (max-width:1200px){
+
+    .burman-weather{
+
+        width:220px;
+
+        padding:18px;
+
+    }
+
+}
+
+/* ===========================
+   iPad Portrait
+=========================== */
+
+@media (max-width:900px){
+
+    .burman-weather{
+
+        width:205px;
+
+        padding:16px;
+
+    }
+
+}
+
+/* ===========================
+   iPhone
+=========================== */
 
 @media (max-width:768px){
 
@@ -737,47 +795,7 @@ background:rgba(255,255,255,0.16);
 
     }
 
-}
-
-/* ================= DESKTOP ================= */
-@media (min-width: 1201px){
-
-  .burman-nav{
-    padding: 12px 20px;
-  }
-
-  .burman-primary{
-    padding: 12px 20px;
-    font-size: 15px;
-  }
-
-}
-/* =======================================================
-   RESPONSIVE FIX (HERO + WIDGET + NAV)
-======================================================= */
-
-/* HERO TEXT SCALING */
-.burman-overlay h1{
-  font-size: clamp(28px, 5vw, 64px);
-  line-height: 1.1;
-}
-
-.burman-overlay span{
-  font-size: clamp(18px, 3.2vw, 36px);
-}
-
-.burman-award{
-  font-size: clamp(11px, 1.5vw, 14px);
-  margin-top: clamp(20px, 4vw, 60px);
-}
-
-/* WEATHER WIDGET SCALING */
-.burman-weather{
-width: clamp(120px, 16vw, 180px);
-  padding: clamp(14px, 2vw, 22px);
-  top: clamp(20px, 4vw, 60px);
-  left: clamp(20px, 4vw, 60px);
-}
+}   
 
 /* NAV BAR SCALE */
 .burman-nav{
@@ -1423,9 +1441,9 @@ overscroll-behavior:none;
 
     position:absolute;
 
-    top:clamp(60px,6vw,90px);
+    top:clamp(24px,4vw,64px);
 
-    right:clamp(60px,8vw,100px);
+    right:clamp(20px,3vw,56px);
 
     z-index:50;
 
@@ -1436,8 +1454,6 @@ overscroll-behavior:none;
     position:relative;
 
 }
-
-
 
 /* ===========================================================
    HERO COPY
