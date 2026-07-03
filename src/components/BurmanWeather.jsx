@@ -3,78 +3,77 @@
 import { useEffect, useState } from "react";
 
 export default function BurmanWeather() {
-
-  const [weather, setWeather] = useState(null);
+  const [weather, setWeather] = useState({
+    loading: true,
+    temp: "--",
+    wind: "--",
+    condition: "Loading...",
+    icon: "☁️",
+  });
 
   useEffect(() => {
-
-    const fetchWeather = async (lat, lon) => {
+    async function loadWeather() {
       try {
+        // Tallinn coordinates
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+          "https://api.open-meteo.com/v1/forecast?latitude=59.437&longitude=24.7536&current=temperature_2m,weather_code,wind_speed_10m"
         );
 
         const data = await res.json();
 
-        const conditionMap = {
-          0: { label: "Clear sky", icon: "☀️" },
-          1: { label: "Mainly clear", icon: "🌤" },
-          2: { label: "Partly cloudy", icon: "⛅" },
-          3: { label: "Cloudy", icon: "☁️" },
-          45: { label: "Fog", icon: "🌫" },
-          48: { label: "Fog", icon: "🌫" },
-          51: { label: "Light drizzle", icon: "🌦" },
-          61: { label: "Rain", icon: "🌧" },
-          71: { label: "Snow", icon: "❄️" },
-          80: { label: "Rain showers", icon: "🌦" },
-          95: { label: "Thunderstorm", icon: "⛈" },
-        };
+        console.log("Weather:", data);
 
-        const current = data?.current_weather;
+        const current = data.current;
 
         if (!current) return;
 
-        const mapped = conditionMap[current.weathercode] || {
-          label: "Clear",
-          icon: "☀️"
+        const conditions = {
+          0: { icon: "☀️", label: "Clear Sky" },
+          1: { icon: "🌤", label: "Mainly Clear" },
+          2: { icon: "⛅", label: "Partly Cloudy" },
+          3: { icon: "☁️", label: "Cloudy" },
+          45: { icon: "🌫", label: "Fog" },
+          48: { icon: "🌫", label: "Fog" },
+          51: { icon: "🌦", label: "Drizzle" },
+          61: { icon: "🌧", label: "Rain" },
+          63: { icon: "🌧", label: "Rain" },
+          65: { icon: "🌧", label: "Heavy Rain" },
+          71: { icon: "❄️", label: "Snow" },
+          80: { icon: "🌦", label: "Rain Showers" },
+          95: { icon: "⛈", label: "Thunderstorm" },
         };
 
+        const condition =
+          conditions[current.weather_code] || {
+            icon: "☁️",
+            label: "Clear",
+          };
+
         setWeather({
-          temp: Math.round(current.temperature),
-          wind: Math.round(current.windspeed),
-          condition: mapped.label,
-          icon: mapped.icon,
+          loading: false,
+          temp: Math.round(current.temperature_2m),
+          wind: Math.round(current.wind_speed_10m),
+          condition: condition.label,
+          icon: condition.icon,
         });
-
       } catch (err) {
-        console.error("Weather error:", err);
-      }
-    };
+        console.error(err);
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        fetchWeather(pos.coords.latitude, pos.coords.longitude);
-      },
-      () => {
-        fetchWeather(59.437, 24.7536); // Tallinn fallback
+        setWeather({
+          loading: false,
+          temp: "--",
+          wind: "--",
+          condition: "Unavailable",
+          icon: "☁️",
+        });
       }
-    );
+    }
 
+    loadWeather();
   }, []);
 
-  if (!weather) return null;
-
   return (
-    <div
-      className="burman-weather"
-      style={{
-        position: "absolute",
-        top: "60px",
-        left: "60px",
-        zIndex: 50   // 🔥 THIS FIXES IT
-      }}
-    >
-
+    <div className="burman-weather">
       <div className="burman-weather-location">
         Tallinn
       </div>
@@ -85,7 +84,7 @@ export default function BurmanWeather() {
         </div>
 
         <div className="burman-weather-temp">
-          {weather.temp}°C
+          {weather.temp}°
         </div>
       </div>
 
@@ -96,7 +95,6 @@ export default function BurmanWeather() {
       <div className="burman-weather-feels">
         Wind {weather.wind} km/h
       </div>
-
     </div>
   );
 }

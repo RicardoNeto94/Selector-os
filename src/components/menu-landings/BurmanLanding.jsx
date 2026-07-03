@@ -5,7 +5,6 @@ import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
-
 export default function BurmanLanding({ menu }) {
   
 const supabase = createClientComponentClient();  
@@ -149,81 +148,147 @@ useEffect(() => {
       {/* EVERYTHING BELOW REMAINS EXACTLY THE SAME */}
       {/* I DID NOT TOUCH YOUR UI */}
 
-      {/* HEADER */}
-      <div className="burman-header">
-        <div>HOTEL</div>
-        <div className="burman-header-center">THE BURMAN</div>
-        <div>TALLINN</div>
-      </div>
+      {/* ========================= HOME ========================= */}
 
-      {/* HERO */}
-      <div className="burman-hero">
-        <BurmanWeather />
+{!openSpa && !openRoomService && !openDining && (
 
-        <div className="burman-image-wrapper">
-          <img
-            src="https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp"
-            alt="Burman Hotel"
-            className="burman-image"
-          />
-        </div>
+<div className="vx-home">
 
-        <div className="burman-overlay">
-          <h1>
-            EXTRAORDINARY<br />
-            LIVING, <span>crafted for you</span>
-          </h1>
+    <div className="vx-container">
+<header className="vx-header">
 
-          <p className="burman-award">
-            MICHELIN Opening of the Year Award 2025
-          </p>
-
-          <div className="burman-michelin">
-            <img src="/Clefs_Michelin-1.svg" />
-            <img src="/Clefs_Michelin-1.svg" />
-          </div>
-        </div>
-      </div>
-
-      {/* NAV */}
-{!openSpa && !openRoomService && (
-  <>
-    <div className="burman-nav">
-
-      <button
-        className="burman-nav-link"
-        onClick={() => setOpenRoomService(true)}
-      >
-        Room Service
-      </button>
-
-      <span className="burman-nav-divider" />
-
-      <button
-        className="burman-nav-link"
-        onClick={() => setOpenDining(true)}
-      >
-        Dining
-      </button>
-
-      <span className="burman-nav-divider" />
-
-      <button
-        className="burman-nav-link"
-        onClick={() => setOpenSpa(true)}
-      >
-        Spa
-      </button>
-<span className="burman-nav-divider" />
-
-<button
-  className="burman-nav-link"
-  onClick={() => window.location.href = "/collection"}
->
-  Collection
-</button>
+    <div className="vx-header-left">
+        HOTEL
     </div>
-  </>
+
+    <div className="vx-header-center">
+        THE BURMAN
+    </div>
+
+    <div className="vx-header-right">
+        TALLINN
+    </div>
+
+</header>
+       <section className="vx-hero">
+
+    <img
+        src="https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp"
+        alt="The Burman"
+        className="vx-hero-image"
+    />
+
+    <div className="vx-hero-gradient" />
+
+    <div className="vx-weather-floating">
+        <BurmanWeather />
+    </div>
+
+    <div className="vx-hero-content">
+
+        <div className="vx-copy">
+
+            <div className="vx-eyebrow">
+                THE BURMAN · TALLINN
+            </div>
+
+            <h1>
+                Welcome to
+                <br />
+                The Burman
+            </h1>
+
+            <p>
+                Discover Michelin dining, refined wellness and exceptional
+                experiences designed around your stay.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div className="vx-services">
+
+        <button
+    className="vx-service"
+    onClick={() => setOpenDining(true)}
+>
+
+    <img
+        src="/homepage/dining.jpg"
+        alt="Dining"
+    />
+
+    <span>MICHELIN SELECTED</span>
+
+    <h3>Dining</h3>
+
+    <p>Restaurants & Wine</p>
+
+</button>
+
+        <button
+    className="vx-service"
+    onClick={() => setOpenRoomService(true)}
+>
+
+    <img
+        src="/homepage/room-service.jpg"
+        alt="Room Service"
+    />
+
+    <span>24 HOURS</span>
+
+    <h3>Room Service</h3>
+
+    <p>Private Dining</p>
+
+</button>
+
+        <button
+    className="vx-service"
+    onClick={() => setOpenSpa(true)}
+>
+
+    <img
+        src="/homepage/spa.jpg"
+        alt="Spa"
+    />
+
+    <span>BURMAN SPA</span>
+
+    <h3>Wellness</h3>
+
+    <p>Spa & Treatments</p>
+
+</button>
+
+       <button
+    className="vx-service"
+    onClick={() => window.location.href="/collection"}
+>
+
+    <img
+        src="/homepage/collection.jpg"
+        alt="Collection"
+    />
+
+    <span>BOUTIQUE</span>
+
+    <h3>Collection</h3>
+
+    <p>Luxury Retail</p>
+
+</button>
+
+    </div>
+
+</section>
+
+    </div>
+
+</div>
+
 )}
 
       {/* ROOM SERVICE MODAL */}
