@@ -6,22 +6,39 @@ export default function BurmanWeather() {
   const [weather, setWeather] = useState({
     loading: true,
     temp: "--",
-    wind: "--",
     condition: "Loading...",
     icon: "☁️",
   });
 
+  const [time, setTime] = useState("");
+
+  // Live Clock
+  useEffect(() => {
+    const updateClock = () => {
+      setTime(
+        new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    };
+
+    updateClock();
+
+    const timer = setInterval(updateClock, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Weather
   useEffect(() => {
     async function loadWeather() {
       try {
-        // Tallinn coordinates
         const res = await fetch(
-          "https://api.open-meteo.com/v1/forecast?latitude=59.437&longitude=24.7536&current=temperature_2m,weather_code,wind_speed_10m"
+          "https://api.open-meteo.com/v1/forecast?latitude=59.437&longitude=24.7536&current=temperature_2m,weather_code"
         );
 
         const data = await res.json();
-
-        console.log("Weather:", data);
 
         const current = data.current;
 
@@ -52,7 +69,6 @@ export default function BurmanWeather() {
         setWeather({
           loading: false,
           temp: Math.round(current.temperature_2m),
-          wind: Math.round(current.wind_speed_10m),
           condition: condition.label,
           icon: condition.icon,
         });
@@ -62,7 +78,6 @@ export default function BurmanWeather() {
         setWeather({
           loading: false,
           temp: "--",
-          wind: "--",
           condition: "Unavailable",
           icon: "☁️",
         });
@@ -74,11 +89,13 @@ export default function BurmanWeather() {
 
   return (
     <div className="burman-weather">
+
       <div className="burman-weather-location">
-        Tallinn
+        TALLINN
       </div>
 
       <div className="burman-weather-main">
+
         <div className="burman-weather-icon">
           {weather.icon}
         </div>
@@ -86,15 +103,34 @@ export default function BurmanWeather() {
         <div className="burman-weather-temp">
           {weather.temp}°
         </div>
+
       </div>
 
       <div className="burman-weather-condition">
         {weather.condition}
       </div>
 
-      <div className="burman-weather-feels">
-        Wind {weather.wind} km/h
+      <div className="burman-weather-divider" />
+
+      <div className="burman-weather-section">
+        <span>LOCAL TIME</span>
+        <strong>{time}</strong>
       </div>
+
+      <div className="burman-weather-divider" />
+
+      <div className="burman-weather-section">
+        <span>BREAKFAST</span>
+        <strong>Until 11:00</strong>
+      </div>
+
+      <div className="burman-weather-divider" />
+
+      <div className="burman-weather-section">
+        <span>DINING</span>
+        <strong>Please contact Reception</strong>
+      </div>
+
     </div>
   );
 }
