@@ -1905,3 +1905,663 @@ body{
     width:100%;
 
 }
+
+
+/* ===========================================================
+   DINING MODAL ONLY — DOES NOT TOUCH HOMEPAGE
+   Requires: <div className="burman-modal vx-dining-modal">
+=========================================================== */
+
+.vx-dining-modal{
+  z-index:4000;
+}
+
+.vx-dining-modal .burman-modal-content{
+  width:min(1360px,94vw);
+  max-width:none;
+  max-height:90dvh;
+  padding:0;
+  overflow-y:auto;
+  border-radius:24px;
+  background:#f4f0ea;
+  border:1px solid rgba(58,42,36,.10);
+  box-shadow:0 40px 120px rgba(0,0,0,.28);
+}
+
+.vx-dining-modal .burman-modal-close{
+  position:fixed;
+  top:clamp(28px,4vw,52px);
+  right:clamp(28px,4vw,52px);
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:999px;
+  background:rgba(20,18,16,.22);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  color:#fff;
+  font-size:16px;
+  z-index:30;
+  cursor:pointer;
+}
+
+.vx-dining-shell{
+  min-height:100%;
+  background:#f4f0ea;
+}
+
+/* ---------- Dining intro ---------- */
+
+.vx-dining-intro{
+  position:relative;
+  min-height:clamp(420px,58dvh,620px);
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+}
+
+.vx-dining-intro-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.vx-dining-intro::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(12,10,8,.86) 0%,
+    rgba(12,10,8,.46) 45%,
+    rgba(12,10,8,.10) 100%
+  );
+}
+
+.vx-dining-intro-copy{
+  position:relative;
+  z-index:2;
+  width:min(900px,88%);
+  padding:clamp(42px,6vw,88px);
+  color:#fff;
+}
+
+.vx-dining-kicker{
+  display:block;
+  margin-bottom:18px;
+  color:#d8b36d;
+  font-size:10px;
+  letter-spacing:.46em;
+  text-transform:uppercase;
+}
+
+.vx-dining-intro h2{
+  margin:0;
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(64px,8vw,118px);
+  line-height:.82;
+  font-weight:300;
+  letter-spacing:-.025em;
+}
+
+.vx-dining-intro p{
+  max-width:620px;
+  margin:30px 0 0;
+  color:rgba(255,255,255,.86);
+  font-size:clamp(16px,1.35vw,21px);
+  line-height:1.7;
+}
+
+/* ---------- Venue selection ---------- */
+
+.vx-dining-body{
+  width:min(1180px,calc(100% - 80px));
+  margin:0 auto;
+  padding:clamp(58px,7vw,100px) 0 110px;
+}
+
+.vx-dining-section-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:40px;
+  margin-bottom:38px;
+}
+
+.vx-dining-section-head span{
+  color:#9b7d52;
+  font-size:10px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+}
+
+.vx-dining-section-head h3{
+  margin:12px 0 0;
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(42px,5vw,72px);
+  line-height:.95;
+  font-weight:300;
+  color:#2d241f;
+}
+
+.vx-dining-venues{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+
+.vx-dining-venue{
+  position:relative;
+height:clamp(280px,32vw,420px);
+min-height:0;  padding:0;
+  overflow:hidden;
+  border:0;
+  border-radius:20px;
+  background:#1b1714;
+  cursor:pointer;
+  text-align:left;
+}
+
+.vx-dining-venue img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+
+.vx-dining-venue::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(10,8,7,.88) 0%,
+    rgba(10,8,7,.30) 48%,
+    rgba(10,8,7,.04) 100%
+  );
+}
+
+.vx-dining-venue:hover img{
+  transform:scale(1.04);
+}
+
+.vx-dining-venue-copy{
+  position:absolute;
+  z-index:2;
+  left:clamp(26px,3vw,44px);
+  right:clamp(26px,3vw,44px);
+  bottom:clamp(28px,3vw,46px);
+  color:#fff;
+}
+
+.vx-dining-venue-copy small{
+  color:#d8b36d;
+  font-size:9px;
+  letter-spacing:.38em;
+  text-transform:uppercase;
+}
+
+.vx-dining-venue-copy h4{
+  margin:12px 0 8px;
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(42px,4.6vw,72px);
+  line-height:.9;
+  font-weight:300;
+}
+
+.vx-dining-venue-copy p{
+  margin:0;
+  color:rgba(255,255,255,.72);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.vx-dining-explore{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  margin-top:24px;
+  color:#fff;
+  font-size:10px;
+  letter-spacing:.32em;
+  text-transform:uppercase;
+}
+
+/* ---------- Restaurant detail ---------- */
+
+.vx-dining-detail{
+  animation:burmanFade .45s ease;
+}
+
+.vx-dining-detail-hero{
+  position:relative;
+  min-height:clamp(430px,62dvh,680px);
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+}
+
+.vx-dining-detail-hero img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.vx-dining-detail-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(10,8,7,.92) 0%,
+    rgba(10,8,7,.38) 52%,
+    rgba(10,8,7,.08) 100%
+  );
+}
+
+.vx-dining-back{
+  position:absolute;
+  top:clamp(28px,4vw,52px);
+  left:clamp(28px,4vw,52px);
+  z-index:4;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:10px;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
+.vx-dining-detail-copy{
+  position:relative;
+  z-index:2;
+  padding:clamp(46px,6vw,88px);
+  color:#fff;
+}
+
+.vx-dining-detail-copy h2{
+  margin:12px 0 0;
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(70px,9vw,132px);
+  line-height:.8;
+  font-weight:300;
+  letter-spacing:-.03em;
+}
+
+.vx-dining-schedule{
+  margin-top:24px;
+  color:rgba(255,255,255,.76);
+  font-size:14px;
+  line-height:1.7;
+}
+
+/* ---------- Dining menu list, scoped only inside Dining ---------- */
+
+.vx-dining-menu{
+  width:min(920px,calc(100% - 80px));
+  margin:0 auto;
+  padding:clamp(60px,7vw,100px) 0 110px;
+}
+
+.vx-dining-menu .burman-spa-section{
+  margin-bottom:70px;
+}
+
+.vx-dining-menu .burman-spa-section h3{
+  justify-content:flex-start;
+  margin:0 0 28px;
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(34px,4vw,54px);
+  line-height:1;
+  letter-spacing:0;
+  text-transform:none;
+  font-weight:300;
+  color:#2d241f;
+}
+
+.vx-dining-menu .burman-spa-section h3::before,
+.vx-dining-menu .burman-spa-section h3::after{
+  display:none;
+}
+
+.vx-dining-menu .burman-spa-item{
+  padding:24px 0;
+  border-bottom:1px solid rgba(58,42,36,.10);
+}
+
+.vx-dining-menu .burman-spa-item h4{
+  margin:0 0 7px;
+  font-family:"Cormorant Garamond",serif;
+  font-size:24px;
+  font-weight:400;
+  color:#2d241f;
+}
+
+.vx-dining-menu .burman-spa-item p{
+  margin:0;
+  max-width:620px;
+  color:#75675e;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.vx-dining-menu .burman-price{
+  color:#6f4b38;
+  font-size:14px;
+  font-weight:400;
+  white-space:nowrap;
+}
+
+/* ---------- Dining responsive only ---------- */
+
+@media (max-width:900px){
+
+  .vx-dining-modal .burman-modal-content{
+    width:100%;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+  }
+
+  .vx-dining-body,
+  .vx-dining-menu{
+    width:calc(100% - 40px);
+  }
+
+  .vx-dining-venues{
+    grid-template-columns:1fr;
+  }
+
+  .vx-dining-venue{
+  height:clamp(260px,52vw,360px);
+  min-height:0;
+}
+
+  .vx-dining-section-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:14px;
+  }
+
+}
+
+/* ===========================================================
+   DINING MODAL — MOTION + BACKDROP
+=========================================================== */
+
+@keyframes vxDiningModalIn{
+  from{
+    opacity:0;
+    transform:translateY(24px) scale(.985);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+@keyframes vxDiningImageIn{
+  from{
+    transform:scale(1.05);
+  }
+
+  to{
+    transform:scale(1);
+  }
+}
+
+@keyframes vxDiningTextIn{
+  from{
+    opacity:0;
+    transform:translateY(22px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes vxDiningVenueIn{
+  from{
+    opacity:0;
+    transform:translateY(28px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+
+/* BACKDROP */
+
+.vx-dining-modal{
+  background:transparent;
+}
+
+.vx-dining-modal > .burman-modal-backdrop{
+  background:rgba(0,0,0,.28);
+
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+
+
+/* MODAL */
+
+.vx-dining-modal > .burman-modal-content{
+  background:transparent;
+
+  animation:
+    vxDiningModalIn
+    .65s
+    cubic-bezier(.22,1,.36,1)
+    both;
+
+  transform-origin:center;
+
+  box-shadow:
+    0 45px 130px rgba(0,0,0,.38);
+
+  border:1px solid rgba(255,255,255,.18);
+}
+
+
+/* DINING SURFACE */
+
+.vx-dining-modal .vx-dining-shell{
+  background:#f4f0ea;
+
+  border-radius:24px;
+
+  overflow:hidden;
+}
+
+
+/* INTRO IMAGE */
+
+.vx-dining-modal
+.vx-dining-intro
+> .vx-dining-intro-image{
+  animation:
+    vxDiningImageIn
+    1.6s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+
+/* INTRO TEXT */
+
+.vx-dining-modal
+.vx-dining-intro-copy{
+  animation:
+    vxDiningTextIn
+    .8s
+    .18s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+
+/* SECTION TITLE */
+
+.vx-dining-modal
+.vx-dining-section-head{
+  animation:
+    vxDiningTextIn
+    .75s
+    .28s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+
+/* VENUE CARDS */
+
+.vx-dining-modal
+.vx-dining-venue{
+  opacity:0;
+
+  animation:
+    vxDiningVenueIn
+    .8s
+    cubic-bezier(.22,1,.36,1)
+    both;
+
+  transition:
+    transform .5s cubic-bezier(.22,1,.36,1),
+    box-shadow .5s ease;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(1){
+  animation-delay:.36s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(2){
+  animation-delay:.48s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(3){
+  animation-delay:.60s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(4){
+  animation-delay:.72s;
+}
+
+
+/* VENUE INTERACTION */
+
+.vx-dining-modal
+.vx-dining-venue:hover{
+  transform:translateY(-4px);
+
+  box-shadow:
+    0 28px 70px rgba(25,18,13,.22);
+}
+
+.vx-dining-modal
+.vx-dining-venue:active{
+  transform:scale(.99);
+}
+
+.vx-dining-modal
+.vx-dining-venue img{
+  transition:
+    transform
+    1.2s
+    cubic-bezier(.22,1,.36,1);
+}
+
+.vx-dining-modal
+.vx-dining-venue:hover img{
+  transform:scale(1.05);
+}
+
+
+/* EXPLORE ARROW */
+
+.vx-dining-modal
+.vx-dining-explore span{
+  display:inline-block;
+
+  transition:
+    transform
+    .4s
+    cubic-bezier(.22,1,.36,1);
+}
+
+.vx-dining-modal
+.vx-dining-venue:hover
+.vx-dining-explore span{
+  transform:translateX(6px);
+}
+
+
+/* DETAIL */
+
+.vx-dining-modal
+.vx-dining-detail-hero img{
+  animation:
+    vxDiningImageIn
+    1.5s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+.vx-dining-modal
+.vx-dining-detail-copy{
+  animation:
+    vxDiningTextIn
+    .8s
+    .16s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+
+/* BACK BUTTON */
+
+.vx-dining-modal
+.vx-dining-back{
+  transition:
+    transform .35s cubic-bezier(.22,1,.36,1),
+    opacity .35s ease;
+}
+
+.vx-dining-modal
+.vx-dining-back:hover{
+  transform:translateX(-4px);
+  opacity:.7;
+}
+
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion:reduce){
+
+  .vx-dining-modal,
+  .vx-dining-modal *{
+    animation-duration:.01ms !important;
+    animation-delay:0ms !important;
+    transition-duration:.01ms !important;
+  }
+
+}

@@ -150,7 +150,7 @@ useEffect(() => {
 
       {/* ========================= HOME ========================= */}
 
-{!openSpa && !openRoomService && !openDining && (
+{!openSpa && !openRoomService && (
 
 <div className="vx-home">
 
@@ -698,153 +698,212 @@ textAlign:"center"
 
       {/* DINING MODAL */}
       {openDining && (
-        <div className="burman-modal">
-
+        <div className="burman-modal vx-dining-modal">
           <div
             className="burman-modal-backdrop"
-            onClick={() => setOpenDining(false)}
+            onClick={() => {
+              setOpenDining(false);
+              setOpenDiningVenue(null);
+            }}
           />
 
           <div className="burman-modal-content">
-
             <button
               className="burman-modal-close"
-              onClick={() => setOpenDining(false)}
+              onClick={() => {
+                setOpenDining(false);
+                setOpenDiningVenue(null);
+              }}
             >
               ✕
             </button>
 
-            <div className="burman-modal-title">
-              <h2 className="burman-heading">
-                <span className="line-top">In Room Dining</span>
-                <span className="line-bottom">EXPERIENCES</span>
-              </h2>
-            </div>
+            <div className="vx-dining-shell">
+              {!openDiningVenue ? (
+                <>
+                  <section className="vx-dining-intro">
+                    <img
+                      src="/homepage/dining.jpg"
+                      alt="Dining at The Burman"
+                      className="vx-dining-intro-image"
+                    />
 
-            <div className="burman-modal-body">
+                    <div className="vx-dining-intro-copy">
+                      <span className="vx-dining-kicker">
+                        THE BURMAN · TALLINN
+                      </span>
 
-  <div className="burman-modal-body">
-    <div style={{
-  display: "flex",
-  justifyContent: "center",
-  gap: 10,
-  marginBottom: 30
-}}>
-  {experiences
-    .filter(exp => exp.type?.toLowerCase() === "dining")
-    .map(exp => (
-      <button
-        key={exp.id}
-        onClick={() => setSelectedDining(exp.id)}
-        style={{
-  padding: "8px 0",
-  margin: "0 14px",
-  border: "none",
-  background: "transparent",
-  color: selectedDining === exp.id ? "#3a2a24" : "#8a7a70",
-  fontSize: 14,
-  letterSpacing: "0.18em",
-  textTransform: "uppercase",
-  cursor: "pointer",
-  position: "relative"
-}}
-      >
-        {exp.name}
-      </button>
-    ))}
-</div>
+                      <h2>Dining</h2>
 
-  {experiences
-.filter(exp => 
-  exp.type?.toLowerCase() === "dining" &&
-  exp.id === selectedDining
-)  .map(exp => {
-
-      const isOpen = openDiningVenue === exp.id;
-
-      return (
-        <div key={exp.id} className="burman-dining-card-wrapper">
-
-          {/* CARD */}
-          <div
-            className="burman-dining-card"
-            onClick={() =>
-              setOpenDiningVenue(isOpen ? null : exp.id)
-            }
-          >
-            <img
-  src={
-    exp.image_url && exp.image_url.startsWith("http")
-      ? exp.image_url
-      : exp.name?.toLowerCase().includes("koyo")
-      ? "/koyo.jpg"
-      : exp.name?.toLowerCase().includes("shang")
-      ? "/shang.jpg"
-      : exp.name?.toLowerCase().includes("lumen")
-      ? "/lumen1.jpg"
-      : "/placeholder.jpg"
-  }
-  className="burman-dining-img"
-/>
-
-            <div className="burman-dining-overlay">
-              <h3>{exp.name}</h3>
-            </div>
-          </div>
-{exp.schedule && (
-  <div className="burman-info-box">
-    <strong>Available</strong>
-    <p>{exp.schedule}</p>
-  </div>
-)}
-          {/* CONTENT */}
-          <div className={`burman-section-content ${isOpen ? "open" : ""}`}>
-
-{exp.experience_sections
-  ?.filter(section => section.experience_items?.length)
-  ?.sort((a, b) => a.position - b.position)
-  .map(section => (              <div key={section.id} className="burman-spa-section">
-
-                <h3>{section.name}</h3>
-
-{section.experience_items
-  ?.sort((a, b) => a.position - b.position)
-  .map(item => {const price = item.experience_prices?.[0]?.price;
-const label = item.experience_prices?.[0]?.label;
-                  return (
-                    <div key={item.id} className="burman-spa-item">
-                      <div>
-                        <h4>{item.name}</h4>
-                        {item.description && <p>{item.description}</p>}
-                      </div>
-
-                      {price && (
-                        <span className="burman-price">
-  {label && <span>{label} — </span>}€{price}
-</span>
-                      )}
+                      <p>
+                        A collection of distinctive culinary experiences,
+                        shaped by craft, character and exceptional hospitality.
+                      </p>
                     </div>
-                  );
-                })}
+                  </section>
 
-              </div>
-            ))}
-            {exp.footer && (
-  <div className="burman-disclaimer">
-    {exp.footer}
-  </div>
-)}
+                  <section className="vx-dining-body">
+                    <div className="vx-dining-section-head">
+                      <div>
+                        <span>MICHELIN SELECTED EXPERIENCES</span>
+                        <h3>Choose your experience</h3>
+                      </div>
+                    </div>
 
-          </div>
+                    <div className="vx-dining-venues">
+                      {experiences
+                        .filter(
+                          exp => exp.type?.toLowerCase() === "dining"
+                        )
+                        .sort((a, b) => a.position - b.position)
+                        .map(exp => {
+                          const image =
+                            exp.image_url &&
+                            exp.image_url.startsWith("http")
+                              ? exp.image_url
+                              : exp.name?.toLowerCase().includes("koyo")
+                              ? "/koyo.jpg"
+                              : exp.name?.toLowerCase().includes("shang")
+                              ? "/shang.jpg"
+                              : exp.name?.toLowerCase().includes("lumen")
+                              ? "/lumen1.jpg"
+                              : "/placeholder.jpg";
 
-        </div>
-      );
-    })}
+                          return (
+                            <button
+                              key={exp.id}
+                              className="vx-dining-venue"
+                              onClick={() => {
+                                setSelectedDining(exp.id);
+                                setOpenDiningVenue(exp.id);
+                              }}
+                            >
+                              <img src={image} alt={exp.name} />
 
-</div>
+                              <div className="vx-dining-venue-copy">
+                                <small>DINING EXPERIENCE</small>
+                                <h4>{exp.name}</h4>
 
+                                {exp.schedule && <p>{exp.schedule}</p>}
+
+                                <span className="vx-dining-explore">
+                                  Explore <span aria-hidden="true">→</span>
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </section>
+                </>
+              ) : (
+                experiences
+                  .filter(
+                    exp =>
+                      exp.type?.toLowerCase() === "dining" &&
+                      exp.id === openDiningVenue
+                  )
+                  .map(exp => {
+                    const image =
+                      exp.image_url && exp.image_url.startsWith("http")
+                        ? exp.image_url
+                        : exp.name?.toLowerCase().includes("koyo")
+                        ? "/koyo.jpg"
+                        : exp.name?.toLowerCase().includes("shang")
+                        ? "/shang.jpg"
+                        : exp.name?.toLowerCase().includes("lumen")
+                        ? "/lumen1.jpg"
+                        : "/placeholder.jpg";
+
+                    return (
+                      <div key={exp.id} className="vx-dining-detail">
+                        <section className="vx-dining-detail-hero">
+                          <img src={image} alt={exp.name} />
+
+                          <button
+                            className="vx-dining-back"
+                            onClick={() => setOpenDiningVenue(null)}
+                          >
+                            ← Dining
+                          </button>
+
+                          <div className="vx-dining-detail-copy">
+                            <span className="vx-dining-kicker">
+                              THE BURMAN · DINING
+                            </span>
+
+                            <h2>{exp.name}</h2>
+
+                            {exp.schedule && (
+                              <div className="vx-dining-schedule">
+                                {exp.schedule}
+                              </div>
+                            )}
+                          </div>
+                        </section>
+
+                        <section className="vx-dining-menu">
+                          {exp.experience_sections
+                            ?.filter(
+                              section =>
+                                section.experience_items?.length
+                            )
+                            ?.sort((a, b) => a.position - b.position)
+                            .map(section => (
+                              <div
+                                key={section.id}
+                                className="burman-spa-section"
+                              >
+                                <h3>{section.name}</h3>
+
+                                {section.experience_items
+                                  ?.sort(
+                                    (a, b) => a.position - b.position
+                                  )
+                                  .map(item => {
+                                    const price =
+                                      item.experience_prices?.[0]?.price;
+                                    const label =
+                                      item.experience_prices?.[0]?.label;
+
+                                    return (
+                                      <div
+                                        key={item.id}
+                                        className="burman-spa-item"
+                                      >
+                                        <div>
+                                          <h4>{item.name}</h4>
+
+                                          {item.description && (
+                                            <p>{item.description}</p>
+                                          )}
+                                        </div>
+
+                                        {price && (
+                                          <span className="burman-price">
+                                            {label && (
+                                              <span>{label} — </span>
+                                            )}
+                                            €{price}
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            ))}
+
+                          {exp.footer?.trim() && (
+                            <div className="burman-disclaimer">
+                              {exp.footer}
+                            </div>
+                          )}
+                        </section>
+                      </div>
+                    );
+                  })
+              )}
             </div>
-
           </div>
         </div>
       )}
