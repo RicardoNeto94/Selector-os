@@ -240,9 +240,9 @@ useEffect(() => {
 
     <span>24 HOURS</span>
 
-    <h3>Room Service</h3>
+    <h3>Room Delicacies</h3>
 
-    <p>Private Dining</p>
+    <p>Curated Selections</p>
 
 </button>
 
