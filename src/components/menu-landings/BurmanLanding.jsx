@@ -20,6 +20,7 @@ const [openSection, setOpenSection] = useState(null);
 const [openDining, setOpenDining] = useState(false);
 const [openDiningVenue, setOpenDiningVenue] = useState(null);
 const [selectedDining, setSelectedDining] = useState(null);
+const [diningTab, setDiningTab] = useState("overview");
 const roomServiceExp = experiences.find(
   exp => exp.type === "room_service"
 );
@@ -704,6 +705,7 @@ textAlign:"center"
             onClick={() => {
               setOpenDining(false);
               setOpenDiningVenue(null);
+              setDiningTab("overview");
             }}
           />
 
@@ -713,89 +715,92 @@ textAlign:"center"
               onClick={() => {
                 setOpenDining(false);
                 setOpenDiningVenue(null);
+                setDiningTab("overview");
               }}
+              aria-label="Close dining"
             >
               ✕
             </button>
 
             <div className="vx-dining-shell">
               {!openDiningVenue ? (
-                <>
-                  <section className="vx-dining-intro">
-                    <img
-                      src="/homepage/dining.jpg"
-                      alt="Dining at The Burman"
-                      className="vx-dining-intro-image"
-                    />
+                <div className="vx-dining-discovery">
+                  <section className="vx-dining-discovery-copy">
+                    <span className="vx-dining-kicker">MICHELIN SELECTED</span>
 
-                    <div className="vx-dining-intro-copy">
-                      <span className="vx-dining-kicker">
-                        THE BURMAN · TALLINN
-                      </span>
+                    <h2>
+                      Exceptional
+                      <br />
+                      culinary experiences
+                    </h2>
 
-                      <h2>Dining</h2>
+                    <p>
+                      Discover our collection of distinctive restaurants,
+                      each with its own character, cuisine and atmosphere.
+                    </p>
 
+                    <div className="vx-dining-assistance">
+                      <span aria-hidden="true">⌂</span>
                       <p>
-                        A collection of distinctive culinary experiences,
-                        shaped by craft, character and exceptional hospitality.
+                        For reservations or assistance, please contact
+                        <strong> Reception</strong>.
                       </p>
                     </div>
                   </section>
 
-                  <section className="vx-dining-body">
-                    <div className="vx-dining-section-head">
-                      <div>
-                        <span>MICHELIN SELECTED EXPERIENCES</span>
-                        <h3>Choose your experience</h3>
-                      </div>
-                    </div>
+                  <section className="vx-dining-venues">
+                    {experiences
+                      .filter(exp => exp.type?.toLowerCase() === "dining")
+                      .sort((a, b) => a.position - b.position)
+                      .map(exp => {
+                        const image =
+                          exp.image_url && exp.image_url.startsWith("http")
+                            ? exp.image_url
+                            : exp.name?.toLowerCase().includes("koyo")
+                            ? "/koyo.jpg"
+                            : exp.name?.toLowerCase().includes("shang")
+                            ? "/shang.jpg"
+                            : exp.name?.toLowerCase().includes("lumen")
+                            ? "/lumen1.jpg"
+                            : "/placeholder.jpg";
 
-                    <div className="vx-dining-venues">
-                      {experiences
-                        .filter(
-                          exp => exp.type?.toLowerCase() === "dining"
-                        )
-                        .sort((a, b) => a.position - b.position)
-                        .map(exp => {
-                          const image =
-                            exp.image_url &&
-                            exp.image_url.startsWith("http")
-                              ? exp.image_url
-                              : exp.name?.toLowerCase().includes("koyo")
-                              ? "/koyo.jpg"
-                              : exp.name?.toLowerCase().includes("shang")
-                              ? "/shang.jpg"
-                              : exp.name?.toLowerCase().includes("lumen")
-                              ? "/lumen1.jpg"
-                              : "/placeholder.jpg";
+                        const venueName = exp.name?.toLowerCase() || "";
 
-                          return (
-                            <button
-                              key={exp.id}
-                              className="vx-dining-venue"
-                              onClick={() => {
-                                setSelectedDining(exp.id);
-                                setOpenDiningVenue(exp.id);
-                              }}
-                            >
-                              <img src={image} alt={exp.name} />
+                        const cuisine = venueName.includes("koyo")
+                          ? "OMAKASE"
+                          : venueName.includes("shang")
+                          ? "CANTONESE CUISINE"
+                          : venueName.includes("lumen")
+                          ? "ALL DAY DINING"
+                          : "DINING EXPERIENCE";
 
-                              <div className="vx-dining-venue-copy">
-                                <small>DINING EXPERIENCE</small>
-                                <h4>{exp.name}</h4>
+                        return (
+                          <button
+                            key={exp.id}
+                            className="vx-dining-venue"
+                            onClick={() => {
+                              setSelectedDining(exp.id);
+                              setDiningTab("overview");
+                              setOpenDiningVenue(exp.id);
+                            }}
+                          >
+                            <img src={image} alt={exp.name} />
 
-                                {exp.schedule && <p>{exp.schedule}</p>}
+                            <div className="vx-dining-venue-copy">
+                              <small>{cuisine}</small>
+                              <h4>{exp.name}</h4>
 
-                                <span className="vx-dining-explore">
-                                  Explore <span aria-hidden="true">→</span>
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                    </div>
+                              {exp.schedule && <p>{exp.schedule}</p>}
+
+                              <span className="vx-dining-explore">
+                                Explore <span aria-hidden="true">→</span>
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
                   </section>
-                </>
+                </div>
               ) : (
                 experiences
                   .filter(
@@ -815,90 +820,206 @@ textAlign:"center"
                         ? "/lumen1.jpg"
                         : "/placeholder.jpg";
 
+                    const venueName = exp.name?.toLowerCase() || "";
+
+                    const cuisine = venueName.includes("koyo")
+                      ? "OMAKASE"
+                      : venueName.includes("shang")
+                      ? "CANTONESE CUISINE"
+                      : venueName.includes("lumen")
+                      ? "ALL DAY DINING"
+                      : "THE BURMAN · DINING";
+
+                    const overviewCopy = venueName.includes("koyo")
+                      ? "An intimate omakase experience guided by seasonality, precision and Japanese craft."
+                      : venueName.includes("shang")
+                      ? "An elevated interpretation of Cantonese cuisine where signature dishes, precise technique and warm hospitality define the experience."
+                      : venueName.includes("lumen")
+                      ? "A relaxed dining experience designed around the rhythm of the day, from unhurried mornings to elegant evenings."
+                      : "A distinctive dining experience shaped by character, craft and exceptional hospitality.";
+
                     return (
-                      <div key={exp.id} className="vx-dining-detail">
-                        <section className="vx-dining-detail-hero">
+                      <div key={exp.id} className="vx-dining-hub">
+                        <section className="vx-dining-hub-hero">
                           <img src={image} alt={exp.name} />
 
                           <button
                             className="vx-dining-back"
-                            onClick={() => setOpenDiningVenue(null)}
+                            onClick={() => {
+                              setOpenDiningVenue(null);
+                              setDiningTab("overview");
+                            }}
                           >
-                            ← Dining
+                            ← Back to Dining
                           </button>
 
-                          <div className="vx-dining-detail-copy">
-                            <span className="vx-dining-kicker">
-                              THE BURMAN · DINING
-                            </span>
-
+                          <div className="vx-dining-hub-copy">
+                            <span className="vx-dining-kicker">{cuisine}</span>
                             <h2>{exp.name}</h2>
+                            <p>{overviewCopy}</p>
 
-                            {exp.schedule && (
-                              <div className="vx-dining-schedule">
-                                {exp.schedule}
-                              </div>
-                            )}
+                            <div className="vx-dining-hub-meta">
+                              <span>{exp.schedule || "Contact Reception"}</span>
+                              <span>The Burman · Tallinn</span>
+                            </div>
+                          </div>
+
+                          <div className="vx-dining-request">
+                            <span>
+                              <small>REQUEST A TABLE</small>
+                              Contact Reception
+                            </span>
+                            <span aria-hidden="true">→</span>
                           </div>
                         </section>
 
-                        <section className="vx-dining-menu">
-                          {exp.experience_sections
-                            ?.filter(
-                              section =>
-                                section.experience_items?.length
-                            )
-                            ?.sort((a, b) => a.position - b.position)
-                            .map(section => (
-                              <div
-                                key={section.id}
-                                className="burman-spa-section"
-                              >
-                                <h3>{section.name}</h3>
+                        <nav className="vx-dining-tabs" aria-label="Dining sections">
+                          {[
+                            ["overview", "Overview"],
+                            ["menu", "Menu"],
+                            ["wine", "Wine"],
+                            ["private", "Private Dining"],
+                          ].map(([key, label]) => (
+                            <button
+                              key={key}
+                              className={
+                                diningTab === key
+                                  ? "vx-dining-tab active"
+                                  : "vx-dining-tab"
+                              }
+                              onClick={() => setDiningTab(key)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </nav>
 
-                                {section.experience_items
-                                  ?.sort(
-                                    (a, b) => a.position - b.position
-                                  )
-                                  .map(item => {
-                                    const price =
-                                      item.experience_prices?.[0]?.price;
-                                    const label =
-                                      item.experience_prices?.[0]?.label;
+                        <div className="vx-dining-hub-body">
+                          {diningTab === "overview" && (
+                            <section className="vx-dining-overview">
+                              <div className="vx-dining-about">
+                                <span className="vx-dining-section-label">ABOUT</span>
+                                <p>{overviewCopy}</p>
 
-                                    return (
-                                      <div
-                                        key={item.id}
-                                        className="burman-spa-item"
-                                      >
-                                        <div>
-                                          <h4>{item.name}</h4>
+                                <div className="vx-dining-info-grid">
+                                  <div className="vx-dining-info-card">
+                                    <span>ATTIRE</span>
+                                    <strong>Smart casual</strong>
+                                  </div>
 
-                                          {item.description && (
-                                            <p>{item.description}</p>
-                                          )}
-                                        </div>
-
-                                        {price && (
-                                          <span className="burman-price">
-                                            {label && (
-                                              <span>{label} — </span>
-                                            )}
-                                            €{price}
-                                          </span>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                                  <div className="vx-dining-info-card">
+                                    <span>RESERVATIONS</span>
+                                    <strong>Contact Reception</strong>
+                                  </div>
+                                </div>
                               </div>
-                            ))}
 
-                          {exp.footer?.trim() && (
-                            <div className="burman-disclaimer">
-                              {exp.footer}
-                            </div>
+                              <div className="vx-dining-highlights">
+                                <span className="vx-dining-section-label">
+                                  SIGNATURE HIGHLIGHTS
+                                </span>
+
+                                <div className="vx-dining-highlight-grid">
+                                  {exp.experience_sections
+                                    ?.flatMap(section =>
+                                      [...(section.experience_items || [])].sort(
+                                        (a, b) => a.position - b.position
+                                      )
+                                    )
+                                    .slice(0, 4)
+                                    .map(item => (
+                                      <button
+                                        key={item.id}
+                                        className="vx-dining-highlight"
+                                        onClick={() => setDiningTab("menu")}
+                                      >
+                                        <h4>{item.name}</h4>
+                                        <p>
+                                          {item.description || "Discover on the menu"}
+                                        </p>
+                                        <span>View menu →</span>
+                                      </button>
+                                    ))}
+                                </div>
+                              </div>
+                            </section>
                           )}
-                        </section>
+
+                          {diningTab === "menu" && (
+                            <section className="vx-dining-menu">
+                              <div className="vx-dining-menu-heading">
+                                <span className="vx-dining-section-label">MENU</span>
+                                <h3>Discover the menu</h3>
+                              </div>
+
+                              {exp.experience_sections
+                                ?.filter(section => section.experience_items?.length)
+                                ?.sort((a, b) => a.position - b.position)
+                                .map(section => (
+                                  <div key={section.id} className="burman-spa-section">
+                                    <h3>{section.name}</h3>
+
+                                    {section.experience_items
+                                      ?.sort((a, b) => a.position - b.position)
+                                      .map(item => {
+                                        const price =
+                                          item.experience_prices?.[0]?.price;
+                                        const label =
+                                          item.experience_prices?.[0]?.label;
+
+                                        return (
+                                          <div key={item.id} className="burman-spa-item">
+                                            <div>
+                                              <h4>{item.name}</h4>
+                                              {item.description && (
+                                                <p>{item.description}</p>
+                                              )}
+                                            </div>
+
+                                            {price && (
+                                              <span className="burman-price">
+                                                {label && <span>{label} — </span>}
+                                                €{price}
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                ))}
+
+                              {exp.footer?.trim() && (
+                                <div className="burman-disclaimer">
+                                  {exp.footer}
+                                </div>
+                              )}
+                            </section>
+                          )}
+
+                          {diningTab === "wine" && (
+                            <section className="vx-dining-placeholder">
+                              <span className="vx-dining-section-label">WINE</span>
+                              <h3>Wine selected for the experience</h3>
+                              <p>
+                                For recommendations, please contact Reception
+                                or our restaurant team.
+                              </p>
+                            </section>
+                          )}
+
+                          {diningTab === "private" && (
+                            <section className="vx-dining-placeholder">
+                              <span className="vx-dining-section-label">
+                                PRIVATE DINING
+                              </span>
+                              <h3>A more private experience</h3>
+                              <p>
+                                For private dining requests, celebrations or
+                                tailored experiences, please contact Reception.
+                              </p>
+                            </section>
+                          )}
+                        </div>
                       </div>
                     );
                   })
