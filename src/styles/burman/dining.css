@@ -1,0 +1,1477 @@
+
+@keyframes vxDiningModalIn{
+  from{
+    opacity:0;
+    transform:translateY(24px) scale(.985);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+@keyframes vxDiningImageIn{
+  from{
+    transform:scale(1.05);
+  }
+
+  to{
+    transform:scale(1);
+  }
+}
+
+@keyframes vxDiningTextIn{
+  from{
+    opacity:0;
+    transform:translateY(22px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes vxDiningVenueIn{
+  from{
+    opacity:0;
+    transform:translateY(28px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.burman-dining-card-wrapper {
+  margin-bottom: 50px;
+}
+
+.burman-dining-card {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 16px;
+  transition: transform 0.6s ease;
+}
+
+.burman-dining-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+}
+
+.burman-dining-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 1.2s ease;
+}
+
+.burman-dining-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0.2)
+  );
+}
+
+.burman-dining-overlay h3 {
+  color: white;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+}
+
+.burman-dining-overlay p {
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.vx-dining-modal {
+  z-index: 4000;
+  background: transparent;
+}
+
+.vx-dining-modal .burman-modal-content {
+  width: min(1360px,94vw);
+  max-width: none;
+  height: 90dvh;
+  max-height: 90dvh;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #f4f0ea;
+  border: 1px solid rgba(58,42,36,.10);
+  box-shadow: 0 40px 120px rgba(0,0,0,.28);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.vx-dining-modal .burman-modal-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.vx-dining-modal .burman-modal-close {
+  position: fixed;
+  top: clamp(28px,4vw,52px);
+  right: clamp(28px,4vw,52px);
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 999px;
+  background: rgba(20,18,16,.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
+  font-size: 16px;
+  z-index: 30;
+  cursor: pointer;
+}
+
+.vx-dining-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #f4f0ea;
+  overflow: hidden;
+}
+
+.vx-dining-intro {
+  position: relative;
+  min-height: clamp(420px,58dvh,620px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.vx-dining-intro-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vx-dining-intro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(12,10,8,.86) 0%,
+    rgba(12,10,8,.46) 45%,
+    rgba(12,10,8,.10) 100%
+  );
+}
+
+.vx-dining-intro-copy {
+  position: relative;
+  z-index: 2;
+  width: min(900px,88%);
+  padding: clamp(42px,6vw,88px);
+  color: #fff;
+}
+
+.vx-dining-kicker {
+  display: block;
+  margin-bottom: 18px;
+  color: #d8b36d;
+  font-size: 10px;
+  letter-spacing: .46em;
+  text-transform: uppercase;
+}
+
+.vx-dining-intro h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond",serif;
+  font-size: clamp(64px,8vw,118px);
+  line-height: .82;
+  font-weight: 300;
+  letter-spacing: -.025em;
+}
+
+.vx-dining-intro p {
+  max-width: 620px;
+  margin: 30px 0 0;
+  color: rgba(255,255,255,.86);
+  font-size: clamp(16px,1.35vw,21px);
+  line-height: 1.7;
+}
+
+.vx-dining-modal .vx-dining-body {
+  width: min(1180px,calc(100% - 80px));
+  margin: 0 auto;
+  padding: clamp(34px,4vw,58px)
+    0
+    clamp(42px,5vw,70px);
+}
+
+.vx-dining-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 38px;
+}
+
+.vx-dining-section-head span {
+  color: #9b7d52;
+  font-size: 10px;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+}
+
+.vx-dining-section-head h3 {
+  margin: 12px 0 0;
+  font-family: "Cormorant Garamond",serif;
+  font-size: clamp(42px,5vw,72px);
+  line-height: .95;
+  font-weight: 300;
+  color: #2d241f;
+}
+
+.vx-dining-modal .vx-dining-venues {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: clamp(14px,2vw,24px);
+  margin-top: 30px;
+}
+
+.vx-dining-venue {
+  position: relative;
+  height: clamp(280px,32vw,420px);
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  background: #1b1714;
+  cursor: pointer;
+  text-align: left;
+}
+
+.vx-dining-venue img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+
+.vx-dining-venue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10,8,7,.88) 0%,
+    rgba(10,8,7,.30) 48%,
+    rgba(10,8,7,.04) 100%
+  );
+}
+
+.vx-dining-venue:hover img {
+  transform: scale(1.04);
+}
+
+.vx-dining-venue-copy {
+  position: absolute;
+  z-index: 2;
+  left: clamp(26px,3vw,44px);
+  right: clamp(26px,3vw,44px);
+  bottom: clamp(28px,3vw,46px);
+  color: #fff;
+}
+
+.vx-dining-venue-copy small {
+  color: #d8b36d;
+  font-size: 9px;
+  letter-spacing: .38em;
+  text-transform: uppercase;
+}
+
+.vx-dining-venue-copy h4 {
+  margin: 12px 0 8px;
+  font-family: "Cormorant Garamond",serif;
+  font-size: clamp(42px,4.6vw,72px);
+  line-height: .9;
+  font-weight: 300;
+}
+
+.vx-dining-venue-copy p {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.vx-dining-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+}
+
+.vx-dining-detail {
+  animation: burmanFade .45s ease;
+}
+
+.vx-dining-detail-hero {
+  position: relative;
+  min-height: clamp(430px,62dvh,680px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.vx-dining-detail-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vx-dining-detail-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10,8,7,.92) 0%,
+    rgba(10,8,7,.38) 52%,
+    rgba(10,8,7,.08) 100%
+  );
+}
+
+.vx-dining-back {
+  position: absolute;
+  top: clamp(28px,4vw,52px);
+  left: clamp(28px,4vw,52px);
+  z-index: 4;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.vx-dining-detail-copy {
+  position: relative;
+  z-index: 2;
+  padding: clamp(46px,6vw,88px);
+  color: #fff;
+}
+
+.vx-dining-detail-copy h2 {
+  margin: 12px 0 0;
+  font-family: "Cormorant Garamond",serif;
+  font-size: clamp(70px,9vw,132px);
+  line-height: .8;
+  font-weight: 300;
+  letter-spacing: -.03em;
+}
+
+.vx-dining-schedule {
+  margin-top: 24px;
+  color: rgba(255,255,255,.76);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.vx-dining-menu {
+  width: min(1040px,calc(100% - 80px));
+  margin: 0 auto;
+  padding: clamp(28px,3vw,44px)
+    0
+    80px;
+}
+
+.vx-dining-menu .burman-spa-section {
+  position: relative;
+  margin-bottom: clamp(48px,5vw,72px);
+}
+
+.vx-dining-menu .burman-spa-section h3 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 0 20px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid
+    rgba(58,42,36,.14);
+  color: #332720;
+  font-family: "Cormorant Garamond",
+    Georgia,
+    serif;
+  font-size: clamp(30px,3vw,42px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.vx-dining-menu .burman-spa-section h3::before,
+.vx-dining-menu .burman-spa-section h3::after {
+  display: none;
+}
+
+.vx-dining-menu .burman-spa-item {
+  display: grid;
+  grid-template-columns: minmax(0,1fr)
+    auto;
+  align-items: start;
+  gap: clamp(30px,5vw,80px);
+  padding: 18px
+    0;
+  border-bottom: 1px solid
+    rgba(58,42,36,.075);
+}
+
+.vx-dining-menu .burman-spa-item h4 {
+  margin: 0 0 5px;
+  color: #30251f;
+  font-family: "Cormorant Garamond",
+    Georgia,
+    serif;
+  font-size: clamp(19px,1.7vw,24px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -.01em;
+}
+
+.vx-dining-menu .burman-spa-item p {
+  margin: 0;
+  max-width: 650px;
+  color: #76533f;
+  font-size: clamp(11px,1vw,13px);
+  line-height: 1.7;
+  letter-spacing: .01em;
+}
+
+.vx-dining-menu .burman-price {
+  padding-top: 4px;
+  color: #76533f;
+  font-family: "Cormorant Garamond",
+    Georgia,
+    serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: .02em;
+}
+
+.vx-dining-modal > .burman-modal-backdrop {
+  background: rgba(0,0,0,.28);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.vx-dining-modal > .burman-modal-content {
+  background: transparent;
+  animation: vxDiningModalIn
+    .65s
+    cubic-bezier(.22,1,.36,1)
+    both;
+  transform-origin: center;
+  box-shadow: 0 45px 130px rgba(0,0,0,.38);
+  border: 1px solid rgba(255,255,255,.18);
+}
+
+.vx-dining-modal .vx-dining-shell {
+  background: #f4f0ea;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.vx-dining-modal
+.vx-dining-intro
+> .vx-dining-intro-image {
+  animation: vxDiningImageIn
+    1.6s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+.vx-dining-modal
+.vx-dining-intro-copy {
+  animation: vxDiningTextIn
+    .8s
+    .18s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+.vx-dining-modal
+.vx-dining-section-head {
+  animation: vxDiningTextIn
+    .75s
+    .28s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+.vx-dining-modal
+.vx-dining-venue {
+  opacity: 0;
+  animation: vxDiningVenueIn
+    .8s
+    cubic-bezier(.22,1,.36,1)
+    both;
+  transition: transform .5s cubic-bezier(.22,1,.36,1),
+    box-shadow .5s ease;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(1) {
+  animation-delay: .36s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(2) {
+  animation-delay: .48s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(3) {
+  animation-delay: .60s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:nth-child(4) {
+  animation-delay: .72s;
+}
+
+.vx-dining-modal
+.vx-dining-venue:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 70px rgba(25,18,13,.22);
+}
+
+.vx-dining-modal
+.vx-dining-venue:active {
+  transform: scale(.99);
+}
+
+.vx-dining-modal
+.vx-dining-venue img {
+  transition: transform
+    1.2s
+    cubic-bezier(.22,1,.36,1);
+}
+
+.vx-dining-modal
+.vx-dining-venue:hover img {
+  transform: scale(1.05);
+}
+
+.vx-dining-modal
+.vx-dining-explore span {
+  display: inline-block;
+  transition: transform
+    .4s
+    cubic-bezier(.22,1,.36,1);
+}
+
+.vx-dining-modal
+.vx-dining-venue:hover
+.vx-dining-explore span {
+  transform: translateX(6px);
+}
+
+.vx-dining-modal
+.vx-dining-detail-hero img {
+  animation: vxDiningImageIn
+    1.5s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+.vx-dining-modal
+.vx-dining-detail-copy {
+  animation: vxDiningTextIn
+    .8s
+    .16s
+    cubic-bezier(.22,1,.36,1)
+    both;
+}
+
+.vx-dining-modal
+.vx-dining-back {
+  transition: transform .35s cubic-bezier(.22,1,.36,1),
+    opacity .35s ease;
+}
+
+.vx-dining-modal
+.vx-dining-back:hover {
+  transform: translateX(-4px);
+  opacity: .7;
+}
+
+.vx-dining-modal .vx-dining-discovery {
+  min-height: 100%;
+  padding: clamp(42px,5vw,76px)
+    clamp(34px,5vw,82px)
+    clamp(46px,5vw,78px);
+  background: linear-gradient(
+      135deg,
+      #f6f1e9 0%,
+      #eee7dd 100%
+    );
+}
+
+.vx-dining-modal .vx-dining-discovery-copy {
+  max-width: 620px;
+  margin-bottom: 34px;
+}
+
+.vx-dining-modal .vx-dining-discovery-copy h2 {
+  margin: 14px 0 18px;
+  color: #33241f;
+  font-family: Georgia,"Times New Roman",serif;
+  font-size: clamp(38px,4.2vw,62px);
+  font-weight: 400;
+  line-height: .96;
+  letter-spacing: -.04em;
+}
+
+.vx-dining-modal .vx-dining-discovery-copy > p {
+  max-width: 480px;
+  margin: 0;
+  color: #776c64;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.vx-dining-modal .vx-dining-assistance {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: max-content;
+  max-width: 100%;
+  margin-top: 24px;
+  padding: 14px 20px;
+  border: 1px solid
+    rgba(93,72,59,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.42);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.vx-dining-modal .vx-dining-assistance > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  background: #8f3d2d;
+  color: white;
+  font-size: 13px;
+}
+
+.vx-dining-modal .vx-dining-assistance p {
+  margin: 0;
+  color: #75675f;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.vx-dining-modal .vx-dining-assistance strong {
+  color: #352620;
+  font-weight: 500;
+}
+
+.vx-dining-modal .vx-dining-venue {
+  position: relative;
+  height: clamp(300px,32vw,430px);
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 18px;
+  background: #241d19;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 22px 55px
+    rgba(45,31,24,.16);
+  isolation: isolate;
+}
+
+.vx-dining-modal .vx-dining-venue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+      to top,
+      rgba(13,9,7,.88) 0%,
+      rgba(13,9,7,.48) 40%,
+      rgba(13,9,7,.05) 74%
+    );
+  pointer-events: none;
+}
+
+.vx-dining-modal .vx-dining-venue > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.01);
+  transition: transform
+    1s
+    cubic-bezier(.22,1,.36,1);
+}
+
+.vx-dining-modal .vx-dining-venue-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: clamp(24px,3vw,38px);
+}
+
+.vx-dining-modal .vx-dining-venue-copy small {
+  display: block;
+  margin-bottom: 10px;
+  color: rgba(255,255,255,.68);
+  font-size: 9px;
+  letter-spacing: .27em;
+  text-transform: uppercase;
+}
+
+.vx-dining-modal .vx-dining-venue-copy h4 {
+  margin: 0 0 10px;
+  color: #fff;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(27px,3vw,42px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.vx-dining-modal .vx-dining-venue-copy p {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.vx-dining-modal .vx-dining-explore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid
+    rgba(255,255,255,.18);
+  color: white;
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.vx-dining-modal .vx-dining-venue:hover > img {
+  transform: scale(1.055);
+}
+
+.vx-dining-modal .vx-dining-hub {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f4f0ea;
+}
+
+.vx-dining-modal .vx-dining-hub-hero {
+  position: relative;
+  height: clamp(280px,34vw,420px);
+  overflow: hidden;
+  background: #211914;
+  isolation: isolate;
+}
+
+.vx-dining-modal .vx-dining-hub-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+      90deg,
+      rgba(14,9,7,.82) 0%,
+      rgba(14,9,7,.55) 42%,
+      rgba(14,9,7,.12) 75%
+    );
+  pointer-events: none;
+}
+
+.vx-dining-modal .vx-dining-hub-hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.01);
+}
+
+.vx-dining-modal .vx-dining-back {
+  position: absolute;
+  top: 30px;
+  left: 34px;
+  z-index: 3;
+  padding: 10px 16px;
+  border: 1px solid
+    rgba(255,255,255,.25);
+  border-radius: 999px;
+  background: rgba(15,10,8,.20);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: rgba(255,255,255,.88);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.vx-dining-modal .vx-dining-hub-copy {
+  position: absolute;
+  left: clamp(36px,6vw,90px);
+  bottom: clamp(44px,6vw,80px);
+  z-index: 2;
+  width: min(560px,58%);
+}
+
+.vx-dining-modal .vx-dining-hub-copy h2 {
+  margin: 14px 0 18px;
+  color: #fff;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(48px,6vw,86px);
+  font-weight: 400;
+  line-height: .92;
+  letter-spacing: -.045em;
+}
+
+.vx-dining-modal .vx-dining-hub-copy > p {
+  max-width: 500px;
+  margin: 0;
+  color: rgba(255,255,255,.78);
+  font-size: clamp(13px,1.3vw,17px);
+  line-height: 1.7;
+}
+
+.vx-dining-modal .vx-dining-hub-meta {
+  display: flex;
+  gap: 24px;
+  margin-top: 22px;
+  color: rgba(255,255,255,.62);
+  font-size: 9px;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+.vx-dining-modal .vx-dining-request {
+  position: absolute;
+  right: clamp(34px,5vw,72px);
+  bottom: clamp(44px,6vw,78px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 34px;
+  width: clamp(220px,25vw,310px);
+  padding: 20px 22px;
+  border: 1px solid
+    rgba(255,255,255,.20);
+  border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: white;
+}
+
+.vx-dining-modal .vx-dining-request span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.vx-dining-modal .vx-dining-request small {
+  color: rgba(255,255,255,.60);
+  font-size: 8px;
+  letter-spacing: .24em;
+}
+
+.vx-dining-modal .vx-dining-request > span:last-child {
+  font-size: 20px;
+}
+
+.vx-dining-modal .vx-dining-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px,5vw,72px);
+  min-height: 74px;
+  padding: 0 28px;
+  border-bottom: 1px solid
+    rgba(73,52,42,.10);
+  background: rgba(244,240,234,.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.vx-dining-modal .vx-dining-tab {
+  position: relative;
+  height: 74px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #9b8c82;
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.vx-dining-modal .vx-dining-tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: #8f3d2d;
+  transform: scaleX(0);
+  transition: transform
+    .35s
+    cubic-bezier(.22,1,.36,1);
+}
+
+.vx-dining-modal .vx-dining-tab.active {
+  color: #3a2922;
+}
+
+.vx-dining-modal .vx-dining-tab.active::after {
+  transform: scaleX(1);
+}
+
+.vx-dining-modal .vx-dining-hub-body {
+  flex: 1;
+  min-height: 0;
+  padding: clamp(28px,3vw,48px)
+    clamp(34px,6vw,90px)
+    clamp(28px,3vw,48px);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.vx-dining-modal .vx-dining-hub-body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.vx-dining-modal .vx-dining-menu {
+  width: min(1040px,calc(100% - 80px));
+  min-height: max-content;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+  padding: clamp(28px,3vw,44px)
+    0
+    80px;
+  touch-action: pan-y;
+}
+
+.vx-dining-modal .vx-dining-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.vx-dining-modal .vx-dining-placeholder {
+  height: 100%;
+  overflow: hidden;
+  width: min(680px,100%);
+  margin: 30px auto 80px;
+  text-align: center;
+}
+
+.vx-dining-modal .vx-dining-overview {
+  display: grid;
+  grid-template-columns: minmax(0,.72fr)
+    minmax(0,1.4fr);
+  gap: clamp(36px,5vw,80px);
+  align-items: start;
+}
+
+.vx-dining-modal .vx-dining-section-label {
+  display: block;
+  margin-bottom: 24px;
+  color: #9b8478;
+  font-size: 10px;
+  letter-spacing: .30em;
+  text-transform: uppercase;
+}
+
+.vx-dining-modal .vx-dining-about h3 {
+  margin: 0 0 14px;
+  color: #3a2922;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(26px,2.5vw,38px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+.vx-dining-modal .vx-dining-about > p {
+  margin: 0;
+  color: #55463e;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(15px,1.35vw,19px);
+  line-height: 1.42;
+}
+
+.vx-dining-modal .vx-dining-about-secondary {
+  margin-top: 14px !important;
+  color: #887970 !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  line-height: 1.55 !important;
+}
+
+.vx-dining-modal .vx-dining-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.vx-dining-modal .vx-dining-info-card {
+  padding: 20px;
+  border: 1px solid
+    rgba(80,58,47,.10);
+  border-radius: 12px;
+  background: rgba(255,255,255,.38);
+}
+
+.vx-dining-modal .vx-dining-info-card span {
+  display: block;
+  margin-bottom: 9px;
+  color: #a19086;
+  font-size: 8px;
+  letter-spacing: .22em;
+}
+
+.vx-dining-modal .vx-dining-info-card strong {
+  color: #3c2d26;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vx-dining-modal .vx-dining-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 14px;
+}
+
+.vx-dining-modal .vx-dining-highlight {
+  min-height: 180px;
+  padding: 26px;
+  border: 1px solid
+    rgba(78,56,45,.10);
+  border-radius: 14px;
+  background: rgba(255,255,255,.42);
+  text-align: left;
+  cursor: pointer;
+  transition: transform .35s
+    cubic-bezier(.22,1,.36,1),
+    box-shadow .35s ease;
+}
+
+.vx-dining-modal .vx-dining-highlight h4 {
+  margin: 0 0 12px;
+  color: #392a23;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(20px,2vw,28px);
+  font-weight: 400;
+}
+
+.vx-dining-modal .vx-dining-highlight p {
+  margin: 0;
+  color: #897a71;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.vx-dining-modal .vx-dining-highlight > span {
+  display: block;
+  margin-top: 24px;
+  color: #8f3d2d;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.vx-dining-modal .vx-dining-highlight:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 42px
+    rgba(45,31,24,.10);
+}
+
+.vx-dining-modal .vx-dining-menu-heading {
+  margin-bottom: 54px;
+  text-align: center;
+}
+
+.vx-dining-modal .vx-dining-menu-heading h3 {
+  margin: 0;
+  color: #392a23;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(38px,5vw,68px);
+  font-weight: 400;
+}
+
+.vx-dining-modal .vx-dining-placeholder h3 {
+  margin: 0 0 22px;
+  color: #392a23;
+  font-family: Georgia,
+    "Times New Roman",
+    serif;
+  font-size: clamp(38px,5vw,64px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.vx-dining-modal .vx-dining-placeholder p {
+  margin: 0;
+  color: #82736a;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+@media (max-width:900px) {
+
+  .vx-dining-modal .burman-modal-content {
+    width: calc(100vw - 64px);
+    height: auto;
+    max-height: calc(100dvh - 64px);
+    border-radius: 24px;
+  }
+
+  .vx-dining-body,
+  .vx-dining-menu {
+    width: calc(100% - 40px);
+  }
+
+  .vx-dining-venues {
+    grid-template-columns: 1fr;
+  }
+
+  .vx-dining-venue {
+    height: clamp(260px,52vw,360px);
+    min-height: 0;
+  }
+
+  .vx-dining-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+}
+
+@media (max-width:768px) {
+
+  .vx-dining-menu {
+    width: calc(100% - 36px);
+    padding: 34px
+      0
+      70px;
+  }
+
+  .vx-dining-menu .burman-spa-section {
+    margin-bottom: 58px;
+  }
+
+  .vx-dining-menu .burman-spa-section h3 {
+    font-size: 36px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+  }
+
+  .vx-dining-menu .burman-spa-item {
+    gap: 20px;
+    padding: 18px
+      0;
+  }
+
+  .vx-dining-menu .burman-spa-item h4 {
+    font-size: 21px;
+  }
+
+  .vx-dining-menu .burman-price {
+    font-size: 15px;
+  }
+
+  .vx-dining-modal .vx-dining-discovery {
+    padding: 42px 20px 36px;
+  }
+
+  .vx-dining-modal .vx-dining-discovery-copy h2 {
+    font-size: 44px;
+  }
+
+  .vx-dining-modal .vx-dining-assistance {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .vx-dining-modal .vx-dining-venues {
+    grid-template-columns: 1fr;
+  }
+
+  .vx-dining-modal .vx-dining-venue {
+    height: 330px;
+  }
+
+  .vx-dining-modal .vx-dining-hub-hero {
+    height: 560px;
+  }
+
+  .vx-dining-modal .vx-dining-hub-hero::after {
+    background: linear-gradient(
+        to top,
+        rgba(14,9,7,.92) 0%,
+        rgba(14,9,7,.50) 58%,
+        rgba(14,9,7,.12) 100%
+      );
+  }
+
+  .vx-dining-modal .vx-dining-hub-copy {
+    left: 24px;
+    right: 24px;
+    bottom: 138px;
+    width: auto;
+  }
+
+  .vx-dining-modal .vx-dining-hub-copy h2 {
+    font-size: 54px;
+  }
+
+  .vx-dining-modal .vx-dining-request {
+    left: 24px;
+    right: 24px;
+    bottom: 26px;
+    width: auto;
+  }
+
+  .vx-dining-modal .vx-dining-tabs {
+    justify-content: flex-start;
+    gap: 30px;
+    overflow-x: auto;
+    padding: 0 24px;
+    scrollbar-width: none;
+  }
+
+  .vx-dining-modal .vx-dining-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vx-dining-modal .vx-dining-tab {
+    flex: 0 0 auto;
+  }
+
+  .vx-dining-modal .vx-dining-hub-body {
+    padding: 48px 24px 70px;
+  }
+
+  .vx-dining-modal .vx-dining-overview {
+    grid-template-columns: 1fr;
+    gap: 54px;
+  }
+
+  .vx-dining-modal .vx-dining-highlight-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (hover:hover) {
+
+  .vx-dining-menu .burman-spa-item:hover {
+    opacity: .72;
+    transform: translateX(4px);
+  }
+
+}
+
+@media (min-width:769px) and (max-width:1200px) {
+
+  .vx-dining-menu {
+    width: calc(100% - 72px);
+    padding-top: 42px;
+  }
+
+  .vx-dining-menu .burman-spa-section {
+    margin-bottom: 76px;
+  }
+
+  .vx-dining-menu .burman-spa-section h3 {
+    font-size: 42px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+  }
+
+  .vx-dining-menu .burman-spa-item {
+    padding: 20px
+      0;
+    gap: 36px;
+  }
+
+  .vx-dining-menu .burman-spa-item h4 {
+    font-size: 23px;
+  }
+
+  .vx-dining-modal .vx-dining-discovery {
+    padding: 38px 48px
+      44px;
+  }
+
+  .vx-dining-modal .vx-dining-discovery-copy {
+    margin-bottom: 30px;
+  }
+
+  .vx-dining-modal .vx-dining-discovery-copy h2 {
+    font-size: 48px;
+  }
+
+  .vx-dining-modal .vx-dining-venue {
+    height: 348px;
+  }
+
+  .vx-dining-modal .vx-dining-hub-hero {
+    height: 420px;
+  }
+
+  .vx-dining-modal .vx-dining-hub-copy {
+    left: 46px;
+    bottom: 48px;
+    width: 52%;
+  }
+
+  .vx-dining-modal .vx-dining-hub-copy h2 {
+    font-size: clamp(50px,7vw,72px);
+  }
+
+  .vx-dining-modal .vx-dining-request {
+    right: 38px;
+    bottom: 48px;
+    width: 230px;
+  }
+
+  .vx-dining-modal .vx-dining-tabs {
+    gap: 42px;
+  }
+
+  .vx-dining-modal .vx-dining-hub-body {
+    padding: 24px 38px 28px;
+  }
+
+  .vx-dining-modal .vx-dining-overview {
+    grid-template-columns: .72fr 1.28fr;
+    gap: 34px;
+  }
+
+  .vx-dining-modal .vx-dining-section-label {
+    margin-bottom: 14px;
+  }
+
+  .vx-dining-modal .vx-dining-about h3 {
+    margin-bottom: 10px;
+    font-size: 28px;
+  }
+
+  .vx-dining-modal .vx-dining-about > p {
+    font-size: 14px;
+    line-height: 1.34;
+  }
+
+  .vx-dining-modal .vx-dining-info-grid {
+    margin-top: 14px;
+    gap: 8px;
+  }
+
+  .vx-dining-modal .vx-dining-info-card {
+    padding: 14px;
+  }
+
+  .vx-dining-modal .vx-dining-highlight-grid {
+    gap: 10px;
+  }
+
+  .vx-dining-modal .vx-dining-highlight {
+    min-height: 150px;
+    padding: 18px;
+  }
+
+}
+
+@media (prefers-reduced-motion:reduce) {
+
+  .vx-dining-modal,
+  .vx-dining-modal * {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: .01ms !important;
+  }
+
+}
