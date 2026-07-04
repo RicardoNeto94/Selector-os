@@ -859,8 +859,7 @@ textAlign:"center"
                             <p>{overviewCopy}</p>
 
                             <div className="vx-dining-hub-meta">
-                              <span>{exp.schedule || "Contact Reception"}</span>
-                              <span>The Burman · Tallinn</span>
+                              <span>{exp.schedule || "The Burman · Tallinn"}</span>
                             </div>
                           </div>
 
@@ -898,10 +897,29 @@ textAlign:"center"
                           {diningTab === "overview" && (
                             <section className="vx-dining-overview">
                               <div className="vx-dining-about">
-                                <span className="vx-dining-section-label">ABOUT</span>
-                                <p>{overviewCopy}</p>
+  <span className="vx-dining-section-label">
+    ABOUT
+  </span>
 
-                                <div className="vx-dining-info-grid">
+  {venueName.includes("shang") ? (
+    <>
+      <h3>Tradition, reimagined.</h3>
+
+      <p>
+        From handcrafted Dim Sum to The Lengendary Peking Duck, dishes are prepared
+        with exceptional ingredients, each experience is shaped
+        by technique, generosity and a respect for tradition. 
+        </p>
+      <p>
+        Shang Shi brings the depth and precision of Cantonese
+        cuisine to Tallinn.
+      </p>
+    </>
+  ) : (
+    <p>{overviewCopy}</p>
+  )}
+
+  <div className="vx-dining-info-grid">
                                   <div className="vx-dining-info-card">
                                     <span>ATTIRE</span>
                                     <strong>Smart casual</strong>
@@ -909,46 +927,133 @@ textAlign:"center"
 
                                   <div className="vx-dining-info-card">
                                     <span>RESERVATIONS</span>
-                                    <strong>Contact Reception</strong>
+                                    <strong>Available through the hotel reception</strong>
                                   </div>
                                 </div>
                               </div>
 
                               <div className="vx-dining-highlights">
-                                <span className="vx-dining-section-label">
-                                  SIGNATURE HIGHLIGHTS
-                                </span>
+  <span className="vx-dining-section-label">
+    {venueName.includes("shang")
+      ? "SIGNATURE EXPERIENCES"
+      : "SIGNATURE HIGHLIGHTS"}
+  </span>
 
-                                <div className="vx-dining-highlight-grid">
-                                  {exp.experience_sections
-                                    ?.flatMap(section =>
-                                      [...(section.experience_items || [])].sort(
-                                        (a, b) => a.position - b.position
-                                      )
-                                    )
-                                    .slice(0, 4)
-                                    .map(item => (
-                                      <button
-                                        key={item.id}
-                                        className="vx-dining-highlight"
-                                        onClick={() => setDiningTab("menu")}
-                                      >
-                                        <h4>{item.name}</h4>
-                                        <p>
-                                          {item.description || "Discover on the menu"}
-                                        </p>
-                                        <span>View menu →</span>
-                                      </button>
-                                    ))}
-                                </div>
-                              </div>
+  <div className="vx-dining-highlight-grid">
+    {venueName.includes("shang") ? (
+      <>
+        <button
+          className="vx-dining-highlight"
+          onClick={() => setDiningTab("menu")}
+        >
+          <span className="vx-dining-highlight-kicker">
+            SHANG SHI SIGNATURE
+          </span>
+
+          <h4>Peking Duck</h4>
+
+          <p>
+            A signature Cantonese ritual presented through
+            a refined three-course experience. (Only available in Shang Shi restaurant upon 24h advance request)
+          </p>
+
+          <span className="vx-dining-highlight-action">
+            Explore menu →
+          </span>
+        </button>
+
+        <button
+          className="vx-dining-highlight"
+          onClick={() => setDiningTab("menu")}
+        >
+          <span className="vx-dining-highlight-kicker">
+            HANDCRAFTED
+          </span>
+
+          <h4>Dim Sum</h4>
+
+          <p>
+            Delicate Cantonese craftsmanship shaped with
+            precision and served for sharing.
+          </p>
+
+          <span className="vx-dining-highlight-action">
+            Explore menu →
+          </span>
+        </button>
+
+        <button
+          className="vx-dining-highlight"
+          onClick={() => setDiningTab("menu")}
+        >
+          <span className="vx-dining-highlight-kicker">
+            SIGNATURE DISH
+          </span>
+
+          <h4>Kung Pao Prawns</h4>
+
+          <p>
+            Wok-fired prawns with cashew nuts, layered with spice, depth and classic Cantonese technique.
+          </p>
+
+          <span className="vx-dining-highlight-action">
+            Explore menu →
+          </span>
+        </button>
+
+        <button
+          className="vx-dining-highlight"
+          onClick={() => setDiningTab("wine")}
+        >
+          <span className="vx-dining-highlight-kicker">
+            THE CELLAR
+          </span>
+
+          <h4>Wine Collection</h4>
+
+          <p>
+            Explore a curated cellar selected to complement
+            the character of Cantonese cuisine.
+          </p>
+
+          <span className="vx-dining-highlight-action">
+            Discover wine →
+          </span>
+        </button>
+      </>
+    ) : (
+      exp.experience_sections
+        ?.flatMap(section =>
+          [...(section.experience_items || [])].sort(
+            (a, b) => a.position - b.position
+          )
+        )
+        .slice(0, 4)
+        .map(item => (
+          <button
+            key={item.id}
+            className="vx-dining-highlight"
+            onClick={() => setDiningTab("menu")}
+          >
+            <h4>{item.name}</h4>
+
+            <p>
+              {item.description || "Discover on the menu"}
+            </p>
+
+            <span>View menu →</span>
+          </button>
+        ))
+    )}
+  </div>
+</div>
                             </section>
                           )}
 
                           {diningTab === "menu" && (
                             <section className="vx-dining-menu">
                               <div className="vx-dining-menu-heading">
-                                <span className="vx-dining-section-label">MENU</span>
+                                <span className="vx-dining-section-label">MENU - Available from Wednesday to Saturday from 17:00 to 22:00</span>
                                 <h3>Discover the menu</h3>
                               </div>
 

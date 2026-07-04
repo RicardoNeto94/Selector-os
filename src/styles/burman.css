@@ -1919,13 +1919,30 @@ body{
 .vx-dining-modal .burman-modal-content{
   width:min(1360px,94vw);
   max-width:none;
+
+  height:90dvh;
   max-height:90dvh;
+
   padding:0;
-  overflow-y:auto;
+
+  overflow:hidden;
+
   border-radius:24px;
+
   background:#f4f0ea;
+
   border:1px solid rgba(58,42,36,.10);
+
   box-shadow:0 40px 120px rgba(0,0,0,.28);
+
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+.vx-dining-modal .burman-modal-content::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
 }
 
 .vx-dining-modal .burman-modal-close{
@@ -1948,10 +1965,14 @@ body{
 }
 
 .vx-dining-shell{
-  min-height:100%;
-  background:#f4f0ea;
-}
+  width:100%;
+  height:100%;
+  min-height:0;
 
+  background:#f4f0ea;
+
+  overflow:hidden;
+}
 /* ---------- Dining intro ---------- */
 
 .vx-dining-intro{
@@ -2206,59 +2227,277 @@ min-height:0;  padding:0;
 
 /* ---------- Dining menu list, scoped only inside Dining ---------- */
 
+/* ===========================================================
+   DINING MENU — EDITORIAL EXPERIENCE
+=========================================================== */
+
 .vx-dining-menu{
-  width:min(920px,calc(100% - 80px));
+  width:min(1040px,calc(100% - 80px));
+
   margin:0 auto;
-  padding:clamp(60px,7vw,100px) 0 110px;
+
+  padding:
+    clamp(28px,3vw,44px)
+    0
+    80px;
 }
+
+
+/* ================= MENU SECTION ================= */
 
 .vx-dining-menu .burman-spa-section{
-  margin-bottom:70px;
+  position:relative;
+
+  margin-bottom:
+    clamp(48px,5vw,72px);
 }
 
+
+/* ================= SECTION TITLE ================= */
+
 .vx-dining-menu .burman-spa-section h3{
-  justify-content:flex-start;
-  margin:0 0 28px;
-  font-family:"Cormorant Garamond",serif;
-  font-size:clamp(34px,4vw,54px);
-  line-height:1;
-  letter-spacing:0;
-  text-transform:none;
+  position:relative;
+
+  display:flex;
+  align-items:center;
+
+  margin:0 0 20px;
+
+  padding-bottom:16px;
+
+  border-bottom:
+    1px solid
+    rgba(58,42,36,.14);
+
+  color:#332720;
+
+  font-family:
+    "Cormorant Garamond",
+    Georgia,
+    serif;
+
+  font-size:
+    clamp(30px,3vw,42px);
+
   font-weight:300;
-  color:#2d241f;
+
+  line-height:1;
+
+  letter-spacing:.04em;
+
+  text-transform:uppercase;
 }
+
 
 .vx-dining-menu .burman-spa-section h3::before,
 .vx-dining-menu .burman-spa-section h3::after{
   display:none;
 }
 
-.vx-dining-menu .burman-spa-item{
-  padding:24px 0;
-  border-bottom:1px solid rgba(58,42,36,.10);
+
+/* subtle editorial line */
+
+.vx-dining-menu .burman-spa-section h3{
+  padding-bottom:26px;
+
+  border-bottom:
+    1px solid
+    rgba(58,42,36,.14);
 }
 
-.vx-dining-menu .burman-spa-item h4{
-  margin:0 0 7px;
-  font-family:"Cormorant Garamond",serif;
-  font-size:24px;
-  font-weight:400;
-  color:#2d241f;
+
+/* ================= MENU ITEM ================= */
+
+.vx-dining-menu .burman-spa-item{
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    auto;
+
+  align-items:start;
+
+  gap:
+    clamp(30px,5vw,80px);
+
+  padding:
+    18px
+    0;
+
+  border-bottom:
+    1px solid
+    rgba(58,42,36,.075);
 }
+
+
+/* ================= DISH NAME ================= */
+
+.vx-dining-menu .burman-spa-item h4{
+  margin:0 0 5px;
+
+  color:#30251f;
+
+  font-family:
+    "Cormorant Garamond",
+    Georgia,
+    serif;
+
+  font-size:
+    clamp(19px,1.7vw,24px);
+
+  font-weight:400;
+
+  line-height:1.15;
+
+  letter-spacing:-.01em;
+}
+
+
+/* ================= DESCRIPTION ================= */
 
 .vx-dining-menu .burman-spa-item p{
   margin:0;
-  max-width:620px;
-  color:#75675e;
-  font-size:13px;
+
+  max-width:650px;
+
+  color:#76533f;
+
+  font-size:
+    clamp(11px,1vw,13px);
+
   line-height:1.7;
+
+  letter-spacing:.01em;
 }
 
+
+/* ================= PRICE ================= */
+
 .vx-dining-menu .burman-price{
-  color:#6f4b38;
-  font-size:14px;
+  padding-top:4px;
+
+  color:#76533f;
+
+  font-family:
+    "Cormorant Garamond",
+    Georgia,
+    serif;
+
+  font-size:17px;
+
   font-weight:400;
+
+  line-height:1;
+
   white-space:nowrap;
+
+  letter-spacing:.02em;
+}
+
+
+/* ================= TOUCH FEEDBACK ================= */
+
+@media (hover:hover){
+
+  .vx-dining-menu .burman-spa-item:hover{
+    opacity:.72;
+
+    transform:
+      translateX(4px);
+  }
+
+}
+
+
+/* ================= IPAD ================= */
+
+@media (min-width:769px) and (max-width:1200px){
+
+  .vx-dining-menu{
+    width:
+      calc(100% - 72px);
+
+    padding-top:42px;
+  }
+
+
+  .vx-dining-menu .burman-spa-section{
+    margin-bottom:76px;
+  }
+
+
+  .vx-dining-menu .burman-spa-section h3{
+    font-size:42px;
+
+    margin-bottom:24px;
+
+    padding-bottom:20px;
+  }
+
+
+  .vx-dining-menu .burman-spa-item{
+    padding:
+      20px
+      0;
+
+    gap:36px;
+  }
+
+
+  .vx-dining-menu .burman-spa-item h4{
+    font-size:23px;
+  }
+
+}
+
+
+/* ================= IPHONE ================= */
+
+@media (max-width:768px){
+
+  .vx-dining-menu{
+    width:
+      calc(100% - 36px);
+
+    padding:
+      34px
+      0
+      70px;
+  }
+
+
+  .vx-dining-menu .burman-spa-section{
+    margin-bottom:58px;
+  }
+
+
+  .vx-dining-menu .burman-spa-section h3{
+    font-size:36px;
+
+    padding-bottom:18px;
+
+    margin-bottom:18px;
+  }
+
+
+  .vx-dining-menu .burman-spa-item{
+    gap:20px;
+
+    padding:
+      18px
+      0;
+  }
+
+
+  .vx-dining-menu .burman-spa-item h4{
+    font-size:21px;
+  }
+
+
+  .vx-dining-menu .burman-price{
+    font-size:15px;
+  }
+
 }
 
 /* ---------- Dining responsive only ---------- */
@@ -2851,7 +3090,13 @@ min-height:0;  padding:0;
 =========================================================== */
 
 .vx-dining-modal .vx-dining-hub{
-  min-height:100%;
+  height:100%;
+  min-height:0;
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
 
   background:#f4f0ea;
 }
@@ -2863,7 +3108,7 @@ min-height:0;  padding:0;
   position:relative;
 
   height:
-    clamp(330px,42vw,520px);
+    clamp(280px,34vw,420px);
 
   overflow:hidden;
 
@@ -3173,10 +3418,57 @@ min-height:0;  padding:0;
 /* ================= HUB BODY ================= */
 
 .vx-dining-modal .vx-dining-hub-body{
+  flex:1;
+  min-height:0;
+
   padding:
-    clamp(46px,6vw,90px)
-    clamp(34px,7vw,110px)
-    clamp(70px,8vw,120px);
+    clamp(28px,3vw,48px)
+    clamp(34px,6vw,90px)
+    clamp(28px,3vw,48px);
+
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.vx-dining-modal .vx-dining-hub-body::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+/* Overview stays compact inside the modal */
+
+/* Menu content expands inside the hub scroll container */
+
+.vx-dining-modal .vx-dining-menu{
+  min-height:100%;
+  height:auto;
+
+  overflow:visible;
+
+  padding-right:0;
+
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+.vx-dining-modal .vx-dining-menu::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+
+
+/* Wine and Private Dining remain fixed */
+
+.vx-dining-modal .vx-dining-placeholder{
+  height:100%;
+
+  overflow:hidden;
 }
 
 
@@ -3201,7 +3493,7 @@ min-height:0;  padding:0;
 
   color:#9b8478;
 
-  font-size:9px;
+  font-size:10px;
 
   letter-spacing:.30em;
 
@@ -3209,10 +3501,10 @@ min-height:0;  padding:0;
 }
 
 
-.vx-dining-modal .vx-dining-about > p{
-  margin:0;
+.vx-dining-modal .vx-dining-about h3{
+  margin:0 0 22px;
 
-  color:#44352e;
+  color:#3a2922;
 
   font-family:
     Georgia,
@@ -3220,9 +3512,43 @@ min-height:0;  padding:0;
     serif;
 
   font-size:
-    clamp(24px,2.7vw,38px);
+    clamp(34px,3.4vw,52px);
 
-  line-height:1.42;
+  font-weight:300;
+
+  line-height:1.05;
+
+  letter-spacing:-.035em;
+}
+
+
+.vx-dining-modal .vx-dining-about > p{
+  margin:0;
+
+  color:#55463e;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(17px,1.6vw,23px);
+
+  line-height:1.48;
+}
+
+
+.vx-dining-modal .vx-dining-about-secondary{
+  margin-top:22px !important;
+
+  color:#887970 !important;
+
+  font-family:inherit !important;
+
+  font-size:13px !important;
+
+  line-height:1.75 !important;
 }
 
 
