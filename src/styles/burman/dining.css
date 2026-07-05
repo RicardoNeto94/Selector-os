@@ -1372,8 +1372,7 @@
   }
 
   .vx-dining-menu .burman-spa-item {
-    padding: 20px
-      0;
+    padding: 20px 0;
     gap: 36px;
   }
 
@@ -1382,8 +1381,7 @@
   }
 
   .vx-dining-modal .vx-dining-discovery {
-    padding: 38px 48px
-      44px;
+    padding: 38px 48px 44px;
   }
 
   .vx-dining-modal .vx-dining-discovery-copy {
@@ -1399,68 +1397,119 @@
   }
 
   .vx-dining-modal .vx-dining-hub-hero {
-    height: 420px;
+    height: 250px;
+    flex: 0 0 250px;
   }
 
   .vx-dining-modal .vx-dining-hub-copy {
-    left: 46px;
-    bottom: 48px;
-    width: 52%;
+    left: 42px;
+    bottom: 20px;
+    width: 54%;
   }
 
   .vx-dining-modal .vx-dining-hub-copy h2 {
-    font-size: clamp(50px,7vw,72px);
+    margin: 6px 0 8px;
+    font-size: 48px;
+    line-height: .88;
+  }
+
+  .vx-dining-modal .vx-dining-hub-copy > p {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .vx-dining-modal .vx-dining-hub-meta {
+    margin-top: 9px;
   }
 
   .vx-dining-modal .vx-dining-request {
-    right: 38px;
-    bottom: 48px;
-    width: 230px;
+    right: 28px;
+    bottom: 20px;
+    width: 200px;
+    padding: 10px 14px;
   }
 
   .vx-dining-modal .vx-dining-tabs {
+    min-height: 48px;
+    height: 48px;
     gap: 42px;
   }
 
+  .vx-dining-modal .vx-dining-tab {
+    height: 48px;
+  }
+
   .vx-dining-modal .vx-dining-hub-body {
-    padding: 24px 38px 28px;
+    padding: 12px 38px 14px;
   }
 
   .vx-dining-modal .vx-dining-overview {
     grid-template-columns: .72fr 1.28fr;
-    gap: 34px;
+    gap: 24px;
   }
 
   .vx-dining-modal .vx-dining-section-label {
-    margin-bottom: 14px;
+    margin-bottom: 10px;
+    font-size: 7px;
   }
 
   .vx-dining-modal .vx-dining-about h3 {
-    margin-bottom: 10px;
-    font-size: 28px;
+    margin-bottom: 7px;
+    font-size: 25px;
+    line-height: 2.5;
   }
 
   .vx-dining-modal .vx-dining-about > p {
-    font-size: 14px;
-    line-height: 1.34;
+    font-size: 12px;
+    line-height: 1.32;
+  }
+
+  .vx-dining-modal .vx-dining-about-secondary {
+    margin-top: 7px !important;
+    font-size: 9px !important;
+    line-height: 1.4 !important;
   }
 
   .vx-dining-modal .vx-dining-info-grid {
-    margin-top: 14px;
-    gap: 8px;
+    margin-top: 8px;
+    gap: 6px;
   }
 
   .vx-dining-modal .vx-dining-info-card {
-    padding: 14px;
+    padding: 11px;
+  }
+
+  .vx-dining-modal .vx-dining-info-card span {
+    margin-bottom: 5px;
+    font-size: 7px;
+  }
+
+  .vx-dining-modal .vx-dining-info-card strong {
+    font-size: 10px;
   }
 
   .vx-dining-modal .vx-dining-highlight-grid {
-    gap: 10px;
+    gap: 7px;
   }
 
   .vx-dining-modal .vx-dining-highlight {
-    min-height: 150px;
-    padding: 18px;
+    min-height: 96px;
+    padding: 13px 15px;
+  }
+
+  .vx-dining-modal .vx-dining-highlight h4 {
+    margin-bottom: 6px;
+    font-size: 19px;
+  }
+
+  .vx-dining-modal .vx-dining-highlight p {
+    font-size: 9px;
+    line-height: 1.4;
+  }
+
+  .vx-dining-modal .vx-dining-highlight > span {
+    margin-top: 8px;
+    font-size: 7px;
   }
 
 }

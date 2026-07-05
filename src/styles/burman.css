@@ -1908,3 +1908,575 @@ body{
 }
 
 
+
+
+/* ===========================================================
+   VAXERON DINING MENU — COMPACT IPAD REFINEMENT
+   =========================================================== */
+
+@media (min-width: 769px) and (max-width: 1200px) {
+
+  .vx-dining-menu {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 34px 42px 64px;
+  }
+
+  .vx-dining-menu-heading {
+    margin-bottom: 26px;
+    text-align: center;
+  }
+
+  .vx-dining-menu-heading .vx-dining-section-label {
+    display: block;
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.26em;
+    margin-bottom: 10px;
+  }
+
+  .vx-dining-menu-heading h3 {
+    margin: 0;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  .vx-dining-menu .burman-spa-section {
+    margin-bottom: 42px;
+  }
+
+  .vx-dining-menu .burman-spa-section h3 {
+    gap: 14px;
+    margin: 30px 0 12px;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+  }
+
+  .vx-dining-menu .burman-spa-section h3::before,
+  .vx-dining-menu .burman-spa-section h3::after {
+    background: rgba(58, 42, 36, 0.10);
+  }
+
+  .vx-dining-menu .burman-spa-item {
+    gap: 24px;
+    min-height: 0;
+    padding: 12px 0;
+    align-items: flex-start;
+  }
+
+  .vx-dining-menu .burman-spa-item > div:first-child {
+    max-width: 82%;
+  }
+
+  .vx-dining-menu .burman-spa-item h4 {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: #3a2a24;
+  }
+
+  .vx-dining-menu .burman-spa-item p {
+    margin: 4px 0 0;
+    font-size: 10px;
+    line-height: 1.45;
+    color: #6f6058;
+    opacity: 0.78;
+  }
+
+  .vx-dining-menu .burman-price {
+    min-width: 42px;
+    padding-top: 1px;
+    font-size: 10px;
+    line-height: 1.25;
+    font-weight: 500;
+    color: #6b352b;
+    white-space: nowrap;
+  }
+
+  .vx-dining-menu .burman-disclaimer {
+    margin-top: 28px;
+    font-size: 9px;
+    line-height: 1.6;
+  }
+}
+/* ===========================================================
+   VAXERON DINING WINE EXPERIENCE
+   =========================================================== */
+
+.vx-wine-landing,
+.vx-wine-list-view,
+.vx-wine-detail,
+.vx-wine-find {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 64px 54px 90px;
+  box-sizing: border-box;
+}
+
+.vx-wine-intro {
+  max-width: 620px;
+  margin-bottom: 56px;
+}
+
+.vx-wine-intro h3,
+.vx-wine-view-heading h3,
+.vx-wine-detail-content h3 {
+  margin: 14px 0 18px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(46px, 5vw, 72px);
+  line-height: 0.94;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  color: #2f241f;
+}
+
+.vx-wine-intro p,
+.vx-wine-view-heading p,
+.vx-wine-detail-content > p {
+  max-width: 560px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #74645b;
+}
+
+.vx-wine-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vx-wine-action {
+  position: relative;
+  min-height: 260px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-align: left;
+  border: 1px solid rgba(58, 42, 36, 0.09);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.34);
+  color: #3a2a24;
+  cursor: pointer;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+.vx-wine-action:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 22px 60px rgba(58, 42, 36, 0.08);
+}
+
+.vx-wine-action > span {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: #a39286;
+}
+
+.vx-wine-action small {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 8px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #9b7966;
+}
+
+.vx-wine-action h4 {
+  margin: 0 0 10px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 400;
+  color: #332720;
+}
+
+.vx-wine-action p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #796a61;
+}
+
+.vx-wine-action > strong {
+  align-self: flex-end;
+  font-size: 17px;
+  font-weight: 300;
+  color: #8a3a2c;
+}
+
+.vx-wine-action-featured {
+  background: #3d2b24;
+  border-color: #3d2b24;
+}
+
+.vx-wine-action-featured > span,
+.vx-wine-action-featured small {
+  color: #c8a879;
+}
+
+.vx-wine-action-featured h4 {
+  color: #ffffff;
+}
+
+.vx-wine-action-featured p {
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.vx-wine-action-featured > strong {
+  color: #d4b47d;
+}
+
+/* ================= BACK ================= */
+
+.vx-wine-back {
+  margin: 0 0 42px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8c796d;
+  cursor: pointer;
+}
+
+/* ================= VIEW HEADING ================= */
+
+.vx-wine-view-heading {
+  max-width: 620px;
+  margin-bottom: 42px;
+}
+
+/* ================= FILTERS ================= */
+
+.vx-wine-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.vx-wine-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.vx-wine-filter {
+  flex-shrink: 0;
+  padding: 9px 15px;
+  border: 1px solid rgba(58, 42, 36, 0.1);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #84736a;
+  cursor: pointer;
+}
+
+.vx-wine-filter.active {
+  background: #3d2b24;
+  border-color: #3d2b24;
+  color: #ffffff;
+}
+
+/* ================= WINE ROWS ================= */
+
+.vx-wine-glass-list,
+.vx-wine-cellar-list {
+  border-top: 1px solid rgba(58, 42, 36, 0.09);
+}
+
+.vx-wine-row {
+  width: 100%;
+  min-height: 82px;
+  padding: 16px 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  border: none;
+  border-bottom: 1px solid rgba(58, 42, 36, 0.08);
+  background: transparent;
+  text-align: left;
+  color: #3a2a24;
+}
+
+.vx-wine-row-button {
+  cursor: pointer;
+}
+
+.vx-wine-row-button:hover {
+  padding-left: 8px;
+}
+
+.vx-wine-row small {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #a08371;
+}
+
+.vx-wine-row h4 {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 21px;
+  line-height: 1.1;
+  font-weight: 400;
+  color: #352821;
+}
+
+.vx-wine-row p {
+  margin: 5px 0 0;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #89786e;
+}
+
+.vx-wine-row > span {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #6d4034;
+}
+
+.vx-wine-row-end {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.vx-wine-row-end span {
+  font-size: 12px;
+  color: #6d4034;
+}
+
+.vx-wine-row-end small {
+  margin: 0;
+  font-size: 13px;
+  color: #9d8272;
+}
+
+/* ================= WINE DETAIL ================= */
+
+.vx-wine-detail-content {
+  max-width: 650px;
+  margin: 20px auto 0;
+}
+
+.vx-wine-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 24px 0 32px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(58, 42, 36, 0.08);
+  border-bottom: 1px solid rgba(58, 42, 36, 0.08);
+}
+
+.vx-wine-detail-meta span {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #89766b;
+}
+
+.vx-wine-pairing {
+  margin-top: 38px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-left: 1px solid #b89a6d;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.vx-wine-pairing small {
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  color: #a08371;
+}
+
+.vx-wine-pairing strong {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #3b2c25;
+}
+
+.vx-wine-detail-price {
+  margin-top: 36px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 30px;
+  color: #6b392f;
+}
+
+/* ================= FIND MY WINE ================= */
+
+.vx-wine-find-placeholder {
+  margin-top: 36px;
+  padding: 46px;
+  border: 1px solid rgba(58, 42, 36, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.3);
+  text-align: center;
+}
+
+.vx-wine-find-placeholder span {
+  font-size: 8px;
+  letter-spacing: 0.28em;
+  color: #b0947f;
+}
+
+.vx-wine-find-placeholder h4 {
+  margin: 14px 0 10px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: #382a23;
+}
+
+.vx-wine-find-placeholder p {
+  max-width: 430px;
+  margin: 0 auto;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #817067;
+}
+
+/* ===========================================================
+   IPAD
+   =========================================================== */
+
+@media (min-width: 769px) and (max-width: 1200px) {
+
+  .vx-wine-landing,
+  .vx-wine-list-view,
+  .vx-wine-detail,
+  .vx-wine-find {
+    max-width: 760px;
+    padding: 38px 42px 64px;
+  }
+
+  .vx-wine-intro {
+    margin-bottom: 34px;
+  }
+
+  .vx-wine-intro h3,
+  .vx-wine-view-heading h3,
+  .vx-wine-detail-content h3 {
+    margin: 10px 0 14px;
+    font-size: 42px;
+  }
+
+  .vx-wine-intro p,
+  .vx-wine-view-heading p,
+  .vx-wine-detail-content > p {
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .vx-wine-actions {
+    gap: 10px;
+  }
+
+  .vx-wine-action {
+    min-height: 210px;
+    padding: 21px;
+    border-radius: 14px;
+  }
+
+  .vx-wine-action h4 {
+    font-size: 23px;
+  }
+
+  .vx-wine-action p {
+    font-size: 10px;
+  }
+
+  .vx-wine-back {
+    margin-bottom: 28px;
+  }
+
+  .vx-wine-view-heading {
+    margin-bottom: 28px;
+  }
+
+  .vx-wine-row {
+    min-height: 66px;
+    padding: 11px 2px;
+  }
+
+  .vx-wine-row h4 {
+    font-size: 17px;
+  }
+
+  .vx-wine-row p {
+    font-size: 9px;
+  }
+
+  .vx-wine-row > span,
+  .vx-wine-row-end span {
+    font-size: 10px;
+  }
+
+  .vx-wine-detail-meta {
+    margin: 18px 0 24px;
+    padding: 12px 0;
+  }
+
+  .vx-wine-pairing {
+    margin-top: 28px;
+    padding: 17px 20px;
+  }
+
+  .vx-wine-pairing strong {
+    font-size: 20px;
+  }
+}
+
+/* ===========================================================
+   MOBILE
+   =========================================================== */
+
+@media (max-width: 768px) {
+
+  .vx-wine-landing,
+  .vx-wine-list-view,
+  .vx-wine-detail,
+  .vx-wine-find {
+    padding: 34px 22px 70px;
+  }
+
+  .vx-wine-intro h3,
+  .vx-wine-view-heading h3,
+  .vx-wine-detail-content h3 {
+    font-size: 40px;
+  }
+
+  .vx-wine-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .vx-wine-action {
+    min-height: 190px;
+  }
+}
