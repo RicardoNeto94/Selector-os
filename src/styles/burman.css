@@ -1,4 +1,5 @@
 @import "./burman/dining.css";
+@import "./burman/room-service.css";
 /* ================= GLOBAL ================= */
 
 html, body{
@@ -298,25 +299,21 @@ background:rgba(255,255,255,0.16);
 .burman-modal-backdrop{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.55);
-  backdrop-filter:blur(6px);
   z-index:1;
 }
 
 .burman-modal-content{
   position:relative;
   z-index:2;
-  background:#f7f5f3;
-  border-radius:20px;
+
   width:92%;
   max-width:1100px;
   max-height:88vh;
-  padding:56px 72px;
+
   overflow-y:auto;
-  border:1px solid rgba(138,58,44,0.12);
-  box-shadow:0 40px 120px rgba(0,0,0,0.25);
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* IE/Edge */
+
+  scrollbar-width:none;
+  -ms-overflow-style:none;
 }
 
 .burman-modal-content::-webkit-scrollbar{

@@ -1097,3 +1097,223 @@ thead{
   }
 
 }
+/* =======================================================
+   VAXERON — COMPACT SIDEBAR
+======================================================= */
+
+:root{
+  --sidebar-width:176px;
+}
+
+/* =======================================================
+   SIDEBAR SHELL
+======================================================= */
+
+.so-sidebar{
+  padding:12px 11px 10px;
+}
+
+/* =======================================================
+   BRAND
+======================================================= */
+
+.so-sidebar-brand{
+  padding:8px 0 14px;
+}
+
+.so-sidebar-brand::after{
+  left:30%;
+  right:30%;
+}
+
+.so-logo{
+  width:54px;
+}
+
+/* =======================================================
+   NAVIGATION
+======================================================= */
+
+.so-sidebar-nav{
+  gap:1px;
+}
+
+.so-sidebar-section-label{
+  font-size:8px;
+
+  letter-spacing:.18em;
+
+  margin-top:12px;
+  margin-bottom:3px;
+
+  padding-left:7px;
+
+  opacity:.72;
+}
+
+.so-nav-item{
+  gap:8px;
+
+  padding:7px 8px;
+
+  min-height:32px;
+
+  border-radius:9px;
+
+  font-size:11.5px;
+}
+
+.so-nav-icon-wrap{
+  width:16px;
+  height:16px;
+}
+
+.so-nav-icon{
+  width:16px;
+  height:16px;
+
+  stroke-width:1.65;
+}
+
+.so-nav-label{
+  line-height:1.15;
+}
+
+/* =======================================================
+   ACTIVE STATE
+======================================================= */
+
+.so-nav-item--active{
+  background:
+    rgba(198,164,108,0.11);
+
+  color:var(--accent);
+
+  font-weight:500;
+}
+
+.so-nav-item--active
+.so-nav-icon{
+  stroke-width:1.9;
+}
+
+/* =======================================================
+   FOOTER
+======================================================= */
+
+.so-sidebar-footer{
+  padding-top:9px;
+
+  gap:7px;
+}
+
+.so-sidebar-user{
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+}
+
+.so-user-avatar{
+  width:25px;
+  height:25px;
+
+  font-size:10px;
+
+  flex-shrink:0;
+}
+
+.so-user-meta{
+  min-width:0;
+}
+
+.so-user-name{
+  font-size:10px;
+
+  white-space:nowrap;
+
+  overflow:hidden;
+
+  text-overflow:ellipsis;
+}
+
+.so-user-tag{
+  font-size:8px;
+
+  margin-top:1px;
+}
+
+.so-logout-btn{
+  font-size:9px;
+
+  color:var(--text-muted);
+
+  opacity:.7;
+
+  padding-left:33px;
+
+  transition:
+    opacity .16s ease,
+    color .16s ease;
+}
+
+.so-logout-btn:hover{
+  opacity:1;
+
+  color:var(--accent);
+}
+
+/* =======================================================
+   COMPACT DESKTOP
+======================================================= */
+
+@media(
+  min-width:901px
+)
+and
+(
+  max-height:820px
+){
+
+  .so-sidebar{
+    padding-top:8px;
+    padding-bottom:8px;
+  }
+
+  .so-sidebar-brand{
+    padding:
+      4px
+      0
+      10px;
+  }
+
+  .so-logo{
+    width:46px;
+  }
+
+  .so-sidebar-section-label{
+    margin-top:8px;
+
+    margin-bottom:2px;
+
+    font-size:7.5px;
+  }
+
+  .so-nav-item{
+    min-height:28px;
+
+    padding:
+      5px
+      7px;
+
+    font-size:10.5px;
+  }
+
+  .so-nav-icon-wrap,
+  .so-nav-icon{
+    width:14px;
+    height:14px;
+  }
+
+}

@@ -2,376 +2,618 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";import Papa from "papaparse";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-const WINE_TYPE_OPTIONS = [
-  "all",
-  "sparkling",
-  "white",
-  "rose",
+import Papa from "papaparse";
+
+import {
+  ArrowRightIcon,
+  ArrowsRightLeftIcon,
+  BuildingStorefrontIcon,
+  CircleStackIcon,
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  ArrowUpTrayIcon,
+} from "@heroicons/react/24/outline";
+
+import {
+  createClientComponentClient,
+} from "@supabase/auth-helpers-nextjs";
+
+/* =======================================================
+   CONSTANTS
+======================================================= */
+
+const WINE_TYPE_ORDER = [
   "red",
+  "white",
+  "sparkling",
+  "rose",
+  "rosé",
+  "sake",
   "orange",
   "dessert",
   "fortified",
 ];
 
-function StockBadge({ stock }) {
+/* =======================================================
+   HELPERS
+======================================================= */
 
-  let color = "bg-green-100 text-green-700";
+function normalize(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
 
-  if (stock <= 6) color = "bg-orange-100 text-orange-700";
-  if (stock === 0) color = "bg-red-100 text-red-700";
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString();
+}
 
-  return (
-    <span className={`px-2 py-1 rounded-md text-xs font-medium ${color}`}>
-      {stock}
-    </span>
+function formatCurrency(value) {
+  return Number(value || 0).toLocaleString(
+    "en-IE",
+    {
+      maximumFractionDigits: 0,
+    }
   );
 }
 
+function formatDate(value) {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  ).format(new Date(value));
+}
+
+function getWineTypeLabel(type) {
+  if (!type) {
+    return "Unknown";
+  }
+
+  if (normalize(type) === "rose") {
+    return "Rosé";
+  }
+
+  return String(type)
+    .charAt(0)
+    .toUpperCase() +
+    String(type).slice(1);
+}
+
+/* =======================================================
+   KPI CARD
+======================================================= */
+
+function MetricCard({
+  label,
+  value,
+  detail,
+}) {
+  return (
+    <div
+      className="
+        bg-white/75
+        border
+        border-[#eadfd5]
+        rounded-[24px]
+        px-5
+        py-5
+        min-w-0
+      "
+    >
+      <div
+        className="
+          text-[9px]
+          uppercase
+          tracking-[0.2em]
+          text-[#91a1ba]
+        "
+      >
+        {label}
+      </div>
+
+      <div
+        className="
+          mt-3
+          text-[28px]
+          leading-none
+          font-medium
+          tracking-[-0.035em]
+          text-[#30231f]
+        "
+      >
+        {value}
+      </div>
+
+      {detail && (
+        <div
+          className="
+            mt-3
+            text-[10px]
+            text-[#9b8d85]
+          "
+        >
+          {detail}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =======================================================
+   PAGE
+======================================================= */
+
 export default function WinesPage() {
+  const router = useRouter();
 
-  const supabase = createClientComponentClient();
-const router = useRouter();
-  const [wines, setWines] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const supabase =
+    createClientComponentClient();
 
-  const [search, setSearch] = useState("");
-  const [wineType, setWineType] = useState("all");
+  const [wines, setWines] =
+    useState([]);
 
-  const [file, setFile] = useState(null);
+  const [locations, setLocations] =
+    useState([]);
 
-  const [importing, setImporting] = useState(false);
+  const [movements, setMovements] =
+    useState([]);
 
-const [importProgress, setImportProgress] = useState(0);
+  const [loading, setLoading] =
+    useState(true);
 
-const [importTotal, setImportTotal] = useState(0);
+  const [search, setSearch] =
+    useState("");
 
-const [importCurrent, setImportCurrent] = useState(0);
+  const [file, setFile] =
+    useState(null);
 
-const [sortColumn, setSortColumn] = useState("name");
-const [sortDirection, setSortDirection] = useState("asc");
+  const [importing, setImporting] =
+    useState(false);
 
-const [showLocationsModal, setShowLocationsModal] = useState(false);
+  const [
+    importProgress,
+    setImportProgress,
+  ] = useState(0);
 
-const [locations, setLocations] = useState([]);
+  const [
+    importCurrent,
+    setImportCurrent,
+  ] = useState(0);
 
-const [newLocation, setNewLocation] = useState({
-  name: "",
-  location_type: "storage",
-  restaurant_id: "",
-  parent_location_id: ""
-});
+  const [
+    importTotal,
+    setImportTotal,
+  ] = useState(0);
+
+  /* =====================================================
+     LOAD
+  ===================================================== */
+
   useEffect(() => {
+    loadCommandCentre();
+  }, []);
 
-  loadWines();
+  async function loadCommandCentre() {
+    setLoading(true);
 
-}, []);
+    const [
+      winesResult,
+      locationsResult,
+      movementsResult,
+    ] = await Promise.all([
+      supabase
+        .from("wines")
+        .select(`
+          *,
+          wine_inventory(
+            id,
+            quantity,
+            location_id
+          )
+        `)
+        .eq("is_active", true),
 
+      supabase
+        .from("wine_locations")
+        .select(`
+          id,
+          name,
+          location_type,
+          is_active
+        `)
+        .eq("is_active", true)
+        .order("name", {
+          ascending: true,
+        }),
 
-  async function loadWines() {
+      supabase
+        .from("wine_movements")
+        .select(`
+          id,
+          wine_id,
+          from_location,
+          to_location,
+          quantity,
+          movement_type,
+          notes,
+          created_at
+        `)
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(12),
+    ]);
 
-  setLoading(true);
-
-  const { data } = await supabase
-    .from("wines")
-    .select(`
-      *,
-      wine_inventory(
-  id,
-  quantity,
-  location_id,
-
-  wine_locations(
-    id,
-    name,
-    restaurant_id
-  )
-)
-  `)
-    .eq("is_active", true);
-
-  if (!data) {
-    setWines([]);
-    setLoading(false);
-    return;
-  }
-
-  const mapped = data.map(w => ({
-
-    ...w,
-
-    stock:
-      w.wine_inventory?.reduce(
-        (sum, i) => sum + (i.quantity || 0),
-        0
-      ) || 0
-
-  }));
-
-  setWines(mapped);
-
-  setLoading(false);
-}
-
-async function loadLocations() {
-
-  const { data, error } =
-    await supabase
-      .from("wine_locations")
-      .select("*")
-      .order("name", {
-        ascending: true
-      });
-
-  if (error) {
-
-    console.error(error);
-    return;
-
-  }
-
-  setLocations(data || []);
-
-}
-
-async function createLocation() {
-
-  if (!newLocation.name) return;
-
-  const slug = newLocation.name
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
-
-  const { error } = await supabase
-    .from("wine_locations")
-    .insert({
-  name: newLocation.name,
-  slug,
-  location_type: newLocation.location_type,
-  restaurant_id:
-    newLocation.restaurant_id || null,
-  parent_location_id:
-    newLocation.parent_location_id || null,
-  is_active: true
-});
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  setNewLocation({
-    name: "",
-    location_type: "storage",
-    restaurant_id: "",
-    parent_location_id: ""
-  });
-
-  loadLocations();
-}
-
-  function filteredWines() {
-
-    const q = search.toLowerCase();
-
-    return wines.filter(w => {
-
-      return (
-        w.name?.toLowerCase().includes(q) ||
-        w.producer?.toLowerCase().includes(q) ||
-        w.region?.toLowerCase().includes(q) ||
-        w.country?.toLowerCase().includes(q)
+    if (winesResult.error) {
+      console.error(
+        "WINES ERROR:",
+        winesResult.error
       );
-
-    });
-
-  }
-
-  function sortedWines(list) {
-
-    return [...list].sort((a, b) => {
-
-      let valA = a[sortColumn];
-      let valB = b[sortColumn];
-
-      if (sortColumn === "stock") {
-        valA = a.stock;
-        valB = b.stock;
-      }
-
-      if (typeof valA === "string") valA = valA.toLowerCase();
-      if (typeof valB === "string") valB = valB.toLowerCase();
-
-      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-
-      return 0;
-
-    });
-
-  }
-
-  function toggleSort(column) {
-
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
     }
 
+    if (locationsResult.error) {
+      console.error(
+        "LOCATIONS ERROR:",
+        locationsResult.error
+      );
+    }
+
+    if (movementsResult.error) {
+      console.error(
+        "MOVEMENTS ERROR:",
+        movementsResult.error
+      );
+    }
+
+    const mappedWines = (
+      winesResult.data || []
+    ).map((wine) => {
+      const inventory =
+        wine.wine_inventory || [];
+
+      const stock = inventory.reduce(
+        (sum, row) =>
+          sum +
+          Number(row.quantity || 0),
+        0
+      );
+
+      return {
+        ...wine,
+        stock,
+        inventory,
+      };
+    });
+
+    setWines(mappedWines);
+
+    setLocations(
+      locationsResult.data || []
+    );
+
+    setMovements(
+      movementsResult.data || []
+    );
+
+    setLoading(false);
   }
 
-  const filtered = filteredWines();
-  const sorted = sortedWines(filtered);
+  /* =====================================================
+     MAPS
+  ===================================================== */
 
-  const paginated = sorted;
+  const winesMap = useMemo(() => {
+    const map = {};
 
-  const totalWines = wines.length;
+    wines.forEach((wine) => {
+      map[String(wine.id)] = wine;
+    });
 
-  const totalBottles = wines.reduce((sum, w) => sum + w.stock, 0);
+    return map;
+  }, [wines]);
 
-  const cellarValue = wines.reduce((sum, w) => {
-    return sum + (w.stock * (w.price || 0));
-  }, 0);
-const wineTypeStats = {};
+  const locationsMap = useMemo(() => {
+    const map = {};
 
-wines.forEach((wine) => {
+    locations.forEach((location) => {
+      map[String(location.id)] =
+        location;
+    });
 
-  const type = (wine.wine_type || "unknown").toLowerCase();
+    return map;
+  }, [locations]);
 
-  if (!wineTypeStats[type]) {
-    wineTypeStats[type] = 0;
-  }
+  /* =====================================================
+     CORE METRICS
+  ===================================================== */
 
-  wineTypeStats[type] += wine.stock;
+  const totalBottles = useMemo(() => {
+    return wines.reduce(
+      (sum, wine) =>
+        sum +
+        Number(wine.stock || 0),
+      0
+    );
+  }, [wines]);
 
-});
+  const uniqueWines = useMemo(() => {
+    return wines.filter(
+      (wine) =>
+        Number(wine.stock || 0) > 0
+    ).length;
+  }, [wines]);
 
-const totalWineTypeBottles = Object.values(wineTypeStats)
-  .reduce((a, b) => a + b, 0);
-  async function importCSV() {
+  const cellarValue = useMemo(() => {
+    return wines.reduce(
+      (sum, wine) =>
+        sum +
+        (
+          Number(wine.stock || 0) *
+          Number(wine.price || 0)
+        ),
+      0
+    );
+  }, [wines]);
 
-  console.log("IMPORT STARTED", file);
+  /* =====================================================
+     WINE COMPOSITION
+  ===================================================== */
 
-  if (!file) return;
+  const wineComposition = useMemo(() => {
+    const stats = {};
 
-  setImporting(true);
+    wines.forEach((wine) => {
+      if (
+        Number(wine.stock || 0) <= 0
+      ) {
+        return;
+      }
 
-  setImportProgress(0);
+      let type = normalize(
+        wine.wine_type
+      );
 
-  setImportCurrent(0);
+      if (!type) {
+        type = "unknown";
+      }
 
-  Papa.parse(file, {
+      if (type === "rosé") {
+        type = "rose";
+      }
 
-    header: true,
+      if (!stats[type]) {
+        stats[type] = 0;
+      }
 
-    complete: async function(results) {
+      stats[type] += Number(
+        wine.stock || 0
+      );
+    });
 
-      setImportTotal(results.data.length);
+    return Object.entries(stats)
+      .map(([type, quantity]) => ({
+        type,
+        quantity,
 
-      for (const [index, row] of results.data.entries()) {
+        percentage:
+          totalBottles > 0
+            ? (
+                (
+                  quantity /
+                  totalBottles
+                ) * 100
+              )
+            : 0,
+      }))
+      .sort((a, b) => {
+        const aIndex =
+          WINE_TYPE_ORDER.indexOf(
+            a.type
+          );
 
-        setImportCurrent(index + 1);
+        const bIndex =
+          WINE_TYPE_ORDER.indexOf(
+            b.type
+          );
 
-        setImportProgress(
-          Math.round(
-            ((index + 1) / results.data.length) * 100
+        if (
+          aIndex !== -1 &&
+          bIndex !== -1
+        ) {
+          return aIndex - bIndex;
+        }
+
+        return (
+          b.quantity -
+          a.quantity
+        );
+      });
+  }, [wines, totalBottles]);
+
+  /* =====================================================
+     LOCATION DISTRIBUTION
+  ===================================================== */
+
+  const locationDistribution =
+    useMemo(() => {
+      return locations
+        .map((location) => {
+          let quantity = 0;
+
+          wines.forEach((wine) => {
+            (
+              wine.inventory || []
+            ).forEach((row) => {
+              if (
+                String(
+                  row.location_id
+                ) ===
+                String(location.id)
+              ) {
+                quantity += Number(
+                  row.quantity || 0
+                );
+              }
+            });
+          });
+
+          return {
+            ...location,
+            quantity,
+          };
+        })
+        .filter(
+          (location) =>
+            location.quantity > 0
+        )
+        .sort(
+          (a, b) =>
+            b.quantity -
+            a.quantity
+        );
+    }, [locations, wines]);
+
+  /* =====================================================
+     ATTENTION
+  ===================================================== */
+
+  const zeroStockWines = useMemo(() => {
+    return wines.filter(
+      (wine) =>
+        Number(wine.stock || 0) === 0
+    );
+  }, [wines]);
+
+  const lowStockWines = useMemo(() => {
+    return wines.filter((wine) => {
+      const stock = Number(
+        wine.stock || 0
+      );
+
+      return (
+        stock > 0 &&
+        stock <= 6
+      );
+    });
+  }, [wines]);
+
+  const highValueLowStock =
+    useMemo(() => {
+      return wines
+        .filter((wine) => {
+          const stock = Number(
+            wine.stock || 0
+          );
+
+          const price = Number(
+            wine.price || 0
+          );
+
+          return (
+            stock > 0 &&
+            stock <= 3 &&
+            price >= 150
+          );
+        })
+        .sort(
+          (a, b) =>
+            Number(b.price || 0) -
+            Number(a.price || 0)
+        );
+    }, [wines]);
+
+  /* =====================================================
+     RECENT ADDITIONS
+  ===================================================== */
+
+  const recentAdditions = useMemo(() => {
+    return [...wines]
+      .filter(
+        (wine) =>
+          Number(wine.stock || 0) > 0
+      )
+      .sort((a, b) => {
+        return (
+          new Date(
+            b.created_at || 0
+          ) -
+          new Date(
+            a.created_at || 0
           )
         );
+      })
+      .slice(0, 6);
+  }, [wines]);
 
-        const wineName =
-          row["Wine"]?.trim();
+  /* =====================================================
+     SEARCH
+  ===================================================== */
 
-        const producer =
-          row["Producer"]?.trim();
+  const searchResults = useMemo(() => {
+    const query = normalize(search);
 
-        const qtyLocations =
-          row["Qty. Location"]?.trim();
+    if (!query) {
+      return [];
+    }
 
-        if (!wineName || !qtyLocations) {
-          continue;
-        }
+    return wines
+      .filter((wine) => {
+        return [
+          wine.name,
+          wine.producer,
+          wine.country,
+          wine.region,
+          wine.vintage,
+        ].some((value) =>
+          normalize(value).includes(
+            query
+          )
+        );
+      })
+      .slice(0, 8);
+  }, [search, wines]);
 
-        const sku =
-          row["SKU"]?.trim();
+  /* =====================================================
+     CSV IMPORT
+  ===================================================== */
 
-        if (!sku) {
+  async function importCSV() {
+    if (!file) {
+      return;
+    }
 
-          console.log(
-            "Missing SKU:",
-            wineName
-          );
+    setImporting(true);
 
-          continue;
+    setImportProgress(0);
+    setImportCurrent(0);
 
-        }
+    Papa.parse(file, {
+      header: true,
 
-        // TRY SKU MATCH FIRST
+      skipEmptyLines: true,
 
-        let { data: wine } = await supabase
-          .from("wines")
-          .select("id, sku")
-          .eq("sku", sku)
-          .maybeSingle();
+      complete: async function (
+        results
+      ) {
+        const rows =
+          results.data || [];
 
-        // FALLBACK TO NAME + PRODUCER
-
-        if (!wine) {
-
-          const { data: fallbackWine } =
-            await supabase
-              .from("wines")
-              .select("id, sku")
-              .eq("name", wineName)
-              .eq("producer", producer || "")
-              .maybeSingle();
-
-          if (fallbackWine) {
-
-            wine = fallbackWine;
-
-            // SAVE SKU INTO DATABASE
-
-            await supabase
-              .from("wines")
-              .update({
-                sku
-              })
-              .eq("id", wine.id);
-
-            console.log(
-              "SKU linked:",
-              wineName,
-              sku
-            );
-
-          }
-
-        }
-
-        // STILL NOT FOUND
-
-        if (!wine) {
-
-          console.log(
-            "Wine not found:",
-            wineName,
-            producer
-          );
-
-          continue;
-
-        }
-
-        // LOCATION MAP
+        setImportTotal(rows.length);
 
         const LOCATION_MAP = {
-
           MS: "Main Cellar",
           MF: "Main Cellar",
 
@@ -381,706 +623,1522 @@ const totalWineTypeBottles = Object.values(wineTypeStats)
           KY: "Koyo",
 
           E: "Ecrin",
-          FD: "Fox Den",
-          BC: "Bombay Club",
-          PC: "Peacock"
 
+          FD: "Fox Den",
+
+          BC: "Bombay Club",
+
+          PC: "Peacock",
         };
 
-        // SPLIT LOCATIONS
+        for (
+          let index = 0;
+          index < rows.length;
+          index += 1
+        ) {
+          const row = rows[index];
 
-        const splitLocations =
-          qtyLocations.split(",");
+          setImportCurrent(
+            index + 1
+          );
 
-        for (const entry of splitLocations) {
+          setImportProgress(
+            Math.round(
+              (
+                (index + 1) /
+                rows.length
+              ) * 100
+            )
+          );
 
-          const [codeRaw, qtyRaw] =
-            entry.split(":");
+          const wineName =
+            row["Wine"]?.trim();
 
-          if (!codeRaw || !qtyRaw) {
+          const producer =
+            row["Producer"]?.trim();
+
+          const qtyLocations =
+            row[
+              "Qty. Location"
+            ]?.trim();
+
+          const sku =
+            row["SKU"]?.trim();
+
+          if (
+            !wineName ||
+            !qtyLocations ||
+            !sku
+          ) {
             continue;
           }
 
-          const code =
-            codeRaw.trim();
+          let {
+            data: wine,
+          } = await supabase
+            .from("wines")
+            .select("id, sku")
+            .eq("sku", sku)
+            .maybeSingle();
 
-          const quantity =
-            Number(qtyRaw.trim());
+          if (!wine) {
+            const {
+              data: fallbackWine,
+            } = await supabase
+              .from("wines")
+              .select("id, sku")
+              .eq("name", wineName)
+              .eq(
+                "producer",
+                producer || ""
+              )
+              .maybeSingle();
 
-          const locationName =
-            LOCATION_MAP[code];
+            if (fallbackWine) {
+              wine = fallbackWine;
 
-          if (!locationName) {
-
-            console.log(
-              "Unknown location code:",
-              code
-            );
-
-            continue;
-
+              await supabase
+                .from("wines")
+                .update({
+                  sku,
+                })
+                .eq(
+                  "id",
+                  wine.id
+                );
+            }
           }
 
-          // FIND LOCATION
+          if (!wine) {
+            continue;
+          }
 
-          const { data: location } =
-            await supabase
+          const splitLocations =
+            qtyLocations.split(",");
+
+          for (
+            const entry
+            of splitLocations
+          ) {
+            const [
+              codeRaw,
+              qtyRaw,
+            ] = entry.split(":");
+
+            if (
+              !codeRaw ||
+              !qtyRaw
+            ) {
+              continue;
+            }
+
+            const code =
+              codeRaw.trim();
+
+            const quantity =
+              Number(qtyRaw.trim());
+
+            const locationName =
+              LOCATION_MAP[code];
+
+            if (!locationName) {
+              continue;
+            }
+
+            const {
+              data: location,
+            } = await supabase
               .from("wine_locations")
               .select("id")
-              .eq("name", locationName)
+              .eq(
+                "name",
+                locationName
+              )
               .limit(1)
               .single();
 
-          if (!location) {
+            if (!location) {
+              continue;
+            }
 
-            console.log(
-              "Location not found:",
-              locationName
-            );
-
-            continue;
-
-          }
-
-          // CHECK EXISTING INVENTORY
-
-          const { data: existingInventory } =
-            await supabase
+            const {
+              data:
+                existingInventory,
+            } = await supabase
               .from("wine_inventory")
               .select("id")
-              .eq("wine_id", wine.id)
-              .eq("location_id", location.id)
+              .eq(
+                "wine_id",
+                wine.id
+              )
+              .eq(
+                "location_id",
+                location.id
+              )
               .maybeSingle();
 
-          // UPDATE EXISTING
+            if (existingInventory) {
+              await supabase
+                .from("wine_inventory")
+                .update({
+                  quantity,
+                })
+                .eq(
+                  "id",
+                  existingInventory.id
+                );
+            } else {
+              await supabase
+                .from("wine_inventory")
+                .insert({
+                  wine_id: wine.id,
 
-          if (existingInventory) {
+                  location_id:
+                    location.id,
 
-            await supabase
-              .from("wine_inventory")
-              .update({
-                quantity
-              })
-              .eq(
-                "id",
-                existingInventory.id
-              );
-
+                  quantity,
+                });
+            }
           }
-
-          // CREATE NEW
-
-          else {
-
-            await supabase
-              .from("wine_inventory")
-              .insert({
-                wine_id: wine.id,
-                location_id: location.id,
-                quantity
-              });
-
-          }
-
         }
 
-      }
+        await loadCommandCentre();
 
-      loadWines();
+        setImporting(false);
 
-      setImporting(false);
+        setFile(null);
 
-      alert(
-        "Inventory synchronization completed."
-      );
+        alert(
+          "Inventory synchronization completed."
+        );
+      },
+    });
+  }
 
-    }
+  /* =====================================================
+     LOADING
+  ===================================================== */
 
-  });
+  if (loading) {
+    return (
+      <div
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          text-[#8f8178]
+          text-[11px]
+          uppercase
+          tracking-[0.25em]
+        "
+      >
+        Loading cellar intelligence
+      </div>
+    );
+  }
 
-}
-
+  /* =====================================================
+     RENDER
+  ===================================================== */
 
   return (
-
-  <div className="max-w-[1600px] mx-auto px-8 py-8 space-y-5">
-
-    {/* HEADER */}
-
-    <div className="flex items-start justify-between gap-8">
-
-  {/* LEFT */}
-
-  <div>
-
-    <div className="so-title">
-      Wine Cellar
-    </div>
-
-    <div className="so-sub mt-1">
-      Inventory, collections and cellar management
-    </div>
-
-  </div>
-
-  {/* RIGHT */}
-
-  <div className="flex items-center gap-3">
-
-    <button
-      onClick={() => router.push("/dashboard/wines/new")}
-      className="so-btn-primary"
+    <div
+      className="
+        max-w-[1600px]
+        mx-auto
+        px-7
+        py-7
+        space-y-5
+      "
     >
-      + Add Wine
-    </button>
 
-    <div className="flex items-center gap-2">
-
-      <label className="
-        px-4 py-2
-        rounded-xl
-        border border-[#e7ddd3]
-        bg-white/80
-        text-sm
-        text-slate-600
-        hover:bg-white
-        transition-all
-        cursor-pointer
-      ">
-
-        Upload CSV
-
-        <input
-          type="file"
-          accept=".csv"
-          className="hidden"
-          onChange={(e) =>
-            setFile(e.target.files?.[0] || null)
-          }
-        />
-
-      </label>
-
-      <button
-        onClick={importCSV}
-        className="so-btn-ghost"
-      >
-        Sync
-      </button>
-
-      <button
-        onClick={() => {
-          setShowLocationsModal(true);
-          loadLocations();
-        }}
-        className="so-btn-ghost"
-      >
-        Locations
-      </button>
-
-      <button
-        onClick={() =>
-          router.push("/dashboard/wine-menus")
-        }
-        className="so-btn-ghost"
-      >
-        Menus
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
-{importing && (       
-
-  <div className="
-    bg-white/80
-    border border-[#efe7df]
-    rounded-[24px]
-    p-5
-    backdrop-blur-sm
-  ">
-
-    <div className="flex items-center justify-between mb-3">
-
-      <div className="text-[#3a2a24] font-medium">
-        Syncing inventory...
-      </div>
-
-      <div className="text-sm text-slate-500">
-        {importProgress}%
-      </div>
-
-    </div>
-
-    <div className="
-      w-full
-      h-3
-      rounded-full
-      bg-[#efe7df]
-      overflow-hidden
-    ">
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
       <div
         className="
-          h-full
-          bg-[#8a3a2c]
-          transition-all
-          duration-300
+          flex
+          items-start
+          justify-between
+          gap-6
+          flex-wrap
         "
-        style={{
-          width: `${importProgress}%`
-        }}
-      />
+      >
+        <div>
+          <div className="so-title">
+            Wine Cellar
+          </div>
 
-    </div>
-
-    <div className="mt-3 text-sm text-slate-500">
-
-      {importCurrent} / {importTotal} wines processed
-
-    </div>
-
-  </div>
-
-)}
-    {/* SEARCH */}
-
-    <div className="flex flex-wrap gap-3 items-center">
-
-      <input
-        placeholder="Search wines, producers, regions..."
-        value={search}
-        onChange={(e)=>setSearch(e.target.value)}
-        className="so-input flex-1 min-w-[320px]"
-      />
-
-      <div className="
-  flex items-center
-  bg-white/75
-  border border-[#efe7df]
-  rounded-[18px]
-  p-1
-  overflow-x-auto
-">
-
-  {WINE_TYPE_OPTIONS.map(type => (
-
-    <button
-      key={type}
-      onClick={() => setWineType(type)}
-      className={`
-        px-4 py-2
-        rounded-[14px]
-        text-sm
-        whitespace-nowrap
-        transition-all
-
-        ${
-          wineType === type
-            ? "bg-[#8a3a2c] text-white shadow-sm"
-            : "text-slate-500 hover:text-[#3a2a24]"
-        }
-      `}
-    >
-      {type}
-    </button>
-
-  ))}
-
-</div>
-
-    </div>
-
-    {/* HERO */}
-    <div
-  onClick={() =>
-    router.push("/dashboard/wine-cellar/inventory")
-  }
-  className="
-    so-dashboard-card
-    cursor-pointer
-    hover:scale-[1.01]
-    transition-all
-  "
->
-
-  <div className="flex items-center justify-between">
-
-    <div>
-
-      <div className="so-dashboard-title">
-        Inventory Explorer
-      </div>
-
-      <div className="so-dashboard-sub mt-2">
-        Manage stock, locations and cellar operations
-      </div>
-
-    </div>
-
-    <div className="
-      px-5 py-3
-      rounded-2xl
-      bg-[#8a3a2c]
-      text-white
-      text-sm
-      font-medium
-    ">
-      Open →
-    </div>
-
-  </div>
-
-</div>
-
-    <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-5">
-
-      {/* OVERVIEW */}
-
-      <div className="so-dashboard-card">
-
-        <div className="text-xl font-medium text-[#8a3a2c] mb-1">
-          Cellar Overview
+          <div className="so-sub mt-1">
+            Global inventory intelligence
+            and cellar operations
+          </div>
         </div>
 
-        <div className="so-sub mb-6">
-          Inventory intelligence across all venues
+        <div
+          className="
+            flex
+            items-center
+            gap-2
+            flex-wrap
+          "
+        >
+          <button
+            onClick={() =>
+              router.push(
+                "/dashboard/wines/new"
+              )
+            }
+            className="so-btn-primary"
+          >
+            <PlusIcon className="w-4 h-4" />
+
+            Add Wine
+          </button>
+
+          <label
+            className="
+              so-btn-ghost
+              cursor-pointer
+              flex
+              items-center
+              gap-2
+            "
+          >
+            <ArrowUpTrayIcon
+              className="w-4 h-4"
+            />
+
+            {file
+              ? file.name
+              : "Upload CSV"}
+
+            <input
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={(event) =>
+                setFile(
+                  event.target
+                    .files?.[0] ||
+                    null
+                )
+              }
+            />
+          </label>
+
+          {file && (
+            <button
+              onClick={importCSV}
+              disabled={importing}
+              className="so-btn-primary"
+            >
+              {importing
+                ? "Syncing"
+                : "Sync Inventory"}
+            </button>
+          )}
+
+          <button
+            onClick={() =>
+              router.push(
+                "/dashboard/wine-cellar/inventory"
+              )
+            }
+            className="so-btn-ghost"
+          >
+            Stock Control
+          </button>
+
+          <button
+            onClick={() =>
+              router.push(
+                "/dashboard/wine-cellar/venues"
+              )
+            }
+            className="so-btn-ghost"
+          >
+            Venue Wines
+          </button>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-
-          <div className="bg-white rounded-2xl border border-[#efe7df] p-5">
-            <div className="text-sm text-slate-500">
-              Total Bottles
-            </div>
-
-            <div className="text-3xl mt-2 font-semibold">
-              {totalBottles}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#efe7df] p-5">
-            <div className="text-sm text-slate-500">
-              Cellar Value
-            </div>
-
-            <div className="text-3xl mt-2 font-semibold">
-              €{cellarValue.toLocaleString()}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#efe7df] p-5">
-            <div className="text-sm text-slate-500">
-              Producers
-            </div>
-
-            <div className="text-3xl mt-2 font-semibold">
-              {new Set(wines.map(w => w.producer)).size}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#efe7df] p-5">
-            <div className="text-sm text-slate-500">
-              Low Stock
-            </div>
-
-            <div className="text-3xl mt-2 font-semibold">
-              {wines.filter(w => w.stock <= 6).length}
-            </div>
-          </div>
-
-        </div>
-
       </div>
 
-      {/* CELLAR IMAGE */}
+      {/* =================================================
+          IMPORT PROGRESS
+      ================================================= */}
 
-      <div className="so-card overflow-hidden p-0">
+      {importing && (
+        <div
+          className="
+            bg-white/75
+            border
+            border-[#eadfd5]
+            rounded-[22px]
+            px-5
+            py-4
+          "
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              mb-3
+            "
+          >
+            <div
+              className="
+                text-[12px]
+                text-[#49352e]
+              "
+            >
+              Synchronizing inventory
+            </div>
 
-        <img
-          src="https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?q=80&w=1600&auto=format&fit=crop"
-          className="w-full h-[220px] object-cover"
+            <div
+              className="
+                text-[11px]
+                text-[#91a1ba]
+              "
+            >
+              {importCurrent}
+              {" / "}
+              {importTotal}
+            </div>
+          </div>
+
+          <div
+            className="
+              h-[5px]
+              rounded-full
+              bg-[#eee5dc]
+              overflow-hidden
+            "
+          >
+            <div
+              className="
+                h-full
+                bg-[#963b2c]
+                transition-all
+                duration-300
+              "
+              style={{
+                width:
+                  `${importProgress}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* =================================================
+          SEARCH
+      ================================================= */}
+
+      <div className="relative">
+        <MagnifyingGlassIcon
+          className="
+            absolute
+            left-4
+            top-1/2
+            -translate-y-1/2
+            w-4
+            h-4
+            text-[#91a1ba]
+          "
         />
 
-        <div className="px-6 py-5">
+        <input
+          value={search}
+          onChange={(event) =>
+            setSearch(
+              event.target.value
+            )
+          }
+          placeholder="Search the cellar by wine, producer, region or vintage..."
+          className="
+            so-input
+            w-full
+            pl-11
+          "
+        />
 
-          <div className="flex items-center justify-between">
+        {search && (
+          <div
+            className="
+              absolute
+              top-[calc(100%+8px)]
+              left-0
+              right-0
+              z-50
+              bg-white
+              border
+              border-[#eadfd5]
+              rounded-[22px]
+              shadow-xl
+              overflow-hidden
+            "
+          >
+            {searchResults.length === 0 ? (
+              <div
+                className="
+                  px-5
+                  py-5
+                  text-[12px]
+                  text-[#9b8d85]
+                "
+              >
+                No wines found.
+              </div>
+            ) : (
+              searchResults.map(
+                (wine) => (
+                  <button
+                    key={wine.id}
+                    onClick={() =>
+                      router.push(
+                        "/dashboard/wine-cellar/inventory"
+                      )
+                    }
+                    className="
+                      w-full
+                      px-5
+                      py-3
+                      flex
+                      items-center
+                      justify-between
+                      gap-6
+                      text-left
+                      border-b
+                      border-[#f2ebe5]
+                      last:border-b-0
+                      hover:bg-[#faf7f3]
+                    "
+                  >
+                    <div>
+                      <div
+                        className="
+                          text-[12px]
+                          font-medium
+                          text-[#33251f]
+                        "
+                      >
+                        {wine.name}
+                      </div>
 
+                      <div
+                        className="
+                          mt-1
+                          text-[10px]
+                          text-[#91a1ba]
+                        "
+                      >
+                        {wine.producer}
+                        {" · "}
+                        {wine.vintage ||
+                          "NV"}
+                      </div>
+                    </div>
+
+                    <div
+                      className="
+                        text-[11px]
+                        text-[#963b2c]
+                      "
+                    >
+                      {wine.stock} bottles
+                    </div>
+                  </button>
+                )
+              )
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* =================================================
+          KPI GRID
+      ================================================= */}
+
+      <div
+        className="
+          grid
+          grid-cols-2
+          xl:grid-cols-4
+          gap-4
+        "
+      >
+        <MetricCard
+          label="Total Bottles"
+          value={formatNumber(
+            totalBottles
+          )}
+          detail="Physical stock across all cellar locations"
+        />
+
+        <MetricCard
+          label="Unique Wines"
+          value={formatNumber(
+            uniqueWines
+          )}
+          detail={`${formatNumber(
+            wines.length
+          )} wines registered`}
+        />
+
+        <MetricCard
+          label="Cellar Value"
+          value={`€${formatCurrency(
+            cellarValue
+          )}`}
+          detail="Based on current wine selling price"
+        />
+
+        <MetricCard
+          label="Active Locations"
+          value={formatNumber(
+            locationDistribution.length
+          )}
+          detail={`${formatNumber(
+            locations.length
+          )} cellar locations configured`}
+        />
+      </div>
+
+      {/* =================================================
+          INTELLIGENCE
+      ================================================= */}
+
+      <div
+        className="
+          grid
+          grid-cols-1
+          xl:grid-cols-[1.08fr_0.92fr]
+          gap-5
+        "
+      >
+
+        {/* ===============================================
+            COMPOSITION
+        =============================================== */}
+
+        <div className="so-card">
+          <div
+            className="
+              flex
+              items-start
+              justify-between
+              gap-5
+              mb-7
+            "
+          >
             <div>
-
-              <div className="text-lg font-medium text-[#8a3a2c]">
-                Burman Cellar
+              <div className="so-title">
+                Cellar Composition
               </div>
 
               <div className="so-sub mt-1">
-                Climate and storage monitoring
-              </div>
-
-            </div>
-
-            <div className="text-emerald-600 text-sm font-medium">
-              ● Optimal
-            </div>
-
-          </div>
-
-          <div className="grid grid-cols-4 gap-6 mt-6">
-
-            <div>
-              <div className="text-xs text-slate-400 uppercase tracking-[0.14em]">
-                Temperature
-              </div>
-
-              <div className="mt-2 text-lg font-medium">
-                12.6°C
+                Bottle distribution by wine
+                category
               </div>
             </div>
-
-            <div>
-              <div className="text-xs text-slate-400 uppercase tracking-[0.14em]">
-                Humidity
-              </div>
-
-              <div className="mt-2 text-lg font-medium">
-                62%
-              </div>
-            </div>
-
-            <div>
-              <div className="text-xs text-slate-400 uppercase tracking-[0.14em]">
-                Zones
-              </div>
-
-              <div className="mt-2 text-lg font-medium">
-                4
-              </div>
-            </div>
-
-            <div>
-              <div className="text-xs text-slate-400 uppercase tracking-[0.14em]">
-                Alerts
-              </div>
-
-              <div className="mt-2 text-lg font-medium">
-                2
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    {/* ANALYTICS */}
-
-    
-
-    {/* EDITORIAL LIST */}
-
-    {/* DASHBOARD CONTENT */}
-
-<div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-5">
-
-  {/* RECENT ADDITIONS */}
-
-  <div className="so-card">
-
-    <div className="flex items-center justify-between mb-6">
-
-      <div>
-
-        <div className="so-dashboard-title">
-          Recent Additions
-        </div>
-
-        <div className="so-dashboard-sub mt-1">
-          Latest wines added to the cellar
-        </div>
-
-      </div>
-
-      <button className="so-btn-ghost">
-        View All
-      </button>
-
-    </div>
-
-    <div className="space-y-2">
-
-      {paginated.slice(0, 8).map((wine) => (
-
-        <div
-          key={wine.id}
-          onClick={() =>
-  router.push("/dashboard/wine-cellar/inventory")
-}
-          className="so-dashboard-wine-row"
-        >
-
-          <img
-            src="https://images.unsplash.com/photo-1569919659476-f0852f6834b7?q=80&w=400&auto=format&fit=crop"
-            className="so-dashboard-wine-thumb"
-          />
-
-          <div className="flex-1 min-w-0">
-
-            <div className="so-dashboard-wine-name">
-              {wine.name}
-            </div>
-
-            <div className="so-dashboard-wine-meta">
-              {wine.producer}
-            </div>
-
-          </div>
-
-          <div className="text-right">
-
-            <div className="so-dashboard-price">
-              €{wine.price || 0}
-            </div>
-
-            <div className="so-dashboard-stock">
-              {wine.stock} bottles
-            </div>
-
-          </div>
-
-        </div>
-
-      ))}
-
-    </div>
-
-  </div>
-
-  {/* STOCK ALERTS */}
-
-  <div className="space-y-5">
-
-    <div className="so-card">
-
-      <div className="so-title mb-1">
-        Stock Alerts
-      </div>
-
-      <div className="so-sub mb-5">
-        Wines requiring operational attention
-      </div>
-
-      <div className="space-y-3">
-
-        {wines
-          .filter(w => w.stock <= 6)
-          .slice(0, 6)
-          .map((wine) => (
 
             <div
-              key={wine.id}
-              className="so-alert-row"
+              className="
+                text-[10px]
+                uppercase
+                tracking-[0.18em]
+                text-[#91a1ba]
+              "
             >
-
-              <div>
-
-                <div className="so-alert-name">
-                  {wine.name}
-                </div>
-
-                <div className="so-alert-meta">
-                  {wine.producer}
-                </div>
-
-              </div>
-
-              <div className="
-                so-soft-pill
-                so-soft-pill--low
-              ">
-                {wine.stock}
-              </div>
-
+              {formatNumber(
+                totalBottles
+              )} bottles
             </div>
+          </div>
 
-        ))}
+          <div className="space-y-5">
+            {wineComposition
+              .slice(0, 8)
+              .map((item) => (
+                <div key={item.type}>
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-5
+                      mb-2
+                    "
+                  >
+                    <div
+                      className="
+                        text-[12px]
+                        text-[#44332d]
+                      "
+                    >
+                      {getWineTypeLabel(
+                        item.type
+                      )}
+                    </div>
 
-      </div>
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-5
+                      "
+                    >
+                      <span
+                        className="
+                          text-[10px]
+                          text-[#91a1ba]
+                        "
+                      >
+                        {formatNumber(
+                          item.quantity
+                        )}
+                      </span>
 
-    </div>
-
-    {/* CATEGORY BREAKDOWN */}
-
-    <div className="so-card">
-
-      <div className="so-title mb-1">
-        Inventory by Category
-      </div>
-
-      <div className="so-sub mb-5">
-        Cellar composition overview
-      </div>
-
-      <div className="space-y-4">
-
-        {Object.entries(wineTypeStats)
-          .slice(0, 5)
-          .map(([type, qty]) => {
-
-            const percentage =
-              totalWineTypeBottles
-                ? ((qty / totalWineTypeBottles) * 100).toFixed(1)
-                : 0;
-
-            return (
-
-              <div key={type}>
-
-                <div className="flex items-center justify-between mb-2">
-
-                  <div className="capitalize text-sm font-medium">
-                    {type}
+                      <span
+                        className="
+                          min-w-[46px]
+                          text-right
+                          text-[11px]
+                          font-medium
+                          text-[#963b2c]
+                        "
+                      >
+                        {item.percentage.toFixed(
+                          1
+                        )}
+                        %
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="text-sm text-slate-500">
-                    {percentage}%
-                  </div>
-
-                </div>
-
-                <div className="so-progress">
 
                   <div
-                    className="so-progress-bar"
-                    style={{
-                      width: `${percentage}%`
-                    }}
-                  />
-
+                    className="
+                      h-[5px]
+                      bg-[#eee6df]
+                      rounded-full
+                      overflow-hidden
+                    "
+                  >
+                    <div
+                      className="
+                        h-full
+                        bg-[#963b2c]
+                        rounded-full
+                      "
+                      style={{
+                        width:
+                          `${item.percentage}%`,
+                      }}
+                    />
+                  </div>
                 </div>
+              ))}
+          </div>
+        </div>
 
+        {/* ===============================================
+            LOCATION DISTRIBUTION
+        =============================================== */}
+
+        <div className="so-card">
+          <div
+            className="
+              flex
+              items-start
+              justify-between
+              gap-5
+              mb-7
+            "
+          >
+            <div>
+              <div className="so-title">
+                Stock Distribution
               </div>
 
-            );
+              <div className="so-sub mt-1">
+                Physical inventory by
+                location
+              </div>
+            </div>
 
-        })}
+            <button
+              onClick={() =>
+                router.push(
+                  "/dashboard/wine-cellar/venues"
+                )
+              }
+              className="
+                text-[10px]
+                uppercase
+                tracking-[0.16em]
+                text-[#963b2c]
+              "
+            >
+              Venue Wines
+            </button>
+          </div>
 
+          <div className="space-y-2">
+            {locationDistribution
+              .slice(0, 8)
+              .map(
+                (
+                  location,
+                  index
+                ) => {
+                  const percentage =
+                    totalBottles > 0
+                      ? (
+                          location.quantity /
+                          totalBottles
+                        ) * 100
+                      : 0;
+
+                  return (
+                    <div
+                      key={location.id}
+                      className="
+                        flex
+                        items-center
+                        gap-4
+                        py-3
+                        border-b
+                        border-[#f0e8e1]
+                        last:border-b-0
+                      "
+                    >
+                      <div
+                        className="
+                          w-7
+                          text-[9px]
+                          text-[#b4a69e]
+                        "
+                      >
+                        {String(
+                          index + 1
+                        ).padStart(
+                          2,
+                          "0"
+                        )}
+                      </div>
+
+                      <BuildingStorefrontIcon
+                        className="
+                          w-4
+                          h-4
+                          text-[#a28e82]
+                        "
+                      />
+
+                      <div
+                        className="
+                          flex-1
+                          min-w-0
+                        "
+                      >
+                        <div
+                          className="
+                            text-[12px]
+                            text-[#3a2a24]
+                          "
+                        >
+                          {location.name}
+                        </div>
+
+                        <div
+                          className="
+                            mt-1
+                            text-[9px]
+                            text-[#91a1ba]
+                          "
+                        >
+                          {percentage.toFixed(
+                            1
+                          )}
+                          % of total inventory
+                        </div>
+                      </div>
+
+                      <div
+                        className="
+                          text-right
+                        "
+                      >
+                        <div
+                          className="
+                            text-[14px]
+                            font-medium
+                            text-[#30231f]
+                          "
+                        >
+                          {formatNumber(
+                            location.quantity
+                          )}
+                        </div>
+
+                        <div
+                          className="
+                            text-[9px]
+                            text-[#91a1ba]
+                          "
+                        >
+                          bottles
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+          </div>
+        </div>
+      </div>
+
+      {/* =================================================
+          ACTIVITY
+      ================================================= */}
+
+      <div
+        className="
+          grid
+          grid-cols-1
+          xl:grid-cols-2
+          gap-5
+        "
+      >
+
+        {/* ===============================================
+            RECENT ADDITIONS
+        =============================================== */}
+
+        <div className="so-card">
+          <div
+            className="
+              flex
+              items-start
+              justify-between
+              gap-5
+              mb-6
+            "
+          >
+            <div>
+              <div className="so-title">
+                Recent Additions
+              </div>
+
+              <div className="so-sub mt-1">
+                Latest wines registered in
+                the cellar
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                router.push(
+                  "/dashboard/wine-cellar/inventory"
+                )
+              }
+              className="
+                text-[10px]
+                uppercase
+                tracking-[0.16em]
+                text-[#963b2c]
+              "
+            >
+              Stock Control
+            </button>
+          </div>
+
+          <div>
+            {recentAdditions.map(
+              (wine) => (
+                <div
+                  key={wine.id}
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    gap-5
+                    py-3
+                    border-b
+                    border-[#f0e8e1]
+                    last:border-b-0
+                  "
+                >
+                  <div className="min-w-0">
+                    <div
+                      className="
+                        text-[12px]
+                        font-medium
+                        text-[#33251f]
+                        truncate
+                      "
+                    >
+                      {wine.name}
+                    </div>
+
+                    <div
+                      className="
+                        mt-1
+                        text-[10px]
+                        text-[#91a1ba]
+                        truncate
+                      "
+                    >
+                      {wine.producer}
+
+                      {wine.vintage
+                        ? ` · ${wine.vintage}`
+                        : ""}
+                    </div>
+                  </div>
+
+                  <div
+                    className="
+                      text-right
+                      flex-shrink-0
+                    "
+                  >
+                    <div
+                      className="
+                        text-[12px]
+                        text-[#963b2c]
+                      "
+                    >
+                      {wine.stock}
+                    </div>
+
+                    <div
+                      className="
+                        text-[9px]
+                        text-[#91a1ba]
+                      "
+                    >
+                      bottles
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* ===============================================
+            RECENT MOVEMENTS
+        =============================================== */}
+
+        <div className="so-card">
+          <div
+            className="
+              flex
+              items-start
+              justify-between
+              gap-5
+              mb-6
+            "
+          >
+            <div>
+              <div className="so-title">
+                Recent Movements
+              </div>
+
+              <div className="so-sub mt-1">
+                Latest inventory activity
+                across the cellar
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                router.push(
+                  "/dashboard/wine-cellar/transfers"
+                )
+              }
+              className="
+                text-[10px]
+                uppercase
+                tracking-[0.16em]
+                text-[#963b2c]
+              "
+            >
+              View Ledger
+            </button>
+          </div>
+
+          <div>
+            {movements
+              .slice(0, 6)
+              .map((movement) => {
+                const wine =
+                  winesMap[
+                    String(
+                      movement.wine_id
+                    )
+                  ];
+
+                const fromLocation =
+                  locationsMap[
+                    String(
+                      movement.from_location
+                    )
+                  ];
+
+                const toLocation =
+                  locationsMap[
+                    String(
+                      movement.to_location
+                    )
+                  ];
+
+                const isTransfer =
+                  movement.movement_type ===
+                  "transfer";
+
+                const quantity =
+                  Number(
+                    movement.quantity || 0
+                  );
+
+                return (
+                  <div
+                    key={movement.id}
+                    className="
+                      flex
+                      items-center
+                      gap-4
+                      py-3
+                      border-b
+                      border-[#f0e8e1]
+                      last:border-b-0
+                    "
+                  >
+                    <div
+                      className="
+                        w-8
+                        h-8
+                        rounded-full
+                        border
+                        border-[#eadfd5]
+                        flex
+                        items-center
+                        justify-center
+                        flex-shrink-0
+                      "
+                    >
+                      {isTransfer ? (
+                        <ArrowsRightLeftIcon
+                          className="
+                            w-4
+                            h-4
+                            text-[#963b2c]
+                          "
+                        />
+                      ) : (
+                        <CircleStackIcon
+                          className="
+                            w-4
+                            h-4
+                            text-[#963b2c]
+                          "
+                        />
+                      )}
+                    </div>
+
+                    <div
+                      className="
+                        flex-1
+                        min-w-0
+                      "
+                    >
+                      <div
+                        className="
+                          text-[12px]
+                          font-medium
+                          text-[#33251f]
+                          truncate
+                        "
+                      >
+                        {wine?.name ||
+                          "Wine movement"}
+                      </div>
+
+                      <div
+                        className="
+                          mt-1
+                          text-[10px]
+                          text-[#91a1ba]
+                          flex
+                          items-center
+                          gap-2
+                          flex-wrap
+                        "
+                      >
+                        {isTransfer ? (
+                          <>
+                            <span>
+                              {fromLocation?.name ||
+                                "Cellar"}
+                            </span>
+
+                            <ArrowRightIcon
+                              className="
+                                w-3
+                                h-3
+                              "
+                            />
+
+                            <span>
+                              {toLocation?.name ||
+                                "Cellar"}
+                            </span>
+                          </>
+                        ) : (
+                          <span>
+                            {movement.notes ||
+                              "Stock adjustment"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
+                      className="
+                        text-right
+                        flex-shrink-0
+                      "
+                    >
+                      <div
+                        className={
+                          `
+                          text-[12px]
+                          font-medium
+                          ${
+                            quantity < 0
+                              ? "text-red-500"
+                              : "text-[#30231f]"
+                          }
+                          `
+                        }
+                      >
+                        {quantity > 0 &&
+                        !isTransfer
+                          ? "+"
+                          : ""}
+                        {quantity}
+                      </div>
+
+                      <div
+                        className="
+                          mt-1
+                          text-[9px]
+                          text-[#91a1ba]
+                        "
+                      >
+                        {formatDate(
+                          movement.created_at
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+
+      {/* =================================================
+          OPERATIONAL ATTENTION
+      ================================================= */}
+
+      <div className="so-card">
+        <div
+          className="
+            flex
+            items-start
+            justify-between
+            gap-5
+            mb-6
+          "
+        >
+          <div>
+            <div className="so-title">
+              Operational Attention
+            </div>
+
+            <div className="so-sub mt-1">
+              Inventory conditions requiring
+              cellar review
+            </div>
+          </div>
+
+          <ExclamationTriangleIcon
+            className="
+              w-5
+              h-5
+              text-[#963b2c]
+            "
+          />
+        </div>
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            md:grid-cols-3
+            gap-4
+          "
+        >
+          <button
+            onClick={() =>
+              router.push(
+                "/dashboard/wine-cellar/inventory"
+              )
+            }
+            className="
+              text-left
+              bg-[#faf7f3]
+              border
+              border-[#eee4db]
+              rounded-[20px]
+              p-5
+              transition-all
+              hover:-translate-y-[1px]
+            "
+          >
+            <div
+              className="
+                text-[9px]
+                uppercase
+                tracking-[0.18em]
+                text-[#91a1ba]
+              "
+            >
+              Zero Stock
+            </div>
+
+            <div
+              className="
+                mt-3
+                text-[27px]
+                font-medium
+                text-[#30231f]
+              "
+            >
+              {formatNumber(
+                zeroStockWines.length
+              )}
+            </div>
+
+            <div
+              className="
+                mt-2
+                text-[10px]
+                text-[#9b8d85]
+              "
+            >
+              Registered wines with no
+              physical stock
+            </div>
+          </button>
+
+          <button
+            onClick={() =>
+              router.push(
+                "/dashboard/wine-cellar/inventory"
+              )
+            }
+            className="
+              text-left
+              bg-[#faf7f3]
+              border
+              border-[#eee4db]
+              rounded-[20px]
+              p-5
+              transition-all
+              hover:-translate-y-[1px]
+            "
+          >
+            <div
+              className="
+                text-[9px]
+                uppercase
+                tracking-[0.18em]
+                text-[#91a1ba]
+              "
+            >
+              Low Stock
+            </div>
+
+            <div
+              className="
+                mt-3
+                text-[27px]
+                font-medium
+                text-[#30231f]
+              "
+            >
+              {formatNumber(
+                lowStockWines.length
+              )}
+            </div>
+
+            <div
+              className="
+                mt-2
+                text-[10px]
+                text-[#9b8d85]
+              "
+            >
+              Wines holding between 1 and
+              6 bottles
+            </div>
+          </button>
+
+          <button
+            onClick={() =>
+              router.push(
+                "/dashboard/wine-cellar/inventory"
+              )
+            }
+            className="
+              text-left
+              bg-[#faf7f3]
+              border
+              border-[#eee4db]
+              rounded-[20px]
+              p-5
+              transition-all
+              hover:-translate-y-[1px]
+            "
+          >
+            <div
+              className="
+                text-[9px]
+                uppercase
+                tracking-[0.18em]
+                text-[#91a1ba]
+              "
+            >
+              High Value / Low Stock
+            </div>
+
+            <div
+              className="
+                mt-3
+                text-[27px]
+                font-medium
+                text-[#963b2c]
+              "
+            >
+              {formatNumber(
+                highValueLowStock.length
+              )}
+            </div>
+
+            <div
+              className="
+                mt-2
+                text-[10px]
+                text-[#9b8d85]
+              "
+            >
+              €150+ wines with 3 bottles
+              or fewer
+            </div>
+          </button>
+        </div>
+
+        {highValueLowStock.length > 0 && (
+          <div
+            className="
+              mt-5
+              border-t
+              border-[#eee5dd]
+              pt-2
+            "
+          >
+            {highValueLowStock
+              .slice(0, 5)
+              .map((wine) => (
+                <div
+                  key={wine.id}
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    gap-5
+                    py-3
+                    border-b
+                    border-[#f2ebe5]
+                    last:border-b-0
+                  "
+                >
+                  <div>
+                    <div
+                      className="
+                        text-[11px]
+                        font-medium
+                        text-[#33251f]
+                      "
+                    >
+                      {wine.name}
+                    </div>
+
+                    <div
+                      className="
+                        mt-1
+                        text-[9px]
+                        text-[#91a1ba]
+                      "
+                    >
+                      {wine.producer}
+                    </div>
+                  </div>
+
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-6
+                    "
+                  >
+                    <div
+                      className="
+                        text-[11px]
+                        text-[#7e6d64]
+                      "
+                    >
+                      €
+                      {formatCurrency(
+                        wine.price
+                      )}
+                    </div>
+
+                    <div
+                      className="
+                        min-w-[72px]
+                        text-right
+                        text-[11px]
+                        font-medium
+                        text-[#963b2c]
+                      "
+                    >
+                      {wine.stock} bottles
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
 
     </div>
-
-  </div>
-
-</div>
-
-
-  </div>
-
-);
-
-}     
-  
+  );
+}

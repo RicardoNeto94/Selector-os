@@ -1,0 +1,1016 @@
+/* =========================================================
+   VAXERON — THE BURMAN
+   ROOM DELICACIES EXPERIENCE
+   ========================================================= */
+
+
+/* =========================================================
+   MODAL SURFACE
+   ========================================================= */
+
+.vx-room-modal .burman-modal-content {
+  position: relative;
+  z-index: 2;
+
+  width: min(1180px, 94vw);
+  height: min(820px, 90vh);
+  max-width: none;
+  max-height: none;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: #f5f0e8;
+
+  box-shadow:
+    0 40px 120px rgba(34, 24, 18, .22);
+}
+
+
+.vx-room-modal .burman-modal-close {
+  position: absolute;
+
+  top: 18px;
+  right: 20px;
+
+  z-index: 30;
+
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, .22);
+
+  border-radius: 999px;
+
+  background:
+    rgba(25, 19, 16, .24);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  color: #fff;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+
+.vx-room-shell {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.vx-room-hero {
+  position: relative;
+
+  width: 100%;
+  height: 320px;
+
+  flex: 0 0 320px;
+
+  overflow: hidden;
+
+  background: #2d241f;
+}
+
+
+.vx-room-hero::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(24, 17, 14, .84) 0%,
+      rgba(24, 17, 14, .58) 36%,
+      rgba(24, 17, 14, .16) 68%,
+      rgba(24, 17, 14, .04) 100%
+    );
+}
+
+
+.vx-room-hero img {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center 48%;
+
+  transform: scale(1.015);
+}
+
+
+.vx-room-hero-copy {
+  position: absolute;
+
+  left: 58px;
+  bottom: 40px;
+
+  z-index: 3;
+
+  width: min(520px, 52%);
+}
+
+
+.vx-room-kicker {
+  display: block;
+
+  color:
+    rgba(255, 255, 255, .68);
+
+  font-size: 8px;
+  font-weight: 500;
+
+  letter-spacing: .28em;
+
+  text-transform: uppercase;
+}
+
+
+.vx-room-hero-copy h2 {
+  margin: 10px 0 14px;
+
+  color: #fff;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(48px, 5vw, 76px);
+
+  font-weight: 400;
+
+  line-height: .9;
+
+  letter-spacing: -.045em;
+}
+
+
+.vx-room-hero-copy > p {
+  max-width: 450px;
+
+  margin: 0;
+
+  color:
+    rgba(255, 255, 255, .76);
+
+  font-size: 12px;
+
+  line-height: 1.55;
+}
+
+
+.vx-room-hero-meta {
+  margin-top: 16px;
+
+  color:
+    rgba(255, 255, 255, .54);
+
+  font-size: 8px;
+
+  letter-spacing: .18em;
+
+  text-transform: uppercase;
+}
+
+
+.vx-room-request {
+  position: absolute;
+
+  right: 42px;
+  bottom: 38px;
+
+  z-index: 3;
+
+  width: 230px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 18px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, .18);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 255, 255, .08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  color: #fff;
+
+  font-size: 11px;
+}
+
+
+.vx-room-request small {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color:
+    rgba(255, 255, 255, .52);
+
+  font-size: 7px;
+
+  letter-spacing: .2em;
+}
+
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+.vx-room-tabs {
+  width: 100%;
+  height: 58px;
+  min-height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 58px;
+
+  flex: 0 0 58px;
+
+  border-bottom:
+    1px solid
+    rgba(80, 58, 47, .08);
+
+  background:
+    rgba(250, 247, 241, .96);
+}
+
+
+.vx-room-tab {
+  position: relative;
+
+  height: 58px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #9a8c83;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  letter-spacing: .18em;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+
+.vx-room-tab::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 1px;
+
+  background: #7d3428;
+
+  transform: scaleX(0);
+
+  transition:
+    transform .35s ease;
+}
+
+
+.vx-room-tab.active {
+  color: #3d2f29;
+}
+
+
+.vx-room-tab.active::after {
+  transform: scaleX(1);
+}
+
+
+/* =========================================================
+   SCROLL BODY
+   ========================================================= */
+
+.vx-room-body {
+  min-height: 0;
+
+  flex: 1;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  overscroll-behavior: contain;
+
+  scrollbar-width: none;
+
+  touch-action: pan-y;
+}
+
+
+.vx-room-body::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* =========================================================
+   MENU EXPERIENCE
+   ========================================================= */
+
+.vx-room-menu,
+.vx-room-pillow {
+  width:
+    min(900px, calc(100% - 96px));
+
+  margin: 0 auto;
+
+  padding:
+    44px 0 70px;
+}
+
+
+.vx-room-menu-heading {
+  margin-bottom: 48px;
+
+  text-align: center;
+}
+
+
+.vx-room-section-label {
+  display: block;
+
+  margin-bottom: 12px;
+
+  color: #9c8d84;
+
+  font-size: 8px;
+  font-weight: 500;
+
+  letter-spacing: .26em;
+
+  text-transform: uppercase;
+}
+
+
+.vx-room-menu-heading h3 {
+  margin: 0;
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(34px, 4vw, 54px);
+
+  font-weight: 400;
+
+  line-height: 1;
+
+  letter-spacing: -.035em;
+}
+
+
+.vx-room-menu-heading p {
+  max-width: 520px;
+
+  margin:
+    18px auto 0;
+
+  color: #81736a;
+
+  font-size: 11px;
+
+  line-height: 1.65;
+}
+
+
+.vx-room-menu-section {
+  margin-bottom: 66px;
+}
+
+
+.vx-room-menu-section > h3 {
+  margin:
+    0 0 12px;
+
+  padding-bottom: 20px;
+
+  border-bottom:
+    1px solid
+    rgba(80, 58, 47, .14);
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 34px;
+
+  font-weight: 400;
+
+  letter-spacing: -.025em;
+}
+
+
+.vx-room-menu-item {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr) auto;
+
+  align-items: start;
+
+  gap: 48px;
+
+  padding: 22px 0;
+
+  border-bottom:
+    1px solid
+    rgba(80, 58, 47, .07);
+}
+
+
+.vx-room-menu-item h4 {
+  margin: 0;
+
+  color: #44352e;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 21px;
+
+  font-weight: 400;
+}
+
+
+.vx-room-menu-item p {
+  max-width: 620px;
+
+  margin: 8px 0 0;
+
+  color: #8a7d74;
+
+  font-size: 10px;
+
+  line-height: 1.55;
+}
+
+
+.vx-room-price {
+  padding-top: 4px;
+
+  color: #5a463d;
+
+  font-size: 11px;
+
+  white-space: nowrap;
+}
+
+
+.vx-room-price > span {
+  color: #9a8c83;
+}
+
+
+.vx-room-disclaimer {
+  margin-top: 48px;
+
+  padding-top: 24px;
+
+  border-top:
+    1px solid
+    rgba(80, 58, 47, .1);
+
+  color: #968980;
+
+  font-size: 9px;
+
+  line-height: 1.65;
+
+  text-align: center;
+}
+
+
+.vx-room-empty {
+  padding: 80px 0;
+
+  color: #95877e;
+
+  font-size: 11px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   PILLOW MENU
+   ========================================================= */
+
+.vx-room-pillow {
+  padding-bottom: 80px;
+}
+
+
+/* =========================================================
+   IPAD
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1366px) {
+
+  .vx-room-modal .burman-modal-content {
+    width:
+      calc(100vw - 42px);
+
+    height:
+      calc(100vh - 42px);
+
+    border-radius: 16px;
+  }
+
+
+  .vx-room-hero {
+  height: 220px;
+  flex-basis: 220px;
+}
+
+.vx-room-hero-copy {
+  left: 42px;
+  bottom: 20px;
+  width: 58%;
+}
+
+.vx-room-hero-copy h2 {
+  margin: 6px 0 8px;
+  font-size: 42px;
+  line-height: .9;
+}
+
+.vx-room-hero-copy > p {
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.vx-room-hero-meta {
+  margin-top: 8px;
+  font-size: 7px;
+}
+
+.vx-room-request {
+  right: 28px;
+  bottom: 18px;
+  width: 200px;
+  padding: 9px 13px;
+}
+
+.vx-room-tabs {
+  height: 48px;
+  min-height: 48px;
+  flex-basis: 48px;
+  gap: 42px;
+}
+
+.vx-room-tab {
+  height: 48px;
+  font-size: 8px;
+}
+
+.vx-room-menu,
+.vx-room-pillow {
+  width: calc(100% - 110px);
+  padding: 24px 0 44px;
+}
+
+.vx-room-menu-heading {
+  margin-bottom: 24px;
+}
+
+.vx-room-section-label {
+  margin-bottom: 6px;
+  font-size: 7px;
+}
+
+.vx-room-menu-heading h3 {
+  font-size: 32px;
+}
+
+.vx-room-menu-heading p {
+  margin-top: 9px;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.vx-room-menu-section {
+  margin-bottom: 34px;
+}
+
+.vx-room-menu-section > h3 {
+  margin-bottom: 4px;
+  padding-bottom: 12px;
+  font-size: 24px;
+}
+
+.vx-room-menu-item {
+  gap: 32px;
+  padding: 13px 0;
+}
+
+.vx-room-menu-item h4 {
+  font-size: 16px;
+}
+
+.vx-room-menu-item p {
+  margin-top: 4px;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.vx-room-price {
+  font-size: 9px;
+}
+
+}
+
+/* =========================================================
+   ROOM SERVICE — TRUE BLURRED HOMEPAGE BACKDROP
+   ========================================================= */
+
+.vx-room-modal {
+  background: transparent !important;
+}
+
+.vx-room-modal > .burman-modal-backdrop {
+  background: rgba(8, 6, 4, .16) !important;
+
+  backdrop-filter:
+    blur(18px)
+    brightness(.72)
+    saturate(.9) !important;
+
+  -webkit-backdrop-filter:
+    blur(18px)
+    brightness(.72)
+    saturate(.9) !important;
+}
+
+.vx-room-modal > .burman-modal-content {
+  background: transparent !important;
+
+  box-shadow:
+    0 45px 130px rgba(0, 0, 0, .38);
+
+  border:
+    1px solid rgba(255, 255, 255, .18);
+}
+
+.vx-room-modal .vx-room-shell {
+  background: #f4f0ea;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   BURMAN SLEEP CONCIERGE
+   ========================================================= */
+
+.vx-pillow-experience {
+  width: 100%;
+}
+
+.vx-pillow-intro {
+  max-width: 460px;
+  margin: 0 auto 22px;
+  text-align: center;
+}
+
+.vx-pillow-intro > span {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #9c8d84;
+
+  font-size: 6px;
+  font-weight: 500;
+
+  letter-spacing: .26em;
+  text-transform: uppercase;
+}
+
+.vx-pillow-intro p {
+  margin: 0;
+
+  color: #81736a;
+
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.vx-pillow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+.vx-pillow-card {
+  min-height: 142px;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 14px 16px;
+
+  border: 1px solid rgba(80, 58, 47, .09);
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, .32);
+
+  color: inherit;
+
+  text-align: left;
+}
+
+.vx-pillow-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+}
+
+.vx-pillow-number,
+.vx-pillow-type {
+  color: #a09289;
+
+  font-size: 6px;
+  font-weight: 500;
+
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+.vx-pillow-card-content {
+  flex: 1;
+
+  padding: 15px 0 13px;
+}
+
+.vx-pillow-card-content h4 {
+  margin: 0;
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 17px;
+  font-weight: 400;
+
+  line-height: 1.05;
+
+  letter-spacing: -.02em;
+}
+
+.vx-pillow-feel {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #7d3428;
+
+  font-size: 6px;
+
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.vx-pillow-card-content p {
+  margin: 10px 0 0;
+
+  color: #897c73;
+
+  font-size: 7px;
+
+  line-height: 1.45;
+}
+
+.vx-pillow-card-footer {
+  padding-top: 9px;
+
+  border-top:
+    1px solid rgba(80, 58, 47, .07);
+
+  color: #95887f;
+
+  font-size: 7px;
+}
+
+.vx-pillow-request {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 40px;
+
+  margin-top: 10px;
+
+  padding: 14px 18px;
+
+  border-radius: 9px;
+
+  background: #3b2d27;
+
+  color: #fff;
+}
+
+.vx-pillow-request span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: rgba(255, 255, 255, .46);
+
+  font-size: 6px;
+
+  letter-spacing: .2em;
+}
+
+.vx-pillow-request strong {
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.vx-pillow-request p {
+  max-width: 300px;
+
+  margin: 0;
+
+  color: rgba(255, 255, 255, .62);
+
+  font-size: 7px;
+
+  line-height: 1.45;
+
+  text-align: right;
+}
+
+.vx-pillow-note {
+  margin: 12px 0 0;
+
+  color: #a09289;
+
+  font-size: 7px;
+
+  text-align: center;
+}
+
+/* =========================================================
+   MOBILE / IPAD PORTRAIT SAFETY
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .vx-room-modal .burman-modal-content {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+
+    border-radius: 14px;
+  }
+
+
+  .vx-room-hero {
+    height: 250px;
+
+    flex-basis: 250px;
+  }
+
+
+  .vx-room-hero-copy {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+
+    width: auto;
+  }
+
+
+  .vx-room-hero-copy h2 {
+    font-size: 42px;
+  }
+
+
+  .vx-room-hero-copy > p {
+    max-width: 80%;
+
+    font-size: 10px;
+  }
+
+
+  .vx-room-request {
+    display: none;
+  }
+
+
+  .vx-room-tabs {
+    justify-content: flex-start;
+
+    gap: 28px;
+
+    padding: 0 24px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+
+  .vx-room-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .vx-room-tab {
+    flex: 0 0 auto;
+  }
+
+
+  .vx-room-menu,
+  .vx-room-pillow {
+    width:
+      calc(100% - 48px);
+
+    padding:
+      30px 0 54px;
+  }
+
+
+  .vx-room-menu-item {
+    gap: 20px;
+  }
+
+
+  .vx-room-menu-item h4 {
+    font-size: 18px;
+  }
+
+}

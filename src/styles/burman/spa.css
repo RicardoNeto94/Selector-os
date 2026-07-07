@@ -1,0 +1,1066 @@
+/* =========================================================
+   VAXERON — THE BURMAN
+   SPA EXPERIENCE
+   ========================================================= */
+
+
+/* =========================================================
+   MODAL + BLURRED HOMEPAGE
+   ========================================================= */
+
+.vx-spa-modal {
+  background: transparent !important;
+}
+
+.vx-spa-modal > .burman-modal-backdrop {
+  background: rgba(8, 6, 4, .16) !important;
+
+  backdrop-filter:
+    blur(18px)
+    brightness(.72)
+    saturate(.9) !important;
+
+  -webkit-backdrop-filter:
+    blur(18px)
+    brightness(.72)
+    saturate(.9) !important;
+}
+
+.vx-spa-modal > .burman-modal-content {
+  position: relative;
+  z-index: 2;
+
+  width: min(1180px, 94vw);
+  height: min(820px, 90vh);
+
+  max-width: none;
+  max-height: none;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  background: transparent !important;
+
+  border:
+    1px solid rgba(255, 255, 255, .18);
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 45px 130px rgba(0, 0, 0, .38);
+}
+
+.vx-spa-modal .burman-modal-close {
+  position: absolute;
+
+  top: 18px;
+  right: 20px;
+
+  z-index: 30;
+
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  border:
+    1px solid rgba(255, 255, 255, .22);
+
+  border-radius: 999px;
+
+  background:
+    rgba(25, 19, 16, .24);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  color: #fff;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.vx-spa-shell {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: #f4f0ea;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.vx-spa-hero {
+  position: relative;
+
+  width: 100%;
+  height: 320px;
+
+  flex: 0 0 320px;
+
+  overflow: hidden;
+
+  background: #2d241f;
+}
+
+.vx-spa-hero::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(24, 17, 14, .82) 0%,
+      rgba(24, 17, 14, .58) 38%,
+      rgba(24, 17, 14, .14) 72%,
+      rgba(24, 17, 14, .03) 100%
+    );
+}
+
+.vx-spa-hero img {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center 52%;
+
+  transform: scale(1.015);
+}
+
+.vx-spa-hero-copy {
+  position: absolute;
+
+  left: 58px;
+  bottom: 40px;
+
+  z-index: 3;
+
+  width: min(540px, 54%);
+}
+
+.vx-spa-kicker {
+  display: block;
+
+  color: rgba(255, 255, 255, .68);
+
+  font-size: 8px;
+  font-weight: 500;
+
+  letter-spacing: .28em;
+
+  text-transform: uppercase;
+}
+
+.vx-spa-hero-copy h2 {
+  margin: 10px 0 14px;
+
+  color: #fff;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: clamp(48px, 5vw, 74px);
+  font-weight: 400;
+
+  line-height: .9;
+
+  letter-spacing: -.045em;
+}
+
+.vx-spa-hero-copy h2 span {
+  display: block;
+
+  font-style: italic;
+}
+
+.vx-spa-hero-copy > p {
+  max-width: 450px;
+
+  margin: 0;
+
+  color: rgba(255, 255, 255, .76);
+
+  font-size: 12px;
+
+  line-height: 1.55;
+}
+
+.vx-spa-hero-meta {
+  margin-top: 16px;
+
+  color: rgba(255, 255, 255, .54);
+
+  font-size: 8px;
+
+  letter-spacing: .18em;
+
+  text-transform: uppercase;
+}
+
+.vx-spa-request {
+  position: absolute;
+
+  right: 42px;
+  bottom: 38px;
+
+  z-index: 3;
+
+  width: 230px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 18px;
+
+  border:
+    1px solid rgba(255, 255, 255, .18);
+
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, .08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  color: #fff;
+
+  font-size: 11px;
+}
+
+.vx-spa-request small {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: rgba(255, 255, 255, .52);
+
+  font-size: 7px;
+
+  letter-spacing: .2em;
+}
+
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+.vx-spa-tabs {
+  width: 100%;
+  height: 58px;
+  min-height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 58px;
+
+  flex: 0 0 58px;
+
+  border-bottom:
+    1px solid rgba(80, 58, 47, .08);
+
+  background: rgba(250, 247, 241, .96);
+}
+
+.vx-spa-tab {
+  position: relative;
+
+  height: 58px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #9a8c83;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  letter-spacing: .18em;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.vx-spa-tab::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 1px;
+
+  background: #7d3428;
+
+  transform: scaleX(0);
+
+  transition: transform .35s ease;
+}
+
+.vx-spa-tab.active {
+  color: #3d2f29;
+}
+
+.vx-spa-tab.active::after {
+  transform: scaleX(1);
+}
+
+
+/* =========================================================
+   SCROLL BODY
+   ========================================================= */
+
+.vx-spa-body {
+  min-height: 0;
+
+  flex: 1;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  overscroll-behavior: contain;
+
+  scrollbar-width: none;
+
+  touch-action: pan-y;
+}
+
+.vx-spa-body::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* =========================================================
+   OVERVIEW
+   ========================================================= */
+
+.vx-spa-overview {
+  width: min(940px, calc(100% - 96px));
+
+  margin: 0 auto;
+
+  padding: 46px 0 70px;
+}
+
+.vx-spa-overview-intro {
+  margin-bottom: 42px;
+
+  text-align: center;
+}
+
+.vx-spa-overview-intro > span,
+.vx-spa-story > span,
+.vx-spa-section-heading > span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #9c8d84;
+
+  font-size: 8px;
+  font-weight: 500;
+
+  letter-spacing: .26em;
+
+  text-transform: uppercase;
+}
+
+.vx-spa-overview-intro h3 {
+  margin: 0;
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 50px;
+  font-weight: 400;
+
+  line-height: .92;
+
+  letter-spacing: -.04em;
+}
+
+.vx-spa-overview-intro p {
+  max-width: 440px;
+
+  margin: 18px auto 0;
+
+  color: #81736a;
+
+  font-size: 11px;
+
+  line-height: 1.6;
+}
+
+.vx-spa-overview-content {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, .8fr)
+    minmax(0, 1.4fr);
+
+  gap: 56px;
+
+  align-items: start;
+}
+
+.vx-spa-story {
+  padding-top: 8px;
+}
+
+.vx-spa-story p {
+  margin: 0 0 18px;
+
+  color: #65564e;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 17px;
+
+  line-height: 1.48;
+}
+
+.vx-spa-highlights {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.vx-spa-highlights article {
+  min-height: 150px;
+
+  padding: 18px;
+
+  border:
+    1px solid rgba(80, 58, 47, .09);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 255, 255, .34);
+}
+
+.vx-spa-highlights article > span {
+  display: block;
+
+  margin-bottom: 24px;
+
+  color: #aa9d94;
+
+  font-size: 7px;
+
+  letter-spacing: .18em;
+}
+
+.vx-spa-highlights small {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #9a4b3b;
+
+  font-size: 6px;
+
+  letter-spacing: .18em;
+}
+
+.vx-spa-highlights h4 {
+  margin: 0;
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.vx-spa-highlights p {
+  margin: 9px 0 0;
+
+  color: #897c73;
+
+  font-size: 8px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+.vx-spa-treatments,
+.vx-spa-information {
+  width: min(900px, calc(100% - 96px));
+
+  margin: 0 auto;
+
+  padding: 44px 0 70px;
+}
+
+.vx-spa-section-heading {
+  margin-bottom: 46px;
+
+  text-align: center;
+}
+
+.vx-spa-section-heading h3 {
+  margin: 0;
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 50px;
+  font-weight: 400;
+
+  line-height: 1;
+
+  letter-spacing: -.035em;
+}
+
+.vx-spa-section-heading p {
+  max-width: 500px;
+
+  margin: 16px auto 0;
+
+  color: #81736a;
+
+  font-size: 10px;
+
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   TREATMENTS
+   ========================================================= */
+
+.vx-spa-treatment-section {
+  margin-bottom: 62px;
+}
+
+.vx-spa-treatment-section > h3 {
+  margin: 0 0 10px;
+
+  padding-bottom: 18px;
+
+  border-bottom:
+    1px solid rgba(80, 58, 47, .14);
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 31px;
+  font-weight: 400;
+
+  letter-spacing: -.025em;
+}
+
+.vx-spa-treatment {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(150px, 220px);
+
+  gap: 48px;
+
+  align-items: start;
+
+  padding: 20px 0;
+
+  border-bottom:
+    1px solid rgba(80, 58, 47, .07);
+}
+
+.vx-spa-treatment-copy h4 {
+  margin: 0;
+
+  color: #44352e;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.vx-spa-treatment-copy p {
+  max-width: 570px;
+
+  margin: 7px 0 0;
+
+  color: #8a7d74;
+
+  font-size: 9px;
+
+  line-height: 1.55;
+}
+
+.vx-spa-pricing {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.vx-spa-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  color: #8d7f76;
+
+  font-size: 9px;
+}
+
+.vx-spa-price strong {
+  color: #5a463d;
+
+  font-weight: 400;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   INFORMATION
+   ========================================================= */
+
+.vx-spa-info-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.vx-spa-info-card {
+  min-height: 170px;
+
+  padding: 20px;
+
+  border:
+    1px solid rgba(80, 58, 47, .09);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 255, 255, .34);
+}
+
+.vx-spa-info-card > span {
+  display: block;
+
+  margin-bottom: 24px;
+
+  color: #aa9d94;
+
+  font-size: 7px;
+
+  letter-spacing: .18em;
+}
+
+.vx-spa-info-card h4 {
+  margin: 0 0 14px;
+
+  color: #3c2d26;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.vx-spa-info-card p {
+  margin: 0 0 9px;
+
+  color: #897c73;
+
+  font-size: 8px;
+
+  line-height: 1.5;
+}
+
+.vx-spa-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 8px 0;
+
+  border-bottom:
+    1px solid rgba(80, 58, 47, .07);
+
+  color: #897c73;
+
+  font-size: 8px;
+}
+
+.vx-spa-info-row strong {
+  color: #5a463d;
+
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   IPAD
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1366px) {
+
+  .vx-spa-modal > .burman-modal-content {
+    width: calc(100vw - 42px);
+    height: calc(100vh - 42px);
+
+    border-radius: 16px;
+  }
+
+  .vx-spa-shell {
+    border-radius: 16px;
+  }
+
+  .vx-spa-hero {
+    height: 220px;
+    flex-basis: 220px;
+  }
+
+  .vx-spa-hero-copy {
+    left: 42px;
+    bottom: 20px;
+
+    width: 58%;
+  }
+
+  .vx-spa-hero-copy h2 {
+    margin: 6px 0 8px;
+
+    font-size: 42px;
+
+    line-height: .9;
+  }
+
+  .vx-spa-hero-copy > p {
+    font-size: 9px;
+
+    line-height: 1.35;
+  }
+
+  .vx-spa-hero-meta {
+    margin-top: 8px;
+
+    font-size: 7px;
+  }
+
+  .vx-spa-request {
+    right: 28px;
+    bottom: 18px;
+
+    width: 200px;
+
+    padding: 9px 13px;
+  }
+
+  .vx-spa-tabs {
+    height: 48px;
+    min-height: 48px;
+
+    flex-basis: 48px;
+
+    gap: 42px;
+  }
+
+  .vx-spa-tab {
+    height: 48px;
+
+    font-size: 8px;
+  }
+
+  .vx-spa-overview,
+  .vx-spa-treatments,
+  .vx-spa-information {
+    width: calc(100% - 110px);
+
+    padding: 24px 0 44px;
+  }
+
+  .vx-spa-overview-intro {
+    margin-bottom: 24px;
+  }
+
+  .vx-spa-overview-intro > span,
+  .vx-spa-story > span,
+  .vx-spa-section-heading > span {
+    margin-bottom: 6px;
+
+    font-size: 7px;
+  }
+
+  .vx-spa-overview-intro h3,
+  .vx-spa-section-heading h3 {
+    font-size: 32px;
+  }
+
+  .vx-spa-overview-intro p,
+  .vx-spa-section-heading p {
+    margin-top: 9px;
+
+    font-size: 9px;
+
+    line-height: 1.4;
+  }
+
+  .vx-spa-overview-content {
+    gap: 34px;
+  }
+
+  .vx-spa-story p {
+    margin-bottom: 12px;
+
+    font-size: 13px;
+
+    line-height: 1.42;
+  }
+
+  .vx-spa-highlights {
+    gap: 8px;
+  }
+
+  .vx-spa-highlights article {
+    min-height: 118px;
+
+    padding: 14px;
+  }
+
+  .vx-spa-highlights article > span {
+    margin-bottom: 14px;
+  }
+
+  .vx-spa-highlights h4 {
+    font-size: 16px;
+  }
+
+  .vx-spa-highlights p {
+    margin-top: 6px;
+
+    font-size: 7px;
+  }
+
+  .vx-spa-section-heading {
+    margin-bottom: 24px;
+  }
+
+  .vx-spa-treatment-section {
+    margin-bottom: 38px;
+  }
+
+  .vx-spa-treatment-section > h3 {
+    margin-bottom: 4px;
+
+    padding-bottom: 12px;
+
+    font-size: 24px;
+  }
+
+  .vx-spa-treatment {
+    gap: 32px;
+
+    padding: 13px 0;
+  }
+
+  .vx-spa-treatment-copy h4 {
+    font-size: 16px;
+  }
+
+  .vx-spa-treatment-copy p {
+    margin-top: 4px;
+
+    font-size: 8px;
+
+    line-height: 1.4;
+  }
+
+  .vx-spa-price {
+    font-size: 8px;
+  }
+
+  .vx-spa-info-grid {
+    gap: 8px;
+  }
+
+  .vx-spa-info-card {
+    min-height: 132px;
+
+    padding: 15px;
+  }
+
+  .vx-spa-info-card > span {
+    margin-bottom: 14px;
+  }
+
+  .vx-spa-info-card h4 {
+    margin-bottom: 9px;
+
+    font-size: 16px;
+  }
+
+  .vx-spa-info-card p,
+  .vx-spa-info-row {
+    font-size: 7px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE / PORTRAIT SAFETY
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .vx-spa-modal > .burman-modal-content {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+
+    border-radius: 14px;
+  }
+
+  .vx-spa-shell {
+    border-radius: 14px;
+  }
+
+  .vx-spa-hero {
+    height: 250px;
+
+    flex-basis: 250px;
+  }
+
+  .vx-spa-hero-copy {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+
+    width: auto;
+  }
+
+  .vx-spa-hero-copy h2 {
+    font-size: 42px;
+  }
+
+  .vx-spa-hero-copy > p {
+    max-width: 80%;
+
+    font-size: 10px;
+  }
+
+  .vx-spa-request {
+    display: none;
+  }
+
+  .vx-spa-tabs {
+    justify-content: flex-start;
+
+    gap: 28px;
+
+    padding: 0 24px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  .vx-spa-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vx-spa-tab {
+    flex: 0 0 auto;
+  }
+
+  .vx-spa-overview,
+  .vx-spa-treatments,
+  .vx-spa-information {
+    width: calc(100% - 48px);
+
+    padding: 30px 0 54px;
+  }
+
+  .vx-spa-overview-content {
+    grid-template-columns: 1fr;
+  }
+
+  .vx-spa-highlights,
+  .vx-spa-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vx-spa-treatment {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+}

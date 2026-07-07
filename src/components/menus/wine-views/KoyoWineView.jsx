@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import WineResultsView from "./KoyoWineResultsView";
 
 function getWine(item) {
@@ -25,20 +25,22 @@ function normalize(str){
 
 export default function KoyoWineView({
   menu,
-  items
+  items,
+  sakePairings = []
 }) {
 
   const [filters,setFilters] =
-    useState({
+  useState({
 
-      wine_type:"",
-      country:"",
-      region:"",
-      vintage:"",
-      grapes:"",
-      price:""
+    wine_type:"",
+    country:"",
+    region:"",
+    vintage:"",
+    grapes:"",
+    price:"",
+    service_type:""
 
-    });
+  });
 
   const [showResults,setShowResults] =
     useState(false);
@@ -49,8 +51,97 @@ export default function KoyoWineView({
   const [transitioning,setTransitioning] =
     useState(false);
 
-  const wines =
-    items.map(getWine);
+  const [experienceMode,setExperienceMode] =
+    useState("wine");
+
+  const guestItems =
+  useMemo(() => {
+
+    return (items || []).map(item => {
+
+      const wine =
+        getWine(item);
+
+      return {
+
+        ...item,
+
+        service_type:
+          item?.service_type ||
+          "bottle",
+
+        glass_price:
+          item?.glass_price !== null &&
+          item?.glass_price !== undefined
+            ? Number(
+                item.glass_price
+              )
+            : null,
+
+        price_override:
+          item?.price_override !== null &&
+          item?.price_override !== undefined
+            ? Number(
+                item.price_override
+              )
+            : null,
+
+        wines: {
+
+          ...wine,
+
+          price:
+            item?.price_override !== null &&
+            item?.price_override !== undefined
+              ? Number(
+                  item.price_override
+                )
+              : wine.price
+
+        }
+
+      };
+
+    });
+
+  },[
+    items
+  ]);
+
+
+const wines =
+  guestItems.map(
+    getWine
+  );
+
+
+const byTheGlassCount =
+  guestItems.filter(item => {
+
+    return (
+
+      item.service_type ===
+      "glass"
+
+      ||
+
+      item.service_type ===
+      "both"
+
+    );
+
+  }).length;
+
+  const publishedPairings =
+    useMemo(() =>
+      (sakePairings || []).filter(
+        pairing => pairing?.status === "published"
+      ),
+      [sakePairings]
+    );
+
+  const hasSakePairing =
+    publishedPairings.length > 0;
 
   /* ================================
      FILTERS
@@ -150,54 +241,110 @@ export default function KoyoWineView({
   ================================= */
 
   const filteredItems =
-    items.filter(item => {
+  guestItems.filter(item => {
 
-      const w =
-        getWine(item);
+    const w =
+      getWine(item);
 
-      if(!w){
-        return false;
-      }
+    if(!w){
+      return false;
+    }
 
-      return (
+    const matchesService =
 
-        (!filters.wine_type ||
+      !filters.service_type
 
-          normalize(w.wine_type)
-          ===
-          normalize(filters.wine_type)
-        )
+      ||
 
-        &&
-
-        (!filters.country ||
-
-          normalize(w.country)
-          ===
-          normalize(filters.country)
-        )
+      (
+        filters.service_type ===
+        "glass"
 
         &&
 
-        (!filters.region ||
+        (
+          item.service_type ===
+          "glass"
 
-          normalize(w.region)
-          ===
-          normalize(filters.region)
+          ||
+
+          item.service_type ===
+          "both"
         )
-
-        &&
-
-        (!filters.vintage ||
-
-          String(w.vintage)
-          ===
-          String(filters.vintage)
-        )
-
       );
 
-    });
+
+    return (
+
+      (
+        !filters.wine_type
+
+        ||
+
+        normalize(
+          w.wine_type
+        )
+        ===
+        normalize(
+          filters.wine_type
+        )
+      )
+
+      &&
+
+      (
+        !filters.country
+
+        ||
+
+        normalize(
+          w.country
+        )
+        ===
+        normalize(
+          filters.country
+        )
+      )
+
+      &&
+
+      (
+        !filters.region
+
+        ||
+
+        normalize(
+          w.region
+        )
+        ===
+        normalize(
+          filters.region
+        )
+      )
+
+      &&
+
+      (
+        !filters.vintage
+
+        ||
+
+        String(
+          w.vintage
+        )
+        ===
+        String(
+          filters.vintage
+        )
+      )
+
+      &&
+
+      matchesService
+
+    );
+
+  });
 
 
   return(
@@ -386,13 +533,18 @@ export default function KoyoWineView({
           relative
           z-10
 
-          px-6
+          max-w-[1180px]
+          mx-auto
+
+          px-5
+          sm:px-7
           md:px-10
           lg:px-14
 
-pt-[9vh]
-md:pt-[10vh]
-          pb-20
+          pt-[max(env(safe-area-inset-top),32px)]
+          md:pt-[max(env(safe-area-inset-top),56px)]
+
+          pb-[max(env(safe-area-inset-bottom),64px)]
 
           transition-all
           duration-300
@@ -411,15 +563,19 @@ md:pt-[10vh]
 
         <div
           className="
+          max-w-[760px]
+          mx-auto
           text-center
           mb-12
+          md:mb-16
         "
         >
 
           <img
             src="/koyologo.png"
             className="
-            h-16
+            h-14
+            sm:h-16
             md:h-20
 
             mx-auto
@@ -495,6 +651,28 @@ md:pt-[10vh]
 
         </div>
 
+        {hasSakePairing && (
+          <div className="w-full max-w-[620px] mx-auto mb-12 md:mb-16">
+            <div className="grid grid-cols-2 p-1 rounded-full border border-[#d7c6b5] bg-white/20 backdrop-blur-sm">
+              <button
+                onClick={() => setExperienceMode("wine")}
+                className={`min-h-12 md:min-h-14 px-3 sm:px-5 rounded-full text-[8px] sm:text-[10px] uppercase tracking-[0.20em] sm:tracking-[0.30em] transition-all duration-300 ${experienceMode === "wine" ? "bg-[#e7dacc] text-[#4f4034] shadow-sm" : "text-[#8d7968]"}`}
+              >
+                Wine Selection
+              </button>
+              <button
+                onClick={() => setExperienceMode("sake")}
+                className={`min-h-12 md:min-h-14 px-3 sm:px-5 rounded-full text-[8px] sm:text-[10px] uppercase tracking-[0.20em] sm:tracking-[0.30em] transition-all duration-300 ${experienceMode === "sake" ? "bg-[#e7dacc] text-[#4f4034] shadow-sm" : "text-[#8d7968]"}`}
+              >
+                Sake Pairing
+              </button>
+            </div>
+          </div>
+        )}
+
+        {experienceMode === "wine" && (
+          <>
+
         {/* TYPES */}
 
         <div
@@ -565,17 +743,91 @@ md:pt-[10vh]
 
         </div>
 
+{/* BY THE GLASS */}
+
+{byTheGlassCount > 0 && (
+
+  <div
+    className="
+      flex
+      justify-center
+      mb-5
+      sm:mb-8
+    "
+  >
+
+    <button
+
+      onClick={() => {
+
+        setFilters({
+
+          ...filters,
+
+          service_type:
+            filters.service_type ===
+            "glass"
+              ? ""
+              : "glass"
+
+        });
+
+      }}
+
+      className={`
+        px-6
+        h-9
+
+        rounded-full
+
+        border
+
+        text-[9px]
+
+        uppercase
+
+        tracking-[0.28em]
+
+        transition-all
+
+        ${
+          filters.service_type ===
+          "glass"
+
+            ?
+
+          "border-[#9f8267] bg-[#e9ddd0] text-[#3f3026]"
+
+            :
+
+          "border-[#d8cabc] bg-[rgba(255,255,255,0.30)] text-[#7d6854]"
+        }
+      `}
+    >
+
+      By the Glass · {byTheGlassCount}
+
+    </button>
+
+  </div>
+
+)}
+
         {/* ADVANCED */}
 
 <div
   className="
-  flex
+  grid
+  grid-cols-[1fr_auto_1fr]
   items-center
-  justify-center
 
-  gap-5
+  gap-2
+  sm:gap-5
 
-  mb-8
+  max-w-[620px]
+  mx-auto
+  mb-5
+  sm:mb-8
 "
 >
 
@@ -619,7 +871,9 @@ hover:border-[#cdb9a6]
 
   <div
     className="
-    w-[40px]
+    block
+    w-[18px]
+    sm:w-[40px]
     h-[1px]
 
     bg-[#d7cabd]
@@ -637,7 +891,8 @@ hover:border-[#cdb9a6]
         region:"",
         vintage:"",
         grapes:"",
-        price:""
+        price:"",
+        service_type:""
 
       });
 
@@ -681,7 +936,8 @@ hover:border-[#cdb9a6]
   <div
     className="
     grid
-    grid-cols-2
+    grid-cols-1
+sm:grid-cols-2
 md:grid-cols-4
 
     gap-x-10
@@ -844,7 +1100,99 @@ justify-center
 
         </div>
 
+          </>
+        )}
+
+        {experienceMode === "sake" && hasSakePairing && (
+          <section className="w-full max-w-[640px] mx-auto">
+            {publishedPairings.map((pairing, pairingIndex) => (
+              <article
+                key={pairing.id}
+                className={pairingIndex > 0 ? "mt-16 pt-12 border-t border-[#d8cabc]" : ""}
+              >
+                <header className="w-full max-w-[520px] mx-auto text-center">
+                  <div className="text-[#9a8068] uppercase tracking-[0.34em] sm:tracking-[0.40em] text-[8px] sm:text-[9px]">
+                    Koyo Sake Journey
+                  </div>
+                  <h2 className="mt-4 text-[#2f2923] font-light leading-none break-words">
+                    <span className="block text-[10px] sm:text-[11px] uppercase tracking-[0.32em] text-[#806b59]">
+                      Koyo Signature
+                    </span>
+                    <span className="block mt-3 text-[clamp(1.15rem,4.5vw,1.65rem)] tracking-[0.06em]">
+                      Sake Pairing
+                    </span>
+                  </h2>
+                  {pairing.description && (
+                    <p className="max-w-[540px] mx-auto mt-6 text-[#766455] text-[11px] sm:text-[12px] font-light leading-[1.9]">
+                      {pairing.description}
+                    </p>
+                  )}
+                  <div className="mt-4 text-[#756252] text-[9px] sm:text-[10px] uppercase tracking-[0.20em]">
+                    {(pairing.stages || []).length} pours
+                    {pairing.price !== null && pairing.price !== undefined && (
+                      <> · €{Number(pairing.price).toFixed(0)}</>
+                    )}
+                  </div>
+                </header>
+
+                <div className="w-px h-5 mx-auto my-5 bg-[#cdb9a6]" />
+
+                <div className="w-full">
+                  {(pairing.stages || []).map((stage,index) => {
+                    const sake = stage?.wines || {};
+                    const isLast = index === (pairing.stages || []).length - 1;
+
+                    return (
+                      <div
+                        key={stage.id}
+                        className="grid grid-cols-[36px_minmax(0,1fr)] sm:grid-cols-[46px_minmax(0,1fr)] md:grid-cols-[58px_minmax(0,1fr)] gap-3 sm:gap-5 md:gap-6"
+                      >
+                        <div className="relative flex justify-center">
+                          {!isLast && (
+                            <div className="absolute top-8 bottom-0 w-px bg-[#d6c6b6]" />
+                          )}
+                          <div className="relative z-10 w-8 h-8 shrink-0 rounded-full border border-[#c8b29d] bg-[#f5f1e8] flex items-center justify-center text-[#806852] text-[7px] tracking-[0.10em]">
+                            {String(stage.stage_number || index + 1).padStart(2,"0")}
+                          </div>
+                        </div>
+
+                        <div className={`min-w-0 pt-0.5 ${!isLast ? "pb-7 sm:pb-8 md:pb-9" : "pb-2"}`}>
+                          {stage.stage_name && (
+                            <div className="text-[#9a8068] uppercase tracking-[0.22em] sm:tracking-[0.24em] text-[7px] sm:text-[8px] leading-relaxed">
+                              {stage.stage_name}
+                            </div>
+                          )}
+                          <h3 className="mt-1.5 text-[#302923] text-[13px] sm:text-[14px] md:text-[15px] font-light leading-[1.3] break-words">
+                            {sake.name || "Sake"}
+                          </h3>
+                          {sake.producer && (
+                            <div className="mt-1 text-[#69594c] text-[8px] sm:text-[9px] tracking-[0.04em] break-words">
+                              {sake.producer}
+                            </div>
+                          )}
+                          {[sake.region,sake.country,sake.vintage].filter(Boolean).length > 0 && (
+                            <div className="mt-2 text-[#9a8775] text-[7px] sm:text-[8px] uppercase tracking-[0.16em] leading-5 break-words">
+                              {[sake.region,sake.country,sake.vintage].filter(Boolean).join(" · ")}
+                            </div>
+                          )}
+                          {stage.description && (
+                            <p className="max-w-[470px] mt-3 text-[#756456] text-[10px] sm:text-[11px] font-light leading-[1.7] break-words">
+                              {stage.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </section>
+        )}
+
       </div>
+
+
 
       {
         showResults && (

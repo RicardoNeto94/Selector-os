@@ -92,7 +92,7 @@ async function loadLocations() {
           subregion,
           country,
           grapes,
-          vintage,
+          vintage: vintage ? Number(vintage) : null,
           size,
           price: price ? Number(price) : null,
           description
@@ -183,6 +183,7 @@ if (createdWine && selectedLocation) {
             <option value="Red">Red</option>
             <option value="Dessert">Dessert</option>
             <option value="Fortified">Fortified</option>
+            <option value="Sake">Sake</option>
           </select>
 
           <input

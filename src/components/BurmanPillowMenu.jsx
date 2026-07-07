@@ -1,68 +1,102 @@
 "use client";
 
 export default function BurmanPillowMenu() {
+  const pillows = [
+    {
+      name: "Memory Foam",
+      type: "ADJUSTABLE SUPPORT",
+      feel: "Medium · Supportive",
+      desc: "Adjustable memory foam for personalised height, firmness and breathable support.",
+      ideal: "Side & back sleepers",
+    },
+    {
+      name: "Down & Feather",
+      type: "BALANCED COMFORT",
+      feel: "Soft · Balanced",
+      desc: "An equal blend of down and feather balancing softness with gentle support.",
+      ideal: "All-round comfort",
+    },
+    {
+      name: "German-Style Down & Feather",
+      type: "CLASSIC SOFTNESS",
+      feel: "Soft · Restorative",
+      desc: "Delicately padded with subtle structure for a calm and restorative night's sleep.",
+      ideal: "Back sleepers",
+    },
+    {
+      name: "Chamomile & Buckwheat",
+      type: "NATURAL RELAXATION",
+      feel: "Firm · Natural",
+      desc: "Calming chamomile and supportive buckwheat husks for natural alignment and relaxation.",
+      ideal: "Structured support",
+    },
+    {
+      name: "Lavender & Buckwheat",
+      type: "AROMATIC CALM",
+      feel: "Firm · Aromatic",
+      desc: "Soothing lavender and supportive buckwheat designed to encourage deeper relaxation.",
+      ideal: "Relaxation",
+    },
+  ];
+
   return (
-    <div className="burman-pillow">
+    <div className="vx-pillow-experience">
+      <div className="vx-pillow-intro">
+        <span>SLEEP CONCIERGE</span>
 
-      <p className="burman-pillow-intro">
-        Dear Guest,<br />
-        Please choose the perfect pillow from our curated collection for a relaxing sleep.
+        <p>
+          Discover our pillow collection and choose the comfort
+          best suited to your preferred sleeping style.
+        </p>
+      </div>
+
+      <div className="vx-pillow-grid">
+        {pillows.map((pillow, index) => (
+          <article
+            key={pillow.name}
+            className="vx-pillow-card"
+          >
+            <div className="vx-pillow-card-top">
+              <span className="vx-pillow-number">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+
+              <span className="vx-pillow-type">
+                {pillow.type}
+              </span>
+            </div>
+
+            <div className="vx-pillow-card-content">
+              <h4>{pillow.name}</h4>
+
+              <span className="vx-pillow-feel">
+                {pillow.feel}
+              </span>
+
+              <p>{pillow.desc}</p>
+            </div>
+
+            <div className="vx-pillow-card-footer">
+              <span>{pillow.ideal}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="vx-pillow-request">
+        <div>
+          <span>FOUND YOUR PREFERRED PILLOW?</span>
+          <strong>Contact Reception</strong>
+        </div>
+
+        <p>
+          Our team will be pleased to arrange delivery to your room.
+        </p>
+      </div>
+
+      <p className="vx-pillow-note">
+        Pillow selection is subject to availability.
       </p>
-
-      <div className="burman-pillow-item">
-        <h4>Memory Foam Pillow</h4>
-        <p>
-          Enjoy unparalleled comfort with our premium memory foam pillow,
-          featuring an adjustable filling for customised height and firmness,
-          along with enhanced breathability to keep you cool all night.
-        </p>
-      </div>
-
-      <div className="burman-pillow-divider">✦</div>
-
-      <div className="burman-pillow-item">
-        <h4>50% Down, 50% Feather Pillow</h4>
-        <p>
-          Experience perfect softness and support with our down and feather blend pillow,
-          cradling you into restful sleep.
-        </p>
-      </div>
-
-      <div className="burman-pillow-divider">✦</div>
-
-      <div className="burman-pillow-item">
-        <h4>German-Style Down & Feather Pillow</h4>
-        <p>
-          This delicately padded pillow balances softness and support
-          for a restorative night.
-        </p>
-      </div>
-
-      <div className="burman-pillow-divider">✦</div>
-
-      <div className="burman-pillow-item">
-        <h4>Chamomile & Buckwheat Pillow</h4>
-        <p>
-          Indulge in natural relaxation with this unique pillow,
-          infused with sleep-enhancing chamomile and supportive buckwheat husks.
-        </p>
-      </div>
-
-      <div className="burman-pillow-divider">✦</div>
-
-      <div className="burman-pillow-item">
-        <h4>Lavender & Buckwheat Pillow</h4>
-        <p>
-          Transform your sleep with the calming scent of lavender
-          and the supportive comfort of buckwheat.
-        </p>
-      </div>
-
-      <p className="burman-pillow-footer">
-        Limited quantities available.<br />
-        Please dial extension 300 to place your request.
-      </p>
-
     </div>
   );
 }

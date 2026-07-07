@@ -1,0 +1,572 @@
+.venue-wines-page {
+  min-height: 100vh;
+  background: #f7f4ef;
+  color: #30231d;
+}
+
+.venue-wines-shell {
+  width: min(100%, 1540px);
+  margin: 0 auto;
+  padding: 42px 48px 64px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.venue-wines-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 48px;
+  padding-bottom: 30px;
+}
+
+.venue-wines-eyebrow {
+  color: #9f806d;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.venue-wines-header h1 {
+  margin: 12px 0 0;
+  color: #2f221c;
+  font-size: clamp(40px, 3.5vw, 56px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.venue-wines-header p {
+  max-width: 590px;
+  margin: 17px 0 0;
+  color: #8d7c72;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.venue-wines-portfolio {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0;
+  color: #8d7c72;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.venue-wines-portfolio span,
+.venue-wines-portfolio strong {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 400;
+}
+
+.venue-wines-portfolio span:not(:first-child)::before,
+.venue-wines-portfolio strong::before {
+  content: "·";
+  margin: 0 9px;
+  color: #c8b9ae;
+}
+
+.venue-wines-portfolio strong {
+  color: #5e4136;
+}
+
+/* =========================================================
+   DIRECTORY
+========================================================= */
+
+.venue-directory {
+  border-top: 1px solid #dcd0c6;
+}
+
+.venue-directory-head {
+  display: grid;
+
+  grid-template-columns:
+    minmax(210px, 1.2fr)
+    minmax(220px, 1.15fr)
+    minmax(260px, 1fr)
+    minmax(135px, 0.55fr)
+    52px;
+
+  gap: 24px;
+
+  align-items: center;
+
+  padding: 12px 18px;
+
+  color: #a08e83;
+
+  font-size: 8px;
+
+  letter-spacing: 0.2em;
+
+  text-transform: uppercase;
+
+  border-bottom: 1px solid #e6dcd4;
+}
+
+/* =========================================================
+   VENUE ROW
+========================================================= */
+
+.venue-directory-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(210px, 1.2fr)
+    minmax(220px, 1.15fr)
+    minmax(260px, 1fr)
+    minmax(135px, 0.55fr)
+    52px;
+
+  gap: 24px;
+
+  align-items: center;
+
+  min-height: 102px;
+
+  padding: 18px;
+
+  border-bottom: 1px solid #ded2c8;
+
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.venue-directory-row:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* =========================================================
+   VENUE IDENTITY
+========================================================= */
+
+.venue-status-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #a08e83;
+
+  font-size: 8px;
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+}
+
+.venue-status-dot {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #b76c54;
+}
+
+.venue-status-dot.is-linked {
+  background: #2f9c78;
+}
+
+.venue-identity h2 {
+  margin: 8px 0 0;
+
+  color: #30231d;
+
+  font-size: 22px;
+
+  font-weight: 500;
+
+  letter-spacing: -0.035em;
+
+  line-height: 1;
+}
+
+.venue-mobile-value {
+  display: none;
+}
+
+/* =========================================================
+   MENU SELECT
+========================================================= */
+
+.venue-menu-control label {
+  display: none;
+}
+
+.venue-menu-control select {
+  width: 100%;
+
+  height: 38px;
+
+  padding: 0 34px 0 12px;
+
+  border: 1px solid #ded2c8;
+
+  border-radius: 8px;
+
+  background-color: rgba(255, 255, 255, 0.4);
+
+  color: #55443b;
+
+  font-size: 11px;
+
+  outline: none;
+
+  cursor: pointer;
+
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.venue-menu-control select:hover {
+  border-color: #baa596;
+
+  background-color: rgba(255, 255, 255, 0.72);
+}
+
+.venue-menu-control select:focus {
+  border-color: #9f806d;
+}
+
+.venue-menu-control select:disabled {
+  cursor: wait;
+
+  opacity: 0.55;
+}
+
+/* =========================================================
+   PORTFOLIO METRICS
+========================================================= */
+
+.venue-metrics {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
+
+  gap: 12px;
+}
+
+.venue-metrics div {
+  min-width: 0;
+}
+
+.venue-metrics strong {
+  display: block;
+
+  color: #3b2b24;
+
+  font-size: 18px;
+
+  font-weight: 500;
+
+  letter-spacing: -0.035em;
+
+  line-height: 1;
+}
+
+.venue-metrics span {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #a08e83;
+
+  font-size: 8px;
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+}
+
+/*
+Low stock intentionally quieter.
+
+The number should not dominate the entire row.
+*/
+
+.venue-metrics .has-alert strong {
+  color: #76584d;
+}
+
+/* =========================================================
+   INVENTORY VALUE
+========================================================= */
+
+.venue-value {
+  text-align: right;
+}
+
+.venue-value strong {
+  display: block;
+
+  color: #4d352c;
+
+  font-size: 15px;
+
+  font-weight: 500;
+
+  letter-spacing: -0.025em;
+}
+
+.venue-value span {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #a08e83;
+
+  font-size: 9px;
+}
+
+/* =========================================================
+   OPEN BUTTON
+========================================================= */
+
+.venue-open-button {
+  width: 42px;
+  height: 42px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d9cbc0;
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: #7f3f32;
+
+  cursor: pointer;
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.venue-open-button span:first-child {
+  display: none;
+}
+
+.venue-open-button span:last-child {
+  font-size: 16px;
+
+  line-height: 1;
+}
+
+.venue-open-button:hover {
+  transform: translateY(-2px);
+
+  border-color: #8a4a3b;
+
+  background: #fffaf6;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.venue-wines-empty {
+  padding: 70px 20px;
+
+  border-top: 1px solid #ded2c8;
+
+  color: #8d7c72;
+
+  font-size: 12px;
+
+  text-align: center;
+}
+
+/* =========================================================
+   MEDIUM DESKTOP / IPAD LANDSCAPE
+========================================================= */
+
+@media (max-width: 1180px) {
+  .venue-wines-shell {
+    padding: 40px 30px 64px;
+  }
+
+  .venue-directory-head {
+    display: none;
+  }
+
+  .venue-directory-row {
+    grid-template-columns:
+      minmax(180px, 1fr)
+      minmax(210px, 1.1fr)
+      minmax(230px, 1fr)
+      46px;
+
+    gap: 20px;
+
+    min-height: 98px;
+
+    padding: 18px 8px;
+  }
+
+  .venue-value {
+    display: none;
+  }
+
+  .venue-mobile-value {
+    display: flex;
+
+    align-items: baseline;
+
+    gap: 8px;
+
+    margin-top: 9px;
+
+    color: #62453a;
+
+    font-size: 11px;
+  }
+
+  .venue-mobile-value span {
+    color: #a08e83;
+
+    font-size: 8px;
+  }
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 820px) {
+  .venue-wines-shell {
+    padding: 34px 22px 56px;
+  }
+
+  .venue-wines-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 20px;
+
+    padding-bottom: 28px;
+  }
+
+  .venue-wines-header h1 {
+    font-size: 44px;
+  }
+
+  .venue-wines-portfolio {
+    justify-content: flex-start;
+
+    white-space: normal;
+
+    line-height: 1.9;
+  }
+
+  .venue-directory-row {
+    grid-template-columns: 1fr auto;
+
+    gap: 20px 16px;
+
+    min-height: 0;
+
+    padding: 24px 4px;
+  }
+
+  .venue-identity {
+    grid-column: 1;
+  }
+
+  .venue-menu-control {
+    grid-column: 1 / -1;
+
+    grid-row: 2;
+  }
+
+  .venue-menu-control label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #a08e83;
+
+    font-size: 8px;
+
+    letter-spacing: 0.16em;
+
+    text-transform: uppercase;
+  }
+
+  .venue-menu-control select {
+    height: 42px;
+  }
+
+  .venue-metrics {
+    grid-column: 1 / -1;
+
+    grid-row: 3;
+
+    gap: 10px;
+
+    padding-top: 2px;
+  }
+
+  .venue-open-button {
+    grid-column: 2;
+
+    grid-row: 1;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 520px) {
+  .venue-wines-shell {
+    padding: 28px 18px 48px;
+  }
+
+  .venue-wines-header h1 {
+    font-size: 38px;
+  }
+
+  .venue-wines-header p {
+    font-size: 12px;
+  }
+
+  .venue-wines-portfolio span:nth-child(3) {
+    display: none;
+  }
+
+  .venue-identity h2 {
+    font-size: 21px;
+  }
+
+  .venue-metrics {
+    gap: 5px;
+  }
+
+  .venue-metrics strong {
+    font-size: 17px;
+  }
+
+  .venue-metrics span {
+    font-size: 7px;
+  }
+
+  .venue-open-button {
+    width: 40px;
+
+    height: 40px;
+  }
+}
