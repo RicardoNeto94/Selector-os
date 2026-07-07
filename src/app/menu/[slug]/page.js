@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 
 // MENU VIEWS
 import FoxDenMenuView from "@/components/menus/FoxDenMenuView";
@@ -19,6 +20,14 @@ export default async function PublicMenuPage({ params, searchParams }) {
 
   const slug = resolvedParams?.slug;
   const typeFromUrl = resolvedSearchParams?.type;
+
+  if (slug === "shang-shi-wine") {
+  redirect("/wine/shang-shi-wine");
+}
+
+if (slug === "koyo-wine") {
+  redirect("/wine/koyo-wine");
+}
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
