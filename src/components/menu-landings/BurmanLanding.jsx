@@ -154,7 +154,7 @@ useEffect(() => {
 
       {/* ========================= HOME ========================= */}
 
-{!openSpa && (
+
 
 <div className="vx-home">
 
@@ -293,7 +293,7 @@ useEffect(() => {
 
 </div>
 
-)}
+
 
       {/* ROOM SERVICE MODAL */}
 {openRoomService && (
