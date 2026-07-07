@@ -19,6 +19,7 @@ import {
   SparklesIcon,
   ArrowsRightLeftIcon,
   ClipboardDocumentCheckIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -260,6 +261,14 @@ export default function DashboardLayout({
               Account
             </SectionLabel>
 
+<NavItem
+  href="/dashboard/team"
+  isActive={isActive(
+    "/dashboard/team"
+  )}
+  icon={UsersIcon}
+  label="Team & Access"
+/>
             <NavItem
               href="/dashboard/settings"
               isActive={isActive(
