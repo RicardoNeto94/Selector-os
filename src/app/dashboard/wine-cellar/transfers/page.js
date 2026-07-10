@@ -12,7 +12,9 @@ import {
   ArrowRightIcon,
   ArrowsRightLeftIcon,
   MagnifyingGlassIcon,
-  AdjustmentsHorizontalIcon
+  AdjustmentsHorizontalIcon,
+  XMarkIcon
+
 } from "@heroicons/react/24/outline";
 
 import {
@@ -173,6 +175,51 @@ export default function WineTransfersPage() {
     setLocationFilter
   ] = useState("all");
 
+  const [
+  inventory,
+  setInventory
+] = useState([]);
+
+const [
+  showTransferModal,
+  setShowTransferModal
+] = useState(false);
+
+const [
+  transferSource,
+  setTransferSource
+] = useState("");
+
+const [
+  transferWineId,
+  setTransferWineId
+] = useState("");
+
+const [
+  transferWineSearch,
+  setTransferWineSearch
+] = useState("");
+
+const [
+  transferDestination,
+  setTransferDestination
+] = useState("");
+
+const [
+  transferQty,
+  setTransferQty
+] = useState(1);
+
+const [
+  transferNote,
+  setTransferNote
+] = useState("");
+
+const [
+  transferring,
+  setTransferring
+] = useState(false);
+
   /* =====================================================
      LOAD
   ===================================================== */
@@ -190,10 +237,11 @@ export default function WineTransfersPage() {
     try {
 
       const [
-        movementsResult,
-        winesResult,
-        locationsResult
-      ] = await Promise.all([
+  movementsResult,
+  winesResult,
+  locationsResult,
+  inventoryResult
+] = await Promise.all([
 
         supabase
           .from("wine_movements")
@@ -230,9 +278,19 @@ export default function WineTransfersPage() {
             id,
             name
           `)
-          .order("name")
+          .order("name"),
 
-      ]);
+supabase
+  .from("wine_inventory")
+  .select(`
+    id,
+    wine_id,
+    location_id,
+    quantity
+  `)
+  .gt("quantity", 0)
+
+]);
 
       if (
         movementsResult.error
@@ -276,6 +334,10 @@ export default function WineTransfersPage() {
         locationsResult.data || []
       );
 
+      setInventory(
+  inventoryResult.data || []
+);
+
     } catch (error) {
 
       console.error(
@@ -292,6 +354,244 @@ export default function WineTransfersPage() {
     setLoading(false);
 
   }
+  /* =====================================================
+   MANUAL TRANSFER
+===================================================== */
+
+const sourceInventory = useMemo(() => {
+
+  if (!transferSource) {
+    return [];
+  }
+
+  return inventory.filter(
+    item =>
+      String(item.location_id) ===
+        String(transferSource) &&
+      Number(item.quantity || 0) > 0
+  );
+
+}, [
+  inventory,
+  transferSource
+]);
+
+const selectedInventoryItem = useMemo(() => {
+
+  return sourceInventory.find(
+    item =>
+      String(item.wine_id) ===
+      String(transferWineId)
+  ) || null;
+
+}, [
+  sourceInventory,
+  transferWineId
+]);
+
+async function executeTransfer() {
+
+  if (
+    !selectedInventoryItem ||
+    !transferDestination ||
+    Number(transferQty) <= 0
+  ) {
+    return;
+  }
+
+  const quantity =
+    Number(transferQty);
+
+  const sourceQty =
+    Number(
+      selectedInventoryItem.quantity || 0
+    );
+
+  if (
+    String(transferSource) ===
+    String(transferDestination)
+  ) {
+
+    alert(
+      "Source and destination cannot be the same."
+    );
+
+    return;
+
+  }
+
+  if (quantity > sourceQty) {
+
+    alert(
+      "Not enough stock available."
+    );
+
+    return;
+
+  }
+
+  try {
+
+    setTransferring(true);
+
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
+
+    const sourceNewQty =
+      sourceQty - quantity;
+
+    const {
+      error: sourceError
+    } = await supabase
+      .from("wine_inventory")
+      .update({
+        quantity: sourceNewQty
+      })
+      .eq(
+        "id",
+        selectedInventoryItem.id
+      );
+
+    if (sourceError) {
+      throw sourceError;
+    }
+
+    const {
+      data: existingDestination,
+      error: destinationCheckError
+    } = await supabase
+      .from("wine_inventory")
+      .select("*")
+      .eq(
+        "wine_id",
+        selectedInventoryItem.wine_id
+      )
+      .eq(
+        "location_id",
+        transferDestination
+      )
+      .maybeSingle();
+
+    if (destinationCheckError) {
+      throw destinationCheckError;
+    }
+
+    if (existingDestination) {
+
+      const {
+        error
+      } = await supabase
+        .from("wine_inventory")
+        .update({
+          quantity:
+            Number(
+              existingDestination.quantity || 0
+            ) + quantity
+        })
+        .eq(
+          "id",
+          existingDestination.id
+        );
+
+      if (error) {
+        throw error;
+      }
+
+    } else {
+
+      const {
+        error
+      } = await supabase
+        .from("wine_inventory")
+        .insert({
+          wine_id:
+            selectedInventoryItem.wine_id,
+          location_id:
+            transferDestination,
+          quantity
+        });
+
+      if (error) {
+        throw error;
+      }
+
+    }
+
+    const {
+      error: transferError
+    } = await supabase
+      .from("wine_transfers")
+      .insert({
+        wine_id:
+          selectedInventoryItem.wine_id,
+        from_location_id:
+          selectedInventoryItem.location_id,
+        to_location_id:
+          transferDestination,
+        quantity,
+        transferred_by:
+          user?.id || null
+      });
+
+    if (transferError) {
+      throw transferError;
+    }
+
+    const {
+      error: movementError
+    } = await supabase
+      .from("wine_movements")
+      .insert({
+        wine_id:
+          selectedInventoryItem.wine_id,
+        from_location:
+          selectedInventoryItem.location_id,
+        to_location:
+          transferDestination,
+        quantity,
+        movement_type:
+          "transfer",
+        created_by:
+          user?.id || null,
+        notes:
+          transferNote.trim() ||
+          "Wine transferred between cellar locations."
+      });
+
+    if (movementError) {
+      throw movementError;
+    }
+
+    await loadData();
+
+    setShowTransferModal(false);
+    setTransferSource("");
+    setTransferWineId("");
+    setTransferDestination("");
+    setTransferQty(1);
+    setTransferNote("");
+
+  } catch (error) {
+
+    console.error(
+      "TRANSFER ERROR:",
+      error
+    );
+
+    alert(
+      "Transfer failed."
+    );
+
+  } finally {
+
+    setTransferring(false);
+
+  }
+
+}
 
   /* =====================================================
      MAPS
@@ -313,6 +613,50 @@ export default function WineTransfersPage() {
       return map;
 
     }, [wines]);
+
+      const filteredSourceInventory =
+    useMemo(() => {
+
+      const query =
+        transferWineSearch
+          .trim()
+          .toLowerCase();
+
+      if (!query) {
+        return [];
+      }
+
+      return sourceInventory
+        .filter(item => {
+
+          const wine =
+            winesMap[
+              String(item.wine_id)
+            ];
+
+          const searchableText = [
+            wine?.name,
+            wine?.producer,
+            wine?.vintage,
+            wine?.country,
+            wine?.region
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+          return searchableText.includes(
+            query
+          );
+
+        })
+        .slice(0, 8);
+
+    }, [
+      sourceInventory,
+      transferWineSearch,
+      winesMap
+    ]);
 
   const locationsMap =
     useMemo(() => {
@@ -547,15 +891,25 @@ export default function WineTransfersPage() {
 
         </div>
 
-        <button
-          onClick={loadData}
-          className="so-btn-secondary"
-        >
+        <div className="flex items-center gap-3">
 
-          Refresh
+  <button
+    onClick={loadData}
+    className="so-btn-secondary"
+  >
+    Refresh
+  </button>
 
-        </button>
+  <button
+    onClick={() =>
+      setShowTransferModal(true)
+    }
+    className="so-btn-primary"
+  >
+    New Transfer
+  </button>
 
+</div>
       </div>
 
       {/* =================================================
@@ -1308,8 +1662,558 @@ export default function WineTransfersPage() {
 
       </div>
 
+          {/* =================================================
+          MANUAL TRANSFER MODAL
+      ================================================= */}
+
+      {showTransferModal && (
+
+        <div
+          className="
+            fixed
+            inset-0
+            z-[100]
+            flex
+            items-center
+            justify-center
+            bg-slate-950/35
+            backdrop-blur-[2px]
+            px-4
+          "
+        >
+
+          <div
+            className="
+              w-full
+              max-w-xl
+              rounded-[24px]
+              border
+              border-slate-200
+              bg-white
+              shadow-2xl
+              overflow-hidden
+            "
+          >
+
+            {/* HEADER */}
+
+            <div
+              className="
+                flex
+                items-start
+                justify-between
+                gap-6
+                border-b
+                border-slate-100
+                px-7
+                py-6
+              "
+            >
+
+              <div>
+
+                <div
+                  className="
+                    text-[9px]
+                    uppercase
+                    tracking-[0.28em]
+                    text-slate-400
+                  "
+                >
+                  Wine Operations
+                </div>
+
+                <h2
+                  className="
+                    mt-2
+                    text-xl
+                    font-semibold
+                    text-slate-900
+                  "
+                >
+                  New Transfer
+                </h2>
+
+                <p
+                  className="
+                    mt-1.5
+                    text-sm
+                    text-slate-500
+                  "
+                >
+                  Move wine between cellar
+                  and venue storage locations.
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowTransferModal(false)
+                }
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-full
+                  border
+                  border-slate-200
+                  text-slate-400
+                  transition
+                  hover:bg-slate-50
+                  hover:text-slate-900
+                "
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+
+            </div>
+
+            {/* FORM */}
+
+            <div className="space-y-5 px-7 py-6">
+
+              {/* SOURCE */}
+
+              <div>
+
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-[9px]
+                    uppercase
+                    tracking-[0.2em]
+                    text-slate-400
+                  "
+                >
+                  From Location
+                </label>
+
+                <select
+                  value={transferSource}
+                  onChange={e => {
+
+                    setTransferSource(
+                      e.target.value
+                    );
+
+                    setTransferWineId("");
+                    setTransferDestination("");
+                    setTransferQty(1);
+
+                  }}
+                  className="
+                    w-full
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    py-3
+                    text-sm
+                    text-slate-900
+                    outline-none
+                    focus:border-slate-400
+                  "
+                >
+
+                  <option value="">
+                    Select source location
+                  </option>
+
+                  {locations.map(
+                    location => (
+
+                      <option
+                        key={location.id}
+                        value={location.id}
+                      >
+                        {location.name}
+                      </option>
+
+                    )
+                  )}
+
+                </select>
+
+              </div>
+
+              {/* WINE */}
+
+              <div>
+
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-[9px]
+                    uppercase
+                    tracking-[0.2em]
+                    text-slate-400
+                  "
+                >
+                  Wine
+                </label>
+
+                <select
+                  value={transferWineId}
+                  onChange={e => {
+
+                    setTransferWineId(
+                      e.target.value
+                    );
+
+                    setTransferQty(1);
+
+                  }}
+                  disabled={!transferSource}
+                  className="
+                    w-full
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    py-3
+                    text-sm
+                    text-slate-900
+                    outline-none
+                    disabled:cursor-not-allowed
+                    disabled:bg-slate-50
+                    disabled:text-slate-400
+                    focus:border-slate-400
+                  "
+                >
+
+                  <option value="">
+                    {
+                      transferSource
+                        ? "Select wine"
+                        : "Select source location first"
+                    }
+                  </option>
+
+                  {sourceInventory.map(
+                    item => {
+
+                      const wine =
+                        winesMap[
+                          String(item.wine_id)
+                        ];
+
+                      return (
+
+                        <option
+                          key={item.id}
+                          value={item.wine_id}
+                        >
+                          {
+                            [
+                              wine?.name ||
+                                "Unknown Wine",
+                              wine?.producer,
+                              wine?.vintage
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")
+                          }
+                          {" — "}
+                          {Number(
+                            item.quantity || 0
+                          )}
+                          {" available"}
+                        </option>
+
+                      );
+
+                    }
+                  )}
+
+                </select>
+
+              </div>
+
+              {/* AVAILABLE */}
+
+              {selectedInventoryItem && (
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    rounded-xl
+                    border
+                    border-slate-100
+                    bg-slate-50
+                    px-4
+                    py-3
+                  "
+                >
+
+                  <span
+                    className="
+                      text-xs
+                      text-slate-500
+                    "
+                  >
+                    Available stock
+                  </span>
+
+                  <span
+                    className="
+                      text-sm
+                      font-medium
+                      text-slate-900
+                    "
+                  >
+                    {Number(
+                      selectedInventoryItem.quantity ||
+                        0
+                    )}
+                    {" bottles"}
+                  </span>
+
+                </div>
+
+              )}
+
+              {/* DESTINATION */}
+
+              <div>
+
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-[9px]
+                    uppercase
+                    tracking-[0.2em]
+                    text-slate-400
+                  "
+                >
+                  To Location
+                </label>
+
+                <select
+                  value={transferDestination}
+                  onChange={e =>
+                    setTransferDestination(
+                      e.target.value
+                    )
+                  }
+                  disabled={!transferSource}
+                  className="
+                    w-full
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    py-3
+                    text-sm
+                    text-slate-900
+                    outline-none
+                    disabled:cursor-not-allowed
+                    disabled:bg-slate-50
+                    disabled:text-slate-400
+                    focus:border-slate-400
+                  "
+                >
+
+                  <option value="">
+                    Select destination
+                  </option>
+
+                  {locations
+                    .filter(
+                      location =>
+                        String(location.id) !==
+                        String(transferSource)
+                    )
+                    .map(
+                      location => (
+
+                        <option
+                          key={location.id}
+                          value={location.id}
+                        >
+                          {location.name}
+                        </option>
+
+                      )
+                    )}
+
+                </select>
+
+              </div>
+
+              {/* QUANTITY */}
+
+              <div>
+
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-[9px]
+                    uppercase
+                    tracking-[0.2em]
+                    text-slate-400
+                  "
+                >
+                  Quantity
+                </label>
+
+                <input
+                  type="number"
+                  min="1"
+                  max={
+                    selectedInventoryItem
+                      ? Number(
+                          selectedInventoryItem.quantity ||
+                            0
+                        )
+                      : undefined
+                  }
+                  value={transferQty}
+                  onChange={e =>
+                    setTransferQty(
+                      Number(e.target.value)
+                    )
+                  }
+                  disabled={!selectedInventoryItem}
+                  className="
+                    w-full
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    py-3
+                    text-sm
+                    text-slate-900
+                    outline-none
+                    disabled:cursor-not-allowed
+                    disabled:bg-slate-50
+                    focus:border-slate-400
+                  "
+                />
+
+              </div>
+
+              {/* NOTE */}
+
+              <div>
+
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-[9px]
+                    uppercase
+                    tracking-[0.2em]
+                    text-slate-400
+                  "
+                >
+                  Note
+                  <span className="normal-case tracking-normal">
+                    {" "}— optional
+                  </span>
+                </label>
+
+                <textarea
+                  value={transferNote}
+                  onChange={e =>
+                    setTransferNote(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Transfer reason or operational note..."
+                  rows={3}
+                  className="
+                    w-full
+                    resize-none
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    py-3
+                    text-sm
+                    text-slate-900
+                    outline-none
+                    placeholder:text-slate-300
+                    focus:border-slate-400
+                  "
+                />
+
+              </div>
+
+            </div>
+
+            {/* FOOTER */}
+
+            <div
+              className="
+                flex
+                items-center
+                justify-end
+                gap-3
+                border-t
+                border-slate-100
+                bg-slate-50/60
+                px-7
+                py-5
+              "
+            >
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowTransferModal(false)
+                }
+                className="so-btn-secondary"
+                disabled={transferring}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={executeTransfer}
+                disabled={
+                  transferring ||
+                  !selectedInventoryItem ||
+                  !transferDestination ||
+                  Number(transferQty) <= 0 ||
+                  Number(transferQty) >
+                    Number(
+                      selectedInventoryItem?.quantity ||
+                        0
+                    )
+                }
+                className="so-btn-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {
+                  transferring
+                    ? "Transferring..."
+                    : "Confirm Transfer"
+                }
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
     </div>
-
   );
-
 }

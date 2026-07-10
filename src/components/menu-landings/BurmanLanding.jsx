@@ -7,6 +7,7 @@ import "@/styles/burman.css";
 import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
+import DiningWineView from "@/components/dining/DiningWineView";
 export default function BurmanLanding({ menu }) {
   
 const supabase = createClientComponentClient();  
@@ -1211,7 +1212,13 @@ textAlign:"center"
 
                     const venueName = exp.name?.toLowerCase() || "";
 
-                    const cuisine = venueName.includes("koyo")
+const wineSlug = venueName.includes("koyo")
+  ? "koyo-wine"
+  : venueName.includes("shang")
+  ? "shang-shi-wine"
+  : null;
+
+const cuisine = venueName.includes("koyo")
                       ? "OMAKASE"
                       : venueName.includes("shang")
                       ? "CANTONESE CUISINE"
@@ -1262,24 +1269,25 @@ textAlign:"center"
                         </section>
 
                         <nav className="vx-dining-tabs" aria-label="Dining sections">
-                          {[
-                            ["overview", "Overview"],
-                            ["menu", "Menu"],
-                            ["wine", "Wine"],
-                            ["private", "Private Dining"],
-                          ].map(([key, label]) => (
-                            <button
-                              key={key}
-                              className={
-                                diningTab === key
-                                  ? "vx-dining-tab active"
-                                  : "vx-dining-tab"
-                              }
-                              onClick={() => setDiningTab(key)}
-                            >
-                              {label}
-                            </button>
-                          ))}
+                        
+ {[
+  ["overview", "Overview"],
+  ["menu", "Menu"],
+  ...(wineSlug ? [["wine", "Wine"]] : []),
+  ["private", "Private Dining"],
+].map(([key, label]) => (
+  <button
+    key={key}
+    className={
+      diningTab === key
+        ? "vx-dining-tab active"
+        : "vx-dining-tab"
+    }
+    onClick={() => setDiningTab(key)}
+  >
+    {label}
+  </button>
+))}
                         </nav>
 
                         <div className="vx-dining-hub-body">
@@ -1492,6 +1500,9 @@ textAlign:"center"
 
                           {diningTab === "wine" && (
   <BurmanDiningWine venueName={exp.name} />
+)}
+{diningTab === "wine" && wineSlug && (
+  <DiningWineView slug={wineSlug} />
 )}
 
                           {diningTab === "private" && (
