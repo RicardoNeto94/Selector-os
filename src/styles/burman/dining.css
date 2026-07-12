@@ -1524,3 +1524,227 @@
   }
 
 }
+
+/* ==========================================================
+   DINING — WINE EXPERIENCE
+========================================================== */
+
+.vx-dining-wine{
+    max-width:1150px;
+    margin:0 auto;
+    padding:80px 70px 110px;
+}
+
+.vx-dining-wine-heading{
+    text-align:center;
+    margin-bottom:55px;
+}
+
+.vx-dining-wine-heading h3{
+    font-size:56px;
+    font-weight:300;
+    line-height:1;
+    margin:14px 0;
+    color:#342621;
+}
+
+.vx-dining-wine-heading p{
+    max-width:620px;
+    margin:auto;
+    color:#78685f;
+    font-size:19px;
+    line-height:1.8;
+}
+
+.vx-dining-wine-controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:40px;
+    margin-bottom:70px;
+    flex-wrap:wrap;
+}
+
+.vx-dining-wine-service,
+.vx-dining-wine-types{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.vx-dining-wine-service button,
+.vx-dining-wine-types button{
+
+    background:none;
+    border:1px solid rgba(60,40,30,.12);
+    border-radius:999px;
+
+    padding:14px 24px;
+
+    font-size:12px;
+
+    letter-spacing:.24em;
+
+    text-transform:uppercase;
+
+    transition:.25s;
+
+    cursor:pointer;
+
+    color:#685950;
+}
+
+.vx-dining-wine-service button.active,
+.vx-dining-wine-types button.active{
+
+    background:#35241d;
+
+    color:white;
+
+    border-color:#35241d;
+}
+
+.vx-dining-wine-section{
+
+    margin-bottom:65px;
+}
+
+.vx-dining-wine-section>h3{
+
+    font-size:30px;
+
+    margin-bottom:24px;
+
+    color:#362923;
+}
+
+.vx-dining-wine-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:60px;
+
+    padding:28px 0;
+
+    border-top:1px solid rgba(0,0,0,.08);
+}
+
+.vx-dining-wine-copy{
+
+    flex:1;
+}
+
+.vx-dining-wine-copy h4{
+
+    font-size:29px;
+
+    font-weight:400;
+
+    margin-bottom:8px;
+}
+
+.vx-dining-wine-origin{
+
+    color:#8a7568;
+
+    font-size:17px;
+
+    margin-bottom:8px;
+}
+
+.vx-dining-wine-grapes{
+
+    color:#9b8c82;
+
+    font-size:16px;
+
+    margin-bottom:10px;
+}
+
+.vx-dining-wine-description{
+
+    max-width:720px;
+
+    font-size:17px;
+
+    color:#64564f;
+
+    line-height:1.75;
+}
+
+.vx-dining-wine-pricing{
+
+    min-width:170px;
+
+    text-align:right;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+}
+
+.vx-dining-wine-pricing span{
+
+    display:block;
+
+    font-size:10px;
+
+    letter-spacing:.32em;
+
+    text-transform:uppercase;
+
+    color:#a1938b;
+
+    margin-bottom:6px;
+}
+
+.vx-dining-wine-pricing strong{
+
+    font-size:28px;
+
+    font-weight:400;
+
+    color:#2f211d;
+}
+
+.vx-dining-wine-empty{
+
+    text-align:center;
+
+    padding:80px;
+
+    color:#8f8278;
+}
+
+.vx-dining-wine-state{
+
+    padding:120px;
+
+    text-align:center;
+}
+
+.vx-dining-wine-state span{
+
+    display:block;
+
+    letter-spacing:.35em;
+
+    text-transform:uppercase;
+
+    font-size:11px;
+
+    color:#9a8b80;
+
+    margin-bottom:16px;
+}
+
+.vx-dining-wine-state p{
+
+    font-size:22px;
+
+    color:#4a3b34;
+}

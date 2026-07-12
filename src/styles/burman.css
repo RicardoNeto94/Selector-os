@@ -1537,21 +1537,20 @@ transform:translateY(40px);
 
     transform:translateX(-50%);
 
-    bottom:64px;
+    bottom:72px;
 
-    width:calc(100% - 60px);
-
-    max-width:1700px;
+    width:min(1180px,92%);
 
     display:grid;
 
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(3,1fr);
 
-    gap:12px;
+    gap:18px;
 
     z-index:20;
 
 }
+
 @media (max-width:1200px){
 
     .vx-services{
@@ -1585,15 +1584,15 @@ transform:translateY(40px);
 
     overflow:hidden;
 
-    height:150px;
+    height:130px;
 
     padding:18px 22px;
 
-    border-radius:15px;
+    border-radius:16px;
 
     border:1px solid rgba(255,255,255,.10);
 
-background:rgba(18,18,18,.18);
+    background:rgba(18,18,18,.18);
 
     cursor:pointer;
 
@@ -1805,7 +1804,7 @@ background:rgba(18,18,18,.18);
 
     .vx-services{
 
-        grid-template-columns:repeat(4,1fr);
+        grid-template-columns:repeat(3,1fr);
 
         width:calc(100% - 50px);
 

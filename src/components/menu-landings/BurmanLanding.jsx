@@ -7,7 +7,6 @@ import "@/styles/burman.css";
 import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
-import DiningWineView from "@/components/dining/DiningWineView";
 export default function BurmanLanding({ menu }) {
   
 const supabase = createClientComponentClient();  
@@ -238,7 +237,7 @@ useEffect(() => {
 >
 
     <img
-        src="/homepage/room-service.jpg"
+        src="/homepage/room-service.png"
         alt="Room Service"
     />
 
@@ -265,24 +264,6 @@ useEffect(() => {
     <h3>Wellness</h3>
 
     <p>Spa & Treatments</p>
-
-</button>
-
-       <button
-    className="vx-service"
-    onClick={() => window.location.href="/collection"}
->
-
-    <img
-        src="/homepage/collection.jpg"
-        alt="Collection"
-    />
-
-    <span>BOUTIQUE</span>
-
-    <h3>Collection</h3>
-
-    <p>Luxury Retail</p>
 
 </button>
 
@@ -324,7 +305,7 @@ useEffect(() => {
         {/* HERO */}
         <section className="vx-room-hero">
           <img
-            src="/homepage/room-service.jpg"
+            src="/homepage/room-service.png"
             alt="Room Delicacies"
           />
 
@@ -1212,12 +1193,6 @@ textAlign:"center"
 
                     const venueName = exp.name?.toLowerCase() || "";
 
-const wineSlug = venueName.includes("koyo")
-  ? "koyo-wine"
-  : venueName.includes("shang")
-  ? "shang-shi-wine"
-  : null;
-
 const cuisine = venueName.includes("koyo")
                       ? "OMAKASE"
                       : venueName.includes("shang")
@@ -1273,8 +1248,6 @@ const cuisine = venueName.includes("koyo")
  {[
   ["overview", "Overview"],
   ["menu", "Menu"],
-  ...(wineSlug ? [["wine", "Wine"]] : []),
-  ["private", "Private Dining"],
 ].map(([key, label]) => (
   <button
     key={key}
@@ -1397,26 +1370,6 @@ const cuisine = venueName.includes("koyo")
             Explore menu →
           </span>
         </button>
-
-        <button
-          className="vx-dining-highlight"
-          onClick={() => setDiningTab("wine")}
-        >
-          <span className="vx-dining-highlight-kicker">
-            THE CELLAR
-          </span>
-
-          <h4>Wine Collection</h4>
-
-          <p>
-            Explore a curated cellar selected to complement
-            the character of Cantonese cuisine.
-          </p>
-
-          <span className="vx-dining-highlight-action">
-            Discover wine →
-          </span>
-        </button>
       </>
     ) : (
       exp.experience_sections
@@ -1497,13 +1450,6 @@ const cuisine = venueName.includes("koyo")
                               )}
                             </section>
                           )}
-
-                          {diningTab === "wine" && (
-  <BurmanDiningWine venueName={exp.name} />
-)}
-{diningTab === "wine" && wineSlug && (
-  <DiningWineView slug={wineSlug} />
-)}
 
                           {diningTab === "private" && (
                             <section className="vx-dining-placeholder">
