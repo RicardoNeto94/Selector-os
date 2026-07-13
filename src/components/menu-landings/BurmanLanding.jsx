@@ -1234,13 +1234,7 @@ const cuisine = venueName.includes("koyo")
                             </div>
                           </div>
 
-                          <div className="vx-dining-request">
-                            <span>
-                              <small>REQUEST A TABLE</small>
-                              Contact Reception
-                            </span>
-                            <span aria-hidden="true">→</span>
-                          </div>
+      
                         </section>
 
                         <nav className="vx-dining-tabs" aria-label="Dining sections">

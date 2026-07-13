@@ -182,510 +182,271 @@ export default function ShangShiWineView({
 
   return (
     <div
-      className="
-        h-[100dvh]
-        overflow-hidden
-        flex
-        items-center
-        justify-center
-        px-8
-        touch-none
-      "
+      className="relative h-[100dvh] overflow-hidden bg-[#001a12] text-[#F3E9D2]"
       style={{
-        background: `
-          radial-gradient(
-            circle at top,
-            rgba(201,169,106,.06),
-            transparent 35%
-          ),
-          linear-gradient(
-            180deg,
-            #003223 0%,
-            #001a12 100%
-          )
+        backgroundImage: `
+          radial-gradient(circle at 72% 18%, rgba(201,169,106,.10), transparent 30%),
+          radial-gradient(circle at 18% 88%, rgba(201,169,106,.06), transparent 28%),
+          linear-gradient(180deg, #00261b 0%, #001a12 58%, #00130d 100%)
         `,
       }}
     >
       <div
-        className={`
-          w-full
-          max-w-[720px]
-          transition-all
-          duration-300
-          ${
-            transitioning
-              ? "opacity-0 blur-sm scale-[0.985]"
-              : "opacity-100 scale-100"
-          }
-        `}
-      >
-        {/* HERO */}
+        className="pointer-events-none absolute inset-0 opacity-[0.13]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px)
+          `,
+          backgroundSize: "42px 42px",
+        }}
+      />
 
-        <div className="text-center mb-14 md:mb-16">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[32%] bg-[radial-gradient(circle_at_0%_55%,rgba(201,169,106,.12),transparent_54%)]" />
+      <div className="pointer-events-none absolute right-[-8%] top-[8%] h-[62%] w-[44%] rounded-full bg-[radial-gradient(circle,rgba(201,169,106,.08),transparent_68%)] blur-3xl" />
+
+      <div
+        className={`relative z-10 h-full transition-all duration-300 ${
+          transitioning
+            ? "opacity-0 blur-sm scale-[0.99]"
+            : "opacity-100 scale-100"
+        }`}
+      >
+        <div className="absolute left-8 top-7 md:left-12 md:top-10">
           <img
             src="/shangshi-logo.png"
-            className="
-              h-24
-              md:h-28
-              mx-auto
-              mb-8
-              opacity-95
-            "
+            alt="Shang Shi"
+            className="h-16 opacity-95 md:h-20"
           />
-
-          <div
-            className="
-              text-[#E3C588]
-              uppercase
-              tracking-[0.48em]
-              text-[9px]
-              mb-4
-            "
-          >
-            WINE SELECTION
-          </div>
-
-          <div
-            className="
-              w-12
-              h-[1px]
-              mx-auto
-              bg-[#E3C588]/20
-              mb-6
-            "
-          />
-
-          <p
-            className="
-              text-[#E3C588]/50
-              text-[12px]
-              font-light
-              tracking-[0.01em]
-            "
-          >
-            A journey through exceptional vineyards
-          </p>
-
-          <div
-            className="
-              mt-5
-              text-[#E3C588]/35
-              text-[9px]
-              tracking-[0.32em]
-              uppercase
-            "
-          >
-            {guestItems.length} Wines Available
-          </div>
         </div>
 
-        {/* PRIMARY FILTERS */}
-
-        <div
-          className="
-            flex
-            justify-center
-            gap-7
-            flex-wrap
-            mb-7
-          "
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(true)}
+          className="absolute right-8 top-8 flex items-center gap-3 text-[11px] uppercase tracking-[0.26em] text-[#E3C588]/70 transition-colors hover:text-[#E3C588] md:right-12 md:top-11 md:text-[12px]"
         >
-          {[
-            "red",
-            "white",
-            "sparkling",
-            "rose",
-          ].map((type) => (
-            <button
-              key={type}
-              onClick={() =>
-                setFilters({
-                  ...filters,
-                  wine_type:
-                    filters.wine_type === type
-                      ? ""
-                      : type,
-                })
-              }
-              className={`
-                uppercase
-                tracking-[0.3em]
-                text-[9px]
-                transition-all
-                ${
-                  filters.wine_type === type
-                    ? "text-[#E3C588]"
-                    : "text-[#E3C588]/35"
-                }
-              `}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
+          Advanced Filters
+          <span className="text-[18px] leading-none">☷</span>
+        </button>
 
-        {/* BY THE GLASS */}
+        <main className="flex h-full items-center justify-center px-8 md:px-16">
+          <section className="mt-6 w-full max-w-[1020px] text-center">
+            <div className="mb-5 text-[13px] uppercase tracking-[0.42em] text-[#E3C588]/82 md:text-[14px]">
+              THE
+            </div>
 
-        {byTheGlassCount > 0 && (
-          <div className="text-center mb-9">
-            <button
-              onClick={() =>
-                setFilters({
-                  ...filters,
-                  service_type:
-                    filters.service_type === "glass"
-                      ? ""
-                      : "glass",
-                })
-              }
-              className={`
-                inline-flex
-                items-center
-                gap-3
-                px-5
-                py-2.5
-                border
-                rounded-full
-                uppercase
-                tracking-[0.4em]
-                text-[9px]
-                transition-all
-                ${
-                  filters.service_type === "glass"
-                    ? "border-[#E3C588]/50 bg-[#E3C588]/10 text-[#E3C588]"
-                    : "border-[#E3C588]/15 text-[#E3C588]/50"
-                }
-              `}
-            >
-              By the Glass
-              <span
-                className="
-                  tracking-normal
-                  text-[9px]
-                  opacity-60
-                "
-              >
-                {byTheGlassCount}
-              </span>
-            </button>
-          </div>
-        )}
+            <h1 className="mb-7 font-serif text-[52px] font-light leading-[0.95] tracking-[0.04em] text-[#F2E8D4] md:text-[76px] lg:text-[88px]">
+              WINE COLLECTION
+            </h1>
 
-        {/* ADVANCED */}
+            <div className="mb-7 flex items-center justify-center gap-4">
+              <span className="h-px w-24 bg-[#E3C588]/35" />
+              <span className="text-[13px] text-[#E3C588]/70">◇</span>
+              <span className="h-px w-24 bg-[#E3C588]/35" />
+            </div>
 
-        <div className="mb-9">
-          <div
-            className="
-              flex
-              items-center
-              justify-center
-              gap-4
-              md:gap-6
-            "
-          >
-            <button
-              onClick={() =>
-                setShowAdvanced(!showAdvanced)
-              }
-              className="
-                flex
-                items-center
-                gap-3
-                text-[#E3C588]/42
-                uppercase
-                tracking-[0.28em]
-                text-[8px]
-                transition-colors
-                hover:text-[#E3C588]/75
-              "
-            >
-              <span>Country</span>
-              <span className="text-[#E3C588]/18">·</span>
-              <span>Region</span>
-              <span className="text-[#E3C588]/18">·</span>
-              <span>Vintage</span>
-              <span className="text-[#E3C588]/18">·</span>
-              <span>Grape</span>
-              <span className="text-[#E3C588]/18">·</span>
-              <span>Price</span>
+            <p className="mx-auto mb-5 max-w-[670px] text-[17px] font-light leading-[1.7] text-[#D9CBB2]/72 md:text-[19px]">
+              A curated cellar selected to complement the elegance and depth of
+              Cantonese cuisine.
+            </p>
 
-              <span
-                className={`
-                  ml-1
-                  text-[#E3C588]/55
-                  text-[13px]
-                  font-light
-                  transition-transform
-                  duration-300
-                  ${
-                    showAdvanced
-                      ? "rotate-45"
-                      : "rotate-0"
-                  }
-                `}
-              >
-                +
-              </span>
-            </button>
-          </div>
+            <div className="mb-10 text-[11px] uppercase tracking-[0.28em] text-[#E3C588]/62 md:text-[12px]">
+              {guestItems.length} Wines Available
+            </div>
 
-          <div
-            className={`
-              grid
-              transition-all
-              duration-300
-              ease-out
-              ${
-                showAdvanced
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
-              }
-            `}
-          >
-            <div className="overflow-hidden">
-              <div
-                className="
-                  grid
-                  grid-cols-2
-                  md:grid-cols-5
-                  gap-x-7
-                  gap-y-6
-                  pt-8
-                "
-              >
-                {[
-                  {
-                    key: "country",
-                    label: "Country",
-                    values: countries,
-                  },
-                  {
-                    key: "region",
-                    label: "Region",
-                    values: regions,
-                  },
-                  {
-                    key: "vintage",
-                    label: "Vintage",
-                    values: vintages,
-                  },
-                  {
-                    key: "grapes",
-                    label: "Grape",
-                    values: grapes,
-                  },
-                ].map((field) => (
-                  <label
-                    key={field.key}
-                    className="min-w-0"
-                  >
-                    <span
-                      className="
-                        block
-                        mb-3
-                        text-[#E3C588]/28
-                        text-[7px]
-                        uppercase
-                        tracking-[0.3em]
-                      "
-                    >
-                      {field.label}
-                    </span>
+            <div className="mb-8 flex items-center justify-center gap-10 md:gap-16">
+              {["red", "white", "rose", "sparkling"].map((type) => {
+                const active = filters.wine_type === type;
 
-                    <select
-                      value={filters[field.key]}
-                      onChange={(e) => {
-                        const value = e.target.value;
-
-                        setFilters((current) => {
-                          const next = {
-                            ...current,
-                            [field.key]: value,
-                          };
-
-                          if (field.key === "country") {
-                            next.region = "";
-                            next.vintage = "";
-                            next.grapes = "";
-                          }
-
-                          if (field.key === "region") {
-                            next.vintage = "";
-                            next.grapes = "";
-                          }
-
-                          if (field.key === "vintage") {
-                            next.grapes = "";
-                          }
-
-                          return next;
-                        });
-                      }}
-                      className="
-                        w-full
-                        min-w-0
-                        appearance-none
-                        bg-transparent
-                        border-0
-                        border-b
-                        border-[#E3C588]/12
-                        rounded-none
-                        pb-2.5
-                        pr-2
-                        text-[#E3C588]/75
-                        text-[10px]
-                        outline-none
-                        cursor-pointer
-                      "
-                    >
-                      <option
-                        value=""
-                        className="text-black"
-                      >
-                        All
-                      </option>
-
-                      {field.values.map((value) => (
-                        <option
-                          key={value}
-                          value={value}
-                          className="text-black"
-                        >
-                          {value}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ))}
-
-                <label className="min-w-0">
-                  <span
-                    className="
-                      block
-                      mb-3
-                      text-[#E3C588]/28
-                      text-[7px]
-                      uppercase
-                      tracking-[0.3em]
-                    "
-                  >
-                    Price
-                  </span>
-
-                  <select
-                    value={filters.price}
-                    onChange={(e) =>
-                      setFilters({
-                        ...filters,
-                        price: e.target.value,
-                      })
-                    }
-                    className="
-                      w-full
-                      appearance-none
-                      bg-transparent
-                      border-0
-                      border-b
-                      border-[#E3C588]/12
-                      rounded-none
-                      pb-2.5
-                      pr-2
-                      text-[#E3C588]/75
-                      text-[10px]
-                      outline-none
-                      cursor-pointer
-                    "
-                  >
-                    <option
-                      value=""
-                      className="text-black"
-                    >
-                      All
-                    </option>
-
-                    <option value="0-50" className="text-black">
-                      Under €50
-                    </option>
-
-                    <option value="50-100" className="text-black">
-                      €50–100
-                    </option>
-
-                    <option value="100-150" className="text-black">
-                      €100–150
-                    </option>
-
-                    <option value="150+" className="text-black">
-                      €150+
-                    </option>
-                  </select>
-                </label>
-              </div>
-
-              {Object.values(filters).some(Boolean) && (
-                <div
-                  className="
-                    flex
-                    justify-end
-                    pt-5
-                  "
-                >
+                return (
                   <button
+                    key={type}
+                    type="button"
                     onClick={() =>
                       setFilters({
-                        wine_type: "",
-                        country: "",
-                        region: "",
-                        vintage: "",
-                        grapes: "",
-                        price: "",
-                        service_type: "",
+                        ...filters,
+                        wine_type: active ? "" : type,
                       })
                     }
-                    className="
-                      text-[#E3C588]/30
-                      text-[7px]
-                      uppercase
-                      tracking-[0.3em]
-                      transition-colors
-                      hover:text-[#E3C588]/60
-                    "
+                    className={`relative pb-3 text-[12px] uppercase tracking-[0.26em] transition-colors md:text-[13px] ${
+                      active
+                        ? "text-[#E3C588]"
+                        : "text-[#F2E8D4]/68 hover:text-[#E3C588]"
+                    }`}
                   >
-                    Clear
+                    {type}
+                    <span
+                      className={`absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-[#E3C588] transition-all ${
+                        active ? "w-10 opacity-100" : "w-0 opacity-0"
+                      }`}
+                    />
                   </button>
-                </div>
-              )}
+                );
+              })}
             </div>
-          </div>
-        </div>
 
-        <div className="pt-6">
-          <button
-            onClick={() => {
-              setTransitioning(true);
+            {byTheGlassCount > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    service_type:
+                      filters.service_type === "glass" ? "" : "glass",
+                  })
+                }
+                className={`mb-10 inline-flex items-center gap-3 text-[12px] uppercase tracking-[0.24em] transition-colors md:text-[13px] ${
+                  filters.service_type === "glass"
+                    ? "text-[#E3C588]"
+                    : "text-[#E3C588]/62 hover:text-[#E3C588]"
+                }`}
+              >
+                <span className="text-[18px] leading-none">♧</span>
+                <span>By the Glass</span>
+                <span className="text-[11px] tracking-normal opacity-70">
+                  {byTheGlassCount}
+                </span>
+              </button>
+            )}
 
-              setTimeout(() => {
-                setShowResults(true);
-              }, 300);
-            }}
-            className="
-              w-full
-              border-b
-              border-[#E3C588]/20
-              pb-4
-              text-[#E3C588]
-              uppercase
-              tracking-[0.48em]
-              text-[11px]
-              opacity-80
-              hover:opacity-100
-              transition-all
-            "
-          >
-            Show Selection
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setTransitioning(true);
+                setTimeout(() => setShowResults(true), 300);
+              }}
+              className="group mx-auto flex w-full max-w-[760px] items-center justify-between border border-[#E3C588]/38 bg-[#E3C588]/[0.04] px-8 py-5 text-[13px] uppercase tracking-[0.34em] text-[#E3C588] transition-all hover:border-[#E3C588]/58 hover:bg-[#E3C588]/[0.08] md:text-[14px]"
+            >
+              <span>Explore the Collection</span>
+              <span className="text-[23px] leading-none transition-transform group-hover:translate-x-1">
+                →
+              </span>
+            </button>
+          </section>
+        </main>
       </div>
+
+      {showAdvanced && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5 py-6">
+          <button
+            type="button"
+            aria-label="Close advanced filters"
+            onClick={() => setShowAdvanced(false)}
+            className="absolute inset-0 bg-[#00110c]/84 backdrop-blur-md"
+          />
+
+          <section className="relative z-10 max-h-[82dvh] w-full max-w-[760px] overflow-y-auto rounded-[24px] border border-[#E3C588]/18 bg-[#06261c]/96 px-6 py-7 shadow-2xl md:px-9 md:py-8">
+            <div className="mb-7 flex items-start justify-between gap-6">
+              <div>
+                <div className="mb-2 text-[12px] uppercase tracking-[0.32em] text-[#E3C588] md:text-[13px]">
+                  Advanced Filters
+                </div>
+                <p className="text-[14px] font-light text-[#E3C588]/42 md:text-[15px]">
+                  Refine the collection by origin, vintage, grape or price.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(false)}
+                className="h-10 w-10 shrink-0 rounded-full border border-[#E3C588]/18 text-[22px] leading-none text-[#E3C588]/70 transition-all hover:border-[#E3C588]/35 hover:text-[#E3C588]"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+              {[
+                { key: "country", label: "Country", values: countries },
+                { key: "region", label: "Region", values: regions },
+                { key: "vintage", label: "Vintage", values: vintages },
+                { key: "grapes", label: "Grape", values: grapes },
+              ].map((field) => (
+                <label key={field.key} className="min-w-0">
+                  <span className="mb-3 block text-[11px] uppercase tracking-[0.26em] text-[#E3C588]/35">
+                    {field.label}
+                  </span>
+                  <select
+                    value={filters[field.key]}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFilters((current) => {
+                        const next = { ...current, [field.key]: value };
+                        if (field.key === "country") {
+                          next.region = "";
+                          next.vintage = "";
+                          next.grapes = "";
+                        }
+                        if (field.key === "region") {
+                          next.vintage = "";
+                          next.grapes = "";
+                        }
+                        if (field.key === "vintage") next.grapes = "";
+                        return next;
+                      });
+                    }}
+                    className="w-full appearance-none rounded-xl border border-[#E3C588]/14 bg-[#001a12]/35 px-4 py-3.5 text-[15px] text-[#E3C588]/82 outline-none"
+                  >
+                    <option value="" className="text-black">All</option>
+                    {field.values.map((value) => (
+                      <option key={value} value={value} className="text-black">
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+
+              <label className="min-w-0">
+                <span className="mb-3 block text-[11px] uppercase tracking-[0.26em] text-[#E3C588]/35">
+                  Price
+                </span>
+                <select
+                  value={filters.price}
+                  onChange={(e) =>
+                    setFilters({ ...filters, price: e.target.value })
+                  }
+                  className="w-full appearance-none rounded-xl border border-[#E3C588]/14 bg-[#001a12]/35 px-4 py-3.5 text-[15px] text-[#E3C588]/82 outline-none"
+                >
+                  <option value="" className="text-black">All</option>
+                  <option value="0-50" className="text-black">Under €50</option>
+                  <option value="50-100" className="text-black">€50–100</option>
+                  <option value="100-150" className="text-black">€100–150</option>
+                  <option value="150+" className="text-black">€150+</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="mt-8 flex flex-col-reverse gap-4 border-t border-[#E3C588]/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters({
+                    wine_type: "",
+                    country: "",
+                    region: "",
+                    vintage: "",
+                    grapes: "",
+                    price: "",
+                    service_type: "",
+                  })
+                }
+                className="text-[11px] uppercase tracking-[0.26em] text-[#E3C588]/45 transition-colors hover:text-[#E3C588]/80"
+              >
+                Clear Filters
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(false)}
+                className="min-w-[210px] rounded-full border border-[#E3C588]/35 bg-[#E3C588]/10 px-7 py-3.5 text-[12px] uppercase tracking-[0.26em] text-[#E3C588] transition-all hover:bg-[#E3C588]/15"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
