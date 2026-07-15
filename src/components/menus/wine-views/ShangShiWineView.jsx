@@ -182,28 +182,23 @@ export default function ShangShiWineView({
 
   return (
     <div
-      className="relative h-[100dvh] overflow-hidden bg-[#001a12] text-[#F3E9D2]"
+      className="relative h-[100dvh] overflow-hidden bg-[#00140e] text-[#F3E9D2]"
       style={{
         backgroundImage: `
-          radial-gradient(circle at 72% 18%, rgba(201,169,106,.10), transparent 30%),
-          radial-gradient(circle at 18% 88%, rgba(201,169,106,.06), transparent 28%),
-          linear-gradient(180deg, #00261b 0%, #001a12 58%, #00130d 100%)
+          linear-gradient(
+            90deg,
+            rgba(0, 18, 13, 0.34) 0%,
+            rgba(0, 18, 13, 0.46) 48%,
+            rgba(0, 12, 8, 0.20) 100%
+          ),
+          url('/wine/shangshi-wine-background.png')
         `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.13]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px)
-          `,
-          backgroundSize: "42px 42px",
-        }}
-      />
-
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[32%] bg-[radial-gradient(circle_at_0%_55%,rgba(201,169,106,.12),transparent_54%)]" />
-      <div className="pointer-events-none absolute right-[-8%] top-[8%] h-[62%] w-[44%] rounded-full bg-[radial-gradient(circle,rgba(201,169,106,.08),transparent_68%)] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#00140e]/20 via-[#00140e]/30 to-[#00140e]/10" />
 
       <div
         className={`relative z-10 h-full transition-all duration-300 ${

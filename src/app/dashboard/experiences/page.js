@@ -186,6 +186,170 @@ export default function ExperiencesPage() {
     );
   }
 
+  // ================= SORTABLE SECTION =================
+  function SortableSection({ section }) {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging
+    } = useSortable({ id: section.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.65 : 1,
+      marginBottom: 20,
+      padding: 16,
+      border: "1px solid rgba(0,0,0,0.08)",
+      borderRadius: 12,
+      background: "#fff"
+    };
+
+    const items = [...(section.experience_items || [])].sort(
+      (a, b) => a.position - b.position
+    );
+
+    return (
+      <div ref={setNodeRef} style={style}>
+        {/* SECTION HEADER */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "32px 1fr 1fr auto",
+            gap: 10,
+            marginBottom: 10,
+            alignItems: "center"
+          }}
+        >
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label={`Move ${section.name}`}
+            title="Drag to reorder section"
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: isDragging ? "grabbing" : "grab",
+              fontSize: 18,
+              opacity: 0.55,
+              padding: 0
+            }}
+          >
+            ☰
+          </button>
+
+          <input
+            className="so-input"
+            defaultValue={section.name}
+            onBlur={async (e) => {
+              await supabase
+                .from("experience_sections")
+                .update({ name: e.target.value })
+                .eq("id", section.id);
+
+              loadExperiences();
+            }}
+          />
+
+          <select
+            className="so-input"
+            defaultValue={section.type || "snacks"}
+            onChange={async (e) => {
+              await supabase
+                .from("experience_sections")
+                .update({ type: e.target.value })
+                .eq("id", section.id);
+
+              loadExperiences();
+            }}
+          >
+            <option value="snacks">Snacks</option>
+            <option value="drinks">Drinks</option>
+            <option value="amenities">Amenities</option>
+          </select>
+
+          <button
+            onClick={async () => {
+              await supabase
+                .from("experience_sections")
+                .delete()
+                .eq("id", section.id);
+
+              loadExperiences();
+            }}
+          >
+            Delete
+          </button>
+        </div>
+
+        <button onClick={() => addItem(section.id)}>
+          + Dish
+        </button>
+
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={async (event) => {
+            const { active, over } = event;
+            if (!over || active.id === over.id) return;
+
+            const oldIndex = items.findIndex(
+              (item) => item.id === active.id
+            );
+            const newIndex = items.findIndex(
+              (item) => item.id === over.id
+            );
+
+            if (oldIndex === -1 || newIndex === -1) return;
+
+            const newItems = arrayMove(items, oldIndex, newIndex);
+
+            setExperiences((prev) =>
+              prev.map((experience) =>
+                experience.id === selectedExp.id
+                  ? {
+                      ...experience,
+                      experience_sections:
+                        experience.experience_sections.map(
+                          (currentSection) =>
+                            currentSection.id === section.id
+                              ? {
+                                  ...currentSection,
+                                  experience_items: newItems
+                                }
+                              : currentSection
+                        )
+                    }
+                  : experience
+              )
+            );
+
+            await Promise.all(
+              newItems.map((item, index) =>
+                supabase
+                  .from("experience_items")
+                  .update({ position: index + 1 })
+                  .eq("id", item.id)
+              )
+            );
+          }}
+        >
+          <SortableContext
+            items={items.map((item) => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {items.map((item) => (
+              <SortableItem key={item.id} item={item} />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
+    );
+  }
+
   // ================= UI =================
   return (
     <div className="so-main-inner">
@@ -345,125 +509,72 @@ export default function ExperiencesPage() {
               + Add Section
             </button>
 
-            {experiences
-              .find(e => e.id === selectedExp.id)
-              ?.experience_sections?.map(section => {
+            {(() => {
+              const currentExperience = experiences.find(
+                (experience) => experience.id === selectedExp.id
+              );
 
-                const items = section.experience_items || [];
+              const sections = [
+                ...(currentExperience?.experience_sections || [])
+              ].sort((a, b) => a.position - b.position);
 
-                return (
-                  <div key={section.id} style={{ marginBottom: 20 }}>
+              return (
+                <DndContext
+                  collisionDetection={closestCenter}
+                  onDragEnd={async (event) => {
+                    const { active, over } = event;
+                    if (!over || active.id === over.id) return;
 
-                    {/* 🔥 EDITABLE SECTION */}
-                    <div style={{
-                      display: "flex",
-                      gap: 10,
-                      marginBottom: 10,
-                      alignItems: "center"
-                    }}>
+                    const oldIndex = sections.findIndex(
+                      (section) => section.id === active.id
+                    );
+                    const newIndex = sections.findIndex(
+                      (section) => section.id === over.id
+                    );
 
-                      <input
-                        className="so-input"
-                        defaultValue={section.name}
-                        onBlur={async (e) => {
-                          await supabase
-                            .from("experience_sections")
-                            .update({ name: e.target.value })
-                            .eq("id", section.id);
+                    if (oldIndex === -1 || newIndex === -1) return;
 
-                          loadExperiences();
-                        }}
+                    const newSections = arrayMove(
+                      sections,
+                      oldIndex,
+                      newIndex
+                    );
+
+                    setExperiences((prev) =>
+                      prev.map((experience) =>
+                        experience.id === selectedExp.id
+                          ? {
+                              ...experience,
+                              experience_sections: newSections
+                            }
+                          : experience
+                      )
+                    );
+
+                    await Promise.all(
+                      newSections.map((section, index) =>
+                        supabase
+                          .from("experience_sections")
+                          .update({ position: index + 1 })
+                          .eq("id", section.id)
+                      )
+                    );
+                  }}
+                >
+                  <SortableContext
+                    items={sections.map((section) => section.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {sections.map((section) => (
+                      <SortableSection
+                        key={section.id}
+                        section={section}
                       />
-
-                      <select
-                        className="so-input"
-                        defaultValue={section.type || "snacks"}
-                        onChange={async (e) => {
-                          await supabase
-                            .from("experience_sections")
-                            .update({ type: e.target.value })
-                            .eq("id", section.id);
-
-                          loadExperiences();
-                        }}
-                      >
-                        <option value="snacks">Snacks</option>
-                        <option value="drinks">Drinks</option>
-                        <option value="amenities">Amenities</option>
-                      </select>
-
-                      <button
-                        onClick={async () => {
-                          await supabase
-                            .from("experience_sections")
-                            .delete()
-                            .eq("id", section.id);
-
-                          loadExperiences();
-                        }}
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-
-                    <button onClick={() => addItem(section.id)}>
-                      + Dish
-                    </button>
-
-                    <DndContext
-                      collisionDetection={closestCenter}
-                      onDragEnd={async (event) => {
-
-                        const { active, over } = event;
-                        if (!over || active.id === over.id) return;
-
-                        const oldIndex = items.findIndex(i => i.id === active.id);
-                        const newIndex = items.findIndex(i => i.id === over.id);
-
-                        const newItems = arrayMove(items, oldIndex, newIndex);
-
-                        setExperiences(prev =>
-                          prev.map(e =>
-                            e.id === selectedExp.id
-                              ? {
-                                  ...e,
-                                  experience_sections: e.experience_sections.map(sec =>
-                                    sec.id === section.id
-                                      ? { ...sec, experience_items: newItems }
-                                      : sec
-                                  )
-                                }
-                              : e
-                          )
-                        );
-
-                        for (let i = 0; i < newItems.length; i++) {
-                          await supabase
-                            .from("experience_items")
-                            .update({ position: i + 1 })
-                            .eq("id", newItems[i].id);
-                        }
-
-                      }}
-                    >
-
-                      <SortableContext
-                        items={items.map(i => i.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        {items
-                          .sort((a, b) => a.position - b.position)
-                          .map(item => (
-                            <SortableItem key={item.id} item={item} />
-                          ))}
-                      </SortableContext>
-
-                    </DndContext>
-
-                  </div>
-                );
-              })}
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              );
+            })()}
 
           </div>
         </div>

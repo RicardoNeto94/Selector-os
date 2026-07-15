@@ -510,11 +510,9 @@
 
 .vx-room-price {
   padding-top: 4px;
-
   color: #5a463d;
-
-  font-size: 11px;
-
+  font-size: 18px;
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -677,7 +675,7 @@
 }
 
 .vx-room-price {
-  font-size: 9px;
+  font-size: 17px;
 }
 
 }
