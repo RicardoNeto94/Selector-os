@@ -991,18 +991,28 @@
 }
 
 .vx-dining-modal .vx-dining-hub-body {
-  flex: 1;
+  flex: 1 1 0;
+  height: 0;
   min-height: 0;
-  padding: clamp(28px,3vw,48px)
-    clamp(34px,6vw,90px)
-    clamp(28px,3vw,48px);
+
+  padding:
+    clamp(28px, 3vw, 48px)
+    clamp(34px, 6vw, 90px)
+    clamp(28px, 3vw, 48px);
+
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
+
   touch-action: pan-y;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+.vx-dining-modal .vx-dining-hub-hero,
+.vx-dining-modal .vx-dining-tabs {
+  flex-shrink: 0;
 }
 
 .vx-dining-modal .vx-dining-hub-body::-webkit-scrollbar {
@@ -1201,9 +1211,10 @@
 @media (max-width:900px) {
 
   .vx-dining-modal .burman-modal-content {
-    width: calc(100vw - 64px);
-    height: auto;
-    max-height: calc(100dvh - 64px);
+    width: calc(100vw - 32px);
+    height: calc(100dvh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow: hidden;
     border-radius: 24px;
   }
 
