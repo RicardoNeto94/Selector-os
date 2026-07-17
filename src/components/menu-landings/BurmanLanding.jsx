@@ -1239,92 +1239,94 @@ export default function BurmanLanding({ menu }) {
 
                           {venueName.includes("koyo") &&
                             diningTab === "experience" && (
-                              <section className="vx-dining-overview">
-                                <div className="vx-dining-about">
-                                  <span className="vx-dining-section-label">
-                                    THE OMAKASE EXPERIENCE
-                                  </span>
+                              <section className="vx-koyo-editorial-tab">
+                                <div className="vx-koyo-editorial-tab-main">
+                                  <div className="vx-koyo-editorial-tab-intro">
+                                    <span className="vx-koyo-editorial-eyebrow">
+                                      THE OMAKASE EXPERIENCE
+                                    </span>
 
-                                  <h3>One counter. One progression.</h3>
+                                    <h3>
+                                      One counter.
+                                      <br />
+                                      One progression.
+                                    </h3>
 
-                                  <p>
-                                    Omakase means placing the experience in the
-                                    hands of the chef. Rather than selecting
-                                    individual dishes, guests are guided through
-                                    a considered sequence prepared for the
-                                    entire counter.
-                                  </p>
+                                    <p>
+                                      Omakase means placing the experience in
+                                      the hands of the chef. Guests are guided
+                                      through one considered sequence prepared
+                                      for the entire counter.
+                                    </p>
 
-                                  <p className="vx-dining-about-secondary">
-                                    The menu develops according to the seasons
-                                    and the best ingredients available. For this
-                                    reason, individual courses are not published
-                                    in advance.
-                                  </p>
+                                    <dl className="vx-koyo-editorial-facts">
+                                      <div>
+                                        <dt>FIRST SEATING</dt>
+                                        <dd>18:00</dd>
+                                      </div>
 
-                                  <div className="vx-dining-info-grid">
-                                    <div className="vx-dining-info-card">
-                                      <span>FIRST SEATING</span>
-                                      <strong>18:00</strong>
-                                    </div>
+                                      <div>
+                                        <dt>SECOND SEATING</dt>
+                                        <dd>20:30</dd>
+                                      </div>
 
-                                    <div className="vx-dining-info-card">
-                                      <span>SECOND SEATING</span>
-                                      <strong>20:30</strong>
-                                    </div>
+                                      <div>
+                                        <dt>DURATION</dt>
+                                        <dd>Approximately 2 hours</dd>
+                                      </div>
 
-                                    <div className="vx-dining-info-card">
-                                      <span>DURATION</span>
-                                      <strong>Approximately 2 hours</strong>
-                                    </div>
-
-                                    <div className="vx-dining-info-card">
-                                      <span>AVAILABILITY</span>
-                                      <strong>Wednesday–Saturday</strong>
-                                    </div>
+                                      <div>
+                                        <dt>AVAILABILITY</dt>
+                                        <dd>Wednesday–Saturday</dd>
+                                      </div>
+                                    </dl>
                                   </div>
-                                </div>
 
-                                <div className="vx-dining-highlights">
-                                  <span className="vx-dining-section-label">
-                                    WHAT TO EXPECT
-                                  </span>
+                                  <div className="vx-koyo-editorial-tab-story">
+                                    <span className="vx-koyo-editorial-mark">
+                                      ◇
+                                    </span>
 
-                                  <div className="vx-dining-highlight-grid">
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        01 · ARRIVAL
-                                      </span>
-                                      <h4>Begin together</h4>
-                                      <p>
-                                        Guests are encouraged to arrive 10–15
-                                        minutes before the confirmed seating
-                                        time.
-                                      </p>
-                                    </article>
+                                    <span className="vx-koyo-editorial-label">
+                                      WHAT TO EXPECT
+                                    </span>
 
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        02 · SERVICE
-                                      </span>
-                                      <h4>Courses in sequence</h4>
-                                      <p>
-                                        Each course is served as part of one
-                                        continuous chef-led progression.
-                                      </p>
-                                    </article>
+                                    <div className="vx-koyo-editorial-steps">
+                                      <div>
+                                        <span>01</span>
+                                        <div>
+                                          <h4>Begin together</h4>
+                                          <p>
+                                            Guests are encouraged to arrive
+                                            10–15 minutes before the confirmed
+                                            seating time.
+                                          </p>
+                                        </div>
+                                      </div>
 
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        03 · PAIRING
-                                      </span>
-                                      <h4>Curated beverages</h4>
-                                      <p>
-                                        A considered selection of sake, wine and
-                                        non-alcoholic pairings may be
-                                        recommended alongside the menu.
-                                      </p>
-                                    </article>
+                                      <div>
+                                        <span>02</span>
+                                        <div>
+                                          <h4>Courses in sequence</h4>
+                                          <p>
+                                            Each course is served as part of one
+                                            continuous chef-led progression.
+                                          </p>
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <span>03</span>
+                                        <div>
+                                          <h4>Curated beverages</h4>
+                                          <p>
+                                            Sake, wine and non-alcoholic
+                                            pairings may be recommended alongside
+                                            the menu.
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </section>
@@ -1332,98 +1334,94 @@ export default function BurmanLanding({ menu }) {
 
                           {venueName.includes("koyo") &&
                             diningTab === "booking" && (
-                              <section className="vx-dining-overview">
-                                <div className="vx-dining-about">
-                                  <span className="vx-dining-section-label">
-                                    BEFORE YOU BOOK
-                                  </span>
+                              <section className="vx-koyo-editorial-tab">
+                                <div className="vx-koyo-editorial-tab-main">
+                                  <div className="vx-koyo-editorial-tab-intro">
+                                    <span className="vx-koyo-editorial-eyebrow">
+                                      BEFORE YOU BOOK
+                                    </span>
 
-                                  <h3>Everything to know before your visit.</h3>
+                                    <h3>
+                                      Everything to know
+                                      <br />
+                                      before your visit.
+                                    </h3>
 
-                                  <p>
-                                    Koyo is a fixed chef-led experience. Advance
-                                    planning allows the team to prepare each
-                                    seating with the care and precision the
-                                    format requires.
-                                  </p>
+                                    <p>
+                                      Koyo is a fixed chef-led experience.
+                                      Advance planning allows the team to prepare
+                                      each seating with the care and precision
+                                      the format requires.
+                                    </p>
 
-                                  <div className="vx-dining-info-grid">
-                                    <div className="vx-dining-info-card">
-                                      <span>MENU PRICE</span>
-                                      <strong>€190 per guest</strong>
-                                    </div>
+                                    <dl className="vx-koyo-editorial-facts">
+                                      <div>
+                                        <dt>MENU PRICE</dt>
+                                        <dd>€190 per guest</dd>
+                                      </div>
 
-                                    <div className="vx-dining-info-card">
-                                      <span>SERVICE CHARGE</span>
-                                      <strong>10%</strong>
-                                    </div>
+                                      <div>
+                                        <dt>SERVICE CHARGE</dt>
+                                        <dd>10%</dd>
+                                      </div>
 
-                                    <div className="vx-dining-info-card">
-                                      <span>MENU FORMAT</span>
-                                      <strong>No à la carte ordering</strong>
-                                    </div>
+                                      <div>
+                                        <dt>FORMAT</dt>
+                                        <dd>No à la carte ordering</dd>
+                                      </div>
 
-                                    <div className="vx-dining-info-card">
-                                      <span>RESERVATIONS</span>
-                                      <strong>Advance booking required</strong>
-                                    </div>
+                                      <div>
+                                        <dt>RESERVATIONS</dt>
+                                        <dd>Advance booking required</dd>
+                                      </div>
+                                    </dl>
                                   </div>
-                                </div>
 
-                                <div className="vx-dining-highlights">
-                                  <span className="vx-dining-section-label">
-                                    BOOKING GUIDANCE
-                                  </span>
+                                  <div className="vx-koyo-editorial-tab-story">
+                                    <span className="vx-koyo-editorial-mark">
+                                      ◇
+                                    </span>
 
-                                  <div className="vx-dining-highlight-grid">
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        DIETARY REQUIREMENTS
-                                      </span>
-                                      <h4>Please advise us in advance</h4>
-                                      <p>
-                                        Allergies and dietary restrictions must
-                                        be shared when booking. Due to the
-                                        nature of the menu, some requirements
-                                        may not be possible to accommodate.
-                                      </p>
-                                    </article>
+                                    <span className="vx-koyo-editorial-label">
+                                      BOOKING GUIDANCE
+                                    </span>
 
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        LATE ARRIVALS
-                                      </span>
-                                      <h4>The seating starts together</h4>
-                                      <p>
-                                        Late arrival may result in missed
-                                        courses because the experience follows a
-                                        coordinated service sequence.
-                                      </p>
-                                    </article>
+                                    <div className="vx-koyo-editorial-guidance">
+                                      <div>
+                                        <h4>Dietary requirements</h4>
+                                        <p>
+                                          Allergies and dietary restrictions
+                                          must be shared when booking. Some
+                                          requirements may not be possible to
+                                          accommodate.
+                                        </p>
+                                      </div>
 
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        CHANGES & CANCELLATIONS
-                                      </span>
-                                      <h4>Review the terms at booking</h4>
-                                      <p>
-                                        Payment, cancellation, rescheduling and
-                                        guest-count conditions are confirmed
-                                        during the reservation process.
-                                      </p>
-                                    </article>
+                                      <div>
+                                        <h4>Late arrivals</h4>
+                                        <p>
+                                          The seating starts together. Late
+                                          arrival may result in missed courses.
+                                        </p>
+                                      </div>
 
-                                    <article className="vx-dining-highlight">
-                                      <span className="vx-dining-highlight-kicker">
-                                        ASSISTANCE
-                                      </span>
-                                      <h4>Contact Reception</h4>
-                                      <p>
-                                        For availability, booking support or
-                                        special requests, please contact The
-                                        Burman reception team.
-                                      </p>
-                                    </article>
+                                      <div>
+                                        <h4>Changes and cancellations</h4>
+                                        <p>
+                                          Payment, cancellation, rescheduling
+                                          and guest-count terms are confirmed
+                                          during reservation.
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <h4>Assistance</h4>
+                                        <p>
+                                          For availability or special requests,
+                                          please contact The Burman Reception.
+                                        </p>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </section>

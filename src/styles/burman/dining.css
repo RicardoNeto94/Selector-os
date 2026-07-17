@@ -301,7 +301,7 @@
 
 .vx-dining-venue-copy small {
   color: #d8b36d;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .38em;
   text-transform: uppercase;
 }
@@ -762,7 +762,7 @@
   display: block;
   margin-bottom: 10px;
   color: rgba(255,255,255,.68);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .27em;
   text-transform: uppercase;
 }
@@ -895,7 +895,7 @@
   gap: 24px;
   margin-top: 22px;
   color: rgba(255,255,255,.62);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .17em;
   text-transform: uppercase;
 }
@@ -929,7 +929,7 @@
 
 .vx-dining-modal .vx-dining-request small {
   color: rgba(255,255,255,.60);
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: .24em;
 }
 
@@ -1112,7 +1112,7 @@
   display: block;
   margin-bottom: 9px;
   color: #a19086;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: .22em;
 }
 
@@ -1163,7 +1163,7 @@
   display: block;
   margin-top: 24px;
   color: #8f3d2d;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .18em;
   text-transform: uppercase;
 }
@@ -1476,7 +1476,7 @@
 
   .vx-dining-modal .vx-dining-about-secondary {
     margin-top: 7px !important;
-    font-size: 9px !important;
+    font-size: 10px !important;
     line-height: 1.4 !important;
   }
 
@@ -1513,7 +1513,7 @@
   }
 
   .vx-dining-modal .vx-dining-highlight p {
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.4;
   }
 
@@ -2261,5 +2261,816 @@ h2 {
   .vx-dining-modal .vx-dining-hub-copy h2 {
     font-size: 54px;
     line-height: 0.94;
+  }
+}
+
+/* =========================================================
+   KOYO ALL TABS — EDITORIAL + ORIENTATION SAFE
+   ========================================================= */
+
+.vx-dining-modal .vx-koyo-editorial-tab {
+  width: 100%;
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-main {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(48px, 7vw, 104px);
+  align-items: stretch;
+  padding:
+    clamp(48px, 5.5vw, 78px)
+    clamp(48px, 6.5vw, 96px)
+    clamp(52px, 6vw, 86px);
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-intro {
+  padding-right: clamp(30px, 4.5vw, 66px);
+  border-right: 1px solid rgba(76, 55, 44, .13);
+}
+
+.vx-dining-modal .vx-koyo-editorial-eyebrow,
+.vx-dining-modal .vx-koyo-editorial-label {
+  display: block;
+  color: #9c765b;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-intro h3 {
+  margin: 18px 0 0;
+  color: #352720;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 3.8vw, 58px);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -.035em;
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-intro > p {
+  max-width: 540px;
+  margin: 26px 0 0;
+  color: #62534b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.7;
+}
+
+.vx-dining-modal .vx-koyo-editorial-facts {
+  margin: 32px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(76, 55, 44, .13);
+}
+
+.vx-dining-modal .vx-koyo-editorial-facts > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 22px;
+  padding: 10px 0;
+}
+
+.vx-dining-modal .vx-koyo-editorial-facts dt {
+  color: #9a8174;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .2em;
+}
+
+.vx-dining-modal .vx-koyo-editorial-facts dd {
+  margin: 0;
+  color: #41332c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-story {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 650px;
+  padding: 10px 0;
+}
+
+.vx-dining-modal .vx-koyo-editorial-mark {
+  display: block;
+  margin-bottom: 22px;
+  color: #b28a4f;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.vx-dining-modal .vx-koyo-editorial-label::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 1px;
+  margin-top: 18px;
+  background: rgba(143, 61, 45, .45);
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps,
+.vx-dining-modal .vx-koyo-editorial-guidance {
+  margin-top: 26px;
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps > div {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(76, 55, 44, .1);
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps > div > span {
+  color: #ae9a8f;
+  font-size: 11px;
+  letter-spacing: .16em;
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps h4,
+.vx-dining-modal .vx-koyo-editorial-guidance h4 {
+  margin: 0;
+  color: #3c2d26;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(20px, 1.8vw, 27px);
+  font-weight: 400;
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps p,
+.vx-dining-modal .vx-koyo-editorial-guidance p {
+  margin: 7px 0 0;
+  color: #7c6d64;
+  font-size: clamp(13px, 1.1vw, 16px);
+  line-height: 1.6;
+}
+
+.vx-dining-modal .vx-koyo-editorial-guidance > div {
+  padding: 17px 0;
+  border-bottom: 1px solid rgba(76, 55, 44, .1);
+}
+
+/* Natural content height for all three Koyo editorial tabs. */
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview),
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab) {
+  height: auto;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-shell,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-body {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+/* Tablet portrait and narrow landscape. */
+@media (max-width: 900px) {
+  .vx-dining-modal .vx-koyo-editorial-tab-main {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 38px 32px 48px;
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-tab-intro {
+    padding-right: 0;
+    padding-bottom: 38px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(76, 55, 44, .13);
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-tab-story {
+    padding: 0;
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab) {
+    width: calc(100vw - 28px);
+    max-height: calc(100dvh - 28px);
+  }
+}
+
+/* Mobile portrait. */
+@media (max-width: 560px) {
+  .vx-dining-modal .vx-koyo-editorial-tab-main {
+    padding: 30px 22px 40px;
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-facts > div {
+    grid-template-columns: 108px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-tab-intro h3 {
+    font-size: 34px;
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-steps > div {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+
+/* Landscape devices with limited vertical space. */
+@media (orientation: landscape) and (max-height: 760px) {
+  .vx-dining-modal .burman-modal-content {
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .vx-dining-modal .vx-dining-hub-hero {
+    height: 210px;
+    flex: 0 0 210px;
+  }
+
+  .vx-dining-modal .vx-dining-tabs {
+    min-height: 48px;
+    height: 48px;
+  }
+
+  .vx-dining-modal .vx-dining-tab {
+    height: 48px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-main,
+  .vx-dining-modal .vx-koyo-editorial-tab-main,
+  .vx-dining-modal .vx-editorial-overview-main {
+    padding-top: 30px;
+    padding-bottom: 36px;
+  }
+}
+
+
+/* =========================================================
+   DINING STATIC TABS — FIT WITHOUT SCROLLING
+   Overview / Experience / Before You Book
+   ========================================================= */
+
+/*
+  Static information tabs must fit entirely inside the modal.
+  Menu and other long-form tabs keep their existing scroll behavior.
+*/
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview),
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab),
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview) {
+  height: min(94dvh, 900px);
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-shell,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-shell,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-shell,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Compact static-tab hero so the complete tab remains visible. */
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub-hero,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-hero,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub-hero {
+  height: clamp(190px, 27dvh, 285px);
+  flex: 0 0 clamp(190px, 27dvh, 285px);
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub-copy,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-copy,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub-copy {
+  left: clamp(30px, 5vw, 72px);
+  bottom: clamp(22px, 3.5vw, 42px);
+  width: min(620px, 66%);
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub-copy h2,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-copy h2,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub-copy h2 {
+  margin: 8px 0 10px;
+  font-size: clamp(38px, 5vw, 66px);
+  line-height: .92;
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub-copy > p,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-copy > p,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub-copy > p {
+  max-width: 560px;
+  font-size: clamp(12px, 1.05vw, 15px);
+  line-height: 1.5;
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub-meta,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-meta,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub-meta {
+  margin-top: 10px;
+  font-size: 10px;
+}
+
+/* Static tabs use a compact navigation bar. */
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-tabs,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-tabs,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-tabs {
+  min-height: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+}
+
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-tab,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-tab,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-tab {
+  height: 52px;
+}
+
+/* No scrolling inside static information tabs. */
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-overview)
+.vx-dining-hub-body,
+.vx-dining-modal
+.burman-modal-content:has(.vx-koyo-editorial-tab)
+.vx-dining-hub-body,
+.vx-dining-modal
+.burman-modal-content:has(.vx-editorial-overview)
+.vx-dining-hub-body {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Compact Koyo overview. */
+.vx-dining-modal .vx-koyo-overview-main {
+  height: 100%;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(34px, 5vw, 72px);
+  align-items: center;
+  padding:
+    clamp(24px, 3.2vw, 42px)
+    clamp(38px, 5.5vw, 82px)
+    clamp(26px, 3.5vw, 46px);
+}
+
+.vx-dining-modal .vx-koyo-overview-intro {
+  padding-right: clamp(24px, 4vw, 58px);
+}
+
+.vx-dining-modal .vx-koyo-overview-intro h3 {
+  font-size: clamp(34px, 3.5vw, 52px);
+  line-height: 1.02;
+}
+
+.vx-dining-modal .vx-koyo-overview-intro > p {
+  margin-top: 18px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.55;
+}
+
+.vx-dining-modal .vx-koyo-overview-facts {
+  margin-top: 22px;
+  padding-top: 16px;
+}
+
+.vx-dining-modal .vx-koyo-overview-facts > div {
+  padding: 6px 0;
+}
+
+.vx-dining-modal .vx-koyo-overview-story p {
+  margin-top: 16px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.55;
+}
+
+.vx-dining-modal .vx-koyo-overview-story .vx-koyo-overview-lead {
+  margin-top: 20px;
+  font-size: clamp(18px, 1.7vw, 25px);
+  line-height: 1.42;
+}
+
+/* Compact Koyo Experience and Before You Book. */
+.vx-dining-modal .vx-koyo-editorial-tab-main {
+  height: 100%;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  gap: clamp(34px, 5vw, 72px);
+  align-items: center;
+  padding:
+    clamp(22px, 3vw, 40px)
+    clamp(38px, 5.5vw, 82px)
+    clamp(24px, 3.2vw, 44px);
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-intro {
+  padding-right: clamp(24px, 4vw, 58px);
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-intro h3 {
+  margin-top: 12px;
+  font-size: clamp(32px, 3.2vw, 48px);
+  line-height: 1.04;
+}
+
+.vx-dining-modal .vx-koyo-editorial-tab-intro > p {
+  margin-top: 17px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.5;
+}
+
+.vx-dining-modal .vx-koyo-editorial-facts {
+  margin-top: 20px;
+  padding-top: 14px;
+}
+
+.vx-dining-modal .vx-koyo-editorial-facts > div {
+  padding: 5px 0;
+}
+
+.vx-dining-modal .vx-koyo-editorial-mark {
+  margin-bottom: 13px;
+}
+
+.vx-dining-modal .vx-koyo-editorial-label::after {
+  margin-top: 12px;
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps,
+.vx-dining-modal .vx-koyo-editorial-guidance {
+  margin-top: 14px;
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps > div,
+.vx-dining-modal .vx-koyo-editorial-guidance > div {
+  padding: 10px 0;
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps h4,
+.vx-dining-modal .vx-koyo-editorial-guidance h4 {
+  font-size: clamp(17px, 1.45vw, 22px);
+}
+
+.vx-dining-modal .vx-koyo-editorial-steps p,
+.vx-dining-modal .vx-koyo-editorial-guidance p {
+  margin-top: 4px;
+  font-size: clamp(12px, .95vw, 14px);
+  line-height: 1.45;
+}
+
+/* Compact overview for Shang Shi, Voi Voi and all other venues. */
+.vx-dining-modal .vx-editorial-overview-main {
+  height: 100%;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(34px, 5vw, 72px);
+  align-items: center;
+  padding:
+    clamp(24px, 3.2vw, 42px)
+    clamp(38px, 5.5vw, 82px)
+    clamp(26px, 3.5vw, 46px);
+}
+
+.vx-dining-modal .vx-editorial-overview-intro {
+  padding-right: clamp(24px, 4vw, 58px);
+}
+
+.vx-dining-modal .vx-editorial-overview-intro h3 {
+  font-size: clamp(34px, 3.5vw, 52px);
+  line-height: 1.04;
+}
+
+.vx-dining-modal .vx-editorial-overview-intro > p {
+  margin-top: 18px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.55;
+}
+
+.vx-dining-modal .vx-editorial-overview-facts {
+  margin-top: 22px;
+  padding-top: 16px;
+}
+
+.vx-dining-modal .vx-editorial-overview-facts > div {
+  padding: 6px 0;
+}
+
+.vx-dining-modal .vx-editorial-overview-story p {
+  margin-top: 16px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.55;
+}
+
+.vx-dining-modal .vx-editorial-overview-story .vx-editorial-overview-lead {
+  margin-top: 20px;
+  font-size: clamp(18px, 1.7vw, 25px);
+  line-height: 1.42;
+}
+
+/* Portrait tablets: keep everything visible by reducing hero and spacing. */
+@media (orientation: portrait) and (min-width: 600px) and (max-width: 1100px) {
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview),
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab),
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview) {
+    width: calc(100vw - 28px);
+    height: calc(100dvh - 28px);
+    max-height: calc(100dvh - 28px);
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-hub-hero,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-hub-hero,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-hub-hero {
+    height: 205px;
+    flex-basis: 205px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-main,
+  .vx-dining-modal .vx-koyo-editorial-tab-main,
+  .vx-dining-modal .vx-editorial-overview-main {
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    gap: 30px;
+    padding: 22px 30px 26px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-intro,
+  .vx-dining-modal .vx-koyo-editorial-tab-intro,
+  .vx-dining-modal .vx-editorial-overview-intro {
+    padding-right: 26px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-intro h3,
+  .vx-dining-modal .vx-koyo-editorial-tab-intro h3,
+  .vx-dining-modal .vx-editorial-overview-intro h3 {
+    font-size: 34px;
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-steps > div,
+  .vx-dining-modal .vx-koyo-editorial-guidance > div {
+    padding: 7px 0;
+  }
+}
+
+/* Landscape tablets and short desktop windows. */
+@media (orientation: landscape) and (max-height: 820px) {
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview),
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab),
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview) {
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-hub-hero,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-hub-hero,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-hub-hero {
+    height: 180px;
+    flex-basis: 180px;
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-tabs,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-tabs,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-tabs {
+    height: 46px;
+    min-height: 46px;
+    flex-basis: 46px;
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-tab,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-tab,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-tab {
+    height: 46px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-main,
+  .vx-dining-modal .vx-koyo-editorial-tab-main,
+  .vx-dining-modal .vx-editorial-overview-main {
+    padding-top: 17px;
+    padding-bottom: 19px;
+  }
+}
+
+/* Phone portrait: preserve readability; the modal remains self-contained. */
+@media (orientation: portrait) and (max-width: 599px) {
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview),
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab),
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview) {
+    width: calc(100vw - 16px);
+    height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-hub-hero,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-hub-hero,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-hub-hero {
+    height: 150px;
+    flex-basis: 150px;
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-hub-copy,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-hub-copy,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-hub-copy {
+    left: 22px;
+    right: 22px;
+    bottom: 18px;
+    width: auto;
+  }
+
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-hub-copy > p,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-hub-copy > p,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-hub-copy > p,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-overview)
+  .vx-dining-hub-meta,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-koyo-editorial-tab)
+  .vx-dining-hub-meta,
+  .vx-dining-modal
+  .burman-modal-content:has(.vx-editorial-overview)
+  .vx-dining-hub-meta {
+    display: none;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-main,
+  .vx-dining-modal .vx-koyo-editorial-tab-main,
+  .vx-dining-modal .vx-editorial-overview-main {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px 20px 20px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-intro,
+  .vx-dining-modal .vx-koyo-editorial-tab-intro,
+  .vx-dining-modal .vx-editorial-overview-intro {
+    padding-right: 0;
+    padding-bottom: 12px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(76, 55, 44, .13);
+  }
+
+  .vx-dining-modal .vx-koyo-overview-intro h3,
+  .vx-dining-modal .vx-koyo-editorial-tab-intro h3,
+  .vx-dining-modal .vx-editorial-overview-intro h3 {
+    font-size: 26px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-intro > p,
+  .vx-dining-modal .vx-koyo-editorial-tab-intro > p,
+  .vx-dining-modal .vx-editorial-overview-intro > p {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-facts,
+  .vx-dining-modal .vx-koyo-editorial-facts,
+  .vx-dining-modal .vx-editorial-overview-facts {
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-facts > div,
+  .vx-dining-modal .vx-koyo-editorial-facts > div,
+  .vx-dining-modal .vx-editorial-overview-facts > div {
+    padding: 3px 0;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-story p,
+  .vx-dining-modal .vx-editorial-overview-story p,
+  .vx-dining-modal .vx-koyo-editorial-steps p,
+  .vx-dining-modal .vx-koyo-editorial-guidance p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .vx-dining-modal .vx-koyo-overview-story .vx-koyo-overview-lead,
+  .vx-dining-modal .vx-editorial-overview-story .vx-editorial-overview-lead {
+    font-size: 15px;
+  }
+
+  .vx-dining-modal .vx-koyo-editorial-steps > div,
+  .vx-dining-modal .vx-koyo-editorial-guidance > div {
+    padding: 5px 0;
   }
 }
