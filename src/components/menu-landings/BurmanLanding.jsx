@@ -282,15 +282,6 @@ export default function BurmanLanding({ menu }) {
                     <span>Available 24 hours</span>
                   </div>
                 </div>
-
-                <div className="vx-room-request">
-                  <span>
-                    <small>PLACE AN ORDER</small>
-                    Contact Reception
-                  </span>
-
-                  <span aria-hidden="true">→</span>
-                </div>
               </section>
 
               {/* TABS */}
@@ -412,10 +403,7 @@ export default function BurmanLanding({ menu }) {
 
                       <h3>Your rest, personalised.</h3>
 
-                      <p>
-                        Explore our pillow selection and choose the comfort and
-                        support best suited to your sleep.
-                      </p>
+                     
                     </div>
 
                     <BurmanPillowMenu />
@@ -474,12 +462,7 @@ export default function BurmanLanding({ menu }) {
                 </div>
 
                 <div className="vx-spa-request">
-                  <span>
-                    <small>SPA CONCIERGE</small>
-                    Contact Reception
-                  </span>
-
-                  <span aria-hidden="true">→</span>
+                  
                 </div>
               </section>
 
@@ -506,83 +489,70 @@ export default function BurmanLanding({ menu }) {
               <div className="vx-spa-body">
                 {/* OVERVIEW */}
                 {spaTab === "overview" && (
-                  <section className="vx-spa-overview">
-                    <div className="vx-spa-overview-intro">
-                      <span>THE BURMAN SPA</span>
-
-                      <h3>
-                        Wellness,
-                        <br />
-                        considered.
-                      </h3>
-
-                      <p>
-                        Discover a tranquil retreat for mind, body and soul
-                        within The Burman.
-                      </p>
-                    </div>
-
-                    <div className="vx-spa-overview-content">
-                      <div className="vx-spa-story">
-                        <span>OUR PHILOSOPHY</span>
+                  <section className="vx-spa-editorial-overview">
+                    <div className="vx-spa-editorial-main">
+                      <div className="vx-spa-editorial-intro">
+                        <h3>
+                          Wellness,
+                          <br />
+                          considered.
+                        </h3>
 
                         <p>
                           The Burman Spa is an intimate sanctuary dedicated to
-                          quiet contentment and personalised wellbeing.
+                          quiet contentment, personalised care and restorative
+                          wellbeing.
                         </p>
 
-                        <p>
+                        <dl className="vx-spa-editorial-facts">
+                          <div>
+                            <dt>APPROACH</dt>
+                            <dd>Personalised treatments</dd>
+                          </div>
+
+                          <div>
+                            <dt>SKINCARE</dt>
+                            <dd>Biologique Recherche · Paris</dd>
+                          </div>
+
+                          <div>
+                            <dt>ATMOSPHERE</dt>
+                            <dd>Quiet, intimate and restorative</dd>
+                          </div>
+
+                          <div>
+                            <dt>RESERVATIONS</dt>
+                            <dd>Advance booking recommended</dd>
+                          </div>
+                        </dl>
+                      </div>
+
+                      <div className="vx-spa-editorial-story">
+                        <span className="vx-spa-editorial-mark">◇</span>
+
+                        <span className="vx-spa-editorial-label">
+                          A PERSONALISED PATH TO RENEWAL
+                        </span>
+
+                        <p className="vx-spa-editorial-lead">
                           Each experience is considered around the individual,
                           combining refined treatments, sensorial rejuvenation
                           and a deeply restorative atmosphere.
                         </p>
-                      </div>
 
-                      <div className="vx-spa-highlights">
-                        <article>
-                          <span>01</span>
+                        <p>
+                          From bespoke facial rituals to moments of holistic
+                          renewal, every detail is shaped to restore balance and
+                          create a lasting sense of calm.
+                        </p>
 
-                          <div>
-                            <small>PERSONALISED CARE</small>
-
-                            <h4>Bespoke treatments</h4>
-
-                            <p>
-                              Wellness experiences tailored around your
-                              individual needs.
-                            </p>
-                          </div>
-                        </article>
-
-                        <article>
-                          <span>02</span>
-
-                          <div>
-                            <small>PARIS · FRANCE</small>
-
-                            <h4>Biologique Recherche</h4>
-
-                            <p>
-                              Highly effective skincare rituals guided by a
-                              personalised approach.
-                            </p>
-                          </div>
-                        </article>
-
-                        <article>
-                          <span>03</span>
-
-                          <div>
-                            <small>HOLISTIC WELLBEING</small>
-
-                            <h4>Sensorial renewal</h4>
-
-                            <p>
-                              A calm environment shaped around restoration and
-                              inner balance.
-                            </p>
-                          </div>
-                        </article>
+                        <button
+                          type="button"
+                          className="vx-spa-editorial-link"
+                          onClick={() => setSpaTab("treatments")}
+                        >
+                          EXPLORE TREATMENTS →
+                        </button>
                       </div>
                     </div>
                   </section>
@@ -1070,16 +1040,16 @@ export default function BurmanLanding({ menu }) {
                         </nav>
 
                         <div className="vx-dining-hub-body">
-                          {diningTab === "overview" && (
-                            <section className="vx-dining-overview">
-                              <div className="vx-dining-about">
-                                <span className="vx-dining-section-label">
-                                  ABOUT
-                                </span>
-
-                                {venueName.includes("koyo") ? (
-                                  <>
-                                    <h3>The menu is entrusted to the chef.</h3>
+                          {diningTab === "overview" &&
+                            (venueName.includes("koyo") ? (
+                              <section className="vx-koyo-overview">
+                                <div className="vx-koyo-overview-main">
+                                  <div className="vx-koyo-overview-intro">
+                                    <h3>
+                                      The menu is entrusted
+                                      <br />
+                                      to the chef.
+                                    </h3>
 
                                     <p>
                                       Koyo is an intimate omakase experience in
@@ -1089,250 +1059,183 @@ export default function BurmanLanding({ menu }) {
                                       creative direction.
                                     </p>
 
-                                    <p className="vx-dining-about-secondary">
+                                    <dl className="vx-koyo-facts">
+                                      <div>
+                                        <dt>FORMAT</dt>
+                                        <dd>Chef-led tasting menu</dd>
+                                      </div>
+
+                                      <div>
+                                        <dt>SEATINGS</dt>
+                                        <dd>18:00 &amp; 20:30</dd>
+                                      </div>
+
+                                      <div>
+                                        <dt>COUNTER</dt>
+                                        <dd>11 seats</dd>
+                                      </div>
+
+                                      <div>
+                                        <dt>PRICE</dt>
+                                        <dd>€190 per guest + 10% service charge</dd>
+                                      </div>
+                                    </dl>
+                                  </div>
+
+                                  <div className="vx-koyo-overview-story">
+                                    <span className="vx-koyo-story-mark">
+                                      ◇
+                                    </span>
+
+                                    <span className="vx-koyo-story-label">
+                                      AN EVENING SHAPED BY THE SEASON
+                                    </span>
+
+                                    <p className="vx-koyo-story-lead">
+                                      The progression may change according to
+                                      season and availability, and the finest
+                                      ingredients are selected for that evening.
+                                    </p>
+
+                                    <p>
                                       With only 11 counter seats, the experience
                                       is personal, precise and designed to be
                                       enjoyed from beginning to end.
                                     </p>
-                                  </>
-                                ) : venueName.includes("shang") ? (
-                                  <>
-                                    <h3>Tradition, reimagined.</h3>
+
+                                    <button
+                                      type="button"
+                                      className="vx-koyo-story-link"
+                                      onClick={() =>
+                                        setDiningTab("experience")
+                                      }
+                                    >
+                                      DISCOVER THE EXPERIENCE →
+                                    </button>
+                                  </div>
+                                </div>
+                              </section>
+                            ) : (
+                              <section className="vx-editorial-overview">
+                                <div className="vx-editorial-overview-main">
+                                  <div className="vx-editorial-overview-intro">
+                                    <h3>
+                                      {venueName.includes("shang")
+                                        ? "Cantonese tradition, expressed with precision."
+                                        : venueName.includes("lumen")
+                                          ? "A relaxed table, from morning into evening."
+                                          : "A distinctive dining experience at The Burman."}
+                                    </h3>
 
                                     <p>
-                                      From handcrafted Dim Sum to the legendary
-                                      Peking Duck, dishes are prepared with
-                                      exceptional ingredients. Each experience
-                                      is shaped by technique, generosity and
-                                      respect for tradition.
+                                      {venueName.includes("shang")
+                                        ? "Shang Shi brings the depth, generosity and refinement of Cantonese cuisine to Tallinn. Each dish is shaped by exceptional ingredients, accomplished technique and respect for tradition."
+                                        : venueName.includes("lumen")
+                                          ? "Lumen is an all-day dining experience designed for unhurried breakfasts, considered lunches and elegant evenings within The Burman."
+                                          : overviewCopy}
+                                    </p>
+
+                                    <dl className="vx-editorial-facts">
+                                      {venueName.includes("shang") ? (
+                                        <>
+                                          <div>
+                                            <dt>CUISINE</dt>
+                                            <dd>Refined Cantonese</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>SIGNATURE</dt>
+                                            <dd>Peking Duck &amp; handcrafted Dim Sum</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>SETTING</dt>
+                                            <dd>Elegant evening dining</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>MENU</dt>
+                                            <dd>À la carte</dd>
+                                          </div>
+                                        </>
+                                      ) : venueName.includes("lumen") ? (
+                                        <>
+                                          <div>
+                                            <dt>STYLE</dt>
+                                            <dd>All-day dining</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>SETTING</dt>
+                                            <dd>Relaxed and contemporary</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>SERVICE</dt>
+                                            <dd>Breakfast through evening</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>MENU</dt>
+                                            <dd>Seasonal à la carte</dd>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <div>
+                                            <dt>EXPERIENCE</dt>
+                                            <dd>{cuisine}</dd>
+                                          </div>
+
+                                          <div>
+                                            <dt>LOCATION</dt>
+                                            <dd>The Burman · Tallinn</dd>
+                                          </div>
+                                        </>
+                                      )}
+                                    </dl>
+                                  </div>
+
+                                  <div className="vx-editorial-overview-story">
+                                    <span className="vx-editorial-story-mark">
+                                      ◇
+                                    </span>
+
+                                    <span className="vx-editorial-story-label">
+                                      {venueName.includes("shang")
+                                        ? "A TABLE SHAPED BY CANTONESE CRAFT"
+                                        : venueName.includes("lumen")
+                                          ? "DINING THROUGHOUT THE DAY"
+                                          : "THE EXPERIENCE"}
+                                    </span>
+
+                                    <p className="vx-editorial-story-lead">
+                                      {venueName.includes("shang")
+                                        ? "From delicate Dim Sum to the theatre of Peking Duck, the experience balances precision, generosity and a sense of occasion."
+                                        : venueName.includes("lumen")
+                                          ? "Thoughtful dishes, comfortable surroundings and service that adapts naturally to the rhythm of your day."
+                                          : overviewCopy}
                                     </p>
 
                                     <p>
-                                      Shang Shi brings the depth and precision
-                                      of Cantonese cuisine to Tallinn.
+                                      {venueName.includes("shang")
+                                        ? "The menu is designed for discovery and sharing, bringing together celebrated signatures and seasonal expressions."
+                                        : venueName.includes("lumen")
+                                          ? "Whether beginning the morning slowly or gathering for dinner, Lumen offers an effortless setting within the hotel."
+                                          : "Explore the menu to discover the current selection."}
                                     </p>
-                                  </>
-                                ) : (
-                                  <p>{overviewCopy}</p>
-                                )}
 
-                                <div className="vx-dining-info-grid">
-                                  {venueName.includes("koyo") ? (
-                                    <>
-                                      <div className="vx-dining-info-card">
-                                        <span>FORMAT</span>
-                                        <strong>Chef-led tasting menu</strong>
-                                      </div>
-
-                                      <div className="vx-dining-info-card">
-                                        <span>SEATING</span>
-                                        <strong>11 counter seats</strong>
-                                      </div>
-
-                                      <div className="vx-dining-info-card">
-                                        <span>PRICE</span>
-                                        <strong>€190 per guest</strong>
-                                      </div>
-
-                                      <div className="vx-dining-info-card">
-                                        <span>SERVICE CHARGE</span>
-                                        <strong>10%</strong>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <div className="vx-dining-info-card">
-                                        <span>ATTIRE</span>
-                                        <strong>Smart casual</strong>
-                                      </div>
-
-                                      <div className="vx-dining-info-card">
-                                        <span>RESERVATIONS</span>
-                                        <strong>
-                                          Available through the hotel reception
-                                        </strong>
-                                      </div>
-                                    </>
-                                  )}
+                                    <button
+                                      type="button"
+                                      className="vx-editorial-story-link"
+                                      onClick={() => setDiningTab("menu")}
+                                    >
+                                      EXPLORE THE MENU →
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-
-                              <div className="vx-dining-highlights">
-                                <span className="vx-dining-section-label">
-                                  {venueName.includes("koyo")
-                                    ? "YOUR EVENING"
-                                    : venueName.includes("shang")
-                                      ? "SIGNATURE EXPERIENCES"
-                                      : "SIGNATURE HIGHLIGHTS"}
-                                </span>
-
-                                <div className="vx-dining-highlight-grid">
-                                  {venueName.includes("koyo") ? (
-                                    <>
-                                      <button
-                                        className="vx-dining-highlight"
-                                        onClick={() =>
-                                          setDiningTab("experience")
-                                        }
-                                      >
-                                        <span className="vx-dining-highlight-kicker">
-                                          TWO EVENING SEATINGS
-                                        </span>
-
-                                        <h4>18:00 & 20:30</h4>
-
-                                        <p>
-                                          Guests are seated together and courses
-                                          are served in sequence across the
-                                          counter.
-                                        </p>
-
-                                        <span className="vx-dining-highlight-action">
-                                          How the experience works →
-                                        </span>
-                                      </button>
-
-                                      <button
-                                        className="vx-dining-highlight"
-                                        onClick={() => setDiningTab("booking")}
-                                      >
-                                        <span className="vx-dining-highlight-kicker">
-                                          ADVANCE RESERVATION
-                                        </span>
-
-                                        <h4>Plan your visit</h4>
-
-                                        <p>
-                                          Dietary requirements, arrival guidance
-                                          and booking conditions should be
-                                          reviewed before confirming.
-                                        </p>
-
-                                        <span className="vx-dining-highlight-action">
-                                          Before you book →
-                                        </span>
-                                      </button>
-
-                                      <button
-                                        className="vx-dining-highlight"
-                                        onClick={() =>
-                                          setDiningTab("experience")
-                                        }
-                                      >
-                                        <span className="vx-dining-highlight-kicker">
-                                          SEASONAL OMAKASE
-                                        </span>
-
-                                        <h4>A menu without repetition</h4>
-
-                                        <p>
-                                          The progression may change according
-                                          to season, availability and the
-                                          ingredients selected for that evening.
-                                        </p>
-
-                                        <span className="vx-dining-highlight-action">
-                                          Discover the philosophy →
-                                        </span>
-                                      </button>
-                                    </>
-                                  ) : venueName.includes("shang") ? (
-                                    <>
-                                      <button
-                                        className="vx-dining-highlight"
-                                        onClick={() => setDiningTab("menu")}
-                                      >
-                                        <span className="vx-dining-highlight-kicker">
-                                          SHANG SHI SIGNATURE
-                                        </span>
-
-                                        <h4>Peking Duck</h4>
-
-                                        <p>
-                                          A signature Cantonese ritual presented
-                                          through a refined three-course
-                                          experience. Available in Shang Shi
-                                          upon 24-hour advance request.
-                                        </p>
-
-                                        <span className="vx-dining-highlight-action">
-                                          Explore menu →
-                                        </span>
-                                      </button>
-
-                                      <button
-                                        className="vx-dining-highlight"
-                                        onClick={() => setDiningTab("menu")}
-                                      >
-                                        <span className="vx-dining-highlight-kicker">
-                                          HANDCRAFTED
-                                        </span>
-
-                                        <h4>Dim Sum</h4>
-
-                                        <p>
-                                          Delicate Cantonese craftsmanship
-                                          shaped with precision and served for
-                                          sharing.
-                                        </p>
-
-                                        <span className="vx-dining-highlight-action">
-                                          Explore menu →
-                                        </span>
-                                      </button>
-
-                                      <button
-                                        className="vx-dining-highlight"
-                                        onClick={() => setDiningTab("menu")}
-                                      >
-                                        <span className="vx-dining-highlight-kicker">
-                                          SIGNATURE DISH
-                                        </span>
-
-                                        <h4>Kung Pao Prawns</h4>
-
-                                        <p>
-                                          Wok-fired prawns with cashew nuts,
-                                          layered with spice, depth and classic
-                                          Cantonese technique.
-                                        </p>
-
-                                        <span className="vx-dining-highlight-action">
-                                          Explore menu →
-                                        </span>
-                                      </button>
-                                    </>
-                                  ) : (
-                                    exp.experience_sections
-                                      ?.flatMap((section) =>
-                                        [
-                                          ...(section.experience_items || []),
-                                        ].sort(
-                                          (a, b) => a.position - b.position,
-                                        ),
-                                      )
-                                      .slice(0, 4)
-                                      .map((item) => (
-                                        <button
-                                          key={item.id}
-                                          className="vx-dining-highlight"
-                                          onClick={() => setDiningTab("menu")}
-                                        >
-                                          <h4>{item.name}</h4>
-
-                                          <p>
-                                            {item.description ||
-                                              "Discover on the menu"}
-                                          </p>
-
-                                          <span>View menu →</span>
-                                        </button>
-                                      ))
-                                  )}
-                                </div>
-                              </div>
-                            </section>
-                          )}
+                              </section>
+                            ))}
 
                           {venueName.includes("koyo") &&
                             diningTab === "experience" && (

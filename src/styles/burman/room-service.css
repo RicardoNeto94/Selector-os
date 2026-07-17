@@ -596,7 +596,7 @@
 }
 
 .vx-room-hero-copy > p {
-  font-size: 9px;
+  font-size: 13px;
   line-height: 1.35;
 }
 
@@ -621,7 +621,7 @@
 
 .vx-room-tab {
   height: 48px;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .vx-room-menu,
@@ -636,7 +636,7 @@
 
 .vx-room-section-label {
   margin-bottom: 6px;
-  font-size: 7px;
+  font-size: 13px;
 }
 
 .vx-room-menu-heading h3 {
@@ -645,7 +645,7 @@
 
 .vx-room-menu-heading p {
   margin-top: 9px;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.4;
 }
 

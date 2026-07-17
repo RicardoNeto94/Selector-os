@@ -42,7 +42,6 @@ export default function BurmanPillowMenu() {
   return (
     <div className="vx-pillow-experience">
       <div className="vx-pillow-intro">
-        <span>SLEEP CONCIERGE</span>
 
         <p>
           Discover our pillow collection and choose the comfort
