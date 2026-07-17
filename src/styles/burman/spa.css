@@ -1393,3 +1393,368 @@
 .vx-spa-request {
   display: none !important;
 }
+
+/* =========================================================
+   SPA OVERVIEW — FIT INSIDE MODAL
+   No scrolling on Overview; Treatments/Information unchanged
+   ========================================================= */
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview) {
+  height: min(94dvh, 900px);
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-shell {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Compact hero for the static Overview tab. */
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-hero {
+  height: clamp(190px, 27dvh, 285px);
+  flex: 0 0 clamp(190px, 27dvh, 285px);
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-hero-copy {
+  left: clamp(30px, 5vw, 64px);
+  bottom: clamp(20px, 3vw, 34px);
+  width: min(620px, 68%);
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-hero-copy h2 {
+  margin: 6px 0 8px;
+  font-size: clamp(38px, 4.8vw, 64px);
+  line-height: .92;
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-hero-copy > p {
+  max-width: 560px;
+  font-size: clamp(12px, 1vw, 14px);
+  line-height: 1.45;
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-hero-meta {
+  margin-top: 8px;
+  font-size: 10px;
+}
+
+/* Compact tabs only while Overview is open. */
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-tabs {
+  height: 50px;
+  min-height: 50px;
+  flex: 0 0 50px;
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-tab {
+  height: 50px;
+}
+
+/* No scroll inside Overview. */
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-editorial-overview)
+.vx-spa-body {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.vx-spa-modal .vx-spa-editorial-main {
+  height: 100%;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(34px, 5vw, 72px);
+  align-items: center;
+  padding:
+    clamp(22px, 3vw, 40px)
+    clamp(38px, 5.5vw, 82px)
+    clamp(24px, 3.2vw, 44px);
+}
+
+.vx-spa-modal .vx-spa-editorial-intro {
+  padding-right: clamp(24px, 4vw, 58px);
+}
+
+.vx-spa-modal .vx-spa-editorial-intro h3 {
+  font-size: clamp(34px, 3.4vw, 52px);
+  line-height: 1.02;
+}
+
+.vx-spa-modal .vx-spa-editorial-intro > p {
+  margin-top: 17px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.5;
+}
+
+.vx-spa-modal .vx-spa-editorial-facts {
+  margin-top: 20px;
+  padding-top: 14px;
+}
+
+.vx-spa-modal .vx-spa-editorial-facts > div {
+  padding: 5px 0;
+}
+
+.vx-spa-modal .vx-spa-editorial-mark {
+  margin-bottom: 14px;
+}
+
+.vx-spa-modal .vx-spa-editorial-label::after {
+  margin-top: 12px;
+}
+
+.vx-spa-modal .vx-spa-editorial-story p {
+  margin-top: 14px;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.5;
+}
+
+.vx-spa-modal
+.vx-spa-editorial-story
+.vx-spa-editorial-lead {
+  margin-top: 18px;
+  font-size: clamp(18px, 1.7vw, 25px);
+  line-height: 1.42;
+}
+
+.vx-spa-modal .vx-spa-editorial-link {
+  margin-top: 24px;
+}
+
+/* Portrait tablet: natural height removes blank space. */
+@media (orientation: portrait) and (min-width: 600px) {
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview) {
+    width: calc(100vw - 28px);
+    height: auto;
+    max-height: calc(100dvh - 28px);
+    overflow: hidden;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-shell,
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-body {
+    height: auto;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-body {
+    flex: 0 0 auto;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-hero {
+    height: 205px;
+    flex-basis: 205px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-main {
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    gap: 30px;
+    padding: 22px 30px 26px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-intro {
+    padding-right: 26px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-intro h3 {
+    font-size: 34px;
+  }
+}
+
+/* Landscape tablet and short desktop windows. */
+@media (orientation: landscape) and (max-height: 820px) {
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview) {
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-hero {
+    height: 180px;
+    flex-basis: 180px;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-tabs {
+    height: 46px;
+    min-height: 46px;
+    flex-basis: 46px;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-tab {
+    height: 46px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-main {
+    padding-top: 16px;
+    padding-bottom: 18px;
+  }
+}
+
+/* Phone portrait: keep the full Overview self-contained. */
+@media (orientation: portrait) and (max-width: 599px) {
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview) {
+    width: calc(100vw - 16px);
+    height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-hero {
+    height: 150px;
+    flex-basis: 150px;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-hero-copy {
+    left: 22px;
+    right: 22px;
+    bottom: 16px;
+    width: auto;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-hero-copy > p,
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-editorial-overview)
+  .vx-spa-hero-meta {
+    display: none;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-main {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px 18px 18px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-intro {
+    padding-right: 0;
+    padding-bottom: 10px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(76, 55, 44, .13);
+  }
+
+  .vx-spa-modal .vx-spa-editorial-intro h3 {
+    font-size: 25px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-intro > p,
+  .vx-spa-modal .vx-spa-editorial-story p {
+    margin-top: 7px;
+    font-size: 11px;
+    line-height: 1.32;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-facts {
+    margin-top: 8px;
+    padding-top: 7px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-facts > div {
+    padding: 2px 0;
+  }
+
+  .vx-spa-modal
+  .vx-spa-editorial-story
+  .vx-spa-editorial-lead {
+    font-size: 15px;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-link {
+    margin-top: 12px;
+  }
+}
+
+
+/* =========================================================
+   EDITORIAL FACT ROWS — COMPACT ALIGNMENT
+   Spa overview
+   ========================================================= */
+
+.vx-spa-modal .vx-spa-editorial-facts {
+  margin-top: 18px;
+  padding-top: 14px;
+}
+
+.vx-spa-modal .vx-spa-editorial-facts > div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+  padding: 7px 0;
+}
+
+.vx-spa-modal .vx-spa-editorial-facts dt {
+  color: #9a8174;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  line-height: 1.35;
+}
+
+.vx-spa-modal .vx-spa-editorial-facts dd {
+  margin: 0;
+  color: #3f312b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+@media (orientation: portrait) and (min-width: 600px) {
+  .vx-spa-modal .vx-spa-editorial-facts > div {
+    grid-template-columns: 122px minmax(0, 1fr);
+    gap: 20px;
+    padding: 6px 0;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-facts dd {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 820px) {
+  .vx-spa-modal .vx-spa-editorial-facts > div {
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 16px;
+    padding: 5px 0;
+  }
+
+  .vx-spa-modal .vx-spa-editorial-facts dd {
+    font-size: 13px;
+  }
+}
