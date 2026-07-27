@@ -299,7 +299,7 @@ export default function HomePage() {
 
         <div className="vx-modules-grid">
 
-          <div className="vx-module-card">
+          <div className="vx-module-card" data-accent="core">
 
             <div className="vx-module-label">
               CORE PLATFORM
@@ -319,7 +319,7 @@ export default function HomePage() {
 
           </div>
 
-          <div className="vx-module-card">
+          <div className="vx-module-card" data-accent="guest">
 
             <div className="vx-module-label">
               GUEST EXPERIENCE
@@ -339,7 +339,7 @@ export default function HomePage() {
 
           </div>
 
-          <div className="vx-module-card">
+          <div className="vx-module-card" data-accent="cellar">
 
             <div className="vx-module-label">
               WINE OPERATIONS
@@ -359,7 +359,7 @@ export default function HomePage() {
 
           </div>
 
-          <div className="vx-module-card">
+          <div className="vx-module-card" data-accent="ops">
 
             <div className="vx-module-label">
               OPERATIONAL LAYER

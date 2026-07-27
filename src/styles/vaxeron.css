@@ -360,14 +360,14 @@ HERO
 .vx-hero-left h1{
   font-family:"Cormorant Garamond",serif;
 
-  font-size:clamp(72px,8vw,122px);
+  font-size:clamp(64px,7vw,104px);
 
-  line-height:0.88;
+  line-height:0.92;
   letter-spacing:-0.05em;
 
   font-weight:500;
 
-  max-width:700px;
+  max-width:920px;
 }
 
 .vx-hero-left p{
@@ -410,7 +410,7 @@ HERO RIGHT
 
 .vx-hero-right{
   position:relative;
-  height:920px;
+  height:900px;
 }
 
 .vx-hero-image{
@@ -476,13 +476,14 @@ HERO RIGHT
 
 /* =========================================================
 FLOATING DASHBOARD
+(primary floating element — sits above the phone)
 ========================================================= */
 
 .vx-dashboard-float{
   position:absolute;
 
-  left:-70px;
-  top:120px;
+  left:-60px;
+  top:100px;
 
   width:390px;
 
@@ -500,7 +501,7 @@ FLOATING DASHBOARD
 
   box-shadow:var(--vx-shadow-large);
 
-  z-index:5;
+  z-index:7;
 }
 
 .vx-dashboard-header{
@@ -598,29 +599,32 @@ FLOATING DASHBOARD
 
 /* =========================================================
 PHONE
+(secondary floating element — smaller, subtler rotation,
+tucked behind the dashboard's lower-right edge rather than
+occupying its own far corner)
 ========================================================= */
 
 .vx-phone-float{
   position:absolute;
 
-  right:-40px;
-  bottom:60px;
+  right:40px;
+  bottom:20px;
 
-  width:260px;
-  height:530px;
+  width:200px;
+  height:410px;
 
   animation:vxPhoneFloat 8s ease-in-out infinite;
 
-  border-radius:42px;
+  border-radius:36px;
 
-  padding:12px;
+  padding:10px;
 
   background:#111;
 
-  transform:rotate(10deg);
+  transform:rotate(4deg);
 
   box-shadow:
-    0 40px 120px rgba(0,0,0,0.28);
+    0 30px 90px rgba(0,0,0,0.24);
 
   z-index:6;
 }
@@ -629,7 +633,7 @@ PHONE
   width:100%;
   height:100%;
 
-  border-radius:32px;
+  border-radius:28px;
 
   overflow:hidden;
 
@@ -637,21 +641,21 @@ PHONE
 }
 
 .vx-phone-top{
-  padding:22px;
+  padding:18px;
 
-  font-size:13px;
-  letter-spacing:0.18em;
+  font-size:12px;
+  letter-spacing:0.16em;
   text-transform:uppercase;
 
   color:#8b5a4c;
 }
 
 .vx-phone-image{
-  height:180px;
+  height:150px;
 
-  margin:0 18px;
+  margin:0 14px;
 
-  border-radius:22px;
+  border-radius:18px;
 
   background:
     linear-gradient(
@@ -663,18 +667,18 @@ PHONE
 }
 
 .vx-phone-menu{
-  padding:20px 18px;
+  padding:16px 14px;
 }
 
 .vx-phone-item{
   display:flex;
   justify-content:space-between;
 
-  padding:18px 0;
+  padding:14px 0;
 
   border-bottom:1px solid rgba(0,0,0,0.06);
 
-  font-size:14px;
+  font-size:13px;
 }
 
 /* =========================================================
@@ -865,6 +869,68 @@ MODULES
   color:var(--vx-muted);
 
   line-height:1.9;
+}
+
+/* ---------------------------------------------------------
+MODULE ACCENTS
+(subtle gold/terracotta variations per module — same family
+as --vx-accent, not distinct colors, to stay on-brand)
+--------------------------------------------------------- */
+
+.vx-module-card[data-accent="core"]::before{
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(167,134,82,0.5),
+      transparent
+    );
+}
+
+.vx-module-card[data-accent="core"] .vx-module-label{
+  color:#a78652;
+}
+
+.vx-module-card[data-accent="guest"]::before{
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(184,120,86,0.5),
+      transparent
+    );
+}
+
+.vx-module-card[data-accent="guest"] .vx-module-label{
+  color:#b87856;
+}
+
+.vx-module-card[data-accent="cellar"]::before{
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(122,84,54,0.5),
+      transparent
+    );
+}
+
+.vx-module-card[data-accent="cellar"] .vx-module-label{
+  color:#7a5436;
+}
+
+.vx-module-card[data-accent="ops"]::before{
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(148,130,100,0.5),
+      transparent
+    );
+}
+
+.vx-module-card[data-accent="ops"] .vx-module-label{
+  color:#948264;
 }
 
 /* =========================================================
@@ -1465,11 +1531,11 @@ RESPONSIVE
 @media (max-width:1400px){
 
   .vx-dashboard-float{
-    left:-20px;
+    left:-16px;
   }
 
   .vx-phone-float{
-    right:-10px;
+    right:16px;
   }
 
 }
@@ -1507,7 +1573,7 @@ RESPONSIVE
   }
 
   .vx-hero-right{
-    height:900px;
+    height:880px;
   }
 
 }
@@ -1543,8 +1609,8 @@ RESPONSIVE
   }
 
   .vx-phone-float{
-    width:210px;
-    height:450px;
+    width:180px;
+    height:370px;
     right:0;
   }
 
@@ -1783,19 +1849,19 @@ ANIMATIONS
 
   0%{
     transform:
-      rotate(10deg)
+      rotate(4deg)
       translateY(0px);
   }
 
   50%{
     transform:
-      rotate(10deg)
-      translateY(-16px);
+      rotate(4deg)
+      translateY(-14px);
   }
 
   100%{
     transform:
-      rotate(10deg)
+      rotate(4deg)
       translateY(0px);
   }
 
