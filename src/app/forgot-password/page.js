@@ -12,26 +12,29 @@ export default function ForgotPasswordPage() {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
+
     setMessage("");
     setSending(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      // IMPORTANT: go through /auth/callback so the session is created,
-      // then land on /update-password (which you already have)
-      redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+    const redirectTo = `${window.location.origin}/auth/update-password`;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo,
     });
 
     setSending(false);
 
     if (error) {
-      console.error(error);
-      setMessage("Could not send reset email. Please try again.");
+      console.error("Password reset request failed:", error.message);
+      setMessage("Could not send the reset email. Please try again.");
       return;
     }
 
-    setMessage("If that email exists, a reset link has been sent.");
+    setMessage(
+      "If an account exists for that email, a new password reset link has been sent."
+    );
   }
 
   return (
@@ -40,26 +43,32 @@ export default function ForgotPasswordPage() {
         <div className="auth-card-logo-floating">
           <img
             src="/selectoros-logo.png"
-            alt="SelectorOS logo"
+            alt="VAXERON"
             className="auth-card-logo-img-only"
           />
         </div>
 
         <h1 className="auth-title">Forgot your password?</h1>
+
         <p className="auth-subtitle">
-          Enter the email you use for SelectorOS and we’ll send you a reset link.
+          Enter your account email and we’ll send you a secure password reset
+          link.
         </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="auth-field">
-            <span className="auth-field-icon">✉️</span>
+            <span className="auth-field-icon" aria-hidden="true">
+              ✉️
+            </span>
+
             <input
               className="auth-input"
               type="email"
               placeholder="Email"
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={sending}
               required
             />
           </div>
@@ -74,13 +83,14 @@ export default function ForgotPasswordPage() {
         </form>
 
         {message && (
-          <p className="auth-footer-text">
+          <p className="auth-footer-text" role="status">
             {message}
           </p>
         )}
 
         <div className="auth-alt">
           <span>Remembered it?</span>
+
           <Link href="/sign-in" className="auth-alt-link">
             Back to sign in
           </Link>
