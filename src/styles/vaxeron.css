@@ -16,6 +16,12 @@
   --vx-accent:#a78652;
   --vx-accent-soft:#c7ad84;
 
+  --vx-dark-bg:#14120f;
+  --vx-dark-text:#f4eee5;
+  --vx-dark-muted:rgba(244,238,229,0.62);
+  --vx-dark-border:rgba(255,255,255,0.12);
+  --vx-dark-surface:rgba(255,255,255,0.07);
+
   --vx-shadow-soft:
     0 20px 60px rgba(0,0,0,0.06);
 
@@ -59,6 +65,12 @@ img{
 
 a{
   color:inherit;
+}
+
+a:focus-visible,
+button:focus-visible{
+  outline:2px solid var(--vx-accent);
+  outline-offset:4px;
 }
 
 .vx-root{
@@ -124,7 +136,6 @@ SECTION WIDTH
 .vx-modules-section,
 .vx-ecosystem-split,
 .vx-grid-section,
-.vx-showcase,
 .vx-trust-section{
 
   width:100%;
@@ -138,7 +149,8 @@ NAV
 ========================================================= */
 
 .vx-nav{
-  position:relative;
+  position:sticky;
+  top:0;
   z-index:20;
 
   display:flex;
@@ -146,12 +158,31 @@ NAV
   align-items:center;
 
   padding:34px 72px;
+
+  border-bottom:1px solid transparent;
+
+  transition:
+    background .4s ease,
+    border-color .4s ease,
+    backdrop-filter .4s ease;
+}
+
+.vx-nav.is-scrolled{
+  background:rgba(243,239,232,0.88);
+
+  border-bottom:1px solid var(--vx-border);
+
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+
+  box-shadow:0 10px 40px rgba(23,22,20,0.04);
 }
 
 .vx-logo-wrap{
   display:flex;
   align-items:center;
   gap:18px;
+  text-decoration:none;
 }
 
 .vx-logo-mark{
@@ -206,17 +237,40 @@ NAV
   text-transform:uppercase;
 }
 
-.vx-links span{
+.vx-links a{
+  position:relative;
+  text-decoration:none;
+
   transition:
+    color .3s ease,
     opacity .3s ease,
     transform .3s ease;
-
-  cursor:pointer;
 }
 
-.vx-links span:hover{
-  opacity:0.55;
+.vx-links a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-8px;
+
+  height:1px;
+
+  background:var(--vx-accent);
+
+  transform:scaleX(0);
+  transform-origin:left;
+
+  transition:transform .3s ease;
+}
+
+.vx-links a:hover{
+  color:var(--vx-text);
   transform:translateY(-1px);
+}
+
+.vx-links a:hover::after{
+  transform:scaleX(1);
 }
 
 .vx-actions{
@@ -242,11 +296,18 @@ BUTTONS
 ========================================================= */
 
 .vx-btn-primary{
-  height:48px;
+  min-height:48px;
   padding:0 26px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 
   border:none;
   border-radius:16px;
+
+  text-decoration:none;
+  white-space:nowrap;
 
   background:var(--vx-accent);
 
@@ -278,10 +339,17 @@ BUTTONS
 }
 
 .vx-btn-secondary{
-  height:48px;
+  min-height:48px;
   padding:0 26px;
 
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
   border-radius:16px;
+
+  text-decoration:none;
+  white-space:nowrap;
 
   border:1px solid rgba(0,0,0,0.06);
 
@@ -329,6 +397,68 @@ TYPOGRAPHY
 .vx-ecosystem-guest h2,
 .vx-ecosystem-ops h2{
   letter-spacing:-0.04em;
+}
+
+/* =========================================================
+FRAME ACCENT
+(shared bracket-corner motif used on hero image, guest imagery,
+experience-grid imagery, and the wine showcase frame — reads as
+a photographic frame rather than a rounded card)
+========================================================= */
+
+.vx-bracket-frame{
+  position:relative;
+}
+
+.vx-bracket-frame::before,
+.vx-bracket-frame::after{
+  content:"";
+
+  position:absolute;
+
+  width:26px;
+  height:26px;
+
+  border-style:solid;
+  border-color:rgba(167,134,82,0.85);
+
+  z-index:4;
+
+  pointer-events:none;
+}
+
+.vx-bracket-frame::before{
+  top:20px;
+  left:20px;
+
+  border-width:1.5px 0 0 1.5px;
+}
+
+.vx-bracket-frame::after{
+  bottom:20px;
+  right:20px;
+
+  border-width:0 1.5px 1.5px 0;
+}
+
+/* =========================================================
+MOTION
+(scroll-reveal used on section headers and select cards;
+class toggled by an IntersectionObserver in page.js)
+========================================================= */
+
+.vx-reveal{
+  opacity:0;
+  transform:translateY(28px);
+
+  transition:
+    opacity .9s ease,
+    transform .9s ease;
+}
+
+.vx-reveal.is-in{
+  opacity:1;
+  transform:translateY(0);
 }
 
 /* =========================================================
@@ -392,16 +522,29 @@ HERO
 .vx-trust{
   display:flex;
   flex-wrap:wrap;
-  gap:34px;
+  gap:14px 28px;
 
   margin-top:56px;
 
   color:#92877a;
 
-  font-size:11px;
-  letter-spacing:0.26em;
+  font-size:10px;
+  letter-spacing:0.2em;
 
   text-transform:uppercase;
+}
+
+.vx-trust span{
+  display:inline-flex;
+  align-items:center;
+  gap:28px;
+}
+
+.vx-trust span:not(:last-child)::after{
+  content:"";
+  width:24px;
+  height:1px;
+  background:rgba(167,134,82,0.32);
 }
 
 /* =========================================================
@@ -431,6 +574,8 @@ HERO RIGHT
   center/cover;
 
   box-shadow:var(--vx-shadow-large);
+
+  will-change:transform;
 }
 
 .vx-image-overlay{
@@ -562,7 +707,7 @@ FLOATING DASHBOARD
 .vx-stat-box h3{
   margin-top:10px;
 
-  font-size:40px;
+  font-size:clamp(28px,3vw,40px);
 
   font-family:"Cormorant Garamond",serif;
   font-weight:600;
@@ -682,7 +827,9 @@ occupying its own far corner)
 }
 
 /* =========================================================
-HOW
+HOW — NUMBERED INDEX
+(replaces the boxed 3-card grid with a quiet, hairline-divided
+list — reads as a manifesto rather than a feature grid)
 ========================================================= */
 
 .vx-how-section{
@@ -705,53 +852,56 @@ HOW
   max-width:720px;
 }
 
-.vx-how-grid{
+.vx-index-list{
+  display:flex;
+  flex-direction:column;
+}
+
+.vx-index-row{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:120px 1fr;
+  gap:48px;
 
-  gap:24px;
+  padding:48px 0;
+
+  border-top:1px solid var(--vx-border);
+
+  transition:background .35s ease;
 }
 
-.vx-how-card{
-  position:relative;
-
-  padding:40px;
-
-  border-radius:32px;
-
-  background:rgba(255,255,255,0.5);
-
-  backdrop-filter:blur(20px);
-
-  border:1px solid rgba(255,255,255,0.5);
-
-  box-shadow:var(--vx-shadow-soft);
-
-  transition:
-    transform .35s ease,
-    box-shadow .35s ease;
+.vx-index-row:last-child{
+  border-bottom:1px solid var(--vx-border);
 }
 
-.vx-how-card:hover{
-  transform:translateY(-4px);
-
-  box-shadow:
-    0 28px 70px rgba(0,0,0,0.08);
+.vx-index-row:hover{
+  background:rgba(167,134,82,0.04);
 }
 
-.vx-how-card h3{
+.vx-index-number{
+  padding-top:6px;
+
+  font-family:"Cormorant Garamond",serif;
+  font-size:22px;
+  letter-spacing:0.05em;
+
+  color:var(--vx-accent);
+}
+
+.vx-index-body h3{
   font-family:"Cormorant Garamond",serif;
 
   font-size:40px;
   line-height:1;
 
-  margin-bottom:20px;
+  margin-bottom:16px;
 }
 
-.vx-how-card p{
+.vx-index-body p{
   color:var(--vx-muted);
 
   line-height:1.9;
+
+  max-width:640px;
 }
 
 /* =========================================================
@@ -834,26 +984,36 @@ MODULES
   top:0;
   left:0;
 
-  width:100%;
-  height:1px;
+  width:2px;
+  height:100%;
 
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(167,134,82,0.45),
-      transparent
-    );
+  background:var(--vx-accent);
+
+  opacity:0.35;
+}
+
+.vx-module-mark{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+
+  margin-bottom:28px;
+}
+
+.vx-module-numeral{
+  font-family:"Cormorant Garamond",serif;
+  font-size:20px;
+
+  color:var(--vx-accent);
 }
 
 .vx-module-label{
-  margin-bottom:24px;
-
-  font-size:11px;
-  letter-spacing:0.22em;
+  font-size:10.5px;
+  letter-spacing:0.14em;
   text-transform:uppercase;
+  white-space:nowrap;
 
-  color:var(--vx-accent);
+  color:var(--vx-muted);
 }
 
 .vx-module-card h3{
@@ -874,62 +1034,42 @@ MODULES
 /* ---------------------------------------------------------
 MODULE ACCENTS
 (subtle gold/terracotta variations per module — same family
-as --vx-accent, not distinct colors, to stay on-brand)
+as --vx-accent, expressed as a thin left spine + numeral color)
 --------------------------------------------------------- */
 
 .vx-module-card[data-accent="core"]::before{
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(167,134,82,0.5),
-      transparent
-    );
+  background:#a78652;
+  opacity:0.55;
 }
 
-.vx-module-card[data-accent="core"] .vx-module-label{
+.vx-module-card[data-accent="core"] .vx-module-numeral{
   color:#a78652;
 }
 
 .vx-module-card[data-accent="guest"]::before{
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(184,120,86,0.5),
-      transparent
-    );
+  background:#b87856;
+  opacity:0.55;
 }
 
-.vx-module-card[data-accent="guest"] .vx-module-label{
+.vx-module-card[data-accent="guest"] .vx-module-numeral{
   color:#b87856;
 }
 
 .vx-module-card[data-accent="cellar"]::before{
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(122,84,54,0.5),
-      transparent
-    );
+  background:#7a5436;
+  opacity:0.55;
 }
 
-.vx-module-card[data-accent="cellar"] .vx-module-label{
+.vx-module-card[data-accent="cellar"] .vx-module-numeral{
   color:#7a5436;
 }
 
 .vx-module-card[data-accent="ops"]::before{
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(148,130,100,0.5),
-      transparent
-    );
+  background:#948264;
+  opacity:0.55;
 }
 
-.vx-module-card[data-accent="ops"] .vx-module-label{
+.vx-module-card[data-accent="ops"] .vx-module-numeral{
   color:#948264;
 }
 
@@ -1083,6 +1223,8 @@ GUEST GRID
 
 /* =========================================================
 OPS PANEL
+(inverted charcoal control panel — the ecosystem split's dark
+counterweight to the guest imagery column)
 ========================================================= */
 
 .vx-ops-panel{
@@ -1098,8 +1240,9 @@ OPS PANEL
 
   background:
     linear-gradient(
-      rgba(255,255,255,0.08),
-      rgba(255,255,255,0.04)
+      180deg,
+      rgba(15,13,10,0.55),
+      rgba(15,13,10,0.8)
     ),
     url("/menu-dashboard.jpg")
     center top/cover;
@@ -1121,13 +1264,15 @@ OPS PANEL
 
   border-radius:22px;
 
-  background:rgba(255,255,255,0.7);
+  background:var(--vx-dark-surface);
+
+  border:1px solid var(--vx-dark-border);
 
   backdrop-filter:blur(20px);
 }
 
 .vx-ops-stat small{
-  color:var(--vx-muted);
+  color:var(--vx-dark-muted);
 }
 
 .vx-ops-stat h3{
@@ -1136,6 +1281,8 @@ OPS PANEL
   font-size:42px;
 
   font-family:"Cormorant Garamond",serif;
+
+  color:var(--vx-dark-text);
 }
 
 .vx-ops-chart{
@@ -1148,8 +1295,8 @@ OPS PANEL
   background:
     linear-gradient(
       180deg,
-      rgba(167,134,82,0.24),
-      rgba(167,134,82,0.02)
+      rgba(167,134,82,0.35),
+      rgba(167,134,82,0.04)
     );
 }
 
@@ -1168,9 +1315,13 @@ OPS PANEL
 
   border-radius:18px;
 
-  background:rgba(255,255,255,0.72);
+  background:var(--vx-dark-surface);
+
+  border:1px solid var(--vx-dark-border);
 
   backdrop-filter:blur(20px);
+
+  color:var(--vx-dark-text);
 
   font-size:14px;
 }
@@ -1283,16 +1434,20 @@ GRID
 
 /* =========================================================
 SHOWCASE
+(full-bleed dark charcoal moment — the page's one inverted
+band, used for pacing and to stage the wine imagery)
 ========================================================= */
 
 .vx-showcase{
   position:relative;
   z-index:5;
 
-  padding:
-    0
-    72px
-    180px;
+  width:100%;
+
+  background:var(--vx-dark-bg);
+  color:var(--vx-dark-text);
+
+  padding:140px 72px 160px;
 }
 
 .vx-showcase-top{
@@ -1301,7 +1456,8 @@ SHOWCASE
 
   gap:80px;
 
-  margin-bottom:60px;
+  max-width:var(--vx-max-width);
+  margin:0 auto 60px;
 }
 
 .vx-showcase-title{
@@ -1313,6 +1469,8 @@ SHOWCASE
   font-weight:500;
 
   max-width:720px;
+
+  color:var(--vx-dark-text);
 }
 
 .vx-showcase-copy{
@@ -1320,13 +1478,25 @@ SHOWCASE
 }
 
 .vx-showcase-copy p{
-  color:var(--vx-muted);
+  color:var(--vx-dark-muted);
 
   line-height:2;
 
   font-size:17px;
 
   margin-bottom:24px;
+}
+
+.vx-showcase-copy .vx-btn-secondary{
+  margin-top:10px;
+
+  color:var(--vx-dark-text);
+  border-color:var(--vx-dark-border);
+  background:var(--vx-dark-surface);
+}
+
+.vx-showcase-copy .vx-btn-secondary:hover{
+  background:rgba(255,255,255,0.12);
 }
 
 .vx-showcase-frame{
@@ -1345,6 +1515,9 @@ SHOWCASE
   box-shadow:var(--vx-shadow-large);
 
   padding:24px;
+
+  max-width:var(--vx-max-width);
+  margin:0 auto;
 }
 
 .vx-showcase-glow{
@@ -1355,7 +1528,7 @@ SHOWCASE
 
   border-radius:999px;
 
-  background:rgba(167,134,82,0.14);
+  background:rgba(167,134,82,0.24);
 
   filter:blur(100px);
 
@@ -1378,7 +1551,9 @@ SHOWCASE
 }
 
 /* =========================================================
-TRUST
+TRUST — STAT BAR
+(replaces four boxed stat cards with a single hairline-divided
+bar — large serif numbers, thin vertical dividers, no boxes)
 ========================================================= */
 
 .vx-trust-section{
@@ -1403,74 +1578,35 @@ TRUST
   margin-top:18px;
 }
 
-.vx-trust-grid{
+.vx-stat-bar{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-
-  gap:24px;
 }
 
-.vx-trust-card{
-  position:relative;
+.vx-stat-cell{
+  padding:0 32px;
 
-  padding:34px;
-
-  border-radius:30px;
-
-  background:rgba(255,255,255,0.52);
-
-  backdrop-filter:blur(20px);
-
-  border:1px solid rgba(255,255,255,0.5);
-
-  box-shadow:var(--vx-shadow-soft);
-
-  overflow:hidden;
-
-  transition:
-    transform .35s ease,
-    box-shadow .35s ease;
+  border-left:1px solid var(--vx-border);
 }
 
-.vx-trust-card:hover{
-  transform:translateY(-4px);
+.vx-stat-cell:first-child{
+  padding-left:0;
 
-  box-shadow:
-    0 24px 70px rgba(0,0,0,0.08);
+  border-left:none;
 }
 
-.vx-trust-card::before{
-  content:"";
-
-  position:absolute;
-
-  top:0;
-  left:0;
-
-  width:100%;
-  height:1px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(167,134,82,0.5),
-      transparent
-    );
-}
-
-.vx-trust-card h3{
+.vx-stat-cell h3{
   font-family:"Cormorant Garamond",serif;
 
-  font-size:64px;
+  font-size:clamp(38px,4vw,64px);
   line-height:1;
 
   color:var(--vx-accent);
 
-  margin-bottom:18px;
+  margin-bottom:20px;
 }
 
-.vx-trust-card p{
+.vx-stat-cell p{
   color:var(--vx-muted);
 
   line-height:1.9;
@@ -1547,10 +1683,6 @@ RESPONSIVE
     gap:80px;
   }
 
-  .vx-how-grid{
-    grid-template-columns:1fr;
-  }
-
   .vx-modules-grid{
     grid-template-columns:1fr 1fr;
   }
@@ -1568,8 +1700,19 @@ RESPONSIVE
     gap:40px;
   }
 
-  .vx-trust-grid{
-    grid-template-columns:1fr 1fr;
+  .vx-stat-bar{
+    grid-template-columns:1fr;
+    row-gap:40px;
+  }
+
+  .vx-stat-cell{
+    border-left:none;
+    padding:0;
+  }
+
+  .vx-stat-cell:not(:first-child){
+    border-top:1px solid var(--vx-border);
+    padding-top:32px;
   }
 
   .vx-hero-right{
@@ -1597,6 +1740,11 @@ RESPONSIVE
   .vx-trust-section{
     padding-left:24px;
     padding-right:24px;
+  }
+
+  .vx-showcase{
+    padding-top:90px;
+    padding-bottom:100px;
   }
 
   .vx-hero{
@@ -1646,7 +1794,6 @@ RESPONSIVE
 @media (max-width:768px){
 
   .vx-modules-grid,
-  .vx-trust-grid,
   .vx-guest-grid{
     grid-template-columns:1fr;
   }
@@ -1699,7 +1846,7 @@ RESPONSIVE
   .vx-btn-secondary{
     padding:0 16px;
     font-size:10px;
-    height:44px;
+    min-height:44px;
   }
 
   .vx-hero-left h1{
@@ -1723,9 +1870,23 @@ RESPONSIVE
   }
 
   .vx-card-content,
-  .vx-module-card,
-  .vx-how-card{
+  .vx-module-card{
     padding:28px;
+  }
+
+  .vx-index-row{
+    grid-template-columns:56px 1fr;
+    gap:20px;
+
+    padding:32px 0;
+  }
+
+  .vx-index-number{
+    font-size:18px;
+  }
+
+  .vx-index-body h3{
+    font-size:32px;
   }
 
   .vx-grid-card.large{
@@ -1745,8 +1906,18 @@ RESPONSIVE
   }
 
   .vx-trust{
-    gap:18px;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px;
     line-height:1.8;
+  }
+
+  .vx-trust span{
+    gap:0;
+  }
+
+  .vx-trust span::after{
+    display:none;
   }
 
 }
@@ -1776,14 +1947,19 @@ RESPONSIVE
   .vx-modules-section,
   .vx-ecosystem-split,
   .vx-grid-section,
-  .vx-showcase,
   .vx-trust-section,
   .vx-cta{
     padding-bottom:120px;
   }
 
+  .vx-showcase{
+    padding-top:70px;
+    padding-bottom:80px;
+  }
+
   .vx-hero-left h1{
-    font-size:48px;
+    font-size:clamp(42px,13vw,48px);
+    line-height:0.96;
   }
 
   .vx-how-top h2,
@@ -1821,6 +1997,79 @@ RESPONSIVE
   .vx-ecosystem-guest,
   .vx-ecosystem-ops{
     border-radius:28px;
+  }
+
+}
+
+@media (max-width:360px){
+
+  .vx-logo-sub{
+    display:none;
+  }
+
+  .vx-actions{
+    align-items:stretch;
+  }
+
+  .vx-actions .vx-login{
+    display:inline-flex;
+    align-items:center;
+  }
+
+  .vx-actions .vx-btn-primary{
+    flex:1;
+  }
+
+  .vx-hero-actions{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .vx-hero-actions .vx-btn-primary,
+  .vx-hero-actions .vx-btn-secondary{
+    width:100%;
+  }
+
+}
+
+/* =========================================================
+ACCESSIBILITY + INPUT
+========================================================= */
+
+@media (hover:none){
+
+  .vx-module-card:hover,
+  .vx-guest-card:hover,
+  .vx-btn-primary:hover,
+  .vx-btn-secondary:hover,
+  .vx-links a:hover{
+    transform:none;
+  }
+
+}
+
+@media (prefers-reduced-motion:reduce){
+
+  html{
+    scroll-behavior:auto;
+  }
+
+  *,
+  *::before,
+  *::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+    transition-duration:0.01ms !important;
+  }
+
+  .vx-reveal{
+    opacity:1;
+    transform:none;
+  }
+
+  .vx-hero-image{
+    transform:none !important;
   }
 
 }

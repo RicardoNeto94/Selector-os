@@ -1,726 +1,389 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import "@/styles/vaxeron.css";
 
+const NAV_ITEMS = [
+  { label: "Platform", href: "/product" },
+  { label: "Products", href: "/product" },
+  { label: "Solutions", href: "/solutions" },
+  { label: "Experience", href: "/customers" },
+  { label: "Company", href: "/company" },
+];
+
+const PLATFORM_PILLARS = [
+  {
+    number: "01",
+    title: "Core",
+    copy: "Foundational data, content, and operational structure.",
+  },
+  {
+    number: "02",
+    title: "Guest",
+    copy: "Beautiful experiences across dining, spa, in-room, and more.",
+  },
+  {
+    number: "03",
+    title: "Cellar",
+    copy: "Wine programmes, inventory, cellar operations, and movement.",
+  },
+  {
+    number: "04",
+    title: "Operations",
+    copy: "Inventory, workflows, venues, reporting, and execution.",
+  },
+];
+
+const FOOTER_GROUPS = [
+  {
+    title: "Platform",
+    links: [
+      { label: "Core", href: "/product#core" },
+      { label: "Guest", href: "/product#guest" },
+      { label: "Cellar", href: "/product#cellar" },
+      { label: "Operations", href: "/product#operations" },
+    ],
+  },
+  {
+    title: "Solutions",
+    links: [
+      { label: "Hotels & Resorts", href: "/solutions/hotels" },
+      { label: "Restaurants", href: "/solutions/restaurants" },
+      { label: "Private Clubs", href: "/solutions/private-clubs" },
+      { label: "Spas & Wellness", href: "/solutions/wellness" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "Case Studies", href: "/resources/case-studies" },
+      { label: "Blog", href: "/resources/blog" },
+      { label: "Documentation", href: "/resources/documentation" },
+      { label: "Support", href: "/support" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About Us", href: "/company" },
+      { label: "Careers", href: "/company/careers" },
+      { label: "Partners", href: "/company/partners" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+];
+
 export default function HomePage() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const targets = document.querySelectorAll(".vx-reveal");
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      targets.forEach((target) => target.classList.add("is-in"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-in");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.14 }
+    );
+
+    targets.forEach((target) => observer.observe(target));
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <main className="vx-root">
+      <header className={`vx-site-header${scrolled ? " is-scrolled" : ""}`}>
+        <div className="vx-header-inner">
+          <Link href="/" className="vx-brand" aria-label="VAXERON home">
+            <span className="vx-brand-mark" aria-hidden="true">
+              V
+            </span>
 
-      {/* AMBIENT */}
-      <div className="vx-bg-glow vx-bg-glow-1" />
-      <div className="vx-bg-glow vx-bg-glow-2" />
-      <div className="vx-noise" />
-
-      {/* NAVBAR */}
-      <nav className="vx-nav">
-
-        <div className="vx-logo-wrap">
-
-          <div className="vx-logo-mark">
-            V
-          </div>
-
-          <div>
-
-            <div className="vx-logo-text">
-              VAXERON
-            </div>
-
-            <div className="vx-logo-sub">
-              by Vaxeron Technologies
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="vx-links">
-          <span>Platform</span>
-          <span>Products</span>
-          <span>Solutions</span>
-          <span>Experience</span>
-          <span>Company</span>
-        </div>
-
-        <div className="vx-actions">
-
-          <Link href="/sign-in" className="vx-login">
-            Sign In
+            <span className="vx-brand-copy">
+              <span className="vx-brand-name">VAXERON</span>
+              <span className="vx-brand-sub">by Vaxeron Technologies</span>
+            </span>
           </Link>
 
-          <button className="vx-btn-primary">
-            Get Early Access
-          </button>
+          <nav className="vx-main-nav" aria-label="Primary navigation">
+            {NAV_ITEMS.map((item) => (
+              <Link key={item.label} href={item.href}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
+          <Link href="/contact" className="vx-header-cta">
+            Request access
+          </Link>
         </div>
+      </header>
 
-      </nav>
-
-      {/* HERO */}
-      <section className="vx-hero">
-
-        {/* LEFT */}
-        <div className="vx-hero-left">
-
-          <div className="vx-eyebrow">
-            OPERATIONAL INFRASTRUCTURE FOR MODERN HOSPITALITY
-          </div>
-
-          <h1>
-            Run your entire
+      <section className="vx-home-hero" aria-labelledby="vx-home-hero-title">
+        <div className="vx-home-hero-copy vx-reveal">
+          <p className="vx-kicker">
+            Operational infrastructure
             <br />
-            hospitality operation
+            for modern hospitality
+          </p>
+
+          <h1 id="vx-home-hero-title">
+            The operating system
             <br />
-            from one system.
+            behind exceptional
+            <br />
+            hospitality.
           </h1>
 
-          <p>
-            VAXERON unifies menus, wine programmes,
-            room service, guest experience, inventory,
-            and operational infrastructure into one
-            connected hospitality ecosystem.
+          <p className="vx-home-hero-lead">
+            Connect guest experience, operational content, wine programmes,
+            inventory, and venue workflows in one considered platform.
           </p>
 
-          <div className="vx-hero-actions">
+          <div className="vx-home-hero-actions">
+            <Link href="/contact" className="vx-button vx-button-primary">
+              Request early access
+            </Link>
 
-            <button className="vx-btn-primary">
-              Get Early Access
-            </button>
-
-            <button className="vx-btn-secondary">
-              See How It Works
-            </button>
-
+            <Link href="/product" className="vx-text-link">
+              See how it works
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
-
-          <div className="vx-trust">
-
-            <span>AMAN</span>
-            <span>ROSEWOOD</span>
-            <span>SIX SENSES</span>
-
-          </div>
-
         </div>
 
-        {/* RIGHT */}
-        <div className="vx-hero-right">
+        <div className="vx-home-hero-visual vx-reveal">
+          <div className="vx-home-hero-backdrop" aria-hidden="true" />
 
-          {/* MAIN IMAGE */}
-          <div className="vx-hero-image">
-
-            <div className="vx-image-overlay" />
-
-            <div className="vx-image-content">
-
-              <div className="vx-image-eyebrow">
-                THE BURMAN
-              </div>
-
-              <h2>
-                Extraordinary
-                <br />
-                living.
-              </h2>
-
+          <div className="vx-device-shell">
+            <div className="vx-device-bar">
+              <span>VAXERON</span>
+              <span>Overview</span>
             </div>
 
+            <img
+              src="/menu-dashboard.jpg"
+              alt="VAXERON operations dashboard"
+              className="vx-device-image"
+            />
           </div>
-
-          {/* FLOATING DASHBOARD */}
-          <div className="vx-dashboard-float">
-
-            <div className="vx-dashboard-header">
-
-              <div className="vx-dashboard-dots">
-                <span />
-                <span />
-                <span />
-              </div>
-
-              <div className="vx-dashboard-label">
-                Operations Overview
-              </div>
-
-            </div>
-
-            <div className="vx-dashboard-body">
-
-              <div className="vx-stat-row">
-
-                <div className="vx-stat-box">
-                  <small>Revenue</small>
-                  <h3>€248K</h3>
-                </div>
-
-                <div className="vx-stat-box">
-                  <small>Occupancy</small>
-                  <h3>92%</h3>
-                </div>
-
-              </div>
-
-              <div className="vx-chart" />
-
-              <div className="vx-mini-grid">
-
-                <div className="vx-mini-card" />
-                <div className="vx-mini-card" />
-                <div className="vx-mini-card" />
-                <div className="vx-mini-card" />
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* FLOATING PHONE */}
-          <div className="vx-phone-float">
-
-            <div className="vx-phone-screen">
-
-              <div className="vx-phone-top">
-                In-Room Dining
-              </div>
-
-              <div className="vx-phone-image" />
-
-              <div className="vx-phone-menu">
-
-                <div className="vx-phone-item">
-                  <span>Salmon Donburi</span>
-                  <span>€35</span>
-                </div>
-
-                <div className="vx-phone-item">
-                  <span>Bluefin Tuna</span>
-                  <span>€45</span>
-                </div>
-
-                <div className="vx-phone-item">
-                  <span>Black Truffle</span>
-                  <span>€18</span>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
         </div>
-
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="vx-how-section">
+      <section
+        className="vx-pillars-section"
+        aria-labelledby="vx-pillars-title"
+      >
+        <div className="vx-pillars-heading vx-reveal">
+          <p className="vx-kicker" id="vx-pillars-title">
+            One platform. Four pillars.
+          </p>
+        </div>
 
-        <div className="vx-how-top">
+        <div className="vx-pillars-grid">
+          {PLATFORM_PILLARS.map((pillar) => (
+            <article className="vx-pillar" key={pillar.number}>
+              <span className="vx-pillar-number">{pillar.number}</span>
+              <h2>{pillar.title}</h2>
+              <p>{pillar.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-          <div className="vx-eyebrow">
-            CENTRALIZED OPERATIONS
+      <section
+        className="vx-product-section"
+        aria-labelledby="vx-product-title"
+      >
+        <div className="vx-product-media vx-reveal">
+          <div className="vx-product-window">
+            <img
+              src="/wine-showcase.png"
+              alt="VAXERON wine portfolio and cellar management interface"
+            />
           </div>
+        </div>
 
-          <h2>
-            Built for operators,
+        <div className="vx-product-copy vx-reveal">
+          <p className="vx-kicker">Platform in action</p>
+
+          <h2 id="vx-product-title">
+            Purpose-built tools
             <br />
-            not just teams.
-          </h2>
-
-        </div>
-
-        <div className="vx-how-grid">
-
-          <div className="vx-how-card">
-
-            <h3>Centralized Control</h3>
-
-            <p>
-              Menus, pricing, experiences, wine programmes,
-              and hospitality infrastructure managed from
-              one connected ecosystem.
-            </p>
-
-          </div>
-
-          <div className="vx-how-card">
-
-            <h3>Real-Time Updates</h3>
-
-            <p>
-              Operational updates instantly reflected
-              across every guest-facing environment
-              and service layer.
-            </p>
-
-          </div>
-
-          <div className="vx-how-card">
-
-            <h3>Operational Precision</h3>
-
-            <p>
-              Built for hospitality groups where
-              execution, consistency, atmosphere,
-              and structure matter.
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* PLATFORM MODULES */}
-      <section className="vx-modules-section">
-
-        <div className="vx-modules-top">
-
-          <div className="vx-eyebrow">
-            THE VAXERON ECOSYSTEM
-          </div>
-
-          <h2>
-            Modular infrastructure
+            for every part of
             <br />
-            for modern hospitality.
+            your operation.
           </h2>
 
           <p>
-            A connected hospitality ecosystem designed
-            to scale across boutique hotels, fine dining,
-            resorts, and multi-venue hospitality operations.
+            Live data, operational clarity, and connected workflows give teams
+            the structure to deliver at the highest level.
           </p>
 
+          <Link href="/product" className="vx-text-link">
+            Explore the platform
+            <span aria-hidden="true">→</span>
+          </Link>
         </div>
-
-        <div className="vx-modules-grid">
-
-          <div className="vx-module-card" data-accent="core">
-
-            <div className="vx-module-label">
-              CORE PLATFORM
-            </div>
-
-            <h3>
-              VAXERON
-              <br />
-              Core
-            </h3>
-
-            <p>
-              Central operational infrastructure connecting
-              menus, experiences, venues, analytics,
-              and hospitality execution.
-            </p>
-
-          </div>
-
-          <div className="vx-module-card" data-accent="guest">
-
-            <div className="vx-module-label">
-              GUEST EXPERIENCE
-            </div>
-
-            <h3>
-              VAXERON
-              <br />
-              Guest
-            </h3>
-
-            <p>
-              Elevated digital hospitality journeys
-              for dining, room service, QR menus,
-              spa experiences, and guest interaction.
-            </p>
-
-          </div>
-
-          <div className="vx-module-card" data-accent="cellar">
-
-            <div className="vx-module-label">
-              WINE OPERATIONS
-            </div>
-
-            <h3>
-              VAXERON
-              <br />
-              Cellar
-            </h3>
-
-            <p>
-              Wine inventory, cellar visibility,
-              allocations, stock movement,
-              and curated wine programme management.
-            </p>
-
-          </div>
-
-          <div className="vx-module-card" data-accent="ops">
-
-            <div className="vx-module-label">
-              OPERATIONAL LAYER
-            </div>
-
-            <h3>
-              VAXERON
-              <br />
-              Ops
-            </h3>
-
-            <p>
-              Operational oversight for hospitality groups,
-              analytics, venue coordination,
-              execution, and reporting systems.
-            </p>
-
-          </div>
-
-        </div>
-
       </section>
 
-      {/* ECOSYSTEM SPLIT */}
-      <section className="vx-ecosystem-split">
-
-        {/* LEFT */}
-        <div className="vx-ecosystem-guest">
-
-          <div className="vx-eyebrow">
-            GUEST EXPERIENCE
-          </div>
-
-          <h2>
-            Designed for
-            atmosphere,
-            emotion,
-            and service.
-          </h2>
-
-          <p>
-            Curated hospitality interfaces designed for
-            luxury hotels, destination dining, spas,
-            wine programmes, and refined guest journeys.
-          </p>
-
-          <div className="vx-guest-grid">
-
-            <div className="vx-guest-card">
-              <div className="vx-guest-image dining" />
-              <span>Dining Experiences</span>
-            </div>
-
-            <div className="vx-guest-card">
-              <div className="vx-guest-image spa" />
-              <span>Spa Journeys</span>
-            </div>
-
-            <div className="vx-guest-card">
-              <div className="vx-guest-image room" />
-              <span>Room Service</span>
-            </div>
-
-            <div className="vx-guest-card">
-              <div className="vx-guest-image wine" />
-              <span>Wine Programmes</span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* RIGHT */}
-        <div className="vx-ecosystem-ops">
-
-          <div className="vx-eyebrow">
-            OPERATIONS INFRASTRUCTURE
-          </div>
-
-          <h2>
-            Operational clarity
-            across every venue.
-          </h2>
-
-          <p>
-            Inventory, analytics, cellar management,
-            menus, experiences, and multi-property operations —
-            unified into one operational layer.
-          </p>
-
-          <div className="vx-ops-panel">
-
-            <div className="vx-ops-top">
-
-              <div className="vx-ops-stat">
-                <small>Properties</small>
-                <h3>12</h3>
-              </div>
-
-              <div className="vx-ops-stat">
-                <small>Venues</small>
-                <h3>48</h3>
-              </div>
-
-            </div>
-
-            <div className="vx-ops-chart" />
-
-            <div className="vx-ops-list">
-
-              <div className="vx-ops-item">
-                <span>Wine Cellar</span>
-                <span>Optimal</span>
-              </div>
-
-              <div className="vx-ops-item">
-                <span>Menu Infrastructure</span>
-                <span>Live</span>
-              </div>
-
-              <div className="vx-ops-item">
-                <span>Room Service</span>
-                <span>Connected</span>
-              </div>
-
-              <div className="vx-ops-item">
-                <span>Inventory Sync</span>
-                <span>92%</span>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* EXPERIENCE GRID */}
-      <section className="vx-grid-section">
-
-        <div className="vx-grid-card large">
-
-          <div className="vx-card-image dining" />
-
-          <div className="vx-card-content">
-
-            <div className="vx-eyebrow">
-              GUEST EXPERIENCE
-            </div>
-
-            <h3>
-              Hospitality interfaces
-              designed with atmosphere.
-            </h3>
-
-            <p>
-              Editorial guest journeys inspired by
-              luxury hospitality, elevated service,
-              and refined digital presentation.
+      <section className="vx-dual-section" aria-label="Guest and operations">
+        <article className="vx-dual-panel vx-dual-guest">
+          <div className="vx-dual-copy">
+            <p className="vx-kicker">
+              Presented beautifully
+              <br />
+              to the guest
             </p>
 
+            <h2>Every experience, seamlessly connected.</h2>
+
+            <p>
+              Dining, wellness, in-room service, and wine presented through one
+              coherent guest journey.
+            </p>
+
+            <Link href="/product#guest" className="vx-text-link">
+              Explore guest experience
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
 
-        </div>
+          <div className="vx-dual-media vx-dual-phone">
+            <img
+              src="/homepage/room-service.png"
+              alt="VAXERON in-room dining guest experience"
+            />
+          </div>
+        </article>
 
-        <div className="vx-grid-stack">
+        <article className="vx-dual-panel vx-dual-ops">
+          <div className="vx-dual-copy">
+            <p className="vx-kicker">
+              Managed clearly
+              <br />
+              by the operation
+            </p>
 
-          <div className="vx-grid-card small">
+            <h2>Control every detail from one place.</h2>
 
-            <div className="vx-card-image spa" />
+            <p>
+              Content, inventory, movements, venues, and workflows unified in
+              one operational environment.
+            </p>
 
-            <div className="vx-card-content">
-
-              <div className="vx-eyebrow">
-                SPA
-              </div>
-
-              <h3>
-                Quiet luxury,
-                digitally expressed.
-              </h3>
-
-            </div>
-
+            <Link href="/product#operations" className="vx-text-link">
+              Explore operations
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
 
-          <div className="vx-grid-card small">
-
-            <div className="vx-card-image wine" />
-
-            <div className="vx-card-content">
-
-              <div className="vx-eyebrow">
-                WINE
-              </div>
-
-              <h3>
-                Cellar management
-                with operational precision.
-              </h3>
-
-            </div>
-
+          <div className="vx-dual-media vx-dual-laptop">
+            <img
+              src="/menu-dashboard.jpg"
+              alt="VAXERON operations and inventory interface"
+            />
           </div>
-
-        </div>
-
+        </article>
       </section>
 
-      {/* WINE INFRASTRUCTURE */}
-      <section className="vx-showcase">
-
-        <div className="vx-showcase-top">
-
+      <section className="vx-origin-section">
+        <div className="vx-origin-inner vx-reveal">
           <div>
+            <p className="vx-kicker">Built inside hospitality</p>
+            <h2>Built inside hospitality, for hospitality.</h2>
+          </div>
 
-            <div className="vx-eyebrow">
-              WINE INFRASTRUCTURE
+          <p>
+            VAXERON is shaped by real operational experience and designed around
+            the complexity of modern hospitality. Every module exists to give
+            teams more clarity while preserving the human character of
+            exceptional service.
+          </p>
+        </div>
+      </section>
+
+      <section className="vx-final-cta">
+        <div className="vx-final-cta-inner">
+          <span className="vx-final-mark" aria-hidden="true">
+            V
+          </span>
+
+          <h2>Bring your operation into one connected system.</h2>
+
+          <Link href="/contact" className="vx-button vx-button-primary">
+            Request early access
+          </Link>
+        </div>
+      </section>
+
+      <footer className="vx-footer">
+        <div className="vx-footer-grid">
+          <div className="vx-footer-brand">
+            <Link href="/" className="vx-brand" aria-label="VAXERON home">
+              <span className="vx-brand-copy">
+                <span className="vx-brand-name">VAXERON</span>
+                <span className="vx-brand-sub">by Vaxeron Technologies</span>
+              </span>
+            </Link>
+
+            <p>
+              The operating system for modern hospitality, unifying guest
+              experience and operational control.
+            </p>
+
+            <div className="vx-footer-social">
+              <a href="#" aria-label="LinkedIn">
+                in
+              </a>
+              <a href="#" aria-label="Instagram">
+                ig
+              </a>
+              <a href="mailto:hello@vaxeron.com" aria-label="Email VAXERON">
+                mail
+              </a>
             </div>
-
-            <h2 className="vx-showcase-title">
-              Cellar management
-              <br />
-              designed for
-              <br />
-              modern hospitality.
-            </h2>
-
           </div>
 
-          <div className="vx-showcase-copy">
+          {FOOTER_GROUPS.map((group) => (
+            <div className="vx-footer-column" key={group.title}>
+              <h3>{group.title}</h3>
 
-            <p>
-              From curated wine programmes to multi-location inventory
-              visibility, VAXERON provides hospitality teams with
-              operational clarity across every bottle, producer,
-              allocation, and service environment.
-            </p>
+              {group.links.map((link) => (
+                <Link href={link.href} key={link.label}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ))}
 
-            <p>
-              Built for boutique hotels, fine dining restaurants,
-              omakase concepts, and premium hospitality groups.
-            </p>
-
+          <div className="vx-footer-legal">
+            <p>© 2026 Vaxeron Technologies. All rights reserved.</p>
+            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/terms">Terms of Service</Link>
           </div>
-
         </div>
-
-        <div className="vx-showcase-frame">
-
-          <div className="vx-showcase-glow" />
-
-          <img
-            src="/wine-showcase.png"
-            alt="VAXERON Wine Cellar"
-            className="vx-showcase-image"
-          />
-
-        </div>
-
-      </section>
-
-      {/* TRUST METRICS */}
-      <section className="vx-trust-section">
-
-        <div className="vx-trust-top">
-
-          <div className="vx-eyebrow">
-            TRUSTED INFRASTRUCTURE
-          </div>
-
-          <h2>
-            Built for modern
-            hospitality operators.
-          </h2>
-
-        </div>
-
-        <div className="vx-trust-grid">
-
-          <div className="vx-trust-card">
-
-            <h3>12+</h3>
-
-            <p>
-              Luxury properties and hospitality concepts
-              operating within the ecosystem.
-            </p>
-
-          </div>
-
-          <div className="vx-trust-card">
-
-            <h3>48</h3>
-
-            <p>
-              Active restaurants, guest experiences,
-              and operational venues managed.
-            </p>
-
-          </div>
-
-          <div className="vx-trust-card">
-
-            <h3>€18M+</h3>
-
-            <p>
-              Combined operational inventory and
-              hospitality asset visibility.
-            </p>
-
-          </div>
-
-          <div className="vx-trust-card">
-
-            <h3>24/7</h3>
-
-            <p>
-              Unified infrastructure supporting
-              service execution across properties.
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* CTA */}
-      <section className="vx-cta">
-
-        <div className="vx-eyebrow">
-          BUILT FOR OPERATORS WHO DEMAND CONTROL
-        </div>
-
-        <h2>
-          Operational elegance
-          for modern hospitality.
-        </h2>
-
-        <p>
-          Designed for hospitality teams where atmosphere,
-          execution, operational visibility, and guest experience
-          matter equally.
-        </p>
-
-        <div className="vx-hero-actions">
-
-          <button className="vx-btn-primary">
-            Get Early Access
-          </button>
-
-          <button className="vx-btn-secondary">
-            See How It Works
-          </button>
-
-        </div>
-
-      </section>
-
+      </footer>
     </main>
   );
 }

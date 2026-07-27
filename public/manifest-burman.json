@@ -2,12 +2,18 @@
   "name": "Burman Hotel",
   "short_name": "Burman",
   "description": "Luxury hospitality experience",
-  "start_url": "/burman-hotel",
+  "start_url": "/menu/burman-hotel",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#07090c",
   "theme_color": "#07090c",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/burman-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
     {
       "src": "/burman-icon.png",
       "sizes": "512x512",

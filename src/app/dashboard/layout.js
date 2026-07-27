@@ -257,6 +257,13 @@ export default function DashboardLayout({
                 ACCOUNT
             =============================================== */}
 
+            <NavItem
+  href="/dashboard/planner"
+  isActive={isActive("/dashboard/planner")}
+  icon={ClipboardDocumentCheckIcon}
+  label="Planner"
+/>
+
             <SectionLabel>
               Account
             </SectionLabel>

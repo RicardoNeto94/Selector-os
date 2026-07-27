@@ -1,23 +1,25 @@
 export default function manifest() {
+
+  // server-safe host detection
   const host =
-    typeof window !== "undefined"
-      ? window.location.hostname
+    typeof headers !== "undefined"
+      ? headers().get("host")
       : "";
 
   let name = "Vaxeron";
   let start_url = "/";
   let icon = "/icon.png";
 
-  if (host.includes("burman")) {
+  if (host?.includes("burman")) {
     name = "Burman Hotel";
     start_url = "/menu/burman-hotel";
     icon = "/burman-icon.png";
   }
 
-  if (host.includes("foxden")) {
+  if (host?.includes("foxden")) {
     name = "Fox Den";
     start_url = "/menu/foxden";
-    icon = "/foxden-icon.png";
+    icon = "/icon-512.png";
   }
 
   return {
@@ -25,8 +27,8 @@ export default function manifest() {
     short_name: name,
     start_url,
     display: "standalone",
-    background_color: "#000000",
-    theme_color: "#000000",
+    background_color: "#05070a",
+    theme_color: "#05070a",
     icons: [
       {
         src: icon,

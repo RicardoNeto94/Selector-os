@@ -182,8 +182,7 @@ export default function ShangShiWineView({
 
   return (
     <div
-      className="relative h-[100dvh] overflow-hidden bg-[#00140e] text-[#F3E9D2]"
-      style={{
+className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[#F3E9D2]"      style={{
         backgroundImage: `
           linear-gradient(
             90deg,
