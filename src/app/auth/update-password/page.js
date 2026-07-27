@@ -3,18 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import "../../../styles/auth.css";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
 
   const supabase = useMemo(
-    () =>
-      createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      ),
+    () => createClientComponentClient(),
     []
   );
 
@@ -51,7 +47,11 @@ export default function UpdatePasswordPage() {
       if (!active) return;
 
       if (error) {
-        console.error("Password recovery code exchange failed:", error.message);
+        console.error("Password recovery code exchange failed:", {
+          message: error.message,
+          code: error.code,
+          status: error.status,
+        });
 
         setIsError(true);
         setMessage(
