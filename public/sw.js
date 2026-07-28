@@ -1,13 +1,10 @@
-const CACHE_NAME = "selectoros-v5";
+const CACHE_NAME = "selectoros-v6";
 
-// Only static assets
 const STATIC_ASSETS = [
-  "/",
   "/manifest.json",
   "/favicon.ico",
 ];
 
-// INSTALL
 self.addEventListener("install", (event) => {
   self.skipWaiting();
 
@@ -18,96 +15,92 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// ACTIVATE
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
-    )
-  );
+    Promise.all([
+      caches.keys().then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              return caches.delete(key);
+            }
 
-  self.clients.claim();
+            return null;
+          })
+        )
+      ),
+      self.clients.claim(),
+    ])
+  );
 });
 
-// FETCH
 self.addEventListener("fetch", (event) => {
-
   const { request } = event;
+  const url = new URL(request.url);
 
-  // 🚫 never cache non-GET
-  if(request.method !== "GET"){
+  if (request.method !== "GET") {
     return;
   }
 
-  // 🚫 NEVER cache API
-  if (request.url.includes("/api/")) {
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (
+    url.pathname.startsWith("/api/") ||
+    request.url.includes("supabase")
+  ) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // 🚫 NEVER cache Supabase
-  if (request.url.includes("supabase")) {
+  /*
+   * Always fetch Next.js files from the network.
+   * This prevents old CSS and JavaScript bundles from being reused.
+   */
+  if (url.pathname.startsWith("/_next/")) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // 🚫 NEVER cache Next.js dynamic chunks
-  if (request.url.includes("/_next/")) {
+  /*
+   * Always load page navigations from the network.
+   */
+  if (request.mode === "navigate") {
+    event.respondWith(fetch(request));
+    return;
+  }
 
+  /*
+   * Cache only stable image assets.
+   * Use network first so updated logos and backgrounds appear immediately.
+   */
+  if (
+    /\.(png|jpg|jpeg|webp|gif|svg|ico)$/i.test(url.pathname)
+  ) {
     event.respondWith(
       fetch(request)
-    );
+        .then((response) => {
+          if (!response || response.status !== 200) {
+            return response;
+          }
 
-    return;
-  }
+          const responseClone = response.clone();
 
-  // ✅ cache only static assets
-  if (
-    request.url.endsWith(".css") ||
-    request.url.endsWith(".js") ||
-    request.url.endsWith(".png") ||
-    request.url.endsWith(".jpg") ||
-    request.url.endsWith(".svg")
-  ) {
-
-    event.respondWith(
-
-      caches.match(request).then((cached)=>{
-
-        return cached || fetch(request).then((response)=>{
-
-          const responseClone =
-            response.clone();
-
-          caches.open(CACHE_NAME).then((cache)=>{
-            cache.put(request,responseClone);
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
           });
 
           return response;
-
-        });
-
-      })
-
+        })
+        .catch(() => caches.match(request))
     );
 
     return;
-
   }
 
-  // 🌐 pages = always network first
-  event.respondWith(
-
-    fetch(request).catch(()=>
-      caches.match("/")
-    )
-
-  );
-
+  /*
+   * Do not cache CSS, JavaScript, JSON or other application files.
+   */
+  event.respondWith(fetch(request));
 });
