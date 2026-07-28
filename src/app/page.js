@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import "@/styles/vaxeron.css";
+import "@/styles/vaxeron-home.css";
 
 const NAV_ITEMS = [
   { label: "Platform", href: "/product" },
