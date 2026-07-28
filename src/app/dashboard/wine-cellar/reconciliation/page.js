@@ -1971,77 +1971,119 @@ setLinkingWines(false);
   }
 
   async function createWineFromBusinessProduct() {
-    if (!manualLinkRow || creatingManualWine) {
-      return;
-    }
+  if (!manualLinkRow || creatingManualWine) {
+    return;
+  }
 
-    const confirmed = window.confirm(
-      `Create "${manualLinkRow.productName}" as a new Vaxeron wine and link this business product?\n\nYou can complete producer, region, country and other wine details later in Wine Cellar.`
+  const confirmed = window.confirm(
+    `Create "${manualLinkRow.productName}" as a new Vaxeron wine and link this business product?\n\nYou can complete producer, region, country and other wine details later in Wine Cellar.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  setCreatingManualWine(true);
+  setManualLinkError("");
+  setBusinessLinkError("");
+  setBusinessLinkMessage("");
+
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
-    if (!confirmed) {
-      return;
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError) {
+      throw userError;
     }
 
-    setCreatingManualWine(true);
+    if (!user?.id) {
+      throw new Error(
+        "You must be signed in to create a wine."
+      );
+    }
+
+    const {
+      data: restaurant,
+      error: restaurantError,
+    } = await supabase
+      .from("restaurants")
+      .select("id")
+      .eq("owner_id", user.id)
+      .limit(1)
+      .single();
+
+    if (restaurantError) {
+      throw restaurantError;
+    }
+
+    if (!restaurant?.id) {
+      throw new Error(
+        "No restaurant was found for the signed-in account."
+      );
+    }
+
+    const {
+      data: createdWine,
+      error: createWineError,
+    } = await supabase
+      .from("wines")
+      .insert({
+        restaurant_id: restaurant.id,
+        name: manualLinkRow.productName,
+        vintage:
+          manualLinkRow.vintage || null,
+        business_product_number:
+          manualLinkRow.productNumber || null,
+        business_barcode:
+          manualLinkRow.barcode || null,
+      })
+      .select(`
+        id,
+        name,
+        producer,
+        vintage,
+        business_product_number,
+        business_barcode
+      `)
+      .single();
+
+    if (createWineError) {
+      throw createWineError;
+    }
+
+    await refreshWineLinkingWorkspace(
+      supabase
+    );
+
+    setBusinessLinkMessage(
+      `${createdWine.name} created and linked successfully.`
+    );
+
+    setManualLinkRow(null);
+    setManualWineSearch("");
+    setManualWineOptions([]);
     setManualLinkError("");
-    setBusinessLinkError("");
-    setBusinessLinkMessage("");
+  } catch (createError) {
+    console.error(
+      "CREATE WINE FROM BUSINESS PRODUCT ERROR:",
+      createError
+    );
 
-    try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
-
-      const { data: createdWine, error } = await supabase
-        .from("wines")
-        .insert({
-          name: manualLinkRow.productName,
-          vintage: manualLinkRow.vintage || null,
-          business_product_number:
-            manualLinkRow.productNumber || null,
-          business_barcode:
-            manualLinkRow.barcode || null,
-        })
-        .select(`
-          id,
-          name,
-          producer,
-          vintage,
-          business_product_number,
-          business_barcode
-        `)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      await refreshWineLinkingWorkspace(supabase);
-
-      setBusinessLinkMessage(
-        `${createdWine.name} created and linked successfully.`
-      );
-
-      setManualLinkRow(null);
-      setManualWineSearch("");
-      setManualWineOptions([]);
-      setManualLinkError("");
-    } catch (createError) {
-      console.error(
-        "CREATE WINE FROM BUSINESS PRODUCT ERROR:",
-        createError
-      );
-
-      setManualLinkError(
-        createError?.message ||
-          "Unable to create this wine."
-      );
-    } finally {
-      setCreatingManualWine(false);
-    }
+    setManualLinkError(
+      createError?.message ||
+        "Unable to create this wine."
+    );
+  } finally {
+    setCreatingManualWine(false);
   }
+}
 
   const filteredManualWineOptions = useMemo(() => {
     const query = normalizeLower(manualWineSearch);
