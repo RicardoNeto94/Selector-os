@@ -383,16 +383,23 @@ export default function WinesPage() {
       }
 
       let type = normalize(
-        wine.wine_type
-      );
+  wine.wine_type
+);
 
-      if (!type) {
-        type = "unknown";
-      }
+if (!type) {
+  type = "unknown";
+}
 
-      if (type === "rosé") {
-        type = "rose";
-      }
+if (type === "rosé") {
+  type = "rose";
+}
+
+if (
+  type.includes("sparkling") ||
+  type.includes("champagne")
+) {
+  type = "sparkling";
+}
 
       if (!stats[type]) {
         stats[type] = 0;
