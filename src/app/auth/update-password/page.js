@@ -9,15 +9,12 @@ import "../../../styles/auth.css";
 export default function UpdatePasswordPage() {
   const router = useRouter();
 
-  const supabase = useMemo(
-    () => createClientComponentClient(),
-    []
-  );
+  const supabase = useMemo(() => createClientComponentClient(), []);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [checkingLink, setCheckingLink] = useState(true);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [recoveryReady, setRecoveryReady] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -27,51 +24,33 @@ export default function UpdatePasswordPage() {
   useEffect(() => {
     let active = true;
 
-    async function prepareRecoverySession() {
-      const requestUrl = new URL(window.location.href);
-      const code = requestUrl.searchParams.get("code");
-
-      if (!code) {
-        if (!active) return;
-
-        setIsError(true);
-        setMessage(
-          "This password reset link is missing its recovery code. Please request a new link."
-        );
-        setCheckingLink(false);
-        return;
-      }
-
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+    async function checkRecoverySession() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
 
       if (!active) return;
 
-      if (error) {
-        console.error("Password recovery code exchange failed:", {
-          message: error.message,
-          code: error.code,
-          status: error.status,
-        });
+      if (error || !user) {
+        console.error(
+          "Password recovery session check failed:",
+          error?.message || "No authenticated recovery user found."
+        );
 
         setIsError(true);
         setMessage(
-          "This password reset link is invalid or has expired. Please request a new link."
+          "This password reset session is invalid or has expired. Please request a new link."
         );
-        setCheckingLink(false);
+        setCheckingSession(false);
         return;
       }
 
-      window.history.replaceState(
-        {},
-        document.title,
-        "/auth/update-password"
-      );
-
       setRecoveryReady(true);
-      setCheckingLink(false);
+      setCheckingSession(false);
     }
 
-    prepareRecoverySession();
+    checkRecoverySession();
 
     return () => {
       active = false;
@@ -144,9 +123,9 @@ export default function UpdatePasswordPage() {
           Choose a secure new password for your VAXERON account.
         </p>
 
-        {checkingLink ? (
+        {checkingSession ? (
           <p className="auth-footer-text" role="status">
-            Verifying your reset link…
+            Verifying your reset session…
           </p>
         ) : (
           <>
