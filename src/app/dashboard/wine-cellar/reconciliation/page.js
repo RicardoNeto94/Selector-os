@@ -581,41 +581,58 @@ setInventoryBalanceMode(
             const barcode =
               normalize(row[4]);
 
-            const from =
-              normalize(row[5]);
+            let quantity;
+let costPrice;
+let totalAmount;
+let difference;
+let initialStock;
+let finalStock;
+let storeBalance;
+let from;
+let to;
+let date;
+let transactionType;
+let document;
 
-            const to =
-              normalize(row[6]);
+if (
+  detectedInventoryBalanceMode ===
+  "amount"
+) {
+  quantity = toNumber(row[5]);
+  costPrice = toNumber(row[6]);
 
-            const date =
-              normalize(row[7]);
+  initialStock = toNumber(row[7]);
+  finalStock = toNumber(row[8]);
+  storeBalance = toNumber(row[9]);
 
-            const transactionType =
-              normalize(row[8]);
+  from = normalize(row[10]);
+  to = normalize(row[11]);
+  date = normalize(row[12]);
+  transactionType =
+    normalize(row[13]);
+  document = normalize(row[14]);
 
-            const document =
-              normalize(row[9]);
+  totalAmount = storeBalance;
+  difference =
+    finalStock - initialStock;
+} else {
+  from = normalize(row[5]);
+  to = normalize(row[6]);
+  date = normalize(row[7]);
 
-            const quantity =
-              toNumber(row[10]);
+  transactionType =
+    normalize(row[8]);
 
-            const costPrice =
-              toNumber(row[11]);
+  document = normalize(row[9]);
 
-            const totalAmount =
-              toNumber(row[12]);
-
-            const difference =
-              toNumber(row[13]);
-
-            const initialStock =
-              toNumber(row[14]);
-
-            const finalStock =
-              toNumber(row[15]);
-
-            const storeBalance =
-              toNumber(row[16]);
+  quantity = toNumber(row[10]);
+  costPrice = toNumber(row[11]);
+  totalAmount = toNumber(row[12]);
+  difference = toNumber(row[13]);
+  initialStock = toNumber(row[14]);
+  finalStock = toNumber(row[15]);
+  storeBalance = toNumber(row[16]);
+}
 
             if (
               normalizeLower(column1) ===
@@ -1286,22 +1303,35 @@ useEffect(() => {
      REPORT VALUE
   ===================================================== */
 
-  const reportValue =
-    useMemo(() => {
-      return rows.reduce(
-        (sum, row) =>
-          sum +
-          (
-            Number(
-              row.finalStock || 0
-            ) *
-            Number(
-              row.costPrice || 0
-            )
-          ),
-        0
-      );
-    }, [rows]);
+  const reportValue = useMemo(() => {
+  if (
+    inventoryBalanceMode === "amount"
+  ) {
+    return rows.reduce(
+      (sum, row) =>
+        sum +
+        Number(
+          row.storeBalance || 0
+        ),
+      0
+    );
+  }
+
+  return rows.reduce(
+    (sum, row) =>
+      sum +
+      Number(
+        row.finalStock || 0
+      ) *
+        Number(
+          row.costPrice || 0
+        ),
+    0
+  );
+}, [
+  rows,
+  inventoryBalanceMode,
+]);
 
   /* =====================================================
      FINAL STOCK
@@ -1616,14 +1646,49 @@ async function linkExactMatches() {
 async function applyInventoryChanges() {
   if (
     applyingInventory ||
-    !reconciliationMetrics ||
-    Number(reconciliationMetrics.changes || 0) === 0
+    !reconciliationMetrics
+  ) {
+    return;
+  }
+
+  const isAmountReport =
+    inventoryBalanceMode === "amount";
+
+  const matchedValuationRows =
+    reconciliation.filter(
+      (row) =>
+        row.wine?.id &&
+        row.location?.id &&
+        !row.isByTheGlass
+    );
+
+  if (
+    isAmountReport &&
+    matchedValuationRows.length === 0
+  ) {
+    setApplyInventoryError(
+      "No matched wine and location records are available for valuation."
+    );
+    return;
+  }
+
+  if (
+    !isAmountReport &&
+    Number(
+      reconciliationMetrics.changes || 0
+    ) === 0
   ) {
     return;
   }
 
   const confirmed = window.confirm(
-    `Apply ${formatNumber(reconciliationMetrics.changes)} inventory changes to Vaxeron?\n\nThis will replace Vaxeron wine quantities with the closing stock from the imported business inventory report for all matched wine/location records.`
+    isAmountReport
+      ? `Import cost valuation for ${formatNumber(
+          matchedValuationRows.length
+        )} matched wine/location records?\n\nThis updates EUR cost values only. Bottle quantities will not change.`
+      : `Apply ${formatNumber(
+          reconciliationMetrics.changes
+        )} inventory changes to Vaxeron?\n\nThis will replace Vaxeron wine quantities with the closing stock from the imported quantity report.`
   );
 
   if (!confirmed) {
@@ -1640,47 +1705,97 @@ async function applyInventoryChanges() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
-    const result = await applyWineInventoryReconciliation({
-      supabase,
-      reconciliationRows: reconciliation,
-    });
+    if (isAmountReport) {
+      const result =
+        await applyWineInventoryCostValuation({
+          supabase,
+          reconciliationRows:
+            reconciliation,
+        });
+
+      if (result.failed > 0) {
+        console.error(
+          "FIRST COST VALUATION ERROR:",
+          JSON.stringify(
+            result.errors?.[0],
+            null,
+            2
+          )
+        );
+
+        throw new Error(
+          `${result.failed} cost valuation records could not be updated. ${result.updated} records were updated successfully.`
+        );
+      }
+
+      setApplyInventoryMessage(
+        `${formatNumber(
+          result.updated
+        )} cost valuation records updated successfully. Total imported cost value: €${formatCurrency(
+          result.totalCostValue
+        )}. Bottle quantities were not changed.`
+      );
+
+      return;
+    }
+
+    const result =
+      await applyWineInventoryReconciliation({
+        supabase,
+        reconciliationRows:
+          reconciliation,
+      });
 
     if (result.failed > 0) {
       console.error(
-  "FIRST INVENTORY APPLY ERROR:",
-  JSON.stringify(
-    result.errors?.[0],
-    null,
-    2
-  )
-);
+        "FIRST INVENTORY APPLY ERROR:",
+        JSON.stringify(
+          result.errors?.[0],
+          null,
+          2
+        )
+      );
+
       throw new Error(
         `${result.failed} inventory records could not be updated. ${result.updated} records were updated successfully.`
       );
     }
 
     setApplyInventoryMessage(
-      `${formatNumber(result.updated)} inventory records updated successfully. ${formatNumber(result.movements)} reconciliation movements logged.`
+      `${formatNumber(
+        result.updated
+      )} inventory records updated successfully. ${formatNumber(
+        result.movements
+      )} reconciliation movements logged.`
     );
 
-    const reconciliationResult = await reconcileWineInventory({
-      supabase,
-      reportRows: rows,
-    });
+    const reconciliationResult =
+      await reconcileWineInventory({
+        supabase,
+        reportRows: rows,
+      });
 
-    setReconciliation(reconciliationResult.rows || []);
-    setReconciliationMetrics(reconciliationResult.metrics || null);
+    setReconciliation(
+      reconciliationResult.rows || []
+    );
+
+    setReconciliationMetrics(
+      reconciliationResult.metrics || null
+    );
   } catch (applyError) {
-    console.error("APPLY INVENTORY RECONCILIATION ERROR:", applyError);
+    console.error(
+      "APPLY INVENTORY REPORT ERROR:",
+      applyError
+    );
+
     setApplyInventoryError(
       applyError?.message ||
-      "Unable to apply inventory reconciliation."
+        "Unable to apply this inventory report."
     );
   } finally {
     setApplyingInventory(false);
-
-setActiveWorkspace("overview");
-setWorkspacePage(1);
+    setActiveWorkspace("overview");
+    setWorkspacePage(1);
   }
 }
 
@@ -1722,6 +1837,7 @@ setBusinessLinkMessage("");
 setApplyInventoryError("");
 setApplyInventoryMessage("");
 setApplyingInventory(false);
+setInventoryBalanceMode("quantity");
 
 setLinkingAnalysis(false);
 
@@ -2318,6 +2434,18 @@ setLinkingWines(false);
     rows[0]?.reportType ===
     "products";
 
+    const isAmountReport =
+  !isProductsReport &&
+  inventoryBalanceMode === "amount";
+
+const matchedValuationCount =
+  reconciliation.filter(
+    (row) =>
+      row.wine?.id &&
+      row.location?.id &&
+      !row.isByTheGlass
+  ).length;
+
   const btgDetectedCount =
     useMemo(
       () =>
@@ -2471,21 +2599,31 @@ setLinkingWines(false);
 
                 {!isProductsReport && (
                 <button
-                  type="button"
-                  onClick={applyInventoryChanges}
-                  disabled={
-                    applyingInventory ||
-                    !reconciliationMetrics ||
-                    Number(reconciliationMetrics.changes || 0) === 0
-                  }
-                  className="rounded-xl bg-[#963b2c] px-4 py-2.5 text-[9px] uppercase tracking-[0.12em] font-medium text-white transition hover:opacity-90 disabled:opacity-35 disabled:cursor-not-allowed whitespace-nowrap"
-                >
-                  {applyingInventory
-                    ? "Applying..."
-                    : `Apply ${formatNumber(
-                        reconciliationMetrics?.changes || 0
-                      )} Changes`}
-                </button>
+  type="button"
+  onClick={applyInventoryChanges}
+  disabled={
+    applyingInventory ||
+    !reconciliationMetrics ||
+    (
+      isAmountReport
+        ? matchedValuationCount === 0
+        : Number(
+            reconciliationMetrics.changes || 0
+          ) === 0
+    )
+  }
+  className="rounded-xl bg-[#963b2c] px-4 py-2.5 text-[9px] uppercase tracking-[0.12em] font-medium text-white transition hover:opacity-90 disabled:opacity-35 disabled:cursor-not-allowed whitespace-nowrap"
+>
+  {applyingInventory
+    ? "Applying..."
+    : isAmountReport
+      ? `Import ${formatNumber(
+          matchedValuationCount
+        )} Cost Values`
+      : `Apply ${formatNumber(
+          reconciliationMetrics?.changes || 0
+        )} Changes`}
+</button>
                 )}
               </div>
             </div>
@@ -3344,183 +3482,4 @@ function WorkspaceTable({
       </table>
     </div>
   );
-}
-/* =======================================================
-   APPLY INVENTORY COST VALUATION
-======================================================= */
-
-export async function applyWineInventoryCostValuation({
-  supabase,
-  reconciliationRows,
-}) {
-  const valuationRows = (
-    reconciliationRows || []
-  ).filter(
-    (row) =>
-      row.wine?.id &&
-      row.location?.id &&
-      !row.isByTheGlass
-  );
-
-  if (valuationRows.length === 0) {
-    return {
-      updated: 0,
-      failed: 0,
-      totalCostValue: 0,
-      errors: [],
-    };
-  }
-
-  const aggregated = new Map();
-
-  valuationRows.forEach((row) => {
-    const key = [
-      row.wine.id,
-      row.location.id,
-    ].join("::");
-
-    if (!aggregated.has(key)) {
-      aggregated.set(key, {
-        wineId: row.wine.id,
-        wineName:
-          row.wine.name ||
-          row.productName,
-        locationId: row.location.id,
-        costValue: 0,
-        costPrice: 0,
-      });
-    }
-
-    const target = aggregated.get(key);
-
-    target.costValue += Number(
-      row.businessQuantity || 0
-    );
-
-    if (
-      Number(row.costPrice || 0) > 0
-    ) {
-      target.costPrice = Number(
-        row.costPrice
-      );
-    }
-  });
-
-  const targets = [
-    ...aggregated.values(),
-  ];
-
-  let updated = 0;
-  const errors = [];
-  const updatedAt =
-    new Date().toISOString();
-
-  for (const target of targets) {
-    const {
-      data: existing,
-      error: lookupError,
-    } = await supabase
-      .from("wine_inventory")
-      .select(`
-        id,
-        quantity
-      `)
-      .eq("wine_id", target.wineId)
-      .eq(
-        "location_id",
-        target.locationId
-      )
-      .maybeSingle();
-
-    if (lookupError) {
-      errors.push({
-        wineId: target.wineId,
-        wineName: target.wineName,
-        locationId:
-          target.locationId,
-        error: lookupError.message,
-      });
-
-      continue;
-    }
-
-    const payload = {
-      cost_value:
-        Math.round(
-          Number(
-            target.costValue || 0
-          ) * 100
-        ) / 100,
-
-      cost_price:
-        Number(
-          target.costPrice || 0
-        ) > 0
-          ? Number(
-              target.costPrice
-            )
-          : null,
-
-      cost_updated_at:
-        updatedAt,
-    };
-
-    const { error } = existing?.id
-      ? await supabase
-          .from("wine_inventory")
-          .update(payload)
-          .eq("id", existing.id)
-      : await supabase
-          .from("wine_inventory")
-          .insert({
-            wine_id:
-              target.wineId,
-            location_id:
-              target.locationId,
-            quantity: 0,
-            ...payload,
-          });
-
-    if (error) {
-      errors.push({
-        wineId: target.wineId,
-        wineName: target.wineName,
-        locationId:
-          target.locationId,
-        error: error.message,
-      });
-
-      continue;
-    }
-
-    updated += 1;
-  }
-
-  const totalCostValue =
-    targets.reduce(
-      (sum, target) =>
-        sum +
-        Number(
-          target.costValue || 0
-        ),
-      0
-    );
-
-  console.log(
-    "VAXERON COST VALUATION IMPORT:",
-    {
-      requested: targets.length,
-      updated,
-      failed: errors.length,
-      totalCostValue,
-      errors: errors.slice(0, 10),
-    }
-  );
-
-  return {
-    updated,
-    failed: errors.length,
-    totalCostValue,
-    errors,
-  };
 }
