@@ -15,6 +15,7 @@ import {
   linkExactWineBusinessIds,
   reconcileWineInventory,
   applyWineInventoryReconciliation,
+  applyWineInventoryCostValuation,
 } from "@/lib/wineReconciliation";
 
 import * as XLSX from "xlsx";
@@ -431,6 +432,8 @@ const [
 const [applyingInventory, setApplyingInventory] = useState(false);
 const [applyInventoryError, setApplyInventoryError] = useState("");
 const [applyInventoryMessage, setApplyInventoryMessage] = useState("");
+const [inventoryBalanceMode, setInventoryBalanceMode] =
+  useState("quantity");
 
 const [activeWorkspace, setActiveWorkspace] = useState("overview");
 const [workspacePage, setWorkspacePage] = useState(1);
@@ -507,6 +510,18 @@ const [manualLinkError, setManualLinkError] = useState("");
             normalizeLower(cell)
           )
         );
+        const reportText = normalizedMatrix
+  .flat()
+  .join(" ");
+
+const detectedInventoryBalanceMode =
+  reportText.includes("by amount")
+    ? "amount"
+    : "quantity";
+
+setInventoryBalanceMode(
+  detectedInventoryBalanceMode
+);
 
       const inventoryHeaderIndex =
         normalizedMatrix.findIndex(
@@ -674,6 +689,8 @@ const [manualLinkError, setManualLinkError] = useState("");
               finalStock,
               storeBalance,
               reportType: "inventory",
+inventoryBalanceMode:
+  detectedInventoryBalanceMode,
             });
           }
         );
@@ -3327,4 +3344,183 @@ function WorkspaceTable({
       </table>
     </div>
   );
+}
+/* =======================================================
+   APPLY INVENTORY COST VALUATION
+======================================================= */
+
+export async function applyWineInventoryCostValuation({
+  supabase,
+  reconciliationRows,
+}) {
+  const valuationRows = (
+    reconciliationRows || []
+  ).filter(
+    (row) =>
+      row.wine?.id &&
+      row.location?.id &&
+      !row.isByTheGlass
+  );
+
+  if (valuationRows.length === 0) {
+    return {
+      updated: 0,
+      failed: 0,
+      totalCostValue: 0,
+      errors: [],
+    };
+  }
+
+  const aggregated = new Map();
+
+  valuationRows.forEach((row) => {
+    const key = [
+      row.wine.id,
+      row.location.id,
+    ].join("::");
+
+    if (!aggregated.has(key)) {
+      aggregated.set(key, {
+        wineId: row.wine.id,
+        wineName:
+          row.wine.name ||
+          row.productName,
+        locationId: row.location.id,
+        costValue: 0,
+        costPrice: 0,
+      });
+    }
+
+    const target = aggregated.get(key);
+
+    target.costValue += Number(
+      row.businessQuantity || 0
+    );
+
+    if (
+      Number(row.costPrice || 0) > 0
+    ) {
+      target.costPrice = Number(
+        row.costPrice
+      );
+    }
+  });
+
+  const targets = [
+    ...aggregated.values(),
+  ];
+
+  let updated = 0;
+  const errors = [];
+  const updatedAt =
+    new Date().toISOString();
+
+  for (const target of targets) {
+    const {
+      data: existing,
+      error: lookupError,
+    } = await supabase
+      .from("wine_inventory")
+      .select(`
+        id,
+        quantity
+      `)
+      .eq("wine_id", target.wineId)
+      .eq(
+        "location_id",
+        target.locationId
+      )
+      .maybeSingle();
+
+    if (lookupError) {
+      errors.push({
+        wineId: target.wineId,
+        wineName: target.wineName,
+        locationId:
+          target.locationId,
+        error: lookupError.message,
+      });
+
+      continue;
+    }
+
+    const payload = {
+      cost_value:
+        Math.round(
+          Number(
+            target.costValue || 0
+          ) * 100
+        ) / 100,
+
+      cost_price:
+        Number(
+          target.costPrice || 0
+        ) > 0
+          ? Number(
+              target.costPrice
+            )
+          : null,
+
+      cost_updated_at:
+        updatedAt,
+    };
+
+    const { error } = existing?.id
+      ? await supabase
+          .from("wine_inventory")
+          .update(payload)
+          .eq("id", existing.id)
+      : await supabase
+          .from("wine_inventory")
+          .insert({
+            wine_id:
+              target.wineId,
+            location_id:
+              target.locationId,
+            quantity: 0,
+            ...payload,
+          });
+
+    if (error) {
+      errors.push({
+        wineId: target.wineId,
+        wineName: target.wineName,
+        locationId:
+          target.locationId,
+        error: error.message,
+      });
+
+      continue;
+    }
+
+    updated += 1;
+  }
+
+  const totalCostValue =
+    targets.reduce(
+      (sum, target) =>
+        sum +
+        Number(
+          target.costValue || 0
+        ),
+      0
+    );
+
+  console.log(
+    "VAXERON COST VALUATION IMPORT:",
+    {
+      requested: targets.length,
+      updated,
+      failed: errors.length,
+      totalCostValue,
+      errors: errors.slice(0, 10),
+    }
+  );
+
+  return {
+    updated,
+    failed: errors.length,
+    totalCostValue,
+    errors,
+  };
 }
