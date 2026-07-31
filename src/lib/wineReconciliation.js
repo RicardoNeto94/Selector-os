@@ -364,7 +364,10 @@ function buildBusinessProducts(rows) {
    WINE INDEXES
 ======================================================= */
 
-function buildWineIndexes(wines) {
+function buildWineIndexes(
+  wines,
+  aliases = []
+) {
   const byProductNumber = new Map();
 
   const byBarcode = new Map();
@@ -426,12 +429,83 @@ function buildWineIndexes(wines) {
     }
   });
 
+  aliases.forEach((alias) => {
+    const wine =
+      alias.wine || null;
+
+    if (!wine?.id) {
+      return;
+    }
+
+    const productNumber =
+      normalizeIdentifier(
+        alias.business_product_number
+      );
+
+    const barcode =
+      normalizeIdentifier(
+        alias.business_barcode
+      );
+
+    if (productNumber) {
+      byProductNumber.set(
+        productNumber,
+        wine
+      );
+    }
+
+    if (barcode) {
+      byBarcode.set(
+        barcode,
+        wine
+      );
+    }
+  });
+
   return {
     byProductNumber,
     byBarcode,
     byName,
     byNormalizedName,
   };
+}
+
+/* =======================================================
+   LOAD BUSINESS ALIASES
+======================================================= */
+
+async function loadWineBusinessAliases(
+  supabase
+) {
+  const {
+    data,
+    error,
+  } = await supabase
+    .from("wine_business_aliases")
+    .select(`
+      id,
+      wine_id,
+      business_product_id,
+      business_product_number,
+      business_barcode,
+      business_product_name,
+      product_group,
+      serving_cl,
+      wine:wines (
+        id,
+        name,
+        producer,
+        vintage,
+        business_product_number,
+        business_barcode
+      )
+    `);
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
 }
 
 /* =======================================================
@@ -762,28 +836,38 @@ export async function buildWineBusinessLinks({
   const businessProducts =
     buildBusinessProducts(reportRows);
 
-  const {
-    data: wines,
-    error,
-  } = await supabase
-    .from("wines")
-    .select(`
-      id,
-      name,
-      producer,
-      vintage,
-      business_product_number,
-      business_barcode
-    `);
+  const [
+    winesResult,
+    aliases,
+  ] = await Promise.all([
+    supabase
+      .from("wines")
+      .select(`
+        id,
+        name,
+        producer,
+        vintage,
+        business_product_number,
+        business_barcode
+      `),
 
-  if (error) {
-    throw error;
+    loadWineBusinessAliases(
+      supabase
+    ),
+  ]);
+
+  if (winesResult.error) {
+    throw winesResult.error;
   }
 
-  const wineRows = wines || [];
+  const wineRows =
+    winesResult.data || [];
 
   const indexes =
-    buildWineIndexes(wineRows);
+    buildWineIndexes(
+      wineRows,
+      aliases
+    );
 
   const rows = businessProducts.map(
     (product) => {
@@ -843,6 +927,8 @@ export async function buildWineBusinessLinks({
 
       wines: wineRows.length,
 
+      aliases: aliases.length,
+
       metrics,
 
       exactSample: rows
@@ -875,7 +961,9 @@ export async function linkExactWineBusinessIds({
   supabase,
   linkRows,
 }) {
-  const exactRows = linkRows.filter(
+  const exactRows = (
+    linkRows || []
+  ).filter(
     (row) =>
       row.status === "exact" &&
       row.wine?.id
@@ -884,69 +972,221 @@ export async function linkExactWineBusinessIds({
   if (exactRows.length === 0) {
     return {
       linked: 0,
-
       failed: 0,
-
       errors: [],
     };
   }
 
-  let linked = 0;
+  const aliases = Array.from(
+    new Map(
+      exactRows.map((row) => {
+        const alias = {
+          wine_id: row.wine.id,
+          business_product_id:
+            normalize(row.productId) || null,
+          business_product_number:
+            normalize(row.productNumber) || null,
+          business_barcode:
+            normalize(row.barcode) || null,
+          business_product_name:
+            normalize(row.productName),
+          product_group:
+            normalize(row.productGroup) || null,
+          serving_cl:
+            row.servingCl ?? null,
+          sales_price:
+            row.salesPrice ?? null,
+          source_type:
+            "inventory_linking",
+          updated_at:
+            new Date().toISOString(),
+        };
 
+        const key =
+          alias.business_product_id ||
+          alias.business_product_number ||
+          alias.business_barcode ||
+          `${alias.wine_id}:${normalizeLower(
+            alias.business_product_name
+          )}`;
+
+        return [key, alias];
+      })
+    ).values()
+  );
+
+  let linked = 0;
   const errors = [];
 
-  for (const row of exactRows) {
-    const payload = {
-      business_product_number:
-        row.productNumber || null,
+  for (const alias of aliases) {
+    let lookup = supabase
+      .from("wine_business_aliases")
+      .select("id, wine_id");
 
-      business_barcode:
-        row.barcode || null,
-    };
+    if (alias.business_product_id) {
+      lookup = lookup.eq(
+        "business_product_id",
+        alias.business_product_id
+      );
+    } else if (
+      alias.business_product_number
+    ) {
+      lookup = lookup.eq(
+        "business_product_number",
+        alias.business_product_number
+      );
+    } else if (
+      alias.business_barcode
+    ) {
+      lookup = lookup.eq(
+        "business_barcode",
+        alias.business_barcode
+      );
+    } else {
+      lookup = lookup
+        .eq("wine_id", alias.wine_id)
+        .eq(
+          "business_product_name",
+          alias.business_product_name
+        );
+    }
 
-    const { error } = await supabase
-      .from("wines")
-      .update(payload)
-      .eq("id", row.wine.id);
+    const {
+      data: existingRows,
+      error: lookupError,
+    } = await lookup.limit(20);
 
-    if (error) {
+    if (lookupError) {
       errors.push({
-        wineId: row.wine.id,
-
-        wineName: row.wine.name,
-
-        productName: row.productName,
-
-        error: error.message,
+        wineId: alias.wine_id,
+        productName:
+          alias.business_product_name,
+        error: lookupError.message,
       });
-
       continue;
+    }
+
+    const conflicting =
+      (existingRows || []).find(
+        (row) =>
+          row.wine_id &&
+          row.wine_id !== alias.wine_id
+      );
+
+    if (conflicting) {
+      errors.push({
+        wineId: alias.wine_id,
+        productName:
+          alias.business_product_name,
+        error:
+          "This business product is already linked to another Vaxeron wine.",
+      });
+      continue;
+    }
+
+    const existing =
+      (existingRows || [])[0] || null;
+
+    const { error: saveError } =
+      existing?.id
+        ? await supabase
+            .from("wine_business_aliases")
+            .update(alias)
+            .eq("id", existing.id)
+        : await supabase
+            .from("wine_business_aliases")
+            .insert(alias);
+
+    if (saveError) {
+      errors.push({
+        wineId: alias.wine_id,
+        productName:
+          alias.business_product_name,
+        error: saveError.message,
+      });
+      continue;
+    }
+
+    const {
+      data: currentWine,
+      error: wineLookupError,
+    } = await supabase
+      .from("wines")
+      .select(`
+        business_product_number,
+        business_barcode
+      `)
+      .eq("id", alias.wine_id)
+      .single();
+
+    if (wineLookupError) {
+      errors.push({
+        wineId: alias.wine_id,
+        productName:
+          alias.business_product_name,
+        error: wineLookupError.message,
+      });
+      continue;
+    }
+
+    const winePatch = {};
+
+    if (
+      !currentWine?.business_product_number &&
+      alias.business_product_number
+    ) {
+      winePatch.business_product_number =
+        alias.business_product_number;
+    }
+
+    if (
+      !currentWine?.business_barcode &&
+      alias.business_barcode
+    ) {
+      winePatch.business_barcode =
+        alias.business_barcode;
+    }
+
+    if (
+      Object.keys(winePatch).length > 0
+    ) {
+      const { error: wineUpdateError } =
+        await supabase
+          .from("wines")
+          .update(winePatch)
+          .eq("id", alias.wine_id);
+
+      if (wineUpdateError) {
+        errors.push({
+          wineId: alias.wine_id,
+          productName:
+            alias.business_product_name,
+          error: wineUpdateError.message,
+        });
+        continue;
+      }
     }
 
     linked += 1;
   }
 
   console.log(
-    "VAXERON BUSINESS LINKS SAVED:",
+    "VAXERON BUSINESS ALIASES LINKED:",
     {
-      requested: exactRows.length,
-
+      requested: aliases.length,
       linked,
-
       failed: errors.length,
-
       errors,
     }
   );
 
   return {
     linked,
-
     failed: errors.length,
-
     errors,
   };
 }
+
 /* =======================================================
    AGGREGATE MATCHED INVENTORY TARGETS
 ======================================================= */
@@ -1034,8 +1274,13 @@ async function saveWineBusinessAliases({
   const aliasRows = matchedRows
     .filter(
       (row) =>
-        row.isByTheGlass &&
-        row.wine?.id
+        row.wine?.id &&
+        (
+          normalize(row.productId) ||
+          normalize(row.productNumber) ||
+          normalize(row.barcode) ||
+          normalize(row.productName)
+        )
     )
     .map((row) => ({
       wine_id: row.wine.id,
@@ -1053,7 +1298,10 @@ async function saveWineBusinessAliases({
         row.servingCl ?? null,
       sales_price:
         row.salesPrice ?? null,
-      source_type: "products_report",
+      source_type:
+        row.isByTheGlass
+          ? "products_report_btg"
+          : "inventory_reconciliation",
       updated_at:
         new Date().toISOString(),
     }));
@@ -1334,6 +1582,7 @@ export async function reconcileWineInventory({
   const [
     locationsResult,
     winesResult,
+    aliases,
   ] = await Promise.all([
     supabase
       .from("wine_locations")
@@ -1352,6 +1601,10 @@ export async function reconcileWineInventory({
         business_product_number,
         business_barcode
       `),
+
+    loadWineBusinessAliases(
+      supabase
+    ),
   ]);
 
   if (locationsResult.error) {
@@ -1372,7 +1625,10 @@ export async function reconcileWineInventory({
     buildLocationIndex(locations);
 
   const wineIndexes =
-    buildWineIndexes(wines);
+    buildWineIndexes(
+      wines,
+      aliases
+    );
 
   const matchedRows =
     businessRows.map((row) => {
@@ -1583,11 +1839,16 @@ export async function reconcileWineInventory({
     }
   );
 
-  const businessAliasResult =
-    await saveWineBusinessAliases({
-      supabase,
-      matchedRows,
-    });
+  /*
+   * Reconciliation is a read-only preview.
+   * Business aliases are saved only after an explicit linking action.
+   */
+  const businessAliasResult = {
+    detected: 0,
+    saved: 0,
+    failed: 0,
+    errors: [],
+  };
 
   const btgSuggestionResult =
     await saveBtgSuggestions({
@@ -1782,6 +2043,9 @@ const reconciliation = [
   ),
 
       winesLoaded: wines.length,
+
+      aliasesLoaded:
+        aliases.length,
 
       inventoryRows:
         inventoryRows.length,

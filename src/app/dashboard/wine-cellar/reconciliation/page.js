@@ -10,6 +10,11 @@ import {
 
 import { createClient } from "@supabase/supabase-js";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
 import {
   buildWineBusinessLinks,
   linkExactWineBusinessIds,
@@ -1014,17 +1019,6 @@ useEffect(() => {
 
     try {
 
-      const supabase =
-        createClient(
-
-          process.env
-            .NEXT_PUBLIC_SUPABASE_URL,
-
-          process.env
-            .NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-        );
-
       const result =
         await buildWineBusinessLinks({
 
@@ -1125,17 +1119,6 @@ useEffect(() => {
     setMatchingError("");
 
     try {
-
-      const supabase =
-        createClient(
-
-          process.env
-            .NEXT_PUBLIC_SUPABASE_URL,
-
-          process.env
-            .NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-        );
 
       const result =
         await reconcileWineInventory({
@@ -1394,59 +1377,22 @@ useEffect(() => {
     ]);
 
     /* =====================================================
-   SAFE EXACT BUSINESS LINKS
+   EXACT BUSINESS LINKS
 ===================================================== */
 
 const safeExactBusinessLinks =
 useMemo(() => {
 
-  const exactRows =
-    businessLinks.filter(
-      (row) =>
-        row.status === "exact" &&
-        row.wine?.id
-    );
-
-  const wineUsage = new Map();
-
-  exactRows.forEach((row) => {
-
-    const wineId = row.wine.id;
-
-    wineUsage.set(
-      wineId,
-      (
-        wineUsage.get(wineId) || 0
-      ) + 1
-    );
-
-  });
-
-  return exactRows.filter(
+  return businessLinks.filter(
     (row) =>
-      wineUsage.get(
-        row.wine.id
-      ) === 1
+      row.status === "exact" &&
+      row.wine?.id
   );
 
 }, [
   businessLinks,
 ]);
 
-const exactLinkConflicts =
-useMemo(() => {
-
-  return (
-    Number(
-      businessLinkMetrics?.exact || 0
-    ) -
-    safeExactBusinessLinks.length
-  );
-
-}, [
-  businessLinkMetrics,
-  safeExactBusinessLinks,
-]);
     /* =====================================================
    RECONCILIATION FILTER
 ===================================================== */
@@ -1529,7 +1475,7 @@ async function linkExactMatches() {
 
   const confirmed = window.confirm(
 
-    `Link ${safeExactBusinessLinks.length} exact business wine matches to Vaxeron?\n\nOnly business product numbers and barcodes will be updated. Inventory quantities will not change.`
+    `Link ${safeExactBusinessLinks.length} exact business wine matches to Vaxeron?\n\nEach business product will be saved as an alias. Inventory quantities will not change.`
 
   );
 
@@ -1545,17 +1491,6 @@ async function linkExactMatches() {
 
   try {
 
-    const supabase =
-      createClient(
-
-        process.env
-          .NEXT_PUBLIC_SUPABASE_URL,
-
-        process.env
-          .NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-      );
-
     const result =
       await linkExactWineBusinessIds({
 
@@ -1567,13 +1502,16 @@ async function linkExactMatches() {
       });
 
     if (result.failed > 0) {
+      const firstError =
+        result.errors?.[0]?.error || "";
 
       throw new Error(
-
-        `${result.failed} wine links could not be saved.`
-
+        `${result.failed} wine links could not be saved.${
+          firstError
+            ? ` First error: ${firstError}`
+            : ""
+        }`
       );
-
     }
 
     setBusinessLinkMessage(
@@ -1700,11 +1638,6 @@ async function applyInventoryChanges() {
   setApplyInventoryMessage("");
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
-
     if (isAmountReport) {
       const result =
         await applyWineInventoryCostValuation({
@@ -1856,11 +1789,6 @@ setLinkingWines(false);
     setLoadingManualWines(true);
 
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
-
       const { data, error } = await supabase
         .from("wines")
         .select(`
@@ -1917,40 +1845,22 @@ setLinkingWines(false);
     setBusinessLinkMessage("");
 
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
+      const result =
+        await linkExactWineBusinessIds({
+          supabase,
+          linkRows: [
+            {
+              ...row,
+              status: "exact",
+            },
+          ],
+        });
 
-      const existingProductNumber = normalize(
-        row.wine.business_product_number
-      );
-
-      const currentProductNumber = normalize(
-        row.productNumber
-      );
-
-      if (
-        existingProductNumber &&
-        existingProductNumber !== currentProductNumber
-      ) {
+      if (result.failed > 0) {
         throw new Error(
-          `Suggested wine is already linked to business product ${existingProductNumber}.`
+          result.errors?.[0]?.error ||
+            "Unable to save the suggested wine alias."
         );
-      }
-
-      const { error } = await supabase
-        .from("wines")
-        .update({
-          business_product_number:
-            row.productNumber || null,
-          business_barcode:
-            row.barcode || null,
-        })
-        .eq("id", row.wine.id);
-
-      if (error) {
-        throw error;
       }
 
       await refreshWineLinkingWorkspace(supabase);
@@ -1979,82 +1889,43 @@ setLinkingWines(false);
       return;
     }
 
-    const existingProductNumber = normalize(
-      wine.business_product_number
-    );
-
-    const currentProductNumber = normalize(
-      manualLinkRow.productNumber
-    );
-
-    if (
-      existingProductNumber &&
-      existingProductNumber !== currentProductNumber
-    ) {
-      setManualLinkError(
-        `This Vaxeron wine is already linked to business product ${existingProductNumber}. Choose another wine.`
-      );
-      return;
-    }
-
     setSavingManualLink(true);
     setManualLinkError("");
     setBusinessLinkError("");
     setBusinessLinkMessage("");
 
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
+      const result =
+        await linkExactWineBusinessIds({
+          supabase,
+          linkRows: [
+            {
+              ...manualLinkRow,
+              status: "exact",
+              wine,
+            },
+          ],
+        });
 
-      const { error } = await supabase
-        .from("wines")
-        .update({
-          business_product_number:
-            manualLinkRow.productNumber || null,
-          business_barcode:
-            manualLinkRow.barcode || null,
-        })
-        .eq("id", wine.id);
-
-      if (error) {
-        throw error;
+      if (result.failed > 0) {
+        throw new Error(
+          result.errors?.[0]?.error ||
+            "Unable to save this wine alias."
+        );
       }
 
-      const linkingResult =
-        await buildWineBusinessLinks({
-          supabase,
-          reportRows: rows,
-        });
-
-      setBusinessLinks(
-        linkingResult.rows || []
-      );
-
-      setBusinessLinkMetrics(
-        linkingResult.metrics || null
-      );
-
-      const reconciliationResult =
-        await reconcileWineInventory({
-          supabase,
-          reportRows: rows,
-        });
-
-      setReconciliation(
-        reconciliationResult.rows || []
-      );
-
-      setReconciliationMetrics(
-        reconciliationResult.metrics || null
+      await refreshWineLinkingWorkspace(
+        supabase
       );
 
       setBusinessLinkMessage(
         `${manualLinkRow.productName} linked to ${wine.name}.`
       );
 
-      closeManualWineLink();
+      setManualLinkRow(null);
+      setManualWineSearch("");
+      setManualWineOptions([]);
+      setManualLinkError("");
       setWorkspacePage(1);
     } catch (manualError) {
       console.error(
@@ -2122,11 +1993,6 @@ setLinkingWines(false);
   setBusinessLinkMessage("");
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
-
     const {
       data: { user },
       error: userError,
@@ -2191,6 +2057,25 @@ setLinkingWines(false);
       throw createWineError;
     }
 
+    const aliasResult =
+      await linkExactWineBusinessIds({
+        supabase,
+        linkRows: [
+          {
+            ...manualLinkRow,
+            status: "exact",
+            wine: createdWine,
+          },
+        ],
+      });
+
+    if (aliasResult.failed > 0) {
+      throw new Error(
+        aliasResult.errors?.[0]?.error ||
+          "Wine was created, but its business alias could not be saved."
+      );
+    }
+
     await refreshWineLinkingWorkspace(
       supabase
     );
@@ -2222,22 +2107,6 @@ setLinkingWines(false);
     const query = normalizeLower(manualWineSearch);
 
     const rowsToShow = manualWineOptions.filter((wine) => {
-      const existingProductNumber = normalize(
-        wine.business_product_number
-      );
-
-      const currentProductNumber = normalize(
-        manualLinkRow?.productNumber
-      );
-
-      const available =
-        !existingProductNumber ||
-        existingProductNumber === currentProductNumber;
-
-      if (!available) {
-        return false;
-      }
-
       if (!query) {
         return true;
       }
@@ -2257,7 +2126,6 @@ setLinkingWines(false);
   }, [
     manualWineOptions,
     manualWineSearch,
-    manualLinkRow,
   ]);
 
   /* =====================================================
@@ -2943,14 +2811,6 @@ const matchedValuationCount =
                               )} Exact Matches`}
                         </button>
                       </div>
-
-                      {exactLinkConflicts > 0 && (
-                        <div className="px-5 py-3 border-b border-amber-200 bg-amber-50 text-[10px] text-amber-700">
-                          {formatNumber(exactLinkConflicts)} exact-looking
-                          matches were excluded because multiple business
-                          products resolve to the same Vaxeron wine.
-                        </div>
-                      )}
 
                       <WorkspaceTable
                         mode="linking"
