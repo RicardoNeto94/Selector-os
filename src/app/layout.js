@@ -3,29 +3,48 @@ import "../styles/theme.css";
 import ServiceWorkerRegister from "../components/ServiceWorkerRegister";
 
 export const metadata = {
-  title: "Vexaron Systems",
-  description: "Powerfull hospitality system.",
+  title: {
+    default: "VAXERON — The operating system for modern hospitality",
+    template: "%s | VAXERON",
+  },
+  description:
+    "VAXERON unifies guest experience, wine programmes, inventory, and operational workflows into one connected platform for modern hospitality.",
 
   icons: {
     icon: "/favicon.ico",
     apple: "/burman-icon.png",
   },
+
+  openGraph: {
+    title: "VAXERON — The operating system for modern hospitality",
+    description:
+      "VAXERON unifies guest experience, wine programmes, inventory, and operational workflows into one connected platform for modern hospitality.",
+    url: "https://vaxeron.com",
+    siteName: "VAXERON",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "VAXERON — operational infrastructure for modern hospitality",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "VAXERON — The operating system for modern hospitality",
+    description:
+      "VAXERON unifies guest experience, wine programmes, inventory, and operational workflows into one connected platform for modern hospitality.",
+    images: ["/og-image.png"],
+  },
 };
 
-export function generateViewport({ params }) {
-
-  const slug = params?.slug || "";
-
-  if (slug.includes("burman")) {
-    return { themeColor: "#eae6e2" };
-  }
-
-  if (slug.includes("foxden")) {
-    return { themeColor: "#07090c" };
-  }
-
-  return { themeColor: "#eae6e2" };
-}
+export const viewport = {
+  themeColor: "#eae6e2",
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -41,7 +60,6 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
       </head>
 
-      {/* 🔥 FIXED: removed hardcoded background */}
       <body>
         <div id="app-scroll" className="app-container">
           {children}
