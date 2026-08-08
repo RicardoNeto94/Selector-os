@@ -56,41 +56,57 @@ export default function PwaRefreshControl() {
     setLoading(false);
   }
 
-  async function publishRefresh() {
-    if (publishing) return;
+async function publishRefresh() {
+  if (publishing) return;
 
-    setPublishing(true);
-    setMessage("");
-    setError("");
+  setPublishing(true);
+  setMessage("");
+  setError("");
 
-    const { data, error: publishError } = await supabase.rpc(
-      "publish_pwa_refresh",
-      {
-        p_channel: CHANNEL,
-      }
-    );
+  try {
+    const response = await fetch("/api/pwa-refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    if (publishError) {
-      console.error("PWA REFRESH PUBLISH ERROR:", publishError);
-      setError(
-        publishError.message ||
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error ||
           "Unable to refresh the Burman room PWA."
       );
-      setPublishing(false);
-      return;
     }
 
-    const row = Array.isArray(data) ? data[0] : data;
+    setVersion(result?.version ?? null);
+    setUpdatedAt(
+      result?.updated_at ??
+        new Date().toISOString()
+    );
 
-    setVersion(row?.version ?? null);
-    setUpdatedAt(row?.updated_at ?? new Date().toISOString());
-    setMessage("Refresh signal sent to all room iPads.");
-    setPublishing(false);
+    setMessage(
+      "Refresh signal sent to all room iPads."
+    );
 
     window.setTimeout(() => {
       setMessage("");
     }, 5000);
+  } catch (publishError) {
+    console.error(
+      "PWA REFRESH PUBLISH ERROR:",
+      publishError
+    );
+
+    setError(
+      publishError?.message ||
+        "Unable to refresh the Burman room PWA."
+    );
+  } finally {
+    setPublishing(false);
   }
+}
 
   return (
     <section className="mt-7 rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] px-5 py-5 md:px-6">
