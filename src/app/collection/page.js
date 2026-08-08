@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function CollectionPage() {
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 const ALLERGENS = [
@@ -27,7 +27,7 @@ const ALLERGENS = [
 ];
 
 export default function NewDishPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);

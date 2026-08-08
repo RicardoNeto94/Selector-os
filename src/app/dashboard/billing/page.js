@@ -1,20 +1,13 @@
 // src/app/dashboard/billing/page.js
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 import BillingClient from "./BillingClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function BillingPage() {
-
-  // ✅ FIX (Next.js 14)
-  const cookieStore = await cookies();
-
-  const supabase = createServerComponentClient({
-    cookies: () => cookieStore
-  });
+  const supabase = await createClient();
 
   const {
     data: { user },

@@ -4,10 +4,10 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function WineMenuEditor() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const params = useParams();
   const slug = params.slug;
 

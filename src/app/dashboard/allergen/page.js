@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AllergensPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [allergens, setAllergens] = useState([]);
   const [loading, setLoading] = useState(true);

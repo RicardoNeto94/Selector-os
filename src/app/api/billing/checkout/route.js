@@ -1,11 +1,11 @@
 // src/app/api/billing/checkout/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 import { stripe } from "../../../../lib/stripe";
 
 export async function POST(req) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   // 1) Auth guard
   const {

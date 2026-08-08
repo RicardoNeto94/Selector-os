@@ -5,21 +5,19 @@ export const dynamic = "force-dynamic";
 import {
   useEffect,
   useState,
-} from "react";
+  } from "react";
 
 import {
   useRouter,
-} from "next/navigation";
+  } from "next/navigation";
 
-import {
-  createClientComponentClient,
-} from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 import "../../styles/auth.css";
 
 export default function InvitePage() {
   const supabase =
-    createClientComponentClient();
+    createClient();
 
   const router = useRouter();
 

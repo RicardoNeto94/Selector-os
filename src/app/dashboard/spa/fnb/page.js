@@ -4,11 +4,11 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SpaSelfCarePage() {
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");

@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function MenuEditorPage() {
 
   const { slug } = useParams();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [menu, setMenu] = useState(null);
   const [categories, setCategories] = useState([]);

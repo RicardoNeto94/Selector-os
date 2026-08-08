@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import LogoUploader from "../dashboard/settings/LogoUploader";
 
 function slugify(name) {
@@ -17,7 +17,7 @@ function slugify(name) {
 }
 
 export default function OnboardingClient({ existingRestaurant }) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
 

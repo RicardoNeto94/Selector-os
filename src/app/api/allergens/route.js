@@ -1,11 +1,11 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from "@/lib/supabase/server";
 import { cookies } from 'next/headers';
 
 // GET:
 // - /api/allergens              -> full allergen catalog
 // - /api/allergens?dish_id=xxx  -> allergens for that dish
 export async function GET(request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
   const { searchParams } = new URL(request.url);
   const dishId = searchParams.get('dish_id');
 
@@ -72,7 +72,7 @@ export async function GET(request) {
 
 // POST: { dish_id, allergen_code }
 export async function POST(request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   const {
     data: { user },

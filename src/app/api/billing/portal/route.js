@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
 let stripe = null;
@@ -21,7 +21,7 @@ export async function POST(request) {
       );
     }
 
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createClient();
 
     const {
       data: { user },

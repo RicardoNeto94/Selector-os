@@ -5,11 +5,11 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SpaCategoryProductsPage() {
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const params = useParams();
 
   const categoryId = params.categoryId;

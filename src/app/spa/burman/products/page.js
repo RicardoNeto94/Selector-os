@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import "../spa.css";
 
 export default function BurmanSpaProductsPage() {
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);

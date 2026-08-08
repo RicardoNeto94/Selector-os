@@ -1,11 +1,11 @@
 // src/app/api/menu/publish/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 import { getRestaurantPlan, getMenuLimitForPlan } from "../../../../lib/planLimits";
 
 export async function POST(req) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   const {
     data: { user },

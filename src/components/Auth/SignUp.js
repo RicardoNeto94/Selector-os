@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from "@/lib/supabase/client";
 import cn from 'classnames';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ const SignUpSchema = Yup.object().shape({
 });
 
 const SignUp = () => {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 

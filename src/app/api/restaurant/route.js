@@ -1,8 +1,8 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from "@/lib/supabase/server";
 import { cookies } from 'next/headers';
 
 export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -47,7 +47,7 @@ export async function GET() {
 
 // PATCH: update restaurant info from onboarding
 export async function PATCH(request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   const {
     data: { user },

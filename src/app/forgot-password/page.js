@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import "../../styles/auth.css";
 
 export default function ForgotPasswordPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);

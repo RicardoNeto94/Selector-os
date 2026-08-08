@@ -1,9 +1,9 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from "@/lib/supabase/server";
 import { cookies } from 'next/headers';
 
 // GET: return all dishes for the current user's main menu
 export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   // 1) Get logged-in user
   const {
@@ -58,7 +58,7 @@ export async function GET() {
 
 // POST: create a new dish in the current user's main menu
 export async function POST(request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   // 1) Get logged-in user
   const {

@@ -1,13 +1,13 @@
 // src/app/onboarding/page.js
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 import OnboardingClient from "./OnboardingClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   // 1) Auth guard
   const {

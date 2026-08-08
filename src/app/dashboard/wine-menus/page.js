@@ -3,11 +3,11 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function WineMenusPage() {
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [menus, setMenus] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
