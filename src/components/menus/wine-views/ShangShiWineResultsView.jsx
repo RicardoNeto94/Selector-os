@@ -257,6 +257,9 @@ export default function ShangShiWineResultsView({
   const [filtersOpen, setFiltersOpen] =
     useState(false);
 
+  const [moreOpen, setMoreOpen] =
+    useState(false);
+
   const [selectedWine, setSelectedWine] =
     useState(null);
 
@@ -447,26 +450,40 @@ export default function ShangShiWineResultsView({
     });
   }, [wineRows]);
 
-  const primaryCategories = useMemo(() => {
-    return categories.filter(
-      (category) =>
-        ![
-          "sake",
-          "soft-drinks",
-          "soft drinks",
-        ].includes(normalizeLower(category))
-    );
+  const visibleCategories = useMemo(() => {
+    const preferred = [
+      "sparkling",
+      "white",
+      "red",
+    ];
+
+    return preferred
+      .map((type) =>
+        categories.find(
+          (category) =>
+            normalizeLower(category) === type
+        )
+      )
+      .filter(Boolean);
   }, [categories]);
 
-  const secondaryCategories = useMemo(() => {
-    return categories.filter((category) =>
-      [
-        "sake",
-        "soft-drinks",
-        "soft drinks",
-      ].includes(normalizeLower(category))
+  const moreCategories = useMemo(() => {
+    const visible = new Set(
+      visibleCategories.map((category) =>
+        normalizeLower(category)
+      )
     );
-  }, [categories]);
+
+    return categories.filter(
+      (category) =>
+        !visible.has(
+          normalizeLower(category)
+        )
+    );
+  }, [
+    categories,
+    visibleCategories,
+  ]);
 
   /* =====================================================
      FILTERED RESULTS
@@ -563,7 +580,7 @@ export default function ShangShiWineResultsView({
         ? `${displayWineType(
             activeWineType
           )} Wines`
-        : "All Selections";
+        : "Wine Collection";
 
   const activeFilterCount = [
     localFilters.country,
@@ -579,6 +596,7 @@ export default function ShangShiWineResultsView({
 
   function selectCategory(category) {
     setSelectedWine(null);
+    setMoreOpen(false);
 
     setLocalFilters((current) => ({
       ...current,
@@ -589,6 +607,7 @@ export default function ShangShiWineResultsView({
 
   function selectByTheGlass() {
     setSelectedWine(null);
+    setMoreOpen(false);
 
     setLocalFilters((current) => ({
       ...current,
@@ -656,7 +675,7 @@ export default function ShangShiWineResultsView({
                 min-h-[44px]
                 items-center
                 gap-2
-                text-[11px]
+                text-[12px]
                 uppercase
                 tracking-[0.18em]
                 text-[#E3C588]
@@ -727,7 +746,7 @@ export default function ShangShiWineResultsView({
               className="
                 mt-8
                 space-y-2
-                text-[16px]
+                text-[20px]
                 leading-[1.55]
                 text-[#E7DDC9]/75
               "
@@ -826,9 +845,9 @@ export default function ShangShiWineResultsView({
               </section>
             )}
 
-            <section className="border-t border-[#C9A96A]/12 pt-8">
+            <section className="border-t border-[#C9A96A]/[0.055] pt-8">
               {showBottlePrice && (
-                <div className="flex min-h-[58px] items-center justify-between gap-6 border-b border-[#C9A96A]/10 py-4">
+                <div className="flex min-h-[58px] items-center justify-between gap-6 border-b border-[#C9A96A]/10 py-7">
                   <div>
                     <div className="text-[15px] text-[#E7DDC9]/78">
                       Bottle
@@ -910,76 +929,72 @@ export default function ShangShiWineResultsView({
         scrollbarWidth: "none",
       }}
     >
-      <div className="mx-auto min-h-full w-full max-w-[1180px] px-5 pb-20 pt-4 sm:px-7 lg:px-9">
-        {/* COMPACT HEADER */}
+      <div className="mx-auto min-h-full w-full max-w-[1080px] px-6 pb-24 pt-5 sm:px-30 lg:px-14">
+        {/* AMAN-STYLE HEADER */}
 
-        <header className="mb-3">
-          <div className="flex min-h-[52px] items-center justify-between gap-5">
+        <header className="mb-6">
+          <div className="grid min-h-[132px] grid-cols-[1fr_auto_1fr] items-start gap-4">
             <button
               type="button"
               onClick={onBack}
               className="
+                mt-3
                 flex
                 min-h-[44px]
                 items-center
                 gap-2
+                justify-self-start
                 text-[11px]
                 uppercase
                 tracking-[0.18em]
                 text-[#E3C588]
               "
             >
-              <span className="text-[20px]">
-                ‹
-              </span>
+              <span className="text-[20px]">‹</span>
               Back
             </button>
 
-            <div className="flex min-w-0 items-center gap-3">
-  <img
-    src="/shangshi-logo.png"
-    alt="Shang Shi"
-    className="
-      h-11
-      w-auto
-      shrink-0
-      object-contain
-      opacity-100
-      sm:h-12
-    "
-  />
+            <div className="flex min-w-0 flex-col items-center text-center">
+              <img
+                src="/shangshi-logo.png"
+                alt="Shang Shi"
+                className="
+                  h-12
+                  w-auto
+                  shrink-0
+                  object-contain
+                  sm:h-14
+                "
+              />
 
-  <div className="min-w-0">
-    <div
-      className="
-        truncate
-        text-[9px]
-        uppercase
-        tracking-[0.2em]
-        text-[#D8B873]
-      "
-    >
-      Shang Shi
-    </div>
+              <div
+                className="
+                  mt-2
+                  text-[9px]
+                  uppercase
+                  tracking-[0.24em]
+                  text-[#D8B873]
+                "
+              >
+                Shang Shi
+              </div>
 
-    <div
-      className="
-        mt-0.5
-        truncate
-        font-serif
-        text-[19px]
-        font-light
-        tracking-[0.01em]
-        text-[#F4F0E8]
-        sm:text-[21px]
-      "
-    >
-      Wine Collection
-    </div>
-  </div>
-</div>
+              <div
+                className="
+                  mt-1
+                  font-serif
+                  text-[24px]
+                  font-light
+                  tracking-[-0.01em]
+                  text-[#F4F0E8]
+                  sm:text-[28px]
+                "
+              >
+                Wine Collection
+              </div>
+            </div>
 
-            <div className="flex items-center gap-1">
+            <div className="mt-2 flex items-center justify-self-end gap-1">
               <button
                 type="button"
                 aria-label="Search wines"
@@ -1007,11 +1022,7 @@ export default function ShangShiWineResultsView({
                   stroke="currentColor"
                   strokeWidth="1.5"
                 >
-                  <circle
-                    cx="11"
-                    cy="11"
-                    r="6.5"
-                  />
+                  <circle cx="11" cy="11" r="6.5" />
                   <path d="m16 16 4 4" />
                 </svg>
               </button>
@@ -1073,7 +1084,7 @@ export default function ShangShiWineResultsView({
           </div>
 
           {searchOpen && (
-            <div className="mt-4">
+            <div className="mx-auto mt-5 max-w-[760px]">
               <div className="relative">
                 <svg
                   viewBox="0 0 24 24"
@@ -1085,16 +1096,12 @@ export default function ShangShiWineResultsView({
                     h-5
                     w-5
                     -translate-y-1/2
-                    text-[#D7C7A8]/68
+                    text-[#D7C7A8]/56
                   "
                   stroke="currentColor"
                   strokeWidth="1.5"
                 >
-                  <circle
-                    cx="11"
-                    cy="11"
-                    r="6.5"
-                  />
+                  <circle cx="11" cy="11" r="6.5" />
                   <path d="m16 16 4 4" />
                 </svg>
 
@@ -1105,28 +1112,26 @@ export default function ShangShiWineResultsView({
                     setLocalFilters(
                       (current) => ({
                         ...current,
-                        name:
-                          event.target
-                            .value,
+                        name: event.target.value,
                       })
                     )
                   }
                   placeholder="Search producer, wine, region or grape"
                   className="
-                    h-13
+                    h-[54px]
                     w-full
                     rounded-xl
                     border
-                    border-[#C9A96A]/16
-                    bg-[#00150f]/55
+                    border-[#C9A96A]/14
+                    bg-[#00150f]/45
                     py-4
                     pl-12
                     pr-12
                     text-[15px]
                     text-[#F4F0E8]
                     outline-none
-                    placeholder:text-[#C9A96A]/32
-                    focus:border-[#C9A96A]/35
+                    placeholder:text-[#C9A96A]/28
+                    focus:border-[#C9A96A]/32
                   "
                 />
 
@@ -1153,7 +1158,7 @@ export default function ShangShiWineResultsView({
                       items-center
                       justify-center
                       text-[20px]
-                      text-[#C9A96A]/60
+                      text-[#C9A96A]/55
                     "
                   >
                     ×
@@ -1168,27 +1173,26 @@ export default function ShangShiWineResultsView({
 
         <nav
           className="
-            sticky
-            top-0
+            relative
             z-40
-            -mx-5
+            -mx-6
             border-b
             border-[#C9A96A]/[0.08]
-            bg-[#002018]/88
+            bg-transparent
             px-5
-            backdrop-blur-2xl
-            sm:-mx-7
+            
+            sm:-mx-10
             sm:px-7
-            lg:-mx-9
+            lg:-mx-14
             lg:px-9
           "
         >
           <div
             className="
               flex
-              min-h-[54px]
+              min-h-[62px]
               items-center
-              gap-7
+              gap-10
               overflow-x-auto
               whitespace-nowrap
               [scrollbar-width:none]
@@ -1203,7 +1207,7 @@ export default function ShangShiWineResultsView({
               className={`
                 relative
                 flex
-                min-h-[54px]
+                min-h-[62px]
                 shrink-0
                 items-center
                 text-[11px]
@@ -1231,7 +1235,7 @@ export default function ShangShiWineResultsView({
               className={`
                 relative
                 flex
-                min-h-[54px]
+                min-h-[62px]
                 shrink-0
                 items-center
                 text-[11px]
@@ -1253,7 +1257,7 @@ export default function ShangShiWineResultsView({
               )}
             </button>
 
-            {primaryCategories.map((category) => {
+            {visibleCategories.map((category) => {
               const active =
                 matchesExact(
                   activeWineType,
@@ -1271,7 +1275,7 @@ export default function ShangShiWineResultsView({
                   className={`
                     relative
                     flex
-                    min-h-[54px]
+                    min-h-[62px]
                     shrink-0
                     items-center
                     text-[11px]
@@ -1280,13 +1284,11 @@ export default function ShangShiWineResultsView({
                     ${
                       active
                         ? "text-[#E3C588]"
-                        : "text-[#D8CBAE]/72"
+                        : "text-[#D8CBAE]/64"
                     }
                   `}
                 >
-                  {displayWineType(
-                    category
-                  )}
+                  {displayWineType(category)}
 
                   {active && (
                     <span className="absolute inset-x-0 bottom-0 h-px bg-[#E3C588]" />
@@ -1295,101 +1297,147 @@ export default function ShangShiWineResultsView({
               );
             })}
 
-            {secondaryCategories.length > 0 && (
-              <>
-                <span className="h-5 w-px shrink-0 bg-[#C9A96A]/14" />
+            {moreCategories.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setMoreOpen(
+                    (current) => !current
+                  )
+                }
+                className={`
+                  relative
+                  flex
+                  min-h-[62px]
+                  shrink-0
+                  items-center
+                  gap-2
+                  text-[11px]
+                  uppercase
+                  tracking-[0.14em]
+                  ${
+                    moreCategories.some(
+                      (category) =>
+                        matchesExact(
+                          activeWineType,
+                          category
+                        )
+                    )
+                      ? "text-[#E3C588]"
+                      : "text-[#D8CBAE]/64"
+                  }
+                `}
+              >
+                More
+                <span className="text-[13px] opacity-60">
+                  {moreOpen ? "⌃" : "⌄"}
+                </span>
 
-                {secondaryCategories.map((category) => {
-                  const active =
+                {moreCategories.some(
+                  (category) =>
                     matchesExact(
                       activeWineType,
                       category
-                    ) &&
-                    !localFilters.service_type;
-
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() =>
-                        selectCategory(category)
-                      }
-                      className={`
-                        relative
-                        flex
-                        min-h-[54px]
-                        shrink-0
-                        items-center
-                        text-[11px]
-                        uppercase
-                        tracking-[0.14em]
-                        ${
-                          active
-                            ? "text-[#E3C588]"
-                            : "text-[#D8CBAE]/58"
-                        }
-                      `}
-                    >
-                      {displayWineType(category)}
-
-                      {active && (
-                        <span className="absolute inset-x-0 bottom-0 h-px bg-[#E3C588]" />
-                      )}
-                    </button>
-                  );
-                })}
-              </>
+                    )
+                ) && (
+                  <span className="absolute inset-x-0 bottom-0 h-px bg-[#E3C588]" />
+                )}
+              </button>
             )}
           </div>
+
+          {moreOpen && (
+            <div className="border-t border-[#C9A96A]/[0.06] py-3">
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {moreCategories.map(
+                  (category) => {
+                    const active =
+                      matchesExact(
+                        activeWineType,
+                        category
+                      ) &&
+                      !localFilters.service_type;
+
+                    return (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() =>
+                          selectCategory(
+                            category
+                          )
+                        }
+                        className={`
+                          min-h-[36px]
+                          text-[10px]
+                          uppercase
+                          tracking-[0.13em]
+                          ${
+                            active
+                              ? "text-[#E3C588]"
+                              : "text-[#D8CBAE]/52"
+                          }
+                        `}
+                      >
+                        {displayWineType(
+                          category
+                        )}
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            </div>
+          )}
         </nav>
 
-        {/* SECTION HEADING */}
+        {/* COLLECTION INTRO */}
 
-        <section className="pb-3 pt-6">
-          <h1
-            className="
-              font-serif
-              text-[28px]
-              font-light
-              tracking-[-0.015em]
-              text-[#F4F0E8]
-            "
-          >
-            {sectionTitle}
-          </h1>
-
+        <section className="pb-8 pt-14">
           <div
             className="
-              mt-2
-              flex
-              flex-wrap
-              items-center
-              gap-x-3
-              gap-y-1
               text-[10px]
               uppercase
-              tracking-[0.15em]
+              tracking-[0.18em]
               text-[#D8B873]
             "
           >
-            <span>
-              {filteredItems.length}{" "}
-              {filteredItems.length === 1
-                ? "selection"
-                : "selections"}
-            </span>
+            {filteredItems.length}{" "}
+            {filteredItems.length === 1
+              ? "selection"
+              : "selections"}
+          </div>
 
-            <span className="text-[#C9A96A]/28">·</span>
+          <h1
+            className="
+              mt-4
+              max-w-[680px]
+              font-serif
+              text-[30px]
+              font-light
+              leading-[1.22]
+              tracking-[-0.02em]
+              text-[#F4F0E8]
+              sm:text-[34px]
+            "
+          >
+            {localFilters.service_type === "glass"
+              ? "Wines served by the glass."
+              : activeWineType
+                ? `${displayWineType(activeWineType)} wines.`
+                : "Curated wines from around the world."}
+          </h1>
 
-            <span className="text-[#C9A96A]/58">
-              Price low to high
-            </span>
+          <div className="mt-7 flex items-center gap-2">
+            <span className="h-px w-14 bg-[#C9A96A]/45" />
+            <span className="h-2 w-2 rotate-45 border border-[#D8B873]/70" />
+            <span className="h-px w-14 bg-[#C9A96A]/45" />
           </div>
         </section>
 
         {/* WINES */}
 
-        <div className="border-t border-[#C9A96A]/[0.07]">
+        <div className="border-t border-[#C9A96A]/[0.045]">
           {filteredItems.map((item) => {
             const wine =
               getWine(item);
@@ -1414,7 +1462,7 @@ export default function ShangShiWineResultsView({
                 key={rowKey}
                 className="
                   border-b
-                  border-[#C9A96A]/12
+                  border-[#C9A96A]/[0.09]
                 "
               >
                 <button
@@ -1424,11 +1472,11 @@ export default function ShangShiWineResultsView({
                   }
                   className="
                     grid
-                    min-h-[102px]
+                    min-h-[92px]
                     w-full
                     grid-cols-[minmax(0,1fr)_auto]
                     items-center
-                    gap-5
+                    gap-8
                     px-1
                     py-4
                     text-left
@@ -1441,14 +1489,14 @@ export default function ShangShiWineResultsView({
                     {wine.producer && (
                       <div
                         className="
-                          mb-2
+                          mb-3
                           truncate
                           text-[10px]
                           font-medium
                           uppercase
                           leading-[1.3]
-                          tracking-[0.16em]
-                          text-[#D8B873]/72
+                          tracking-[0.12em]
+                          text-[#D7C7A8]/48
                         "
                       >
                         {wine.producer}
@@ -1458,12 +1506,12 @@ export default function ShangShiWineResultsView({
                     <div
                       className="
                         font-serif
-                        text-[17px]
+                        text-[16px]
                         font-light
                         leading-[1.35]
                         tracking-[-0.01em]
                         text-[#F4F0E8]
-                        sm:text-[18px]
+                        sm:text-[22px]
                       "
                     >
                       {wine.name}
@@ -1479,14 +1527,14 @@ export default function ShangShiWineResultsView({
                         gap-y-1
                         text-[11px]
                         leading-[1.45]
-                        text-[#C9A96A]/55
+                        text-[#D7C7A8]/48
                       "
                     >
                       {[
-                        wine.region,
-                        wine.country,
+                        [wine.region, wine.country]
+                          .filter(Boolean)
+                          .join(", "),
                         wine.vintage,
-                        wine.grapes,
                       ]
                         .filter(Boolean)
                         .map(
@@ -1510,14 +1558,14 @@ export default function ShangShiWineResultsView({
                     </div>
                   </div>
 
-                  <div className="flex min-w-[92px] items-center justify-end gap-3">
+                  <div className="flex min-w-[96px] items-center justify-end gap-3">
                     <div className="text-right">
                       {showBottlePrice && (
                         <div>
                           <div
                             className="
                               font-serif
-                              text-[21px]
+                              text-[28px]
                               font-light
                               text-[#E3C588]
                             "
@@ -1585,22 +1633,23 @@ export default function ShangShiWineResultsView({
                         )}
                     </div>
 
-                    <span
-                      className="
-                        ml-1
-                        text-[23px]
-                        font-light
-                        text-[#D8B873]/32
-                      "
-                    >
-                      ›
-                    </span>
+
                   </div>
                 </button>
               </article>
             );
           })}
         </div>
+
+        {filteredItems.length > 0 && (
+          <div className="flex items-center justify-center gap-5 py-14">
+            <span className="h-px w-24 bg-[#C9A96A]/25" />
+            <span className="font-serif text-[22px] text-[#D8B873]/75">
+              SS
+            </span>
+            <span className="h-px w-24 bg-[#C9A96A]/25" />
+          </div>
+        )}
 
         {filteredItems.length === 0 && (
           <div className="py-24 text-center">

@@ -1,8 +1,7 @@
 // src/app/dashboard/menu/page.js
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 
 import MenuDashboardClient from "@/components/dashboard/MenuDashboardClient";
 
@@ -11,11 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function MenuDashboardPage() {
 
   // ✅ FIX auth (same pattern as other pages)
-  const cookieStore = await cookies();
-
-  const supabase = createServerComponentClient({
-    cookies: () => cookieStore
-  });
+  const supabase = await createClient();
 
   const {
     data: { user },

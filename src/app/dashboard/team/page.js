@@ -8,9 +8,7 @@ import {
   useState,
 } from "react";
 
-import {
-  createClientComponentClient,
-} from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -27,7 +25,7 @@ const EMPTY_FORM = {
 
 export default function TeamAccessPage() {
   const supabase =
-    createClientComponentClient();
+    createClient();
 
   const [mounted, setMounted] =
     useState(false);

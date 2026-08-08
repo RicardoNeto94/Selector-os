@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function CreateMenuModal({ isOpen, onClose, restaurantId }) {
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");

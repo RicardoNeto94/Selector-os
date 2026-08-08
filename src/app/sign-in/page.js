@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import "../../styles/auth.css";
 
 export default function SignInPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -37,6 +37,7 @@ export default function SignInPage() {
       }
 
       router.push("/dashboard");
+router.refresh();
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to sign in.");

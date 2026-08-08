@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LogoUploader({ restaurantId, initialLogoUrl }) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl || "");
   const [uploading, setUploading] = useState(false);

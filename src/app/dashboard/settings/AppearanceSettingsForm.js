@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from "@/lib/supabase/client";
 
 export default function AppearanceSettingsForm({
   restaurantId,
@@ -11,7 +11,7 @@ export default function AppearanceSettingsForm({
   initialCardStyle,
   initialDensity,
 }) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [primaryColor, setPrimaryColor] = useState(
     initialPrimaryColor || '#d4af37'

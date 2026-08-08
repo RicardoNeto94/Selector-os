@@ -1,8 +1,7 @@
 // src/app/dashboard/settings/page.js
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/server";
 import AppearanceSettingsForm from "./AppearanceSettingsForm";
 import LogoUploader from "./LogoUploader";
 
@@ -11,11 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
 
   // ✅ FIX (Next.js 14 cookies)
-  const cookieStore = await cookies();
-
-  const supabase = createServerComponentClient({
-    cookies: () => cookieStore
-  });
+  const supabase = await createClient();
 
   const {
     data: { user },

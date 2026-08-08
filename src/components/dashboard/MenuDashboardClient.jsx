@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { QRCodeSVG } from "qrcode.react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import CreateMenuModal from "./CreateMenuModal";
 
 export default function MenuDashboardClient({
@@ -16,7 +16,7 @@ export default function MenuDashboardClient({
 }) {
 
   const [showModal, setShowModal] = useState(false);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const getDomainForMenu = (slug) => {
     if (slug.includes("burman")) return "https://burman.vaxeron.com";

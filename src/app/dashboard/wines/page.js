@@ -18,10 +18,8 @@ import {
   ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 
-import {
-  createClientComponentClient,
-} from "@supabase/auth-helpers-nextjs";
 
+import { createClient } from "@/lib/supabase/client";
 /* =======================================================
    CONSTANTS
 ======================================================= */
@@ -159,8 +157,7 @@ function MetricCard({
 export default function WinesPage() {
   const router = useRouter();
 
-  const supabase =
-    createClientComponentClient();
+  const supabase = createClient();
 
   const [wines, setWines] =
     useState([]);

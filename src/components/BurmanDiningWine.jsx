@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function BurmanDiningWine({ venueName = "" }) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [view, setView] = useState("landing");
   const [category, setCategory] = useState("All");

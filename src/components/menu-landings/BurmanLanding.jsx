@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
 export default function BurmanLanding({ menu }) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const base = `/menu/${menu?.public_slug}`;
   const [roomTab, setRoomTab] = useState("snacks");
 
@@ -37,6 +37,90 @@ export default function BurmanLanding({ menu }) {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [pricesMap, setPricesMap] = useState({});
+  const [pwaRefreshVersion, setPwaRefreshVersion] = useState(null);
+
+  // ================= REMOTE PWA REFRESH =================
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncRefreshVersion() {
+      const { data, error } = await supabase
+        .from("pwa_refresh_signals")
+        .select("version")
+        .eq("channel", "burman_room_pwa")
+        .maybeSingle();
+
+      if (error) {
+        console.error("PWA REFRESH VERSION ERROR:", error);
+        return;
+      }
+
+      if (
+        !cancelled &&
+        data?.version !== null &&
+        data?.version !== undefined
+      ) {
+        setPwaRefreshVersion((currentVersion) => {
+          const nextVersion = Number(data.version);
+
+          if (currentVersion === null) {
+            return nextVersion;
+          }
+
+          return nextVersion !== currentVersion
+            ? nextVersion
+            : currentVersion;
+        });
+      }
+    }
+
+    syncRefreshVersion();
+
+    const refreshChannel = supabase
+      .channel("burman-room-pwa-refresh")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "pwa_refresh_signals",
+          filter: "channel=eq.burman_room_pwa",
+        },
+        (payload) => {
+          const nextVersion = Number(payload.new?.version);
+
+          if (Number.isFinite(nextVersion)) {
+            setPwaRefreshVersion(nextVersion);
+          }
+        },
+      )
+      .subscribe();
+
+    const refreshInterval = window.setInterval(() => {
+      syncRefreshVersion();
+    }, 30000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncRefreshVersion();
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange,
+    );
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(refreshInterval);
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange,
+      );
+      supabase.removeChannel(refreshChannel);
+    };
+  }, []);
 
   useEffect(() => {
     if (!menu?.id) return;
@@ -78,7 +162,7 @@ export default function BurmanLanding({ menu }) {
     };
 
     loadData();
-  }, [menu]);
+  }, [menu, pwaRefreshVersion]);
 
   // ================= EXPERIENCES DATA =================
   useEffect(() => {
@@ -127,7 +211,7 @@ export default function BurmanLanding({ menu }) {
     if (openDining || openRoomService) {
       loadExperiences();
     }
-  }, [openDining, openRoomService]);
+  }, [openDining, openRoomService, pwaRefreshVersion]);
 
   // ================= SCROLL LOCK =================
   // ================= SCROLL LOCK =================
@@ -640,14 +724,19 @@ export default function BurmanLanding({ menu }) {
                         <h4>Opening Hours</h4>
 
                         <div className="vx-spa-info-row">
-                          <span>Spa Facilities</span>
-                          <strong>08:00 — 22:00</strong>
-                        </div>
+  <span>Spa Facilities</span>
+  <strong>08:00 — 21:00</strong>
+</div>
 
-                        <div className="vx-spa-info-row">
-                          <span>Treatments</span>
-                          <strong>10:00 — 21:00</strong>
-                        </div>
+<div className="vx-spa-info-row">
+  <span>Treatments</span>
+  <strong>Mon–Thu · 15:00 — 20:00</strong>
+</div>
+
+<div className="vx-spa-info-row">
+  <span></span>
+  <strong>Fri–Sun · 10:00 — 20:00</strong>
+</div>
                       </article>
 
                       <article className="vx-spa-info-card">
@@ -766,12 +855,13 @@ export default function BurmanLanding({ menu }) {
 
                   <div className="burman-info-row">
                     <span>Spa Facilities</span>
-                    <span>08AM — 10PM</span>
+                    <span>08AM — 9PM</span>
                   </div>
 
                   <div className="burman-info-row">
                     <span>Treatments</span>
-                    <span>10AM — 9PM</span>
+                    <span>Monday - Thursday 3PM — 8PM / </span>
+                    <span>Friday - Sunday 10AM — 8PM</span>
                   </div>
                 </div>
 
@@ -887,7 +977,7 @@ export default function BurmanLanding({ menu }) {
                       <span aria-hidden="true">⌂</span>
                       <p>
                         For reservations or assistance, please contact
-                        <strong> Reception</strong>.
+                        <strong> Reception, Extension 800</strong>.
                       </p>
                     </div>
                   </section>

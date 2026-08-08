@@ -19,6 +19,7 @@ import {
   SparklesIcon,
   ArrowsRightLeftIcon,
   ClipboardDocumentCheckIcon,
+  ArrowUpTrayIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
 
@@ -253,16 +254,18 @@ export default function DashboardLayout({
               label="Movements"
             />
 
+            <NavItem
+              href="/dashboard/wine-cellar/catalogue-import"
+              isActive={isActive(
+                "/dashboard/wine-cellar/catalogue-import"
+              )}
+              icon={ArrowUpTrayIcon}
+              label="Catalogue Importer"
+            />
+
             {/* ===============================================
                 ACCOUNT
             =============================================== */}
-
-            <NavItem
-  href="/dashboard/planner"
-  isActive={isActive("/dashboard/planner")}
-  icon={ClipboardDocumentCheckIcon}
-  label="Planner"
-/>
 
             <SectionLabel>
               Account

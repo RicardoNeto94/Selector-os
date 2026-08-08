@@ -17,9 +17,7 @@ import {
 
 } from "@heroicons/react/24/outline";
 
-import {
-  createClientComponentClient
-} from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 /* =======================================================
    HELPERS
@@ -138,7 +136,7 @@ function displayQuantity(
 export default function WineTransfersPage() {
 
   const supabase =
-    createClientComponentClient();
+    createClient();
 
   const [
     movements,
@@ -322,6 +320,16 @@ supabase
 
       }
 
+      if (
+        inventoryResult.error
+      ) {
+
+        throw (
+          inventoryResult.error
+        );
+
+      }
+
       setMovements(
         movementsResult.data || []
       );
@@ -357,6 +365,31 @@ supabase
   /* =====================================================
    MANUAL TRANSFER
 ===================================================== */
+
+const sourceLocations = useMemo(() => {
+
+  const locationIdsWithStock = new Set(
+    inventory
+      .filter(
+        item =>
+          Number(item.quantity || 0) > 0
+      )
+      .map(
+        item => String(item.location_id)
+      )
+  );
+
+  return locations.filter(
+    location =>
+      locationIdsWithStock.has(
+        String(location.id)
+      )
+  );
+
+}, [
+  inventory,
+  locations
+]);
 
 const sourceInventory = useMemo(() => {
 
@@ -1802,6 +1835,7 @@ async function executeTransfer() {
                     );
 
                     setTransferWineId("");
+                    setTransferWineSearch("");
                     setTransferDestination("");
                     setTransferQty(1);
 
@@ -1825,7 +1859,7 @@ async function executeTransfer() {
                     Select source location
                   </option>
 
-                  {locations.map(
+                  {sourceLocations.map(
                     location => (
 
                       <option

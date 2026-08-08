@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useMemo, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 const PAGE_SIZES = [25, 50, 100];
 const TYPES = ["all", "sparkling", "white", "rosé", "red", "orange", "dessert", "fortified", "sake"];
@@ -12,7 +12,7 @@ const money = (value) =>
   new Intl.NumberFormat("en-EE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(value || 0));
 
 export default function WineInventoryPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [inventory, setInventory] = useState([]);
   const [locations, setLocations] = useState([]);

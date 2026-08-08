@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
 import { createClient } from "@supabase/supabase-js";
 
 import {
@@ -439,6 +440,8 @@ export default async function DashboardPage() {
             />
           </div>
         </section>
+
+        <PwaRefreshControl />
 
         {/* =================================================
             SYSTEM FOOTER

@@ -4,10 +4,10 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function VenueWinePage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const params = useParams();
   const router = useRouter();
 
