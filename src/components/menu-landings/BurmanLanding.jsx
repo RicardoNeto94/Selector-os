@@ -122,6 +122,100 @@ export default function BurmanLanding({ menu }) {
     };
   }, []);
 
+  // ================= DEPLOYMENT AUTO-UPDATE =================
+  // Once this version is installed on an iPad, future production deployments
+  // are detected automatically and the PWA reloads itself exactly once.
+  useEffect(() => {
+    let cancelled = false;
+    let initialVersion = null;
+    let reloading = false;
+
+    async function checkDeploymentVersion() {
+      try {
+        const response = await fetch("/api/app-version", {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        const nextVersion = String(data?.version || "").trim();
+
+        if (!nextVersion || nextVersion === "local") {
+          return;
+        }
+
+        if (initialVersion === null) {
+          initialVersion = nextVersion;
+          return;
+        }
+
+        if (
+          !cancelled &&
+          !reloading &&
+          nextVersion !== initialVersion
+        ) {
+          reloading = true;
+
+          // Persist the version only as a diagnostic breadcrumb.
+          try {
+            window.localStorage.setItem(
+              "burman_deployment_version",
+              nextVersion,
+            );
+          } catch {
+            // Storage may be unavailable in some browser modes.
+          }
+
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error("DEPLOYMENT VERSION CHECK ERROR:", error);
+      }
+    }
+
+    checkDeploymentVersion();
+
+    const deploymentInterval = window.setInterval(() => {
+      checkDeploymentVersion();
+    }, 30000);
+
+    const handleDeploymentVisibility = () => {
+      if (document.visibilityState === "visible") {
+        checkDeploymentVersion();
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleDeploymentVisibility,
+    );
+
+    window.addEventListener(
+      "pageshow",
+      checkDeploymentVersion,
+    );
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(deploymentInterval);
+      document.removeEventListener(
+        "visibilitychange",
+        handleDeploymentVisibility,
+      );
+      window.removeEventListener(
+        "pageshow",
+        checkDeploymentVersion,
+      );
+    };
+  }, []);
+
   useEffect(() => {
     if (!menu?.id) return;
 
