@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// 🔥 FORCE REALTIME (NO CACHE)
+// FORCE REALTIME (NO CACHE)
 export const dynamic = "force-dynamic";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -21,7 +21,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 export async function GET(_req, { params }) {
   try {
-    const slug = params?.slug;
+    const { slug } = await params;
 
     if (!slug) {
       return NextResponse.json(
@@ -30,7 +30,7 @@ export async function GET(_req, { params }) {
       );
     }
 
-    // 🔹 Restaurant
+    // Restaurant
     const { data: restaurant, error: restaurantError } = await supabase
       .from("restaurants")
       .select("id, logo_url")
@@ -39,6 +39,7 @@ export async function GET(_req, { params }) {
 
     if (restaurantError) {
       console.error("Error fetching restaurant", restaurantError);
+
       return NextResponse.json(
         { error: "Failed to load restaurant" },
         { status: 500 }
@@ -52,21 +53,27 @@ export async function GET(_req, { params }) {
       );
     }
 
-    // 🔹 Dishes
+    // Dishes
     const { data: dishes, error: dishesError } = await supabase.rpc(
       "menu_for_slug",
-      { slug_input: slug }
+      {
+        slug_input: slug,
+      }
     );
 
     if (dishesError) {
       console.error("menu_for_slug error", dishesError);
+
       return NextResponse.json(
-        { error: dishesError.message || "Failed to load menu" },
+        {
+          error:
+            dishesError.message ||
+            "Failed to load menu",
+        },
         { status: 500 }
       );
     }
 
-    // 🔥 RETURN WITH NO-CACHE HEADERS
     return NextResponse.json(
       {
         logo_url: restaurant.logo_url ?? null,
@@ -80,6 +87,7 @@ export async function GET(_req, { params }) {
     );
   } catch (err) {
     console.error("Unexpected error", err);
+
     return NextResponse.json(
       { error: "Unexpected server error" },
       { status: 500 }

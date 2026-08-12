@@ -47,13 +47,43 @@ export default function VenueWinesPage() {
   const supabase = createClient();
   const router = useRouter();
 
+  const RESTAURANT_ID = "0a8fb8bb-b4c8-4f05-9874-929637521f58";
+
+  const LOCATION_TYPES = [
+    ["master_cellar", "Master cellar"],
+    ["venue_cellar", "Venue cellar"],
+    ["bar_storage", "Bar storage"],
+    ["service_station", "Service station"],
+    ["private_collection", "Private collection"],
+    ["transit", "Transit"],
+  ];
+
+  const emptyForm = {
+    name: "",
+    location_type: "bar_storage",
+    parent_location_id: "",
+    wine_menu_id: "",
+    slug: "",
+    store_name: "",
+  };
+
   const [locations, setLocations] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [menus, setMenus] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+  const [storeMappings, setStoreMappings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingLocationId, setSavingLocationId] = useState(null);
   const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+
+  const [showArchived, setShowArchived] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingLocation, setEditingLocation] = useState(null);
+  const [form, setForm] = useState(emptyForm);
+  const [savingForm, setSavingForm] = useState(false);
+  const [mappingDraft, setMappingDraft] = useState("");
 
   useEffect(() => {
     loadData();
@@ -67,19 +97,25 @@ export default function VenueWinesPage() {
       const [
         locationsResult,
         menusResult,
+        mappingsResult,
         inventoryRows,
         menuItemRows,
       ] = await Promise.all([
         supabase
           .from("wine_locations")
           .select("*")
-          .eq("is_active", true)
+          .order("is_active", { ascending: false })
           .order("name"),
 
         supabase
           .from("wine_menus")
           .select("*")
           .order("name"),
+
+        supabase
+          .from("wine_location_store_mappings")
+          .select("*")
+          .order("business_store_name"),
 
         fetchAllRows(() =>
           supabase
@@ -116,62 +152,390 @@ export default function VenueWinesPage() {
         ),
       ]);
 
-      if (locationsResult.error) {
-        throw locationsResult.error;
-      }
-
-      if (menusResult.error) {
-        throw menusResult.error;
-      }
+      if (locationsResult.error) throw locationsResult.error;
+      if (menusResult.error) throw menusResult.error;
+      if (mappingsResult.error) throw mappingsResult.error;
 
       setLocations(locationsResult.data || []);
       setInventory(inventoryRows);
       setMenus(menusResult.data || []);
+      setStoreMappings(mappingsResult.data || []);
       setMenuItems(menuItemRows);
     } catch (error) {
-      console.error("VENUE WINES LOAD ERROR:", error);
+      console.error("LOCATIONS LOAD ERROR:", error);
       setLoadError(
         error?.message ||
-          "Venue wine data could not be loaded."
+          "Wine location data could not be loaded."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  const venueLocations = useMemo(() => {
-    return locations.filter((location) => {
-      const name = location.name?.toLowerCase() || "";
-      return !name.includes("main cellar");
+  const activeLocations = useMemo(
+    () => locations.filter((location) => location.is_active !== false),
+    [locations]
+  );
+
+  const visibleLocations = useMemo(
+    () =>
+      showArchived
+        ? locations
+        : locations.filter((location) => location.is_active !== false),
+    [locations, showArchived]
+  );
+
+  function getLocationTypeLabel(type) {
+    return (
+      LOCATION_TYPES.find(([value]) => value === type)?.[1] ||
+      type ||
+      "Storage"
+    );
+  }
+
+  function getParentName(location) {
+    if (!location.parent_location_id) return "No parent";
+
+    return (
+      locations.find(
+        (item) =>
+          String(item.id) ===
+          String(location.parent_location_id)
+      )?.name || "Unknown parent"
+    );
+  }
+
+  function mappingsForLocation(locationId) {
+    return storeMappings.filter(
+      (mapping) =>
+        String(mapping.location_id) === String(locationId)
+    );
+  }
+
+  function resetEditor() {
+    setEditingLocation(null);
+    setForm(emptyForm);
+    setMappingDraft("");
+    setActionError("");
+  }
+
+  function openCreate() {
+    setEditingLocation(null);
+    setForm(emptyForm);
+    setMappingDraft("");
+    setActionError("");
+    setActionMessage("");
+    setShowCreate(true);
+  }
+
+  function openEdit(location) {
+    setShowCreate(false);
+    setEditingLocation(location);
+    setForm({
+      name: location.name || "",
+      location_type: location.location_type || "bar_storage",
+      parent_location_id: location.parent_location_id || "",
+      wine_menu_id: location.wine_menu_id || "",
+      slug: location.slug || "",
+      store_name: "",
     });
-  }, [locations]);
+    setMappingDraft("");
+    setActionError("");
+    setActionMessage("");
+  }
+
+  async function createLocation(event) {
+    event.preventDefault();
+
+    if (!form.name.trim()) {
+      setActionError("Location name is required.");
+      return;
+    }
+
+    setSavingForm(true);
+    setActionError("");
+    setActionMessage("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "create_wine_location",
+        {
+          p_restaurant_id: RESTAURANT_ID,
+          p_name: form.name.trim(),
+          p_location_type: form.location_type,
+          p_parent_location_id:
+            form.parent_location_id || null,
+          p_wine_menu_id: form.wine_menu_id || null,
+          p_slug: form.slug.trim() || null,
+        }
+      );
+
+      if (error) throw error;
+
+      const created = Array.isArray(data) ? data[0] : data;
+
+      if (form.store_name.trim() && created?.id) {
+        const { error: mappingError } = await supabase.rpc(
+          "add_wine_location_store_mapping",
+          {
+            p_location_id: created.id,
+            p_business_store_name: form.store_name.trim(),
+          }
+        );
+
+        if (mappingError) throw mappingError;
+      }
+
+      setShowCreate(false);
+      setForm(emptyForm);
+      setActionMessage("Storage location created.");
+      await loadData();
+    } catch (error) {
+      console.error("CREATE LOCATION ERROR:", error);
+      setActionError(
+        error?.message || "Unable to create storage location."
+      );
+    } finally {
+      setSavingForm(false);
+    }
+  }
+
+  async function updateLocation(event) {
+    event.preventDefault();
+
+    if (!editingLocation?.id) return;
+
+    if (!form.name.trim()) {
+      setActionError("Location name is required.");
+      return;
+    }
+
+    setSavingForm(true);
+    setActionError("");
+    setActionMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "update_wine_location",
+        {
+          p_location_id: editingLocation.id,
+          p_name: form.name.trim(),
+          p_location_type: form.location_type,
+          p_parent_location_id:
+            form.parent_location_id || null,
+          p_wine_menu_id: form.wine_menu_id || null,
+          p_slug: form.slug.trim() || null,
+        }
+      );
+
+      if (error) throw error;
+
+      setActionMessage("Storage location updated.");
+      setEditingLocation(null);
+      setForm(emptyForm);
+      await loadData();
+    } catch (error) {
+      console.error("UPDATE LOCATION ERROR:", error);
+      setActionError(
+        error?.message || "Unable to update storage location."
+      );
+    } finally {
+      setSavingForm(false);
+    }
+  }
+
+  async function archiveLocation(location) {
+  const confirmed = window.confirm(
+    `Archive ${location.name}? It can be restored later.`
+  );
+
+  if (!confirmed) return;
+
+  setSavingLocationId(location.id);
+  setActionError("");
+  setActionMessage("");
+
+  try {
+    const { data, error } = await supabase.rpc(
+      "archive_wine_location",
+      {
+        p_location_id: location.id,
+      }
+    );
+
+    if (error) {
+      console.error(
+        "ARCHIVE LOCATION RPC ERROR:",
+        JSON.stringify(error, null, 2)
+      );
+
+      throw new Error(
+        error.message ||
+          error.details ||
+          error.hint ||
+          "Unable to archive storage location."
+      );
+    }
+
+    setActionMessage(`${location.name} archived.`);
+
+    if (editingLocation?.id === location.id) {
+      resetEditor();
+    }
+
+    await loadData();
+  } catch (error) {
+    console.error(
+      "ARCHIVE LOCATION ERROR:",
+      error?.message || error
+    );
+
+    setActionError(
+      error?.message ||
+        "Unable to archive storage location."
+    );
+  } finally {
+    setSavingLocationId(null);
+  }
+}
+
+  async function restoreLocation(location) {
+    setSavingLocationId(location.id);
+    setActionError("");
+    setActionMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "restore_wine_location",
+        {
+          p_location_id: location.id,
+        }
+      );
+
+      if (error) throw error;
+
+      setActionMessage(`${location.name} restored.`);
+      await loadData();
+    } catch (error) {
+      console.error("RESTORE LOCATION ERROR:", error);
+      setActionError(
+        error?.message || "Unable to restore storage location."
+      );
+    } finally {
+      setSavingLocationId(null);
+    }
+  }
+
+  async function addMapping() {
+    if (!editingLocation?.id || !mappingDraft.trim()) return;
+
+    setSavingLocationId(editingLocation.id);
+    setActionError("");
+    setActionMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "add_wine_location_store_mapping",
+        {
+          p_location_id: editingLocation.id,
+          p_business_store_name: mappingDraft.trim(),
+        }
+      );
+
+      if (error) throw error;
+
+      setMappingDraft("");
+      setActionMessage("CompuCash store mapping added.");
+      await loadData();
+    } catch (error) {
+      console.error("ADD MAPPING ERROR:", error);
+      setActionError(
+        error?.message || "Unable to add store mapping."
+      );
+    } finally {
+      setSavingLocationId(null);
+    }
+  }
+
+  async function removeMapping(mapping) {
+    const confirmed = window.confirm(
+      `Remove mapping "${mapping.business_store_name}"?`
+    );
+
+    if (!confirmed) return;
+
+    setSavingLocationId(mapping.location_id);
+    setActionError("");
+    setActionMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "remove_wine_location_store_mapping",
+        {
+          p_mapping_id: mapping.id,
+        }
+      );
+
+      if (error) throw error;
+
+      setActionMessage("CompuCash store mapping removed.");
+      await loadData();
+    } catch (error) {
+      console.error("REMOVE MAPPING ERROR:", error);
+      setActionError(
+        error?.message || "Unable to remove store mapping."
+      );
+    } finally {
+      setSavingLocationId(null);
+    }
+  }
 
   async function linkMenu(locationId, wineMenuId) {
+    const location = locations.find(
+      (item) => String(item.id) === String(locationId)
+    );
+
+    if (!location) return;
+
     setSavingLocationId(locationId);
+    setActionError("");
 
     const menuId = wineMenuId || null;
 
-    const { error } = await supabase
-      .from("wine_locations")
-      .update({
-        wine_menu_id: menuId,
-      })
-      .eq("id", locationId);
+    const { data, error } = await supabase.rpc(
+      "update_wine_location",
+      {
+        p_location_id: location.id,
+        p_name: location.name,
+        p_location_type:
+          location.location_type || "bar_storage",
+        p_parent_location_id:
+          location.parent_location_id || null,
+        p_wine_menu_id: menuId,
+        p_slug: location.slug || null,
+      }
+    );
 
     if (error) {
       console.error("LINK MENU ERROR:", error);
+      setActionError(
+        error?.message || "Unable to link wine menu."
+      );
       setSavingLocationId(null);
       return;
     }
 
+    const updated = Array.isArray(data) ? data[0] : data;
+
     setLocations((previous) =>
-      previous.map((location) =>
-        location.id === locationId
+      previous.map((item) =>
+        item.id === locationId
           ? {
-              ...location,
+              ...item,
+              ...(updated || {}),
               wine_menu_id: menuId,
             }
-          : location
+          : item
       )
     );
 
@@ -338,7 +702,7 @@ export default function VenueWinesPage() {
     return (
       <div className="page-fade px-8 py-8">
         <div className="text-slate-400">
-          Loading venue wines...
+          Loading locations & storage...
         </div>
       </div>
     );
@@ -354,7 +718,7 @@ export default function VenueWinesPage() {
     );
   }
 
-  const portfolioStats = venueLocations.reduce(
+  const portfolioStats = activeLocations.reduce(
     (total, location) => {
       const stats = getVenueStats(location);
 
@@ -373,6 +737,8 @@ export default function VenueWinesPage() {
     }
   );
 
+  const editorOpen = showCreate || Boolean(editingLocation);
+
   return (
     <div className="venue-wines-page page-fade">
       <div className="venue-wines-shell">
@@ -382,16 +748,16 @@ export default function VenueWinesPage() {
               Wine Operations
             </div>
 
-            <h1>Venue Wines</h1>
+            <h1>Locations &amp; Storage</h1>
 
             <p>
-              Live cellar portfolios, menu connections and guest
-              availability across every wine venue.
+              Manage every wine storage point, venue cellar, menu
+              connection and CompuCash store mapping from one place.
             </p>
           </div>
 
           <div className="venue-wines-portfolio">
-            <span>{venueLocations.length} cellars</span>
+            <span>{activeLocations.length} active locations</span>
             <span>
               {portfolioStats.wines.toLocaleString()} wines
             </span>
@@ -407,46 +773,334 @@ export default function VenueWinesPage() {
           </div>
         </header>
 
-        {venueLocations.length === 0 ? (
+        <section className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={openCreate}
+              className="rounded-full bg-[#963d2d] px-5 py-2.5 text-[9px] uppercase tracking-[0.16em] text-white transition hover:bg-[#7f3327]"
+            >
+              Add location
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowArchived((value) => !value)}
+              className="rounded-full border border-[#d8c9bd] bg-[#fbf8f3] px-5 py-2.5 text-[9px] uppercase tracking-[0.14em] text-[#6e5a4f]"
+            >
+              {showArchived
+                ? "Hide archived"
+                : `Show archived (${locations.length - activeLocations.length})`}
+            </button>
+          </div>
+
+          <div className="text-[9px] text-[#95867b]">
+            Main Cellar is now included in this directory.
+          </div>
+        </section>
+
+        {(actionError || actionMessage) && (
+          <div
+            className={`mt-4 rounded-2xl border px-4 py-3 text-[10px] ${
+              actionError
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-emerald-200 bg-emerald-50 text-emerald-700"
+            }`}
+          >
+            {actionError || actionMessage}
+          </div>
+        )}
+
+        {editorOpen && (
+          <section className="mt-5 rounded-[22px] border border-[#ded3c8] bg-[#fbf8f3] p-5 md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[8px] uppercase tracking-[0.24em] text-[#a17865]">
+                  {showCreate ? "New storage point" : "Manage location"}
+                </div>
+
+                <h2 className="mt-2 text-[20px] tracking-[-0.03em] text-[#30241f]">
+                  {showCreate
+                    ? "Create wine location"
+                    : editingLocation?.name}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreate(false);
+                  resetEditor();
+                }}
+                className="rounded-full border border-[#ded3c8] px-3 py-1.5 text-[9px] text-[#7f6e63]"
+              >
+                Close
+              </button>
+            </div>
+
+            <form
+              onSubmit={showCreate ? createLocation : updateLocation}
+              className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+            >
+              <label className="text-[9px] text-[#76655b]">
+                <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                  Name
+                </span>
+                <input
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      name: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                  placeholder="e.g. Casino Bar"
+                />
+              </label>
+
+              <label className="text-[9px] text-[#76655b]">
+                <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                  Location type
+                </span>
+                <select
+                  value={form.location_type}
+                  onChange={(event) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      location_type: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                >
+                  {LOCATION_TYPES.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="text-[9px] text-[#76655b]">
+                <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                  Parent location
+                </span>
+                <select
+                  value={form.parent_location_id}
+                  onChange={(event) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      parent_location_id: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                >
+                  <option value="">No parent</option>
+                  {activeLocations
+                    .filter(
+                      (location) =>
+                        !editingLocation ||
+                        location.id !== editingLocation.id
+                    )
+                    .map((location) => (
+                      <option key={location.id} value={location.id}>
+                        {location.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+
+              <label className="text-[9px] text-[#76655b]">
+                <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                  Wine menu
+                </span>
+                <select
+                  value={form.wine_menu_id}
+                  onChange={(event) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      wine_menu_id: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                >
+                  <option value="">No wine menu linked</option>
+                  {menus.map((menu) => (
+                    <option key={menu.id} value={menu.id}>
+                      {menu.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="text-[9px] text-[#76655b]">
+                <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                  Slug
+                </span>
+                <input
+                  value={form.slug}
+                  onChange={(event) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      slug: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                  placeholder="Generated automatically"
+                />
+              </label>
+
+              {showCreate && (
+                <label className="text-[9px] text-[#76655b]">
+                  <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                    Initial CompuCash store
+                  </span>
+                  <input
+                    value={form.store_name}
+                    onChange={(event) =>
+                      setForm((previous) => ({
+                        ...previous,
+                        store_name: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                    placeholder="Optional exact store name"
+                  />
+                </label>
+              )}
+
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  disabled={savingForm}
+                  className="min-h-10 rounded-full bg-[#30241f] px-5 text-[9px] uppercase tracking-[0.14em] text-white disabled:opacity-50"
+                >
+                  {savingForm
+                    ? "Saving..."
+                    : showCreate
+                      ? "Create location"
+                      : "Save changes"}
+                </button>
+              </div>
+            </form>
+
+            {editingLocation && (
+              <div className="mt-6 border-t border-[#e7ddd4] pt-5">
+                <div className="text-[8px] uppercase tracking-[0.2em] text-[#a17865]">
+                  CompuCash store mappings
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {mappingsForLocation(editingLocation.id).length === 0 && (
+                    <span className="text-[9px] text-[#97877c]">
+                      No store mappings configured.
+                    </span>
+                  )}
+
+                  {mappingsForLocation(editingLocation.id).map((mapping) => (
+                    <span
+                      key={mapping.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#ded3c8] bg-white px-3 py-1.5 text-[9px] text-[#5f5048]"
+                    >
+                      {mapping.business_store_name}
+                      <button
+                        type="button"
+                        onClick={() => removeMapping(mapping)}
+                        className="text-[#a34d3e]"
+                        aria-label={`Remove ${mapping.business_store_name}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex max-w-[520px] gap-2">
+                  <input
+                    value={mappingDraft}
+                    onChange={(event) =>
+                      setMappingDraft(event.target.value)
+                    }
+                    className="min-w-0 flex-1 rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                    placeholder="Exact CompuCash business store name"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={addMapping}
+                    disabled={
+                      !mappingDraft.trim() ||
+                      savingLocationId === editingLocation.id
+                    }
+                    className="rounded-full border border-[#cdb9aa] px-4 text-[9px] uppercase tracking-[0.12em] text-[#6e5a4f] disabled:opacity-50"
+                  >
+                    Add mapping
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {visibleLocations.length === 0 ? (
           <div className="venue-wines-empty">
-            No venue wine locations found.
+            No wine locations found.
           </div>
         ) : (
           <section className="venue-directory">
             <div className="venue-directory-head">
-              <span>Venue</span>
+              <span>Location</span>
               <span>Wine menu</span>
               <span>Portfolio</span>
               <span>Inventory value</span>
               <span />
             </div>
 
-            {venueLocations.map((location) => {
+            {visibleLocations.map((location) => {
               const stats = getVenueStats(location);
+              const mappings = mappingsForLocation(location.id);
+              const archived = location.is_active === false;
 
               return (
                 <article
                   key={location.id}
-                  className="venue-directory-row"
+                  className={`venue-directory-row ${
+                    archived ? "opacity-60" : ""
+                  }`}
                 >
                   <div className="venue-identity">
                     <div className="venue-status-line">
                       <span
                         className={
-                          stats.menu
-                            ? "venue-status-dot is-linked"
-                            : "venue-status-dot"
+                          archived
+                            ? "venue-status-dot"
+                            : stats.menu
+                              ? "venue-status-dot is-linked"
+                              : "venue-status-dot"
                         }
                       />
 
                       <span>
-                        {stats.menu
-                          ? "Menu linked"
-                          : "Menu not linked"}
+                        {archived
+                          ? "Archived"
+                          : stats.menu
+                            ? "Menu linked"
+                            : "Active storage"}
                       </span>
                     </div>
 
                     <h2>{location.name}</h2>
+
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[8px] text-[#9a897f]">
+                      <span>
+                        {getLocationTypeLabel(location.location_type)}
+                      </span>
+                      <span>Parent: {getParentName(location)}</span>
+                      <span>
+                        {mappings.length} store mapping
+                        {mappings.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
 
                     <div className="venue-mobile-value">
                       €
@@ -474,6 +1128,7 @@ export default function VenueWinesPage() {
                       id={`venue-menu-${location.id}`}
                       value={location.wine_menu_id || ""}
                       disabled={
+                        archived ||
                         savingLocationId === location.id
                       }
                       onChange={(event) =>
@@ -555,18 +1210,50 @@ export default function VenueWinesPage() {
                     )}
                   </div>
 
-                  <button
-                    className="venue-open-button"
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/wine-cellar/venues/${location.id}`
-                      )
-                    }
-                    aria-label={`Open ${location.name}`}
-                  >
-                    <span>Open</span>
-                    <span aria-hidden="true">↗</span>
-                  </button>
+                  <div className="flex flex-col items-stretch gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(location)}
+                      className="rounded-full border border-[#d8c9bd] px-3 py-2 text-[8px] uppercase tracking-[0.12em] text-[#6d5a50]"
+                    >
+                      Manage
+                    </button>
+
+                    {archived ? (
+                      <button
+                        type="button"
+                        disabled={savingLocationId === location.id}
+                        onClick={() => restoreLocation(location)}
+                        className="rounded-full border border-emerald-300 px-3 py-2 text-[8px] uppercase tracking-[0.12em] text-emerald-700 disabled:opacity-50"
+                      >
+                        Restore
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="venue-open-button"
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/wine-cellar/venues/${location.id}`
+                            )
+                          }
+                          aria-label={`Open ${location.name}`}
+                        >
+                          <span>Open</span>
+                          <span aria-hidden="true">↗</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={savingLocationId === location.id}
+                          onClick={() => archiveLocation(location)}
+                          className="rounded-full border border-red-200 px-3 py-2 text-[8px] uppercase tracking-[0.12em] text-red-600 disabled:opacity-50"
+                        >
+                          Archive
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </article>
               );
             })}

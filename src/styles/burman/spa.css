@@ -1758,3 +1758,494 @@
     font-size: 13px;
   }
 }
+
+
+/* =========================================================
+   SPA — SUMMER GLOW RITUALS
+   Matches the approved Burman modal concept
+   ========================================================= */
+
+.vx-spa-summer-offer {
+  width: min(1000px, calc(100% - 86px));
+  margin: 0 auto;
+  padding: 34px 0 42px;
+
+  display: grid;
+  grid-template-columns: minmax(250px, .72fr) minmax(0, 1.6fr);
+  gap: 54px;
+  align-items: stretch;
+}
+
+.vx-spa-summer-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 14px 8px 0 0;
+}
+
+.vx-spa-summer-kicker {
+  display: block;
+  margin-bottom: 12px;
+  color: #a77b51;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .23em;
+  text-transform: uppercase;
+}
+
+.vx-spa-summer-kicker::after {
+  content: "";
+  display: block;
+  width: 25px;
+  height: 1px;
+  margin-top: 9px;
+  background: rgba(167, 123, 81, .58);
+}
+
+.vx-spa-summer-intro h3 {
+  margin: 0;
+  color: #382821;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(40px, 4.2vw, 56px);
+  font-weight: 400;
+  line-height: .98;
+  letter-spacing: -.04em;
+  text-transform: uppercase;
+}
+
+.vx-spa-summer-subtitle {
+  margin: 14px 0 0;
+  color: #7d3428;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.vx-spa-summer-divider {
+  width: 100%;
+  max-width: 310px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 18px 0 16px;
+  color: #b68b55;
+}
+
+.vx-spa-summer-divider span {
+  height: 1px;
+  background: rgba(126, 91, 69, .16);
+}
+
+.vx-spa-summer-divider b {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.vx-spa-summer-copy {
+  max-width: 330px;
+  margin: 0;
+  color: #63544b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.vx-spa-summer-booking-note {
+  width: 100%;
+  max-width: 310px;
+  margin-top: 25px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 16px;
+  border: 1px solid rgba(89, 64, 50, .10);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .27);
+}
+
+.vx-spa-summer-note-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  fill: none;
+  stroke: #b68b55;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vx-spa-summer-booking-note p {
+  margin: 0;
+  color: #4c3b33;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.vx-spa-summer-cta {
+  width: 100%;
+  max-width: 310px;
+  min-height: 55px;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border: 0;
+  border-radius: 5px;
+  background: #7d2724;
+  color: #fff8f0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 11px 28px rgba(82, 34, 29, .12);
+}
+
+.vx-spa-summer-cta span {
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.vx-spa-summer-options {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.vx-spa-summer-card {
+  min-height: 282px;
+  padding: 22px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid rgba(89, 64, 50, .11);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .24);
+  text-align: center;
+}
+
+.vx-spa-summer-ritual-icon {
+  width: 62px;
+  height: 62px;
+  margin-bottom: 6px;
+  display: grid;
+  place-items: center;
+}
+
+.vx-spa-summer-ritual-icon svg {
+  width: 60px;
+  height: 60px;
+  fill: none;
+  stroke: #b68b55;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vx-spa-summer-card h4,
+.vx-spa-summer-bundle h4 {
+  margin: 0;
+  color: #433128;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.vx-spa-summer-card h4 {
+  font-size: 17px;
+}
+
+.vx-spa-summer-card > p {
+  min-height: 40px;
+  margin: 10px 0 12px;
+  color: #5c4c43;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.vx-spa-summer-card-rule {
+  width: 100%;
+  height: 1px;
+  background: rgba(89, 64, 50, .10);
+}
+
+.vx-spa-summer-duration {
+  padding: 12px 0;
+  color: #ae7c49;
+  font-size: 10px;
+  letter-spacing: .11em;
+}
+
+.vx-spa-summer-card strong {
+  margin-top: auto;
+  padding-top: 10px;
+  color: #7d2724;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -.03em;
+}
+
+.vx-spa-summer-bundle {
+  position: relative;
+  grid-column: 1 / -1;
+  min-height: 108px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 34px;
+  border: 1px solid rgba(181, 139, 85, .55);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .29);
+}
+
+.vx-spa-summer-ribbon {
+  position: absolute;
+  top: 10px;
+  right: -31px;
+  width: 118px;
+  padding: 5px 0;
+  transform: rotate(39deg);
+  background: #ae7c49;
+  color: #fff8ef;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.vx-spa-summer-bundle-mark {
+  display: grid;
+  place-items: center;
+  color: #b68b55;
+  font-size: 44px;
+  line-height: 1;
+}
+
+.vx-spa-summer-bundle h4 {
+  font-size: 21px;
+}
+
+.vx-spa-summer-bundle-copy p {
+  margin: 4px 0 0;
+  color: #8d725d;
+  font-size: 9px;
+  letter-spacing: .13em;
+}
+
+.vx-spa-summer-bundle-meta {
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  padding-left: 26px;
+  border-left: 1px solid rgba(89, 64, 50, .10);
+}
+
+.vx-spa-summer-bundle-meta span {
+  color: #ae7c49;
+  font-size: 9px;
+  letter-spacing: .10em;
+}
+
+.vx-spa-summer-bundle-meta strong {
+  color: #7d2724;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 31px;
+  font-weight: 400;
+}
+
+/* Ensure the Summer tab keeps the same fixed modal geometry as Treatments/Information */
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-summer-offer) {
+  height: min(820px, 90vh);
+  max-height: none;
+  overflow: hidden;
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-summer-offer)
+.vx-spa-shell {
+  height: 100%;
+  overflow: hidden;
+}
+
+.vx-spa-modal
+.burman-modal-content:has(.vx-spa-summer-offer)
+.vx-spa-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* iPad / tablet */
+@media (min-width: 769px) and (max-width: 1366px) {
+  .vx-spa-summer-offer {
+    width: calc(100% - 72px);
+    padding: 25px 0 30px;
+    grid-template-columns: minmax(220px, .72fr) minmax(0, 1.55fr);
+    gap: 34px;
+  }
+
+  .vx-spa-summer-intro {
+    padding-top: 8px;
+  }
+
+  .vx-spa-summer-intro h3 {
+    font-size: 36px;
+  }
+
+  .vx-spa-summer-subtitle {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .vx-spa-summer-divider {
+    margin: 13px 0;
+  }
+
+  .vx-spa-summer-copy {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .vx-spa-summer-booking-note {
+    margin-top: 16px;
+    padding: 10px 12px;
+  }
+
+  .vx-spa-summer-booking-note p {
+    font-size: 10px;
+  }
+
+  .vx-spa-summer-cta {
+    min-height: 46px;
+    font-size: 9px;
+  }
+
+  .vx-spa-summer-card {
+    min-height: 226px;
+    padding: 14px 16px 12px;
+  }
+
+  .vx-spa-summer-ritual-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .vx-spa-summer-ritual-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .vx-spa-summer-card h4 {
+    font-size: 14px;
+  }
+
+  .vx-spa-summer-card > p {
+    min-height: 33px;
+    margin: 7px 0 8px;
+    font-size: 11px;
+  }
+
+  .vx-spa-summer-duration {
+    padding: 8px 0;
+    font-size: 8px;
+  }
+
+  .vx-spa-summer-card strong {
+    padding-top: 7px;
+    font-size: 25px;
+  }
+
+  .vx-spa-summer-bundle {
+    min-height: 84px;
+    padding: 14px 26px;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+
+  .vx-spa-summer-bundle-mark {
+    font-size: 34px;
+  }
+
+  .vx-spa-summer-bundle h4 {
+    font-size: 17px;
+  }
+
+  .vx-spa-summer-bundle-meta {
+    min-width: 132px;
+    padding-left: 18px;
+  }
+
+  .vx-spa-summer-bundle-meta strong {
+    font-size: 27px;
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-summer-offer) {
+    width: calc(100vw - 42px);
+    height: calc(100vh - 42px);
+    border-radius: 16px;
+  }
+}
+
+/* Mobile / portrait */
+@media (max-width: 768px) {
+  .vx-spa-summer-offer {
+    width: calc(100% - 40px);
+    padding: 28px 0 45px;
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .vx-spa-summer-intro {
+    padding: 0;
+  }
+
+  .vx-spa-summer-intro h3 {
+    font-size: 38px;
+  }
+
+  .vx-spa-summer-options {
+    grid-template-columns: 1fr;
+  }
+
+  .vx-spa-summer-card {
+    min-height: auto;
+  }
+
+  .vx-spa-summer-bundle {
+    grid-column: auto;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .vx-spa-summer-bundle-meta {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(89, 64, 50, .10);
+  }
+
+  .vx-spa-modal
+  .burman-modal-content:has(.vx-spa-summer-offer) {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+  }
+}
