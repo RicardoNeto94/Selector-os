@@ -405,6 +405,65 @@ function parseProductsWorkbook({ worksheet, matrix }) {
   return rows;
 }
 
+function deriveProductsFromStoreBalance(storeRows) {
+  const productsByKey = new Map();
+
+  for (const row of storeRows) {
+    const fallbackFormat = extractFormat(row.productName, null);
+    const product = {
+      sourceRow: row.sourceRow,
+      productId: "",
+      productNumber: row.productNumber || "",
+      barcode: row.barcode || "",
+      productName: row.productName,
+      productGroup: row.productGroup || "",
+      measureUnit: 0,
+      salesPrice: Number(row.salesPrice || 0),
+      totalQuantityInStores: 0,
+      costPrice: Number(row.storagePrice || 0),
+      vintage: extractVintage(row.productName),
+      format:
+        normalizeAccentless(row.productGroup) === "by the glass"
+          ? {
+              ...fallbackFormat,
+              serviceType: "glass",
+              bottleCl: null,
+              servingCl: fallbackFormat.servingCl || null,
+              label: fallbackFormat.label || "BTG",
+            }
+          : fallbackFormat,
+      wineType: normalizeWineGroup(row.productGroup),
+      derivedFromStoreBalance: true,
+    };
+
+    const key =
+      normalizeIdentifier(product.barcode) ||
+      normalizeIdentifier(product.productNumber) ||
+      [
+        normalizedWineIdentity(product.productName),
+        product.vintage || "nv",
+        product.format?.serviceType || "bottle",
+        product.format?.bottleCl || product.format?.servingCl || "unknown",
+      ].join("::");
+
+    const existing = productsByKey.get(key);
+
+    if (!existing) {
+      productsByKey.set(key, product);
+      continue;
+    }
+
+    // Keep the richest price/cost values seen across stores.
+    productsByKey.set(key, {
+      ...existing,
+      salesPrice: existing.salesPrice || product.salesPrice,
+      costPrice: existing.costPrice || product.costPrice,
+    });
+  }
+
+  return [...productsByKey.values()];
+}
+
 function parseStoreBalanceWorkbook({ matrix }) {
   const normalizedMatrix = matrix.map((row) =>
     row.map((cell) => normalizeAccentless(cell))
@@ -1049,6 +1108,11 @@ export default function WineCatalogueImportPage() {
       setBalanceFile(file);
       setStoreBalanceRows(parsed.rows);
       setStores(parsed.stores);
+
+      if (!productsFile) {
+        setProducts(deriveProductsFromStoreBalance(parsed.rows));
+      }
+
       setSelectedStore((current) =>
         parsed.stores.includes(current) ? current : parsed.stores[0] || ""
       );
@@ -1314,7 +1378,6 @@ export default function WineCatalogueImportPage() {
   }
 
   const ready =
-    products.length > 0 &&
     storeBalanceRows.length > 0 &&
     selectedStore &&
     context &&
@@ -1332,7 +1395,7 @@ export default function WineCatalogueImportPage() {
             <div className="mt-2 text-[10px] text-[#9b8d85]">
               {applyingImport
                 ? "Updating wines, aliases, inventory and wine menu items"
-                : "Reading CompuCash files and current Vaxeron records"}
+                : "Reading CompuCash data and current Vaxeron records"}
             </div>
           </div>
         </div>
@@ -1342,8 +1405,8 @@ export default function WineCatalogueImportPage() {
         <div>
           <div className="so-title">CompuCash Catalogue Import</div>
           <div className="so-sub mt-1">
-            Preview wines, venue allocation, pricing and stock before any
-            database changes
+            Upload a Store Balance on its own, or add a Products report for
+            richer catalogue matching before any database changes
           </div>
         </div>
 
@@ -1366,21 +1429,25 @@ export default function WineCatalogueImportPage() {
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <UploadCard
-          title="1. Products report"
-          description="Provides the CompuCash Product ID, product name, wine group, bottle or glass size, standard price and company-wide quantity."
+          title="Products report · Optional"
+          description="Optional enrichment file. Adds CompuCash Product ID, standard catalogue data and company-wide product details when available."
           file={productsFile}
           loading={readingProducts}
           onFile={handleProductsFile}
           onClear={() => {
             setProductsFile(null);
-            setProducts([]);
+            setProducts(
+              storeBalanceRows.length
+                ? deriveProductsFromStoreBalance(storeBalanceRows)
+                : []
+            );
             setContext(null);
           }}
         />
 
         <UploadCard
-          title="2. Store Balance report"
-          description="Provides the store-by-store quantity, storage price and sales price used to assign wines to a selected venue."
+          title="Store Balance report"
+          description="Can be imported on its own. Provides product identity, store-by-store quantity, storage price and sales price for Vaxeron inventory."
           file={balanceFile}
           loading={readingBalance}
           onFile={handleBalanceFile}
@@ -1389,12 +1456,17 @@ export default function WineCatalogueImportPage() {
             setStoreBalanceRows([]);
             setStores([]);
             setSelectedStore("");
+
+            if (!productsFile) {
+              setProducts([]);
+            }
+
             setContext(null);
           }}
         />
       </div>
 
-      {products.length > 0 && storeBalanceRows.length > 0 && (
+      {storeBalanceRows.length > 0 && (
         <div className="rounded-[24px] border border-[#eadfd5] bg-white/75 p-5">
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div>
@@ -1856,10 +1928,11 @@ export default function WineCatalogueImportPage() {
           <div className="max-w-[560px]">
             <DocumentChartBarIcon className="mx-auto h-7 w-7 text-[#963b2c]" />
             <div className="mt-5 text-[14px] font-medium text-[#30231f]">
-              Upload both CompuCash reports
+              Upload a CompuCash Store Balance report
             </div>
             <div className="mt-3 text-[10px] leading-relaxed text-[#8f8178]">
-              Upload both reports to preview changes. Apply Import remains
+              A Store Balance report is enough to build the inventory preview.
+              The Products report is optional enrichment. Apply Import remains
               disabled until the selected store resolves to a valid location
               and wine menu.
             </div>
