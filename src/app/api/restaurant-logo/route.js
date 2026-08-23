@@ -1,105 +1,30 @@
-// src/app/api/restaurant-logo/route.js
-
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAdministrator } from "@/lib/server/requireAdministrator";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-// ⚠️ service role key – SERVER ONLY
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const RESTAURANT_ID = "0a8fb8bb-b4c8-4f05-9874-929637521f58";
+const ALLOWED_TYPES = new Map([["image/png", "png"], ["image/jpeg", "jpg"], ["image/webp", "webp"]]);
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    "Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
-  );
-}
-
-// This runs only server-side
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false },
-});
-
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const formData = await req.formData();
+    const authorization = await requireAdministrator(request);
+    if (authorization.error) return NextResponse.json({ error: authorization.error.message }, { status: authorization.error.status });
+    const formData = await request.formData();
     const file = formData.get("file");
-    const restaurantId = formData.get("restaurantId");
-
-    if (!file || !restaurantId) {
-      return NextResponse.json(
-        { error: "Missing file or restaurantId" },
-        { status: 400 }
-      );
+    if (!file || typeof file.arrayBuffer !== "function") return NextResponse.json({ error: "A logo file is required." }, { status: 400 });
+    const extension = ALLOWED_TYPES.get(file.type);
+    if (!extension) return NextResponse.json({ error: "Only PNG, JPG or WebP images are allowed." }, { status: 400 });
+    if (file.size > 2 * 1024 * 1024) return NextResponse.json({ error: "Logo must be 2 MB or smaller." }, { status: 400 });
+    const path = `restaurant-${RESTAURANT_ID}-${crypto.randomUUID()}.${extension}`;
+    const { error: uploadError } = await authorization.admin.storage.from("restaurant-logos").upload(path, Buffer.from(await file.arrayBuffer()), { cacheControl: "3600", contentType: file.type, upsert: false });
+    if (uploadError) return NextResponse.json({ error: "Logo upload failed." }, { status: 500 });
+    const { data: publicData } = authorization.admin.storage.from("restaurant-logos").getPublicUrl(path);
+    const { data, error } = await authorization.admin.from("restaurants").update({ logo_url: publicData.publicUrl, theme_logo_url: publicData.publicUrl }).eq("id", RESTAURANT_ID).select("id,logo_url").maybeSingle();
+    if (error || !data) {
+      await authorization.admin.storage.from("restaurant-logos").remove([path]);
+      return NextResponse.json({ error: error?.message || "Vaxeron organisation was not found." }, { status: error ? 500 : 404 });
     }
-
-    // basic type check
-    if (
-      !file.type.startsWith("image/") ||
-      !["image/png", "image/jpeg", "image/svg+xml"].includes(file.type)
-    ) {
-      return NextResponse.json(
-        { error: "Only PNG, JPG, or SVG images are allowed." },
-        { status: 400 }
-      );
-    }
-
-    // Convert the File/Blob into a Node Buffer (safer in Vercel's Node runtime)
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const ext = file.name.split(".").pop() || "png";
-    const path = `restaurant-${restaurantId}-${Date.now()}.${ext}`;
-
-    // ⬇️ Make sure bucket name matches your Supabase bucket
-    const { error: uploadError } = await supabase.storage
-      .from("restaurant-logos")
-      .upload(path, buffer, {
-        cacheControl: "3600",
-        upsert: true,
-        contentType: file.type,
-      });
-
-    if (uploadError) {
-      console.error("Logo upload error:", uploadError);
-      return NextResponse.json(
-        {
-          error: "Failed to upload to storage",
-          details: uploadError.message || uploadError,
-        },
-        { status: 500 }
-      );
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("restaurant-logos").getPublicUrl(path);
-
-    const { data, error: updateError } = await supabase
-      .from("restaurants")
-      .update({ logo_url: publicUrl })
-      .eq("id", restaurantId)
-      .select("id, name, logo_url")
-      .maybeSingle();
-
-    if (updateError) {
-      console.error("Update restaurant.logo_url error:", updateError);
-      return NextResponse.json(
-        {
-          error: "Failed to update restaurant logo",
-          details: updateError.message || updateError,
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: true, logo_url: data.logo_url },
-      { status: 200 }
-    );
-  } catch (err) {
-    console.error("Unexpected logo upload error:", err);
-    return NextResponse.json(
-      { error: "Unexpected error uploading logo", details: String(err) },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, logo_url: data.logo_url });
+  } catch (error) {
+    return NextResponse.json({ error: error?.message || "Unexpected logo upload error." }, { status: 500 });
   }
 }
