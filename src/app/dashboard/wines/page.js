@@ -90,6 +90,32 @@ function getWineTypeLabel(type) {
     String(type).slice(1);
 }
 
+async function loadAllActiveWines(supabase) {
+  const rows = [];
+  const pageSize = 1000;
+
+  for (let from = 0; ; from += pageSize) {
+    const result = await supabase
+      .from("wines")
+      .select(`
+        *,
+        wine_inventory(
+          id,
+          quantity,
+          location_id
+        )
+      `)
+      .eq("is_active", true)
+      .range(from, from + pageSize - 1);
+
+    if (result.error) return result;
+    rows.push(...(result.data || []));
+    if ((result.data || []).length < pageSize) {
+      return { data: rows, error: null };
+    }
+  }
+}
+
 /* =======================================================
    KPI CARD
 ======================================================= */
@@ -171,6 +197,9 @@ export default function WinesPage() {
   const [loading, setLoading] =
     useState(true);
 
+  const [compuCashStatus, setCompuCashStatus] =
+    useState(null);
+
   const [search, setSearch] =
     useState("");
 
@@ -201,7 +230,17 @@ export default function WinesPage() {
 
   useEffect(() => {
     loadCommandCentre();
+    loadCompuCashStatus();
   }, []);
+
+  async function loadCompuCashStatus() {
+    try {
+      const response = await fetch("/api/compucash/status", { cache: "no-store" });
+      if (response.ok) setCompuCashStatus(await response.json());
+    } catch (error) {
+      console.error("COMPUCASH STATUS LOAD ERROR:", error);
+    }
+  }
 
   async function loadCommandCentre() {
     setLoading(true);
@@ -211,17 +250,7 @@ export default function WinesPage() {
       locationsResult,
       movementsResult,
     ] = await Promise.all([
-      supabase
-        .from("wines")
-        .select(`
-          *,
-          wine_inventory(
-            id,
-            quantity,
-            location_id
-          )
-        `)
-        .eq("is_active", true),
+      loadAllActiveWines(supabase),
 
       supabase
         .from("wine_locations")
@@ -879,6 +908,15 @@ if (
             Global inventory intelligence
             and cellar operations
           </div>
+
+          {compuCashStatus && (
+            <div className="mt-2 text-[10px] text-[#8f8178]">
+              Compucash automatic sync: {compuCashStatus.automaticSyncEnabled ? "enabled" : "disabled"}
+              {compuCashStatus.latestRun?.completed_at
+                ? ` · Last ${compuCashStatus.latestRun.status} ${formatDate(compuCashStatus.latestRun.completed_at)}`
+                : " · No scheduled run recorded"}
+            </div>
+          )}
         </div>
 
         <div

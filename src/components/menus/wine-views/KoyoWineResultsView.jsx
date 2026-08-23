@@ -64,6 +64,10 @@ function getWine(item) {
       item.glass_price !== undefined
         ? Number(item.glass_price)
         : null,
+
+    servings: Array.isArray(item.servings)
+      ? item.servings
+      : [],
   };
 }
 
@@ -654,7 +658,20 @@ export default function KoyoWineResultsView({
                           "NV"}
                       </div>
 
-                      {byTheGlass && (
+                      {byTheGlass && wine.servings.length > 0 && (
+                        <div className="space-y-1">
+                          {wine.servings.map((serving) => (
+                            <div key={serving.id || serving.compucash_product_id} className="text-[#7d6854] text-[12px] md:text-[13px]">
+                              €{serving.price ?? "—"}
+                              <span className="ml-2 text-[8px] uppercase tracking-[0.2em] opacity-50 font-sans">
+                                {serving.serving_cl}cl
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {byTheGlass && wine.servings.length === 0 && (
                         <div
                           className="
                             mt-3

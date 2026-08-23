@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireAdministrator } from "@/lib/server/requireAdministrator";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   try {
+    const authorization = await requireAdministrator(request);
+    if (authorization.error) {
+      return NextResponse.json(
+        { error: authorization.error.message },
+        { status: authorization.error.status }
+      );
+    }
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -41,16 +49,9 @@ export async function POST(request) {
       );
     }
 
-    const supabase = createClient(
-      supabaseUrl,
-      serviceRoleKey,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
-    );
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     const {
       data,

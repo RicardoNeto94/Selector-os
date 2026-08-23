@@ -632,7 +632,25 @@ export default function VenueWinePage() {
 
     const suggestionMap = new Map();
 
+    const availableWineIds = new Set(rows.map((row) => row.wineId));
+    const enabledWineIds = new Set(
+      rows
+        .filter(
+          (row) =>
+            row.guestVisible &&
+            (row.serviceType === "glass" || row.serviceType === "both")
+        )
+        .map((row) => row.wineId)
+    );
+
     for (const suggestion of btgSuggestions) {
+      if (
+        enabledWineIds.has(suggestion.wine_id) ||
+        (suggestion.suggestion_type !== "confirmed" &&
+          !availableWineIds.has(suggestion.wine_id))
+      ) {
+        continue;
+      }
       const key = [
         suggestion.wine_id || "",
         suggestion.location_id || "",
@@ -651,7 +669,7 @@ export default function VenueWinePage() {
     }
 
     return Array.from(suggestionMap.values());
-  }, [btgSuggestions]);
+  }, [btgSuggestions, rows]);
 
   const confirmedBtgSuggestions = useMemo(
     () =>

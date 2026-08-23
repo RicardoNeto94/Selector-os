@@ -225,6 +225,24 @@ export default async function Page({ params }) {
     ),
   ];
 
+  const menuItemIds = (menuItems || []).map((item) => item.id).filter(Boolean);
+  const servingsByMenuItem = {};
+  for (const batch of chunkArray(menuItemIds, QUERY_BATCH_SIZE)) {
+    const { data: servingRows = [], error } = await supabase
+      .from("wine_menu_servings")
+      .select("id,wine_menu_item_id,compucash_product_id,serving_cl,price,is_active")
+      .in("wine_menu_item_id", batch)
+      .eq("is_active", true)
+      .order("serving_cl", { ascending: true });
+    if (error) console.log("WINE SERVINGS ERROR:", JSON.stringify(error));
+    for (const serving of servingRows) {
+      servingsByMenuItem[serving.wine_menu_item_id] = [
+        ...(servingsByMenuItem[serving.wine_menu_item_id] || []),
+        { ...serving, serving_cl: Number(serving.serving_cl), price: serving.price == null ? null : Number(serving.price) },
+      ];
+    }
+  }
+
   const wineIdBatches = chunkArray(
     wineIds,
     QUERY_BATCH_SIZE
@@ -282,41 +300,14 @@ export default async function Page({ params }) {
   const inventoryMap = {};
 
   if (locationIds.length > 0) {
-    for (const batch of wineIdBatches) {
-      const {
-        data: inventoryRows = [],
-        error,
-      } = await supabase
-        .from("wine_inventory")
-        .select(`
-          wine_id,
-          quantity,
-          location_id
-        `)
-        .in("location_id", locationIds)
-        .in("wine_id", batch);
-
-      if (error) {
-        console.log(
-          "INVENTORY BATCH ERROR:",
-          JSON.stringify(error)
-        );
-
-        continue;
-      }
-
-      inventoryRows.forEach((row) => {
-        const wineId = String(
-          row.wine_id
-        );
-
-        inventoryMap[wineId] =
-          Number(
-            inventoryMap[wineId] || 0
-          ) +
-          Number(row.quantity || 0);
-      });
-    }
+    const { data: inventoryRows = [], error } = await supabase.rpc(
+      "get_public_wine_menu_availability",
+      { p_menu_id: menu.id }
+    );
+    if (error) console.log("PUBLIC INVENTORY ERROR:", JSON.stringify(error));
+    (inventoryRows || []).forEach((row) => {
+      inventoryMap[String(row.wine_id)] = Number(row.quantity || 0);
+    });
   }
 
   /* =======================================================
@@ -374,6 +365,7 @@ export default async function Page({ params }) {
         service_type: serviceType,
 
         glass_price: glassPrice,
+        servings: servingsByMenuItem[menuItem.id] || [],
 
         price_override: bottlePrice,
 

@@ -1,4 +1,11 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/compucash",
+      "schedule": "*/30 * * * *"
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",

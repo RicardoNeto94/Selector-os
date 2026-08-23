@@ -151,6 +151,23 @@ export async function GET(request, { params }) {
     ),
   ];
 
+  const menuItemIds = menuItems.map((item) => item.id).filter(Boolean);
+  const servingsByMenuItem = {};
+  for (const batch of chunkArray(menuItemIds, QUERY_BATCH_SIZE)) {
+    const { data: servingRows = [] } = await supabase
+      .from("wine_menu_servings")
+      .select("id,wine_menu_item_id,compucash_product_id,serving_cl,price,is_active")
+      .in("wine_menu_item_id", batch)
+      .eq("is_active", true)
+      .order("serving_cl", { ascending: true });
+    for (const serving of servingRows) {
+      servingsByMenuItem[serving.wine_menu_item_id] = [
+        ...(servingsByMenuItem[serving.wine_menu_item_id] || []),
+        { ...serving, serving_cl: Number(serving.serving_cl), price: serving.price == null ? null : Number(serving.price) },
+      ];
+    }
+  }
+
   const wineIdBatches = chunkArray(
     wineIds,
     QUERY_BATCH_SIZE
@@ -190,27 +207,13 @@ export async function GET(request, { params }) {
   const inventoryMap = {};
 
   if (locationIds.length > 0) {
-    for (const batch of wineIdBatches) {
-      const {
-        data: inventoryRows = [],
-      } = await supabase
-        .from("wine_inventory")
-        .select(`
-          wine_id,
-          quantity,
-          location_id
-        `)
-        .in("location_id", locationIds)
-        .in("wine_id", batch);
-
-      inventoryRows.forEach((row) => {
-        const wineId = String(row.wine_id);
-
-        inventoryMap[wineId] =
-          Number(inventoryMap[wineId] || 0) +
-          Number(row.quantity || 0);
-      });
-    }
+    const { data: inventoryRows = [] } = await supabase.rpc(
+      "get_public_wine_menu_availability",
+      { p_menu_id: menu.id }
+    );
+    (inventoryRows || []).forEach((row) => {
+      inventoryMap[String(row.wine_id)] = Number(row.quantity || 0);
+    });
   }
 
   const finalItems = menuItems
@@ -256,6 +259,7 @@ export async function GET(request, { params }) {
         position: menuItem.position ?? 0,
         service_type: serviceType,
         glass_price: glassPrice,
+        servings: servingsByMenuItem[menuItem.id] || [],
         price_override: bottlePrice,
         description: menuItem.description || "",
 

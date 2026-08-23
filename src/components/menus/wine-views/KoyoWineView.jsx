@@ -78,6 +78,10 @@ export default function KoyoWineView({
               )
             : null,
 
+        servings: Array.isArray(item?.servings)
+          ? item.servings
+          : [],
+
         price_override:
           item?.price_override !== null &&
           item?.price_override !== undefined
@@ -1236,4 +1240,4 @@ items={filteredItems}
 
   );
 
-}  
+}
