@@ -47,7 +47,10 @@ function normalize(value) {
 }
 
 function formatNumber(value) {
-  return Number(value || 0).toLocaleString();
+  const numericValue = Number(value || 0);
+  return new Intl.NumberFormat("en-GB", {
+    maximumFractionDigits: 2,
+  }).format(Math.abs(numericValue) < 0.001 ? 0 : numericValue);
 }
 
 function formatCurrency(value) {
@@ -1190,7 +1193,7 @@ if (
                         text-[#963b2c]
                       "
                     >
-                      {wine.stock} bottles
+                      {formatNumber(wine.stock)} bottles
                     </div>
                   </button>
                 )
@@ -1654,7 +1657,7 @@ if (
                         text-[#963b2c]
                       "
                     >
-                      {wine.stock}
+                      {formatNumber(wine.stock)}
                     </div>
 
                     <div
@@ -1873,7 +1876,7 @@ if (
                         !isTransfer
                           ? "+"
                           : ""}
-                        {quantity}
+                        {formatNumber(quantity)}
                       </div>
 
                       <div
@@ -2172,7 +2175,7 @@ if (
                         text-[#963b2c]
                       "
                     >
-                      {wine.stock} bottles
+                      {formatNumber(wine.stock)} bottles
                     </div>
                   </div>
                 </div>

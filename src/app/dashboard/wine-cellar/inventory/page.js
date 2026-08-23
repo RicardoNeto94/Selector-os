@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZES = [25, 50, 100];
 const TYPES = ["all", "sparkling", "white", "rosé", "red", "orange", "dessert", "fortified", "sake"];
 const number = (value) => Number(value || 0);
-const quantity = (value) => new Intl.NumberFormat("en-GB", { maximumFractionDigits: 3 }).format(Math.abs(number(value)) < 0.001 ? 0 : number(value));
+const quantity = (value) => new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(Math.abs(number(value)) < 0.001 ? 0 : number(value));
 const money = (value) => new Intl.NumberFormat("en-EE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(number(value));
 const syncDate = (value) => value ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(value)) : "Not yet completed";
 
