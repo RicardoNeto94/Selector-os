@@ -1403,15 +1403,15 @@ export default function WineCatalogueImportPage() {
 
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div>
-          <div className="so-title">CompuCash Catalogue Import</div>
+          <div className="so-title">Catalogue Recovery Tool</div>
           <div className="so-sub mt-1">
-            Upload a Store Balance on its own, or add a Products report for
-            richer catalogue matching before any database changes
+            Administrator-only fallback for initial setup or approved recovery.
+            Normal stock updates are handled automatically by Compucash sync.
           </div>
         </div>
 
         <div className="rounded-full border border-[#e5d8ce] bg-white/75 px-4 py-2 text-[9px] uppercase tracking-[0.16em] text-[#963b2c]">
-          {importResult ? "Import applied" : "Preview and apply"}
+          {importResult ? "Recovery applied" : "Administrator tool"}
         </div>
       </div>
 

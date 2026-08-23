@@ -2367,13 +2367,13 @@ const matchedValuationCount =
         <div>
           <div className="so-title">
             {isProductsReport
-              ? "BTG Catalogue Sync"
-              : "Daily Inventory Reconciliation"}
+              ? "BTG Catalogue Review"
+              : "Stock Issues"}
           </div>
           <div className="so-sub mt-1">
             {isProductsReport
-              ? "Match the Business by-the-glass catalogue with Vaxeron wines and venue stock"
-              : "Compare the official business inventory report with Vaxeron cellar stock"}
+              ? "Review by-the-glass catalogue exceptions against Vaxeron wines and venue stock"
+              : "Administrator tools for investigating Compucash stock exceptions and recovery cases"}
           </div>
         </div>
 
@@ -2396,17 +2396,18 @@ const matchedValuationCount =
             </div>
 
             <div className="mt-7 text-[18px] font-medium tracking-[-0.02em] text-[#30231f]">
-              Import daily inventory report
+              Manual exception review
             </div>
 
             <div className="mt-3 text-[12px] leading-relaxed text-[#8f8178]">
-              Upload the Excel inventory report exported from the business system.
-              Vaxeron will inspect the report before any stock changes are made.
+              Compucash is the source of truth and updates Vaxeron automatically.
+              Only upload an exported inventory report when investigating a sync
+              discrepancy or performing an administrator-approved recovery.
             </div>
 
             <label className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-[#963b2c] px-5 py-3 text-[11px] font-medium text-white cursor-pointer transition hover:opacity-90">
               <ArrowUpTrayIcon className="w-4 h-4" />
-              {reading ? "Reading Report..." : "Select Excel Report"}
+              {reading ? "Reading Report..." : "Select Recovery Report"}
               <input
                 type="file"
                 accept=".xlsx,.xls"

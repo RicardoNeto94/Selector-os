@@ -19,7 +19,6 @@ import {
   SparklesIcon,
   ArrowsRightLeftIcon,
   ClipboardDocumentCheckIcon,
-  ArrowUpTrayIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
 
@@ -242,7 +241,7 @@ export default function DashboardLayout({
     "/dashboard/wine-cellar/reconciliation"
   )}
   icon={ClipboardDocumentCheckIcon}
-  label="Reconciliation"
+  label="Stock Issues"
 />
 
             <NavItem
@@ -252,15 +251,6 @@ export default function DashboardLayout({
               )}
               icon={ArrowsRightLeftIcon}
               label="Movements"
-            />
-
-            <NavItem
-              href="/dashboard/wine-cellar/catalogue-import"
-              isActive={isActive(
-                "/dashboard/wine-cellar/catalogue-import"
-              )}
-              icon={ArrowUpTrayIcon}
-              label="Catalogue Importer"
             />
 
             {/* ===============================================
