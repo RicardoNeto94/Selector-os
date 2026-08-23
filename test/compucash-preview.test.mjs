@@ -148,3 +148,14 @@ test("authoritative replacement zeroes obsolete rows at mapped locations", () =>
     business_stores: "Shang Shi Beverages",
   }]);
 });
+
+test("excludes Compucash control products from physical inventory", () => {
+  assert.equal(
+    getProductExclusionReason({ productGroupId: "16", name: "(C)Red Wine" }),
+    "generic_placeholder"
+  );
+  assert.equal(
+    getProductExclusionReason({ productGroupId: "77", name: "Sake Pairing" }),
+    "pairing_package"
+  );
+});

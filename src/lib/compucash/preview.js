@@ -34,7 +34,10 @@ export function getProductExclusionReason(product) {
   if (!COMPUCASH_PHYSICAL_WINE_GROUP_IDS.has(product.productGroupId)) return "non_physical_wine_group";
   const name = product.name ?? "";
   if (/\b(?:5|6|12|15)\s*cl\b/i.test(name)) return "by_the_glass_serving";
-  if (/\(\s*c\s*\)\s*$/i.test(name)) return "generic_placeholder";
+  if (/^\s*\(\s*c\s*\)/i.test(name) || /\(\s*c\s*\)\s*$/i.test(name)) {
+    return "generic_placeholder";
+  }
+  if (/^\s*sake\s+pairing\s*$/i.test(name)) return "pairing_package";
   return null;
 }
 
