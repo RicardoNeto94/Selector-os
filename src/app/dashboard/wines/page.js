@@ -618,6 +618,10 @@ export default function WinesPage() {
 
     return wines
       .filter((wine) => {
+        if (Number(wine.stock || 0) <= 0) {
+          return false;
+        }
+
         return [
           wine.name,
           wine.producer,
@@ -1218,8 +1222,8 @@ export default function WinesPage() {
             uniqueWines
           )}
           detail={`${formatNumber(
-            wines.length
-          )} wines registered`}
+            zeroStockWines.length
+          )} wines need ordering`}
         />
 
         <MetricCard
@@ -1735,7 +1739,7 @@ export default function WinesPage() {
           <button
             onClick={() =>
               router.push(
-                "/dashboard/wine-cellar/inventory"
+                "/dashboard/wine-cellar/inventory?stock=out"
               )
             }
             className="
@@ -1757,7 +1761,7 @@ export default function WinesPage() {
                 text-[#91a1ba]
               "
             >
-              Zero Stock
+              Needs Ordering
             </div>
 
             <div
@@ -1780,8 +1784,8 @@ export default function WinesPage() {
                 text-[#9b8d85]
               "
             >
-              Registered wines with no
-              physical stock
+              Wines held separately because
+              physical stock is zero
             </div>
           </button>
 

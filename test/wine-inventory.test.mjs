@@ -20,6 +20,8 @@ test("counts each Compucash stock unit as one bottle regardless of bottle size",
 
 test("preserves fractional bottles and removes insignificant database residue", () => {
   assert.equal(bottleQuantity(2.37), 2.37);
+  assert.equal(positiveBottleQuantity(0.1), 0.1);
+  assert.equal(positiveBottleQuantity(0), 0);
   assert.equal(bottleQuantity(0.0004), 0);
   assert.equal(bottleQuantity(-0.0004), 0);
 });
