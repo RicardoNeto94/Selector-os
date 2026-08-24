@@ -95,13 +95,66 @@ const unmatched = plan.unmatchedProducts.map((product) => ({
     .slice(0, 5),
 }));
 
+const mappedLocationIds = new Set(COMPUCASH_STORE_TARGETS.map((row) => row.locationId));
+const plannedByKey = new Map(
+  plan.rows.map((row) => [`${row.wineId}:${row.locationId}`, Number(row.quantity || 0)])
+);
+const currentByKey = new Map(
+  inventory
+    .filter((row) => mappedLocationIds.has(row.location_id))
+    .map((row) => [`${row.wine_id}:${row.location_id}`, Number(row.quantity || 0)])
+);
+const allKeys = new Set([...plannedByKey.keys(), ...currentByKey.keys()]);
+const differences = [...allKeys]
+  .map((key) => {
+    const plannedQuantity = plannedByKey.get(key) || 0;
+    const currentQuantity = currentByKey.get(key) || 0;
+    const [wineId, locationId] = key.split(":");
+    return {
+      wineId,
+      locationId,
+      plannedQuantity,
+      currentQuantity,
+      difference: currentQuantity - plannedQuantity,
+    };
+  })
+  .filter((row) => Math.abs(row.difference) >= 0.001)
+  .sort((left, right) => Math.abs(right.difference) - Math.abs(left.difference));
+
+const totalsByLocation = (rows, getLocationId, getQuantity) => {
+  const totals = new Map();
+  for (const row of rows) {
+    const locationId = getLocationId(row);
+    if (!mappedLocationIds.has(locationId)) continue;
+    const quantity = Number(getQuantity(row) || 0);
+    const current = totals.get(locationId) || { positiveBottles: 0, netBottles: 0 };
+    current.positiveBottles += Math.max(0, Math.abs(quantity) < 0.001 ? 0 : quantity);
+    current.netBottles += Math.abs(quantity) < 0.001 ? 0 : quantity;
+    totals.set(locationId, current);
+  }
+  return Object.fromEntries([...totals.entries()].sort(([left], [right]) => left.localeCompare(right)));
+};
+
+const unmatchedPositiveBottles = unmatched.reduce(
+  (total, product) => total + product.stock.reduce(
+    (stockTotal, row) => stockTotal + Math.max(0, Number(row.quantity || 0)),
+    0
+  ),
+  0
+);
+
 console.log(JSON.stringify({
   summary: {
     productsReceived: plan.productsReceived,
     productsEligible: plan.productsEligible,
     productsMatched: plan.productsMatched,
     unmatchedProducts: unmatched.length,
+    unmatchedPositiveBottles,
+    differingInventoryRows: differences.length,
   },
+  plannedTotalsByLocation: totalsByLocation(plan.rows, (row) => row.locationId, (row) => row.quantity),
+  currentTotalsByLocation: totalsByLocation(inventory, (row) => row.location_id, (row) => row.quantity),
+  differences: differences.slice(0, 100),
   unmatched,
   negativeInventory: inventory.filter((row) => Number(row.quantity) < 0),
 }, null, 2));

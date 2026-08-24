@@ -175,42 +175,35 @@ export default function NewDishPage() {
   // No menu yet: force them to create one first
   if (!menus.length) {
     return (
-      <div className="page-fade">
-        <div className="max-w-xl mx-auto">
-          <div className="so-card text-sm text-slate-700">
-            <h1 className="mb-3 text-xl font-semibold text-slate-900">
-              No menus yet
-            </h1>
-            <p className="mb-4">
-              You need at least one menu before you can add dishes to your guest
-              allergen tool.
-            </p>
-            <a
-              href="/dashboard/menu"
-              className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-            >
-              Create your first menu
-            </a>
-          </div>
+      <div className="so-page page-fade">
+        <header className="so-page-header">
+          <div><p className="so-page-eyebrow">Guest experience</p><h1 className="so-page-title">Add a dish</h1><p className="so-page-description">Create dishes and connect them to the menus guests can explore.</p></div>
+        </header>
+        <div className="so-empty-state">
+          <span>Menu required</span>
+          <h2>Create a menu first</h2>
+          <p>You need at least one menu before a dish can be organised and shown to guests.</p>
+          <a href="/dashboard/menu" className="so-btn-secondary">Open menus</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-fade">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="so-page page-fade">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div>
-          <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-600">
-            SELECTOROS • DISHES
+        <div className="so-page-header">
+          <div><p className="so-page-eyebrow">
+            Guest experience · Dishes
           </p>
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="so-page-title">
             Add a new dish
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="so-page-description">
             This dish will sync automatically to your live allergen view.
           </p>
+          </div>
         </div>
 
         {/* Form */}
@@ -319,7 +312,7 @@ export default function NewDishPage() {
                     onClick={() => toggleAllergen(a.code)}
                     className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                       active
-                        ? "border-emerald-300 bg-emerald-400 text-slate-950 shadow-sm"
+                        ? "border-[#9ebbb2] bg-[#d5e9e2] text-[#23342f] shadow-sm"
                         : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300"
                     }`}
                   >
@@ -344,8 +337,7 @@ export default function NewDishPage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items
-              center justify-center rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-50"
+              className="so-btn-primary disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save dish"}
             </button>

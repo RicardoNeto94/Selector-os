@@ -1,25 +1,19 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdministrator } from "@/lib/server/requireAdministrator";
 
 const CHANNEL = "burman_room_pwa";
 
-export async function POST() {
+export async function POST(request) {
   try {
-    const supabase = await createClient();
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
+    const authorization = await requireAdministrator(request);
+    if (authorization.error) {
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
+        { error: authorization.error.message },
+        { status: authorization.error.status },
       );
     }
 
-    const { data, error } = await supabase.rpc(
+    const { data, error } = await authorization.admin.rpc(
       "publish_pwa_refresh",
       {
         p_channel: CHANNEL,

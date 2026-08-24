@@ -957,7 +957,7 @@ export default function ExperiencesPage() {
                   focus:outline-none focus:ring-2 focus:ring-[#963b2c]/20
                 "
               >
-                <div className="relative h-28 overflow-hidden bg-gradient-to-br from-[#f6eee8] to-[#e9ddd5]">
+                <div className="relative h-28 overflow-hidden bg-gradient-to-br from-[#edf3ef] to-[#dce8e2]">
                   {experience.image_url ? (
                     <img
                       src={experience.image_url}

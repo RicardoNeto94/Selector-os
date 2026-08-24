@@ -28,6 +28,16 @@ export async function requireAdministrator(request) {
 
   if (!user) return { admin, error: { status: 401, message: "Authentication required." } };
 
+  const { data: profile, error: profileError } = await admin
+    .from("profiles")
+    .select("status")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profileError) throw profileError;
+  if (profile?.status !== "active") {
+    return { admin, user, error: { status: 403, message: "Active account required." } };
+  }
+
   const { data, error } = await admin
     .from("user_roles")
     .select("roles!inner(slug)")

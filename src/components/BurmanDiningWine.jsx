@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { sumPositiveBottles } from "@/lib/wineInventory";
 
 export default function BurmanDiningWine({ venueName = "" }) {
   const supabase = createClient();
@@ -133,11 +134,7 @@ export default function BurmanDiningWine({ venueName = "" }) {
             );
           }) || [];
 
-        const venueStock = venueInventory.reduce(
-          (total, inventory) =>
-            total + Number(inventory.quantity || 0),
-          0
-        );
+        const venueStock = sumPositiveBottles(venueInventory);
 
         return {
           id: wine.id,

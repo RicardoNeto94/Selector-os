@@ -18,9 +18,9 @@ const SPA_AREAS = [
     description:
       "Manage massages, facials, body rituals, wellness journeys and signature spa experiences.",
     icon: SparklesIcon,
-    accent: "from-[#f4e7df] to-[#efe0d6]",
-    iconBackground: "bg-[#f4e2d8]",
-    iconColor: "text-[#9b4f3c]",
+    accent: "from-[#e8f0ec] to-[#d8e5df]",
+    iconBackground: "bg-[#dfeae5]",
+    iconColor: "text-[#55766b]",
   },
   {
     href: "/dashboard/spa/selfcare",
@@ -29,9 +29,9 @@ const SPA_AREAS = [
     description:
       "Manage self care, bath rituals, skincare, oils, teas and spa retail items.",
     icon: BuildingStorefrontIcon,
-    accent: "from-[#ece8dc] to-[#e4dfd0]",
-    iconBackground: "bg-[#e9e3d3]",
-    iconColor: "text-[#7d6c42]",
+    accent: "from-[#edf1e9] to-[#dfe8dc]",
+    iconBackground: "bg-[#e3ebe0]",
+    iconColor: "text-[#64785e]",
   },
   {
     href: "/dashboard/spa/fnb",
@@ -49,15 +49,15 @@ const SPA_AREAS = [
 export default function SpaDashboardPage() {
   return (
     <div className="so-main-inner space-y-8 pb-10">
-      <section className="relative overflow-hidden rounded-[30px] border border-[#e7ddd4] bg-[#f8f4ef] px-6 py-7 sm:px-8 sm:py-9 lg:px-10">
+      <section className="relative overflow-hidden rounded-[30px] border border-[#dbe6e0] bg-[#f4f8f5] px-6 py-7 sm:px-8 sm:py-9 lg:px-10">
         <div
-          className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#d8b88d]/20 blur-3xl"
+          className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#9fc1b5]/20 blur-3xl"
           aria-hidden="true"
         />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.24em] text-[#9a7a56]">
+            <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.24em] text-[#638076]">
               Wellness operations
             </div>
 
@@ -75,7 +75,7 @@ export default function SpaDashboardPage() {
             href="/spa/burman"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#c9ab7a] bg-[#c9ab7a] px-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:-translate-y-0.5 hover:bg-[#b89560]"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#294039] bg-[#294039] px-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:-translate-y-0.5 hover:bg-[#36544b]"
           >
             Open guest view
             <ArrowTopRightOnSquareIcon className="h-4 w-4" />

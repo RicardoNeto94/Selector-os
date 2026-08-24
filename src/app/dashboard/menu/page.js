@@ -29,20 +29,21 @@ export default async function MenuDashboardPage() {
 
   if (restaurantError || !restaurant) {
     return (
-      <main className="so-main">
-        <div className="so-main-inner">
-
-          <div className="so-card">
-            <h1 className="text-white font-semibold mb-2">
-              No restaurant found
-            </h1>
-            <p className="text-slate-400 text-sm">
-              You need to complete onboarding first.
-            </p>
+      <div className="so-page page-fade">
+        <header className="so-page-header">
+          <div>
+            <p className="so-page-eyebrow">Guest experience</p>
+            <h1 className="so-page-title">Menus</h1>
+            <p className="so-page-description">Build, publish and manage guest-facing hospitality menus.</p>
           </div>
-
+        </header>
+        <div className="so-empty-state">
+          <span>Organisation setup</span>
+          <h2>No restaurant workspace is linked</h2>
+          <p>Your account is authenticated, but it is not currently linked to a restaurant record. An administrator can resolve this in organisation settings.</p>
+          <a href="/dashboard/settings" className="so-btn-secondary">Open settings</a>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -54,20 +55,12 @@ export default async function MenuDashboardPage() {
     .order("created_at", { ascending: true });
 
   return (
-    <main className="so-main">
-
-      <div className="so-main-inner">
-
-        <MenuDashboardClient
-          menus={menus}
-          restaurant={restaurant}
-          plan="pro"
-          maxMenus={null}
-          isAtLimit={false}
-        />
-
-      </div>
-
-    </main>
+    <MenuDashboardClient
+      menus={menus}
+      restaurant={restaurant}
+      plan="pro"
+      maxMenus={null}
+      isAtLimit={false}
+    />
   );
 }

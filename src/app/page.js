@@ -1,389 +1,105 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import "@/styles/vaxeron-home.css";
+import VaxeronMotion from "@/components/VaxeronMotion";
+import "@/styles/vaxeron-new.css";
 
-const NAV_ITEMS = [
-  { label: "Platform", href: "/product" },
-  { label: "Products", href: "/product" },
-  { label: "Solutions", href: "/solutions" },
-  { label: "Experience", href: "/customers" },
-  { label: "Company", href: "/company" },
+const capabilities = [
+  { category: "Cellar", title: "Wine & cellar intelligence", copy: "One live view of the catalogue, availability, pricing and every service format.", outcome: "Bottle and by-the-glass availability stays aligned with the cellar and the venue serving it.", proofs: ["Catalogue & vintages", "Location-level stock", "Bottle & BTG formats"] },
+  { category: "Operations", title: "Venue operations", copy: "Control transfers, movements and discrepancies across every storage and service location.", outcome: "Teams see where stock is, how it moved and which venue can confidently offer it now.", proofs: ["Transfers", "Movement history", "Venue reconciliation"] },
+  { category: "Experience", title: "Guest experience publishing", copy: "Shape stock-aware wine lists and bespoke dining, spa and in-room guest journeys.", outcome: "Operational truth becomes a beautifully tailored experience without exposing the systems behind it.", proofs: ["Digital wine lists", "Property experiences", "Brand-led presentation"] },
+  { category: "Ecosystem", title: "Connected hospitality systems", copy: "An integration architecture designed for POS, inventory, PMS and reservation platforms.", outcome: "Compucash is the first live connector. Additional providers are designed to attach through isolated adapters while VAXERON keeps one consistent operational language.", proofs: ["POS & inventory", "PMS integration path", "Webhooks & scheduled sync"] },
+  { category: "Governance", title: "Teams, security & control", copy: "Protected workspaces, accountable access and a reliable operational record for every property.", outcome: "Each team member sees only what they need, while sensitive operational data remains private and auditable.", proofs: ["Verified sessions", "Role-based access", "Audit-ready history"] },
 ];
 
-const PLATFORM_PILLARS = [
-  {
-    number: "01",
-    title: "Core",
-    copy: "Foundational data, content, and operational structure.",
-  },
-  {
-    number: "02",
-    title: "Guest",
-    copy: "Beautiful experiences across dining, spa, in-room, and more.",
-  },
-  {
-    number: "03",
-    title: "Cellar",
-    copy: "Wine programmes, inventory, cellar operations, and movement.",
-  },
-  {
-    number: "04",
-    title: "Operations",
-    copy: "Inventory, workflows, venues, reporting, and execution.",
-  },
-];
-
-const FOOTER_GROUPS = [
-  {
-    title: "Platform",
-    links: [
-      { label: "Core", href: "/product#core" },
-      { label: "Guest", href: "/product#guest" },
-      { label: "Cellar", href: "/product#cellar" },
-      { label: "Operations", href: "/product#operations" },
-    ],
-  },
-  {
-    title: "Solutions",
-    links: [
-      { label: "Hotels & Resorts", href: "/solutions/hotels" },
-      { label: "Restaurants", href: "/solutions/restaurants" },
-      { label: "Private Clubs", href: "/solutions/private-clubs" },
-      { label: "Spas & Wellness", href: "/solutions/wellness" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Case Studies", href: "/resources/case-studies" },
-      { label: "Blog", href: "/resources/blog" },
-      { label: "Documentation", href: "/resources/documentation" },
-      { label: "Support", href: "/support" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About Us", href: "/company" },
-      { label: "Careers", href: "/company/careers" },
-      { label: "Partners", href: "/company/partners" },
-      { label: "Contact", href: "/contact" },
-    ],
-  },
+const experiences = [
+  ["/vaxeron/koyo-ipad-service.png", "Koyo", "A seasonal wine-and-sake journey presented with the intimacy, care and quiet theatre of omotenashi.", "Omakase wine experience"],
+  ["/vaxeron/shang-shi-ipad-service.png", "Shang Shi", "A tableside sommelier consultation connecting the live cellar with contemporary Cantonese dining.", "Sommelier-led wine programme"],
+  ["/vaxeron/burman-spa-ipad-consultation.png", "The Burman Spa", "A private wellness consultation guiding each guest towards treatments, self-care and moments of restoration.", "Personalised wellness journey"],
 ];
 
 export default function HomePage() {
-  const [scrolled, setScrolled] = useState(false);
+  return <main className="vx2">
+    <VaxeronMotion />
+    <header className="vx2-nav">
+      <Link href="/" className="vx2-wordmark" aria-label="VAXERON home"><img src="/selectoros-logo.png" alt=""/><span>VAXERON</span></Link>
+      <nav aria-label="Primary navigation"><a href="#vision">Vision</a><a href="#platform">Platform</a><a href="#experiences">Experiences</a><a href="#access">Access</a></nav>
+      <div><Link href="/sign-in" className="vx2-signin">Sign in</Link><a href="#access" className="vx2-nav-cta">Request access</a></div>
+    </header>
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    <section className="vx2-hero">
+      <img className="vx2-hero-image" src="/vaxeron/hospitality-arrival.png" alt="A refined contemporary hospitality arrival at night"/>
+      <div className="vx2-hero-shade"/>
+      <div className="vx2-hero-copy" data-reveal>
+        <p>Operational intelligence for exceptional hospitality</p>
+        <h1>Everything behind the experience, quietly connected.</h1>
+        <div className="vx2-hero-bottom"><span>Wine · Venues · Inventory · Guests</span><a href="#vision">Discover VAXERON <b>↓</b></a></div>
+      </div>
+    </section>
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    <section className="vx2-manifesto" id="vision">
+      <p className="vx2-label" data-reveal>One operational language</p>
+      <h2 data-reveal>Hospitality should feel effortless.<br/><em>The work behind it rarely is.</em></h2>
+      <div className="vx2-manifesto-tail" data-reveal><span>VAXERON brings the moving parts together—without flattening the identity of the property.</span><p>A shared foundation for cellar, service, content and guest experience. Clear enough for the first day. Powerful enough for what comes next.</p></div>
+    </section>
 
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    <section className="vx2-workspace" id="platform">
+      <div className="vx2-workspace-copy" data-reveal><p className="vx2-label">The working view</p><h2>Clarity,<br/>at a glance.</h2><p>Live operational health, venue inventory and guest publishing—designed around the way hospitality teams actually work.</p><a href="#capabilities">Explore the platform <span>→</span></a></div>
+      <div className="vx2-device-wrap" data-reveal>
+        <div className="vx2-laptop"><div className="vx2-screen"><span className="vx2-camera"/><img src="/platform/dashboard-overview.png?v=4" alt="VAXERON operational dashboard displayed on a laptop"/></div><div className="vx2-base"><i/></div></div>
+        <small>VAXERON operational overview · Live workspace</small>
+      </div>
+    </section>
 
-  useEffect(() => {
-    const targets = document.querySelectorAll(".vx-reveal");
+    <section className="vx2-service">
+      <figure data-reveal><img src="/vaxeron/sommelier-service.png" alt="A sommelier preparing wine service in an intimate cellar"/><figcaption>Precision in every detail</figcaption></figure>
+      <div className="vx2-service-copy" data-reveal><p className="vx2-label">From cellar to table</p><h2>Built for the details guests never need to see.</h2><p>Availability, pricing, service formats and location move through one connected system—so the experience stays composed.</p><blockquote>“The technology recedes.<br/>The hospitality remains.”</blockquote></div>
+    </section>
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      targets.forEach((target) => target.classList.add("is-in"));
-      return;
-    }
+    <section className="vx2-capabilities" id="capabilities">
+      <header data-reveal><p className="vx2-label">A modular foundation</p><h2>One language.<br/>Every moving part.</h2><p className="vx2-capability-intro">Explore how VAXERON connects operational truth with the guest experience—without depending on a single technology provider.</p><div className="vx2-capability-scope"><span>Operations</span><span>Experiences</span><span>Integrations</span></div></header>
+      <div className="vx2-capability-list">{capabilities.map(({category,title,copy,outcome,proofs},index)=><details key={title} open={index===0} data-reveal><summary><span>{String(index+1).padStart(2,"0")}</span><div><small>{category}</small><h3>{title}</h3><p>{copy}</p></div><b aria-hidden="true">+</b></summary><div className="vx2-capability-detail"><p>{outcome}</p><ul>{proofs.map(proof=><li key={proof}>{proof}</li>)}</ul></div></details>)}</div>
+    </section>
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-in");
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.14 }
-    );
+    <section className="vx2-evening">
+      <img src="/vaxeron/evening-service.png" alt="Hospitality team preparing a restaurant for evening service"/>
+      <div data-reveal><p>Quiet coordination</p><h2>When every team sees the same truth, service moves differently.</h2></div>
+    </section>
 
-    targets.forEach((target) => observer.observe(target));
+    <section className="vx2-experiences" id="experiences">
+      <header data-reveal><p className="vx2-label">Partner implementations</p><h2>Designed around<br/><em>their world.</em></h2><span>VAXERON provides the operational foundation. Every guest-facing service is then shaped around the partner, their setting and the way they welcome guests.</span></header>
 
-    return () => observer.disconnect();
-  }, []);
+      <article className="vx2-burman-case" data-reveal>
+        <div className="vx2-burman-room"><img src="/vaxeron/burman-ipad-final.png" alt="The Burman VAXERON guest experience presented on an in-room iPad"/></div>
+        <div className="vx2-burman-caption"><p className="vx2-label">The Burman Hotel · In-room experience</p><h3>The stay, thoughtfully gathered in one place.</h3><p>Created for the hotel’s in-room iPads, the experience gives every guest an immediate path to Michelin-recognised dining, room service, the spa and the details of their stay.</p><small>Original VAXERON concept · Inspired by the live installation</small></div>
+      </article>
 
-  return (
-    <main className="vx-root">
-      <header className={`vx-site-header${scrolled ? " is-scrolled" : ""}`}>
-        <div className="vx-header-inner">
-          <Link href="/" className="vx-brand" aria-label="VAXERON home">
-            <span className="vx-brand-mark" aria-hidden="true">
-              V
-            </span>
+      <div className="vx2-partner-intro" data-reveal><p className="vx2-label">Personalised services for our partners</p><span>Part of the wider Bombay hospitality world, each destination keeps a distinct voice, service ritual and digital expression.</span></div>
+      <div className="vx2-experience-grid">{experiences.map(([image,title,copy,service],index)=><figure key={title} className={`vx2-exp-${index+1}`} data-reveal><div className="vx2-partner-image"><img src={image} alt={`${title} guest experience powered by VAXERON`}/><small>{service}</small></div><figcaption><span>{title}</span><p>{copy}</p></figcaption></figure>)}</div>
+    </section>
 
-            <span className="vx-brand-copy">
-              <span className="vx-brand-name">VAXERON</span>
-              <span className="vx-brand-sub">by Vaxeron Technologies</span>
-            </span>
-          </Link>
+    <section className="vx2-proof" id="inside-platform">
+      <header className="vx2-proof-header" data-reveal><p className="vx2-label">Inside the platform</p><h2>From one source of truth<br/><em>to every point of service.</em></h2><p>VAXERON turns fragmented operational data into a calm, shared workspace—then carries the right information into every venue and guest experience.</p></header>
+      <div className="vx2-proof-stage" data-reveal>
+        <figure className="vx2-proof-window vx2-proof-main"><div className="vx2-window-bar"><i/><i/><i/><span>Live operational workspace</span></div><img src="/platform/stock-control.png?v=4" alt="VAXERON live stock control workspace"/></figure>
+        <figure className="vx2-proof-window vx2-proof-venue"><div className="vx2-window-bar"><i/><i/><i/><span>Venue intelligence</span></div><img src="/platform/venue-inventory.png?v=4" alt="VAXERON location-level venue inventory"/></figure>
+        <aside className="vx2-proof-note"><p className="vx2-label">Operational record</p><h3>Every bottle.<br/>Every venue.<br/>Every movement.</h3><p>Live quantities, service formats and movement history stay connected to the teams and experiences that depend on them.</p><ul><li>Location-level availability</li><li>Transfers and adjustments</li><li>Stock-aware publishing</li></ul></aside>
+      </div>
+      <ol className="vx2-proof-flow" data-reveal>
+        <li><span>01</span><div><b>Connect systems</b><small>Provider-specific adapters</small></div></li>
+        <li><span>02</span><div><b>Normalise the truth</b><small>Products, locations and units</small></div></li>
+        <li><span>03</span><div><b>Operate confidently</b><small>Inventory, movements and teams</small></div></li>
+        <li><span>04</span><div><b>Publish beautifully</b><small>Venue and guest experiences</small></div></li>
+      </ol>
+      <p className="vx2-proof-caption" data-reveal>Compucash is the first live connector. The integration architecture is designed to welcome additional POS, inventory, PMS and reservation providers.</p>
+    </section>
 
-          <nav className="vx-main-nav" aria-label="Primary navigation">
-            {NAV_ITEMS.map((item) => (
-              <Link key={item.label} href={item.href}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+    <section className="vx2-private">
+      <p className="vx2-label" data-reveal>Private by design</p><h2 data-reveal>The public experience is open.<br/>The operation never is.</h2><div data-reveal><span>Verified sessions</span><span>Active accounts</span><span>Role-based access</span><span>Server-side protection</span></div>
+    </section>
 
-          <Link href="/contact" className="vx-header-cta">
-            Request access
-          </Link>
-        </div>
-      </header>
+    <section className="vx2-access" id="access">
+      <div data-reveal><p className="vx2-label">Selected hospitality partners</p><h2>What could VAXERON become for your property?</h2><p>Tell us about the operation, the guest journey and what you would like to connect.</p><a href="mailto:hello@vaxeron.com?subject=VAXERON%20access%20request&body=Property%20or%20company%3A%0A%0AModules%20of%20interest%3A%0A%0AWhat%20would%20you%20like%20VAXERON%20to%20help%20with%3A">Request a private introduction <span>→</span></a></div>
+    </section>
 
-      <section className="vx-home-hero" aria-labelledby="vx-home-hero-title">
-        <div className="vx-home-hero-copy vx-reveal">
-          <p className="vx-kicker">
-            Operational infrastructure
-            <br />
-            for modern hospitality
-          </p>
-
-          <h1 id="vx-home-hero-title">
-            The operating system
-            <br />
-            behind exceptional
-            <br />
-            hospitality.
-          </h1>
-
-          <p className="vx-home-hero-lead">
-            Connect guest experience, operational content, wine programmes,
-            inventory, and venue workflows in one considered platform.
-          </p>
-
-          <div className="vx-home-hero-actions">
-            <Link href="/contact" className="vx-button vx-button-primary">
-              Request early access
-            </Link>
-
-            <Link href="/product" className="vx-text-link">
-              See how it works
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="vx-home-hero-visual vx-reveal">
-          <div className="vx-home-hero-backdrop" aria-hidden="true" />
-
-          <div className="vx-device-shell">
-            <div className="vx-device-bar">
-              <span>VAXERON</span>
-              <span>Overview</span>
-            </div>
-
-            <img
-              src="/menu-dashboard.jpg"
-              alt="VAXERON operations dashboard"
-              className="vx-device-image"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="vx-pillars-section"
-        aria-labelledby="vx-pillars-title"
-      >
-        <div className="vx-pillars-heading vx-reveal">
-          <p className="vx-kicker" id="vx-pillars-title">
-            One platform. Four pillars.
-          </p>
-        </div>
-
-        <div className="vx-pillars-grid">
-          {PLATFORM_PILLARS.map((pillar) => (
-            <article className="vx-pillar" key={pillar.number}>
-              <span className="vx-pillar-number">{pillar.number}</span>
-              <h2>{pillar.title}</h2>
-              <p>{pillar.copy}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="vx-product-section"
-        aria-labelledby="vx-product-title"
-      >
-        <div className="vx-product-media vx-reveal">
-          <div className="vx-product-window">
-            <img
-              src="/wine-showcase.png"
-              alt="VAXERON wine portfolio and cellar management interface"
-            />
-          </div>
-        </div>
-
-        <div className="vx-product-copy vx-reveal">
-          <p className="vx-kicker">Platform in action</p>
-
-          <h2 id="vx-product-title">
-            Purpose-built tools
-            <br />
-            for every part of
-            <br />
-            your operation.
-          </h2>
-
-          <p>
-            Live data, operational clarity, and connected workflows give teams
-            the structure to deliver at the highest level.
-          </p>
-
-          <Link href="/product" className="vx-text-link">
-            Explore the platform
-            <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </section>
-
-      <section className="vx-dual-section" aria-label="Guest and operations">
-        <article className="vx-dual-panel vx-dual-guest">
-          <div className="vx-dual-copy">
-            <p className="vx-kicker">
-              Presented beautifully
-              <br />
-              to the guest
-            </p>
-
-            <h2>Every experience, seamlessly connected.</h2>
-
-            <p>
-              Dining, wellness, in-room service, and wine presented through one
-              coherent guest journey.
-            </p>
-
-            <Link href="/product#guest" className="vx-text-link">
-              Explore guest experience
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-
-          <div className="vx-dual-media vx-dual-phone">
-            <img
-              src="/homepage/room-service.png"
-              alt="VAXERON in-room dining guest experience"
-            />
-          </div>
-        </article>
-
-        <article className="vx-dual-panel vx-dual-ops">
-          <div className="vx-dual-copy">
-            <p className="vx-kicker">
-              Managed clearly
-              <br />
-              by the operation
-            </p>
-
-            <h2>Control every detail from one place.</h2>
-
-            <p>
-              Content, inventory, movements, venues, and workflows unified in
-              one operational environment.
-            </p>
-
-            <Link href="/product#operations" className="vx-text-link">
-              Explore operations
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-
-          <div className="vx-dual-media vx-dual-laptop">
-            <img
-              src="/menu-dashboard.jpg"
-              alt="VAXERON operations and inventory interface"
-            />
-          </div>
-        </article>
-      </section>
-
-      <section className="vx-origin-section">
-        <div className="vx-origin-inner vx-reveal">
-          <div>
-            <p className="vx-kicker">Built inside hospitality</p>
-            <h2>Built inside hospitality, for hospitality.</h2>
-          </div>
-
-          <p>
-            VAXERON is shaped by real operational experience and designed around
-            the complexity of modern hospitality. Every module exists to give
-            teams more clarity while preserving the human character of
-            exceptional service.
-          </p>
-        </div>
-      </section>
-
-      <section className="vx-final-cta">
-        <div className="vx-final-cta-inner">
-          <span className="vx-final-mark" aria-hidden="true">
-            V
-          </span>
-
-          <h2>Bring your operation into one connected system.</h2>
-
-          <Link href="/contact" className="vx-button vx-button-primary">
-            Request early access
-          </Link>
-        </div>
-      </section>
-
-      <footer className="vx-footer">
-        <div className="vx-footer-grid">
-          <div className="vx-footer-brand">
-            <Link href="/" className="vx-brand" aria-label="VAXERON home">
-              <span className="vx-brand-copy">
-                <span className="vx-brand-name">VAXERON</span>
-                <span className="vx-brand-sub">by Vaxeron Technologies</span>
-              </span>
-            </Link>
-
-            <p>
-              The operating system for modern hospitality, unifying guest
-              experience and operational control.
-            </p>
-
-            <div className="vx-footer-social">
-              <a href="#" aria-label="LinkedIn">
-                in
-              </a>
-              <a href="#" aria-label="Instagram">
-                ig
-              </a>
-              <a href="mailto:hello@vaxeron.com" aria-label="Email VAXERON">
-                mail
-              </a>
-            </div>
-          </div>
-
-          {FOOTER_GROUPS.map((group) => (
-            <div className="vx-footer-column" key={group.title}>
-              <h3>{group.title}</h3>
-
-              {group.links.map((link) => (
-                <Link href={link.href} key={link.label}>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          ))}
-
-          <div className="vx-footer-legal">
-            <p>© 2026 Vaxeron Technologies. All rights reserved.</p>
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms of Service</Link>
-          </div>
-        </div>
-      </footer>
-    </main>
-  );
+    <footer className="vx2-footer"><Link href="/" className="vx2-wordmark"><img src="/selectoros-logo.png" alt=""/><span>VAXERON</span></Link><p>Operational intelligence for modern hospitality.</p><nav><a href="#platform">Platform</a><a href="#experiences">Experiences</a><a href="mailto:hello@vaxeron.com">Contact</a><Link href="/sign-in">Team sign in</Link></nav><small>© {new Date().getFullYear()} VAXERON Technologies</small></footer>
+  </main>;
 }

@@ -1,9 +1,22 @@
 import { NextResponse } from "next/server";
 
-export function middleware(req) {
+export async function middleware(req) {
 
   const host = req.headers.get("host") || "";
   const { pathname } = req.nextUrl;
+
+  if (pathname === "/sign-up") {
+    return NextResponse.redirect(new URL("/#request-access", req.url));
+  }
+
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+    const hasAuthCookie = req.cookies
+      .getAll()
+      .some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));
+    if (!hasAuthCookie) {
+      return NextResponse.redirect(new URL("/sign-in?reason=session-required", req.url));
+    }
+  }
 
   if (pathname === "/") {
 
@@ -44,5 +57,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/"],
+  matcher: ["/", "/sign-up", "/dashboard/:path*"],
 };

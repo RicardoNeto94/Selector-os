@@ -1,3 +1,5 @@
+import { fetchAllQueryRows } from "@/lib/wineInventory";
+
 const WINE_GROUPS = new Set([
   "by the glass",
   "champagne",
@@ -1529,8 +1531,7 @@ async function loadInventory({
       index + chunkSize
     );
 
-    const { data, error } =
-      await supabase
+    const data = await fetchAllQueryRows(() => supabase
         .from("wine_inventory")
         .select(`
           wine_id,
@@ -1541,14 +1542,11 @@ async function loadInventory({
         .in(
           "location_id",
           locationIds
-        );
-
-    if (error) {
-      throw error;
-    }
+        )
+        .order("wine_id"));
 
     inventoryRows.push(
-      ...(data || [])
+      ...data
     );
   }
 
@@ -1707,7 +1705,7 @@ export async function reconcileWineInventory({
       ),
     ];
 
-    const { data, error } = await supabase
+    const data = await fetchAllQueryRows(() => supabase
       .from("wine_inventory")
       .select(`
         wine_id,
@@ -1715,11 +1713,8 @@ export async function reconcileWineInventory({
         quantity
       `)
       .in("wine_id", globalBtgWineIds)
-      .gt("quantity", 0);
-
-    if (error) {
-      throw error;
-    }
+      .gt("quantity", 0)
+      .order("wine_id"));
 
     const positiveInventoryByWine =
       new Map();

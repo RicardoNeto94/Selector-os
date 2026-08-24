@@ -3,6 +3,7 @@ import "../styles/theme.css";
 import ServiceWorkerRegister from "../components/ServiceWorkerRegister";
 
 export const metadata = {
+  metadataBase: new URL("https://vaxeron.com"),
   title: {
     default: "VAXERON — The operating system for modern hospitality",
     template: "%s | VAXERON",
@@ -23,7 +24,7 @@ export const metadata = {
     siteName: "VAXERON",
     images: [
       {
-        url: "/og-image.png",
+        url: "/vaxeron/hospitality-arrival.png",
         width: 1200,
         height: 630,
         alt: "VAXERON — operational infrastructure for modern hospitality",
@@ -38,7 +39,7 @@ export const metadata = {
     title: "VAXERON — The operating system for modern hospitality",
     description:
       "VAXERON unifies guest experience, wine programmes, inventory, and operational workflows into one connected platform for modern hospitality.",
-    images: ["/og-image.png"],
+    images: ["/vaxeron/hospitality-arrival.png"],
   },
 };
 
@@ -53,7 +54,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
 
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="SelectorOS" />
+        <meta name="apple-mobile-web-app-title" content="VAXERON" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
         <link rel="apple-touch-icon" href="/icon-192.png" />

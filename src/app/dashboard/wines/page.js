@@ -20,6 +20,8 @@ import {
 
 
 import { createClient } from "@/lib/supabase/client";
+import { normalizeWineCategory, positiveBottleQuantity, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
+import "./wine-cellar.css";
 /* =======================================================
    CONSTANTS
 ======================================================= */
@@ -31,9 +33,21 @@ const WINE_TYPE_ORDER = [
   "rose",
   "rosé",
   "sake",
+  "non-alcoholic",
   "orange",
   "dessert",
   "fortified",
+];
+
+const WINE_CHART_COLORS = [
+  "#385a50",
+  "#7e9e92",
+  "#c2a36f",
+  "#b87366",
+  "#8d798f",
+  "#d3b37f",
+  "#657a91",
+  "#9b8c73",
 ];
 
 /* =======================================================
@@ -206,6 +220,9 @@ export default function WinesPage() {
   const [search, setSearch] =
     useState("");
 
+  const [selectedCompositionType, setSelectedCompositionType] = useState(null);
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
+
   const [file, setFile] =
     useState(null);
 
@@ -313,16 +330,13 @@ export default function WinesPage() {
       const inventory =
         wine.wine_inventory || [];
 
-      const stock = inventory.reduce(
-        (sum, row) =>
-          sum +
-          Number(row.quantity || 0),
-        0
-      );
+      const stock = sumPositiveBottles(inventory);
+      const netStock = sumNetBottles(inventory);
 
       return {
         ...wine,
         stock,
+        netStock,
         inventory,
       };
     });
@@ -411,24 +425,7 @@ export default function WinesPage() {
         return;
       }
 
-      let type = normalize(
-  wine.wine_type
-);
-
-if (!type) {
-  type = "unknown";
-}
-
-if (type === "rosé") {
-  type = "rose";
-}
-
-if (
-  type.includes("sparkling") ||
-  type.includes("champagne")
-) {
-  type = "sparkling";
-}
+      const type = normalizeWineCategory(wine);
 
       if (!stats[type]) {
         stats[type] = 0;
@@ -499,9 +496,7 @@ if (
                 ) ===
                 String(location.id)
               ) {
-                quantity += Number(
-                  row.quantity || 0
-                );
+                quantity += positiveBottleQuantity(row.quantity);
               }
             });
           });
@@ -521,6 +516,23 @@ if (
             a.quantity
         );
     }, [locations, wines]);
+
+  const selectedComposition = wineComposition.find(
+    (item) => item.type === selectedCompositionType
+  ) || wineComposition[0] || null;
+
+  const selectedLocation = locationDistribution.find(
+    (location) => String(location.id) === String(selectedLocationId)
+  ) || locationDistribution[0] || null;
+
+  const compositionSegments = useMemo(() => {
+    let cursor = 0;
+    return wineComposition.slice(0, 8).map((item, index) => {
+      const start = cursor;
+      cursor += item.percentage;
+      return { ...item, start, color: WINE_CHART_COLORS[index % WINE_CHART_COLORS.length] };
+    });
+  }, [wineComposition]);
 
   /* =====================================================
      ATTENTION
@@ -879,29 +891,13 @@ if (
   ===================================================== */
 
   return (
-    <div
-      className="
-        max-w-[1600px]
-        mx-auto
-        px-7
-        py-7
-        space-y-5
-      "
-    >
+    <div className="wine-cellar-page max-w-[1600px] mx-auto px-7 py-7 space-y-5">
 
       {/* =================================================
           HEADER
       ================================================= */}
 
-      <div
-        className="
-          flex
-          items-start
-          justify-between
-          gap-6
-          flex-wrap
-        "
-      >
+      <div className="wine-cellar-hero flex items-start justify-between gap-6 flex-wrap">
         <div>
           <div className="so-title">
             Wine Cellar
@@ -1207,14 +1203,7 @@ if (
           KPI GRID
       ================================================= */}
 
-      <div
-        className="
-          grid
-          grid-cols-2
-          xl:grid-cols-4
-          gap-4
-        "
-      >
+      <div className="wine-cellar-kpis grid grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard
           label="Total Bottles"
           value={formatNumber(
@@ -1256,294 +1245,97 @@ if (
           INTELLIGENCE
       ================================================= */}
 
-      <div
-        className="
-          grid
-          grid-cols-1
-          xl:grid-cols-[1.08fr_0.92fr]
-          gap-5
-        "
-      >
-
-        {/* ===============================================
-            COMPOSITION
-        =============================================== */}
-
-        <div className="so-card">
-          <div
-            className="
-              flex
-              items-start
-              justify-between
-              gap-5
-              mb-7
-            "
-          >
-            <div>
-              <div className="so-title">
-                Cellar Composition
-              </div>
-
-              <div className="so-sub mt-1">
-                Bottle distribution by wine
-                category
-              </div>
-            </div>
-
-            <div
-              className="
-                text-[10px]
-                uppercase
-                tracking-[0.18em]
-                text-[#91a1ba]
-              "
-            >
-              {formatNumber(
-                totalBottles
-              )} bottles
-            </div>
+      <div className="wine-intelligence-grid">
+        <section className="wine-analytics-card wine-composition-card">
+          <div className="wine-card-heading">
+            <div><span>Portfolio analytics</span><h2>Cellar composition</h2><p>Select a category to inspect its share of physical stock.</p></div>
+            <small>{formatNumber(totalBottles)} bottles</small>
           </div>
 
-          <div className="space-y-5">
-            {wineComposition
-              .slice(0, 8)
-              .map((item) => (
-                <div key={item.type}>
-                  <div
-                    className="
-                      flex
-                      items-center
-                      justify-between
-                      gap-5
-                      mb-2
-                    "
-                  >
-                    <div
-                      className="
-                        text-[12px]
-                        text-[#44332d]
-                      "
-                    >
-                      {getWineTypeLabel(
-                        item.type
-                      )}
-                    </div>
+          <div className="wine-donut-layout">
+            <div className="wine-donut" aria-label="Interactive wine category distribution">
+              <svg viewBox="0 0 100 100" role="group" aria-label="Select a wine category segment">
+                <circle className="wine-donut-track" cx="50" cy="50" r="40" pathLength="100" />
+                {compositionSegments.map((item) => {
+                  const isActive = selectedComposition?.type === item.type;
+                  return <circle
+                    key={item.type}
+                    className={`wine-donut-segment ${isActive ? "is-active" : "is-muted"}`}
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    pathLength="100"
+                    stroke={item.color}
+                    strokeDasharray={`${Math.max(item.percentage - .35, .15)} ${100 - Math.max(item.percentage - .35, .15)}`}
+                    strokeDashoffset={-item.start}
+                    tabIndex="0"
+                    role="button"
+                    aria-label={`${getWineTypeLabel(item.type)}, ${item.percentage.toFixed(1)} percent`}
+                    onClick={() => setSelectedCompositionType(item.type)}
+                    onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedCompositionType(item.type); } }}
+                  />;
+                })}
+              </svg>
+              <span key={selectedComposition?.type || "empty"} className="wine-donut-center">
+                <small>{selectedComposition ? getWineTypeLabel(selectedComposition.type) : "Cellar"}</small>
+                <strong>{selectedComposition ? `${selectedComposition.percentage.toFixed(1)}%` : "0%"}</strong>
+                <em>{selectedComposition ? `${formatNumber(selectedComposition.quantity)} bottles` : "No stock"}</em>
+              </span>
+            </div>
 
-                    <div
-                      className="
-                        flex
-                        items-center
-                        gap-5
-                      "
-                    >
-                      <span
-                        className="
-                          text-[10px]
-                          text-[#91a1ba]
-                        "
-                      >
-                        {formatNumber(
-                          item.quantity
-                        )}
-                      </span>
-
-                      <span
-                        className="
-                          min-w-[46px]
-                          text-right
-                          text-[11px]
-                          font-medium
-                          text-[#963b2c]
-                        "
-                      >
-                        {item.percentage.toFixed(
-                          1
-                        )}
-                        %
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="
-                      h-[5px]
-                      bg-[#eee6df]
-                      rounded-full
-                      overflow-hidden
-                    "
-                  >
-                    <div
-                      className="
-                        h-full
-                        bg-[#963b2c]
-                        rounded-full
-                      "
-                      style={{
-                        width:
-                          `${item.percentage}%`,
-                      }}
-                    />
-                  </div>
-                </div>
+            <div className="wine-chart-legend">
+              {wineComposition.slice(0, 8).map((item, index) => (
+                <button
+                  type="button"
+                  key={item.type}
+                  onClick={() => setSelectedCompositionType(item.type)}
+                  className={selectedComposition?.type === item.type ? "is-active" : ""}
+                >
+                  <i style={{ background: WINE_CHART_COLORS[index % WINE_CHART_COLORS.length] }} />
+                  <span>{getWineTypeLabel(item.type)}</span>
+                  <strong>{item.percentage.toFixed(1)}%</strong>
+                </button>
               ))}
-          </div>
-        </div>
-
-        {/* ===============================================
-            LOCATION DISTRIBUTION
-        =============================================== */}
-
-        <div className="so-card">
-          <div
-            className="
-              flex
-              items-start
-              justify-between
-              gap-5
-              mb-7
-            "
-          >
-            <div>
-              <div className="so-title">
-                Stock Distribution
-              </div>
-
-              <div className="so-sub mt-1">
-                Physical inventory by
-                location
-              </div>
             </div>
+          </div>
+        </section>
 
-            <button
-              onClick={() =>
-                router.push(
-                  "/dashboard/wine-cellar/venues"
-                )
-              }
-              className="
-                text-[10px]
-                uppercase
-                tracking-[0.16em]
-                text-[#963b2c]
-              "
-            >
-              Venue Wines
-            </button>
+        <section className="wine-analytics-card wine-location-card">
+          <div className="wine-card-heading">
+            <div><span>Physical network</span><h2>Stock distribution</h2><p>Compare inventory held by each cellar and venue.</p></div>
+            <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Open venues ↗</button>
           </div>
 
-          <div className="space-y-2">
-            {locationDistribution
-              .slice(0, 8)
-              .map(
-                (
-                  location,
-                  index
-                ) => {
-                  const percentage =
-                    totalBottles > 0
-                      ? (
-                          location.quantity /
-                          totalBottles
-                        ) * 100
-                      : 0;
-
-                  return (
-                    <div
-                      key={location.id}
-                      className="
-                        flex
-                        items-center
-                        gap-4
-                        py-3
-                        border-b
-                        border-[#f0e8e1]
-                        last:border-b-0
-                      "
-                    >
-                      <div
-                        className="
-                          w-7
-                          text-[9px]
-                          text-[#b4a69e]
-                        "
-                      >
-                        {String(
-                          index + 1
-                        ).padStart(
-                          2,
-                          "0"
-                        )}
-                      </div>
-
-                      <BuildingStorefrontIcon
-                        className="
-                          w-4
-                          h-4
-                          text-[#a28e82]
-                        "
-                      />
-
-                      <div
-                        className="
-                          flex-1
-                          min-w-0
-                        "
-                      >
-                        <div
-                          className="
-                            text-[12px]
-                            text-[#3a2a24]
-                          "
-                        >
-                          {location.name}
-                        </div>
-
-                        <div
-                          className="
-                            mt-1
-                            text-[9px]
-                            text-[#91a1ba]
-                          "
-                        >
-                          {percentage.toFixed(
-                            1
-                          )}
-                          % of total inventory
-                        </div>
-                      </div>
-
-                      <div
-                        className="
-                          text-right
-                        "
-                      >
-                        <div
-                          className="
-                            text-[14px]
-                            font-medium
-                            text-[#30231f]
-                          "
-                        >
-                          {formatNumber(
-                            location.quantity
-                          )}
-                        </div>
-
-                        <div
-                          className="
-                            text-[9px]
-                            text-[#91a1ba]
-                          "
-                        >
-                          bottles
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-              )}
+          <div className="wine-location-focus">
+            <div>
+              <span>Selected location</span>
+              <strong>{selectedLocation?.name || "No active stock"}</strong>
+            </div>
+            <div>
+              <strong>{formatNumber(selectedLocation?.quantity || 0)}</strong>
+              <span>bottles · {totalBottles > 0 ? (((selectedLocation?.quantity || 0) / totalBottles) * 100).toFixed(1) : 0}% of portfolio</span>
+            </div>
           </div>
-        </div>
+
+          <div className="wine-location-bars" aria-label="Inventory by location">
+            {locationDistribution.slice(0, 8).map((location) => {
+              const maxQuantity = locationDistribution[0]?.quantity || 1;
+              const selected = String(selectedLocation?.id) === String(location.id);
+              return (
+                <button
+                  type="button"
+                  key={location.id}
+                  className={selected ? "is-active" : ""}
+                  onClick={() => setSelectedLocationId(location.id)}
+                  title={`${location.name}: ${formatNumber(location.quantity)} bottles`}
+                >
+                  <span className="wine-location-bar-track"><i style={{ height: `${Math.max(7, (location.quantity / maxQuantity) * 100)}%` }} /></span>
+                  <em>{location.name}</em>
+                </button>
+              );
+            })}
+          </div>
+        </section>
       </div>
 
       {/* =================================================

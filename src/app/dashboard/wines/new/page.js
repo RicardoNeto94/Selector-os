@@ -138,17 +138,18 @@ if (createdWine && selectedLocation) {
 
   return (
 
-    <div className="page-fade w-full px-8 py-6">
+    <div className="so-page page-fade">
 
       <div className="w-full">
 
-        <h1 className="text-2xl font-semibold text-white mb-6">
-          Add Wine
-        </h1>
+        <header className="so-page-header">
+          <div><p className="so-page-eyebrow">Wine operations</p><h1 className="so-page-title">Add wine</h1><p className="so-page-description">Create a catalogue record and optionally assign its opening stock to a location.</p></div>
+          <button type="button" onClick={() => router.back()} className="so-btn-secondary">Cancel</button>
+        </header>
 
         <form
   onSubmit={handleSubmit}
-  className="so-card w-full max-w-6xl p-10 !grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  className="so-card w-full p-6 md:p-8 !grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
 >
 
           <input

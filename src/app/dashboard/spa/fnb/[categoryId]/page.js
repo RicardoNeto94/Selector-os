@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import SpaConfirmDialog from "@/components/dashboard/SpaConfirmDialog";
+import "@/styles/spa-catalogue.css";
 
 export default function SpaCategoryProductsPage() {
 
@@ -21,6 +23,8 @@ export default function SpaCategoryProductsPage() {
   const [newPrice, setNewPrice] = useState("");
   const [expandedId, setExpandedId] =
   useState(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function loadData() {
 
@@ -72,27 +76,25 @@ export default function SpaCategoryProductsPage() {
   }
 
   async function deleteProduct(id) {
+    setPendingDeleteId(id);
+  }
 
-    const confirmed = window.confirm(
-      "Delete product?"
-    );
-
-    if (!confirmed) return;
-
-    await supabase
-      .from("spa_products")
-      .delete()
-      .eq("id", id);
-
+  async function confirmDeleteProduct() {
+    if (!pendingDeleteId) return;
+    setDeleting(true);
+    await supabase.from("spa_products").delete().eq("id", pendingDeleteId);
+    setPendingDeleteId(null);
+    setDeleting(false);
     loadData();
-
   }
 
   return (
 
-    <div className="so-main-inner space-y-8">
+    <div className="spa-editor-page">
 
       <div>
+
+        <Link href="/dashboard/spa/fnb" className="spa-hero-back">← Back to categories</Link>
 
         <div
           className="
@@ -110,11 +112,15 @@ export default function SpaCategoryProductsPage() {
           {category?.name || "Category"}
         </h1>
 
+        <p className="spa-editor-summary">Food & beverage catalogue · {products.length} item{products.length === 1 ? "" : "s"}</p>
+
       </div>
 
       {/* ADD PRODUCT */}
 
       <div className="panel p-6">
+
+        <div className="spa-editor-section-heading"><div><span>New catalogue item</span><h2>Add a new item</h2></div><p>Create the essential record first, then open it below to add descriptions, pricing and visibility.</p></div>
 
         <div className="grid md:grid-cols-3 gap-4">
 
@@ -382,7 +388,7 @@ export default function SpaCategoryProductsPage() {
                 </button>
 
                 <button
-                  className="button"
+                  className="button spa-destructive-button"
                   onClick={() =>
                     deleteProduct(product.id)
                   }
@@ -418,6 +424,16 @@ export default function SpaCategoryProductsPage() {
         </Link>
 
       </div>
+
+      <SpaConfirmDialog
+        open={Boolean(pendingDeleteId)}
+        title={`Delete “${products.find((product) => product.id === pendingDeleteId)?.name || "product"}”?`}
+        description="This permanently removes the item from the spa catalogue and the guest experience."
+        confirmLabel="Delete product"
+        busy={deleting}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDeleteProduct}
+      />
 
     </div>
 

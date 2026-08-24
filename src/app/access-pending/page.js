@@ -1,0 +1,5 @@
+import Link from "next/link";
+
+export default function AccessPendingPage() {
+  return <main className="flex min-h-screen items-center justify-center bg-[#f7f3ed] px-5 text-[#30241f]"><section className="w-full max-w-[560px] rounded-[28px] border border-[#ded3c8] bg-[#fbf8f3] p-8 text-center shadow-[0_24px_70px_rgba(65,43,32,0.08)] md:p-12"><div className="text-[9px] uppercase tracking-[0.3em] text-[#a17865]">Protected workspace</div><h1 className="mt-4 text-[32px] tracking-[-0.04em]">Access is not active</h1><p className="mx-auto mt-3 max-w-[420px] text-[11px] leading-5 text-[#89796f]">Your session is valid, but this account has not been approved for a Vaxeron workspace. Ask your organisation administrator for an invitation or active role.</p><div className="mt-7 flex flex-wrap justify-center gap-2"><Link href="/logout" className="rounded-full border border-[#d4c4b8] px-5 py-2.5 text-[9px] uppercase tracking-[0.14em]">Sign out</Link><Link href="/#request-access" className="rounded-full bg-[#963d2d] px-5 py-2.5 text-[9px] uppercase tracking-[0.14em] text-white">Request access</Link></div></section></main>;
+}

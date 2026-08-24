@@ -91,56 +91,61 @@ export default function DishesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 page-fade">
+    <div className="so-page page-fade">
 
       {/* HEADER */}
-      <header className="flex items-center justify-between">
+      <header className="so-page-header">
 
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-teal-400">
-            SelectorOS • Workspace
+          <p className="so-page-eyebrow">
+            Guest experience
           </p>
 
-          <h1 className="text-3xl font-semibold text-white mt-1">
+          <h1 className="so-page-title">
             Dishes
           </h1>
 
-          <p className="text-sm text-slate-400 mt-1">
-            Manage dishes across all your menus.
+          <p className="so-page-description">
+            Create and maintain the dishes presented across restaurant and in-room menus.
           </p>
         </div>
 
-        <a
-          href="/dashboard/dishes/new"
-          className="so-btn-primary"
-        >
-          + Add dish
-        </a>
+        {!error && (
+          <a href="/dashboard/dishes/new" className="so-btn-primary">
+            + Add dish
+          </a>
+        )}
 
       </header>
 
       {error && (
-        <div className="so-card border border-red-400/30 text-red-300 text-sm">
-          {error}
+        <div className="so-empty-state">
+          <span>Organisation setup</span>
+          <h2>Dish catalogue is not connected</h2>
+          <p>{error} Ask an administrator to link this account to the correct restaurant workspace.</p>
+          <a href="/dashboard/settings" className="so-btn-secondary">Open settings</a>
         </div>
       )}
 
       {/* EMPTY STATE */}
 
-      {dishes.length === 0 && (
-        <div className="so-card flex items-center justify-center h-[300px] text-slate-400">
-          No dishes yet. Add your first dish.
+      {!error && dishes.length === 0 && (
+        <div className="so-empty-state">
+          <span>Dish catalogue</span>
+          <h2>No dishes yet</h2>
+          <p>Create the first dish to begin building guest-facing menus.</p>
+          <a href="/dashboard/dishes/new" className="so-btn-secondary">Create first dish</a>
         </div>
       )}
 
       {/* DISH LIST */}
 
       {dishes.length > 0 && (
-        <div className="so-card p-0 overflow-hidden">
+        <div className="so-glass-panel overflow-hidden">
 
           <table className="w-full text-sm">
 
-            <thead className="text-xs uppercase tracking-wider text-slate-400 border-b border-white/10">
+            <thead className="so-table-head">
               <tr>
                 <th className="text-left px-6 py-4">Dish</th>
                 <th className="text-left px-6 py-4">Menu</th>
@@ -160,26 +165,26 @@ export default function DishesPage() {
 
                   <tr
                     key={dish.id}
-                    className="border-b border-white/5 hover:bg-white/5 transition"
+                    className="so-table-row"
                   >
 
-                    <td className="px-6 py-4 font-medium text-white">
+                    <td className="px-6 py-4 font-medium text-[#26322f]">
                       {dish.name}
                     </td>
 
                     <td className="px-6 py-4">
 
-                      <span className="px-2 py-1 text-xs rounded-full bg-white/10 text-slate-300">
+                      <span className="so-soft-pill">
                         {menu?.name || "—"}
                       </span>
 
                     </td>
 
-                    <td className="px-6 py-4 text-slate-400">
+                    <td className="px-6 py-4 text-[#75817c]">
                       {dish.category || "—"}
                     </td>
 
-                    <td className="px-6 py-4 text-right text-white font-medium">
+                    <td className="px-6 py-4 text-right text-[#26322f] font-medium">
                       {dish.price ? `${Number(dish.price).toFixed(2)} €` : "—"}
                     </td>
 

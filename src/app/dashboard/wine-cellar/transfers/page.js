@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { createClient } from "@/lib/supabase/client";
+import { fetchAllQueryRows } from "@/lib/wineInventory";
 
 /* =======================================================
    HELPERS
@@ -235,13 +236,13 @@ const [
     try {
 
       const [
-  movementsResult,
-  winesResult,
+  movementRows,
+  wineRows,
   locationsResult,
-  inventoryResult
+  inventoryRows
 ] = await Promise.all([
 
-        supabase
+        fetchAllQueryRows(() => supabase
           .from("wine_movements")
           .select(`
             id,
@@ -259,16 +260,16 @@ const [
             {
               ascending: false
             }
-          ),
+          )),
 
-        supabase
+        fetchAllQueryRows(() => supabase
           .from("wines")
           .select(`
             id,
             name,
             producer,
             vintage
-          `),
+          `).order("id")),
 
         supabase
           .from("wine_locations")
@@ -278,7 +279,7 @@ const [
           `)
           .order("name"),
 
-supabase
+fetchAllQueryRows(() => supabase
   .from("wine_inventory")
   .select(`
     id,
@@ -287,28 +288,9 @@ supabase
     quantity
   `)
   .gt("quantity", 0)
+  .order("id"))
 
 ]);
-
-      if (
-        movementsResult.error
-      ) {
-
-        throw (
-          movementsResult.error
-        );
-
-      }
-
-      if (
-        winesResult.error
-      ) {
-
-        throw (
-          winesResult.error
-        );
-
-      }
 
       if (
         locationsResult.error
@@ -320,22 +302,12 @@ supabase
 
       }
 
-      if (
-        inventoryResult.error
-      ) {
-
-        throw (
-          inventoryResult.error
-        );
-
-      }
-
       setMovements(
-        movementsResult.data || []
+        movementRows
       );
 
       setWines(
-        winesResult.data || []
+        wineRows
       );
 
       setLocations(
@@ -343,7 +315,7 @@ supabase
       );
 
       setInventory(
-  inventoryResult.data || []
+  inventoryRows
 );
 
     } catch (error) {

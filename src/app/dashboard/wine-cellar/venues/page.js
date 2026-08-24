@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { bottleQuantity, positiveBottleQuantity } from "@/lib/wineInventory";
 import "./venue-wines.css";
 
 const PAGE_SIZE = 1000;
@@ -43,6 +44,27 @@ function formatQuantity(value) {
   });
 }
 
+function PortfolioRing({ label, value, total, detail, tone = "sage" }) {
+  const percentage = total > 0
+    ? Math.min(100, Math.max(0, (Number(value || 0) / Number(total)) * 100))
+    : 0;
+
+  return (
+    <div className={`venue-portfolio-ring is-${tone}`}>
+      <div
+        className="venue-ring-visual"
+        style={{ "--venue-progress": `${percentage * 3.6}deg` }}
+      >
+        <div>
+          <strong>{Math.round(percentage)}%</strong>
+          <span>{detail}</span>
+        </div>
+      </div>
+      <span>{label}</span>
+    </div>
+  );
+}
+
 export default function VenueWinesPage() {
   const supabase = createClient();
   const router = useRouter();
@@ -79,6 +101,8 @@ export default function VenueWinesPage() {
   const [actionMessage, setActionMessage] = useState("");
 
   const [showArchived, setShowArchived] = useState(false);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [locationView, setLocationView] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [editingLocation, setEditingLocation] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -177,7 +201,7 @@ export default function VenueWinesPage() {
     [locations]
   );
 
-  const visibleLocations = useMemo(
+  const archiveFilteredLocations = useMemo(
     () =>
       showArchived
         ? locations
@@ -556,7 +580,7 @@ export default function VenueWinesPage() {
       const current = inventoryByWine.get(wineId);
 
       if (current) {
-        current.quantity += Number(item.quantity || 0);
+        current.quantity += bottleQuantity(item.quantity);
 
         if (!current.wines && item.wines) {
           current.wines = item.wines;
@@ -564,7 +588,7 @@ export default function VenueWinesPage() {
       } else {
         inventoryByWine.set(wineId, {
           wine_id: wineId,
-          quantity: Number(item.quantity || 0),
+          quantity: bottleQuantity(item.quantity),
           wines: item.wines || null,
         });
       }
@@ -575,7 +599,7 @@ export default function VenueWinesPage() {
     );
 
     const availableInventory = allInventory.filter(
-      (item) => Number(item.quantity || 0) > 0
+      (item) => positiveBottleQuantity(item.quantity) > 0
     );
 
     const availableWineIds = new Set(
@@ -586,30 +610,30 @@ export default function VenueWinesPage() {
 
     const totalBottles = availableInventory.reduce(
       (sum, item) =>
-        sum + Number(item.quantity || 0),
+        sum + positiveBottleQuantity(item.quantity),
       0
     );
 
     const netBottles = allInventory.reduce(
       (sum, item) =>
-        sum + Number(item.quantity || 0),
+        sum + bottleQuantity(item.quantity),
       0
     );
 
     const negativeQuantity = allInventory
       .filter(
-        (item) => Number(item.quantity || 0) < 0
+        (item) => bottleQuantity(item.quantity) < 0
       )
       .reduce(
         (sum, item) =>
-          sum + Number(item.quantity || 0),
+          sum + bottleQuantity(item.quantity),
         0
       );
 
     const stockValue = availableInventory.reduce(
       (sum, item) => {
         const price = Number(item.wines?.price || 0);
-        const quantity = Number(item.quantity || 0);
+        const quantity = positiveBottleQuantity(item.quantity);
 
         return sum + price * quantity;
       },
@@ -618,7 +642,7 @@ export default function VenueWinesPage() {
 
     const lowStock = availableInventory.filter(
       (item) => {
-        const quantity = Number(item.quantity || 0);
+        const quantity = positiveBottleQuantity(item.quantity);
 
         return quantity > 0 && quantity <= 2;
       }
@@ -698,6 +722,31 @@ export default function VenueWinesPage() {
     };
   }
 
+  const visibleLocations = archiveFilteredLocations.filter((location) => {
+    const stats = getVenueStats(location);
+    const query = locationSearch.trim().toLowerCase();
+    const mappings = mappingsForLocation(location.id);
+    const matchesSearch =
+      !query ||
+      [
+        location.name,
+        getLocationTypeLabel(location.location_type),
+        stats.menu?.name,
+        ...mappings.map((mapping) => mapping.business_store_name),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+
+    if (!matchesSearch) return false;
+    if (locationView === "live") return stats.liveGuestWines > 0;
+    if (locationView === "attention") {
+      return !stats.menu || mappings.length === 0 || stats.negativeQuantity < 0;
+    }
+    return true;
+  });
+
   if (loading) {
     return (
       <div className="page-fade px-8 py-8">
@@ -726,6 +775,12 @@ export default function VenueWinesPage() {
       total.live += stats.liveGuestWines;
       total.btg += stats.byTheGlass;
       total.value += stats.stockValue;
+      total.attention +=
+        !stats.menu ||
+        mappingsForLocation(location.id).length === 0 ||
+        stats.negativeQuantity < 0
+          ? 1
+          : 0;
 
       return total;
     },
@@ -734,13 +789,14 @@ export default function VenueWinesPage() {
       live: 0,
       btg: 0,
       value: 0,
+      attention: 0,
     }
   );
 
   const editorOpen = showCreate || Boolean(editingLocation);
 
   return (
-    <div className="venue-wines-page page-fade">
+    <div className="venue-wines-page">
       <div className="venue-wines-shell">
         <header className="venue-wines-header">
           <div>
@@ -748,33 +804,72 @@ export default function VenueWinesPage() {
               Wine Operations
             </div>
 
-            <h1>Locations &amp; Storage</h1>
+            <h1>Venue wine operations</h1>
 
             <p>
-              Manage every wine storage point, venue cellar, menu
-              connection and CompuCash store mapping from one place.
+              See what is live for guests, spot setup or stock issues,
+              and open the right venue workspace without hunting through data.
             </p>
           </div>
 
-          <div className="venue-wines-portfolio">
-            <span>{activeLocations.length} active locations</span>
-            <span>
-              {portfolioStats.wines.toLocaleString()} wines
-            </span>
-            <span>
-              {portfolioStats.btg.toLocaleString()} BTG
-            </span>
-            <strong>
-              €
-              {Math.round(
-                portfolioStats.value
-              ).toLocaleString()}
-            </strong>
+          <div className="venue-wines-portfolio" aria-label="Portfolio summary">
+            <PortfolioRing
+              label="Guest coverage"
+              value={portfolioStats.live}
+              total={portfolioStats.wines}
+              detail={`${portfolioStats.live.toLocaleString()} live`}
+            />
+            <PortfolioRing
+              label="Venue readiness"
+              value={activeLocations.length - portfolioStats.attention}
+              total={activeLocations.length}
+              detail={`${activeLocations.length - portfolioStats.attention}/${activeLocations.length}`}
+              tone={portfolioStats.attention ? "amber" : "sage"}
+            />
+            <div className="venue-portfolio-stat">
+              <span>By the glass</span>
+              <strong>{portfolioStats.btg.toLocaleString()}</strong>
+              <small>servings live across the portfolio</small>
+            </div>
+            <div className={`venue-portfolio-stat ${portfolioStats.attention ? "has-attention" : ""}`}>
+              <span>Needs attention</span>
+              <strong>{portfolioStats.attention}</strong>
+              <small>{portfolioStats.attention ? "setup or stock review" : "all systems ready"}</small>
+            </div>
           </div>
         </header>
 
-        <section className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <section className="venue-toolbar mt-5">
+          <div className="venue-toolbar-primary">
+            <label className="venue-search">
+              <span className="sr-only">Search locations</span>
+              <span aria-hidden="true">⌕</span>
+              <input
+                value={locationSearch}
+                onChange={(event) => setLocationSearch(event.target.value)}
+                placeholder="Search venue, menu or mapped store"
+              />
+            </label>
+
+            <div className="venue-view-switcher" aria-label="Filter venues">
+              {[
+                ["all", "All"],
+                ["live", "Guest live"],
+                ["attention", `Needs attention (${portfolioStats.attention})`],
+              ].map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  onClick={() => setLocationView(value)}
+                  className={locationView === value ? "is-active" : ""}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="venue-toolbar-actions">
             <button
               type="button"
               onClick={openCreate}
@@ -793,10 +888,6 @@ export default function VenueWinesPage() {
                 : `Show archived (${locations.length - activeLocations.length})`}
             </button>
           </div>
-
-          <div className="text-[9px] text-[#95867b]">
-            Main Cellar is now included in this directory.
-          </div>
         </section>
 
         {(actionError || actionMessage) && (
@@ -812,7 +903,13 @@ export default function VenueWinesPage() {
         )}
 
         {editorOpen && (
-          <section className="mt-5 rounded-[22px] border border-[#ded3c8] bg-[#fbf8f3] p-5 md:p-6">
+          <div className="venue-editor-layer" role="presentation" onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setShowCreate(false);
+              resetEditor();
+            }
+          }}>
+          <section className="venue-editor-modal rounded-[22px] border border-[#ded3c8] bg-[#fbf8f3] p-5 md:p-6" role="dialog" aria-modal="true" aria-label={showCreate ? "Create wine location" : `Manage ${editingLocation?.name || "location"}`}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-[8px] uppercase tracking-[0.24em] text-[#a17865]">
@@ -1040,26 +1137,28 @@ export default function VenueWinesPage() {
               </div>
             )}
           </section>
+          </div>
         )}
 
         {visibleLocations.length === 0 ? (
           <div className="venue-wines-empty">
-            No wine locations found.
+            No locations match this view. Try another search or filter.
           </div>
         ) : (
           <section className="venue-directory">
-            <div className="venue-directory-head">
-              <span>Location</span>
-              <span>Wine menu</span>
-              <span>Portfolio</span>
-              <span>Inventory value</span>
-              <span />
-            </div>
-
             {visibleLocations.map((location) => {
               const stats = getVenueStats(location);
               const mappings = mappingsForLocation(location.id);
               const archived = location.is_active === false;
+              const setupMissing = !stats.menu || mappings.length === 0;
+              const stockIssue = stats.negativeQuantity < 0;
+              const readinessLabel = archived
+                ? "Archived"
+                : stockIssue
+                  ? "Stock review"
+                  : setupMissing
+                    ? "Setup needed"
+                    : "Guest ready";
 
               return (
                 <article
@@ -1068,7 +1167,7 @@ export default function VenueWinesPage() {
                     archived ? "opacity-60" : ""
                   }`}
                 >
-                  <div className="venue-identity">
+                  <div className="venue-card-topline">
                     <div className="venue-status-line">
                       <span
                         className={
@@ -1083,15 +1182,17 @@ export default function VenueWinesPage() {
                       <span>
                         {archived
                           ? "Archived"
-                          : stats.menu
-                            ? "Menu linked"
-                            : "Active storage"}
+                          : readinessLabel}
                       </span>
                     </div>
 
+                    <span className="venue-card-index">{String(visibleLocations.indexOf(location) + 1).padStart(2, "0")}</span>
+                  </div>
+
+                  <div className="venue-identity">
                     <h2>{location.name}</h2>
 
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[8px] text-[#9a897f]">
+                    <div className="venue-identity-meta mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[8px]">
                       <span>
                         {getLocationTypeLabel(location.location_type)}
                       </span>
@@ -1102,19 +1203,37 @@ export default function VenueWinesPage() {
                       </span>
                     </div>
 
-                    <div className="venue-mobile-value">
-                      €
-                      {Math.round(
-                        stats.stockValue
-                      ).toLocaleString()}
-
-                      <span>
-                        {formatQuantity(
-                          stats.totalBottles
-                        )}{" "}
-                        positive bottles
-                      </span>
+                    <div className="venue-readiness-notes">
+                      {!stats.menu && <span>No guest menu</span>}
+                      {mappings.length === 0 && <span>No store mapping</span>}
+                      {stockIssue && <span>Negative stock detected</span>}
+                      {!setupMissing && !stockIssue && <span>Inventory and guest menu connected</span>}
                     </div>
+                  </div>
+
+                  <div className="venue-card-analytics">
+                    <div
+                      className="venue-card-ring"
+                      style={{
+                        "--venue-progress": `${(stats.availableWines > 0 ? Math.min(100, (stats.liveGuestWines / stats.availableWines) * 100) : 0) * 3.6}deg`,
+                      }}
+                    >
+                      <div>
+                        <strong>{stats.availableWines > 0 ? Math.round((stats.liveGuestWines / stats.availableWines) * 100) : 0}%</strong>
+                        <span>guest live</span>
+                      </div>
+                    </div>
+
+                    <div className="venue-metrics">
+                      <div><strong>{stats.availableWines}</strong><span>Wines</span></div>
+                      <div><strong>{stats.byTheGlass}</strong><span>BTG</span></div>
+                      <div className={stats.lowStock > 0 ? "has-alert" : ""}><strong>{stats.lowStock}</strong><span>Low</span></div>
+                    </div>
+                  </div>
+
+                  <div className="venue-card-value">
+                    <div><span>Inventory value</span><strong>€{Math.round(stats.stockValue).toLocaleString()}</strong></div>
+                    <div><span>Physical stock</span><strong>{formatQuantity(stats.totalBottles)} <small>btl</small></strong></div>
                   </div>
 
                   <div className="venue-menu-control">
@@ -1153,49 +1272,7 @@ export default function VenueWinesPage() {
                     </select>
                   </div>
 
-                  <div className="venue-metrics">
-                    <div>
-                      <strong>{stats.availableWines}</strong>
-                      <span>Wines</span>
-                    </div>
-
-                    <div>
-                      <strong>{stats.byTheGlass}</strong>
-                      <span>BTG</span>
-                    </div>
-
-                    <div>
-                      <strong>{stats.liveGuestWines}</strong>
-                      <span>Live</span>
-                    </div>
-
-                    <div
-                      className={
-                        stats.lowStock > 0
-                          ? "has-alert"
-                          : ""
-                      }
-                    >
-                      <strong>{stats.lowStock}</strong>
-                      <span>Low</span>
-                    </div>
-                  </div>
-
-                  <div className="venue-value">
-                    <strong>
-                      €
-                      {Math.round(
-                        stats.stockValue
-                      ).toLocaleString()}
-                    </strong>
-
-                    <span>
-                      {formatQuantity(
-                        stats.totalBottles
-                      )}{" "}
-                      positive bottles
-                    </span>
-
+                  <div className="venue-card-alerts">
                     {stats.negativeQuantity < 0 && (
                       <span
                         title={`Net stock: ${formatQuantity(
@@ -1210,11 +1287,11 @@ export default function VenueWinesPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-col items-stretch gap-2">
+                  <div className="venue-card-actions">
                     <button
                       type="button"
                       onClick={() => openEdit(location)}
-                      className="rounded-full border border-[#d8c9bd] px-3 py-2 text-[8px] uppercase tracking-[0.12em] text-[#6d5a50]"
+                      className="venue-manage-button"
                     >
                       Manage
                     </button>
@@ -1247,7 +1324,7 @@ export default function VenueWinesPage() {
                           type="button"
                           disabled={savingLocationId === location.id}
                           onClick={() => archiveLocation(location)}
-                          className="rounded-full border border-red-200 px-3 py-2 text-[8px] uppercase tracking-[0.12em] text-red-600 disabled:opacity-50"
+                          className="venue-archive-button"
                         >
                           Archive
                         </button>

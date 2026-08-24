@@ -33,22 +33,22 @@ export default function MenuDashboardClient({
   };
 
   return (
-    <div className="so-main-inner space-y-8">
+    <div className="so-page page-fade">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+      <header className="so-page-header">
 
         <div>
-          <p className="text-xs uppercase tracking-widest text-[var(--so-text-muted)]">
-            MENUS
+          <p className="so-page-eyebrow">
+            Guest experience
           </p>
 
-          <h1 className="text-2xl font-semibold mt-1">
-            {restaurant.name}
+          <h1 className="so-page-title">
+            Menus
           </h1>
 
-          <p className="text-sm text-[var(--so-text-muted)] mt-1">
-            Plan: <strong>{plan}</strong>{" "}
+          <p className="so-page-description">
+            {restaurant.name} · <strong>{plan}</strong>{" "}
             {typeof maxMenus === "number" && (
               <>({menus.length}/{maxMenus})</>
             )}
@@ -61,21 +61,24 @@ export default function MenuDashboardClient({
           className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium ${
             isAtLimit
               ? "opacity-50 border border-[var(--so-border-subtle)]"
-              : "button"
+              : "so-btn-primary"
           }`}
         >
           <PlusIcon className="h-4 w-4" />
           New Menu
         </button>
 
-      </div>
+      </header>
 
       {/* GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {menus.length === 0 && (
-          <div className="panel p-6 text-[var(--so-text-muted)]">
-            No menus yet.
+          <div className="so-empty-state md:col-span-2">
+            <span>Guest menus</span>
+            <h2>No menus yet</h2>
+            <p>Create the first menu to begin organising guest-facing dining content.</p>
+            <button type="button" className="so-btn-secondary" onClick={() => setShowModal(true)}>Create first menu</button>
           </div>
         )}
 
@@ -86,7 +89,7 @@ export default function MenuDashboardClient({
           return (
             <div
               key={m.id}
-              className="panel p-6 flex flex-col justify-between transition hover:shadow-lg"
+              className="so-glass-panel p-6 flex flex-col justify-between transition hover:shadow-lg"
             >
 
               {/* TOP */}

@@ -5,6 +5,15 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity } from "@/lib/wineInventory";
+import "../venue-wines.css";
+
+function formatQuantity(value) {
+  return Number(value || 0).toLocaleString("en-IE", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+}
 
 export default function VenueWinePage() {
   const supabase = createClient();
@@ -100,8 +109,9 @@ export default function VenueWinePage() {
       setSakeStages(stageData || []);
     } else setSakeStages([]);
 
-    const { data: inventoryData, error: inventoryError } =
-      await supabase
+    let inventoryData = [];
+    try {
+      inventoryData = await fetchAllQueryRows(() => supabase
         .from("wine_inventory")
         .select(`
           id,
@@ -122,9 +132,9 @@ export default function VenueWinePage() {
           )
         `)
         .eq("location_id", locationId)
-        .gt("quantity", 0);
-
-    if (inventoryError) {
+        .gt("quantity", INVENTORY_ROUNDING_EPSILON)
+        .order("id"));
+    } catch (inventoryError) {
       console.error("INVENTORY ERROR:", inventoryError);
     }
 
@@ -194,7 +204,7 @@ export default function VenueWinePage() {
           grape: wine.grape || "",
           wineType: wine.wine_type || "",
 
-          stock: Number(inventory.quantity || 0),
+          stock: positiveBottleQuantity(inventory.quantity),
 
           defaultPrice:
             wine.price !== null &&
@@ -707,13 +717,34 @@ export default function VenueWinePage() {
       (row) => row.stock <= 2
     ).length;
 
+    const missingGlassPrice = rows.filter(
+      (row) =>
+        row.guestVisible &&
+        (row.serviceType === "glass" || row.serviceType === "both") &&
+        !(Number(row.glassPrice) > 0)
+    ).length;
+
+    const missingBottlePrice = rows.filter(
+      (row) =>
+        row.guestVisible &&
+        row.serviceType !== "glass" &&
+        !(Number(row.bottlePrice) > 0)
+    ).length;
+
     return {
       available,
       guestLive,
       byTheGlass,
       lowStock,
+      missingGlassPrice,
+      missingBottlePrice,
+      attention:
+        lowStock +
+        missingGlassPrice +
+        missingBottlePrice +
+        dedupedBtgSuggestions.length,
     };
-  }, [rows]);
+  }, [rows, dedupedBtgSuggestions]);
 
   const filteredRows = useMemo(() => {
     const query = search.toLowerCase().trim();
@@ -788,7 +819,7 @@ export default function VenueWinePage() {
   }
 
   return (
-    <div className="page-fade min-h-screen bg-[#f7f4ef]">
+    <div className="venue-detail-page page-fade min-h-screen bg-[#f7f4ef]">
       <div className="max-w-[1780px] mx-auto px-5 md:px-8 lg:px-10 py-7 md:py-9">
         <button
           onClick={() =>
@@ -797,14 +828,14 @@ export default function VenueWinePage() {
           className="inline-flex items-center gap-2 text-[12px] font-medium text-[#8a6a59] hover:text-[#3a2a24] transition mb-7"
         >
           <span>←</span>
-          <span>Venue Wines</span>
+          <span>All venues</span>
         </button>
 
-        <section className="mb-7">
+        <section className="venue-detail-hero mb-7">
           <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
             <div>
               <div className="text-[10px] uppercase tracking-[0.28em] text-[#a08371]">
-                Wine Operations / Venue
+                Venue wine workspace
               </div>
 
               <h1 className="text-[34px] md:text-[42px] leading-none font-semibold tracking-[-0.035em] text-[#2f221c] mt-3">
@@ -822,7 +853,17 @@ export default function VenueWinePage() {
                     {menu.name}
                   </span>
                 )}
+
+                <span className={`venue-health-pill ${stats.attention > 0 ? "has-alert" : "is-ready"}`}>
+                  {stats.attention > 0
+                    ? `${stats.attention} items to review`
+                    : "Guest experience ready"}
+                </span>
               </div>
+
+              <p className="venue-detail-intro">
+                Control what guests can see, how each wine is served, and the prices shown on this venue&apos;s digital list.
+              </p>
             </div>
 
             {menu && (
@@ -838,12 +879,12 @@ export default function VenueWinePage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+        <section className="venue-detail-kpis grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
           {[
-            ["Available wines", stats.available, "In venue stock"],
-            ["Guest live", stats.guestLive, "Published now"],
-            ["By the glass", stats.byTheGlass, "Glass or both"],
-            ["Low stock", stats.lowStock, "2 bottles or fewer"],
+            ["Available wines", stats.available, "CompuCash stock above zero"],
+            ["Guest live", stats.guestLive, `${stats.available ? Math.round((stats.guestLive / stats.available) * 100) : 0}% of available wines`],
+            ["By the glass", stats.byTheGlass, stats.missingGlassPrice ? `${stats.missingGlassPrice} missing prices` : "Prices complete"],
+            ["Needs review", stats.attention, `${stats.lowStock} low-stock wines`],
           ].map(([label, value, meta]) => (
             <div
               key={label}
@@ -864,12 +905,28 @@ export default function VenueWinePage() {
           ))}
         </section>
 
-        <section className="rounded-2xl border border-[#e5d9ce] bg-white/75 p-1.5 mb-6 overflow-x-auto">
+        {(stats.attention > 0 || !menu) && (
+          <section className="venue-attention-panel" aria-label="Venue readiness">
+            <div className="venue-attention-copy">
+              <span className="venue-attention-kicker">Recommended next actions</span>
+              <h2>Keep the guest list complete and service-ready</h2>
+              <p>Vaxeron only showcases available wines. Pricing and service settings still need to be complete for a clear guest experience.</p>
+            </div>
+            <div className="venue-attention-actions">
+              {!menu && <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>}
+              {stats.missingGlassPrice > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("glass"); }}>Add {stats.missingGlassPrice} glass prices</button>}
+              {dedupedBtgSuggestions.length > 0 && <button type="button" onClick={() => setWorkspaceTab(confirmedBtgSuggestions.length ? "confirmed" : "opportunities")}>Review {dedupedBtgSuggestions.length} BTG signals</button>}
+              {stats.lowStock > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("low"); }}>Review low stock</button>}
+            </div>
+          </section>
+        )}
+
+        <section className="venue-workspace-tabs rounded-2xl border border-[#e5d9ce] bg-white/75 p-1.5 mb-6 overflow-x-auto">
           <div className="flex min-w-max gap-1">
             {[
-              ["wines", "Wine List", stats.available],
-              ["confirmed", "Confirmed BTG", confirmedBtgSuggestions.length],
-              ["opportunities", "BTG Opportunities", opportunityBtgSuggestions.length],
+              ["wines", "Inventory & guest list", stats.available],
+              ["confirmed", "Confirmed BTG review", confirmedBtgSuggestions.length],
+              ["opportunities", "BTG opportunities", opportunityBtgSuggestions.length],
               ["pairings", "Sake Pairing", sakePairings.length],
             ].map(([value, label, count]) => (
               <button
@@ -1124,6 +1181,17 @@ export default function VenueWinePage() {
 
         {workspaceTab === "wines" && (
           <section className="rounded-2xl border border-[#e5d9ce] bg-white overflow-hidden">
+            <div className="venue-list-heading">
+              <div>
+                <span>Venue catalogue</span>
+                <h2>Inventory &amp; guest wine list</h2>
+                <p>Stock comes from CompuCash. Use the controls below to decide what guests see and to complete service pricing.</p>
+              </div>
+              <div className="venue-list-legend">
+                <span><i className="is-live" /> Live on guest list</span>
+                <span><i className="is-warning" /> Action needed</span>
+              </div>
+            </div>
             <div className="px-4 md:px-5 py-4 border-b border-[#eee5de] bg-[#fcfaf8]">
               <div className="flex flex-col xl:flex-row xl:items-center gap-3">
                 <div className="relative flex-1">
@@ -1138,12 +1206,12 @@ export default function VenueWinePage() {
 
                 <div className="flex gap-1.5 overflow-x-auto">
                   {[
-                    ["all", "All"],
-                    ["live", "Guest Live"],
-                    ["glass", "By the Glass"],
-                    ["hidden", "Hidden"],
-                    ["low", "Low Stock"],
-                  ].map(([value, label]) => (
+                    ["all", "All", rows.length],
+                    ["live", "Guest Live", stats.guestLive],
+                    ["glass", "By the Glass", stats.byTheGlass],
+                    ["hidden", "Hidden", rows.length - stats.guestLive],
+                    ["low", "Low Stock", stats.lowStock],
+                  ].map(([value, label, count]) => (
                     <button
                       key={value}
                       onClick={() => setFilter(value)}
@@ -1153,7 +1221,7 @@ export default function VenueWinePage() {
                           : "border border-[#e3d8ce] bg-white text-[#75645b] hover:bg-[#f7f2ed]"
                       }`}
                     >
-                      {label}
+                      {label} <span className="venue-filter-count">{count}</span>
                     </button>
                   ))}
                 </div>
@@ -1182,7 +1250,7 @@ export default function VenueWinePage() {
 
                 <tbody className="divide-y divide-[#f0e9e3]">
                   {paginatedRows.map((row) => (
-                    <tr key={row.wineId} className="group hover:bg-[#fcfaf8] transition">
+                    <tr key={row.wineId} className={`group hover:bg-[#fcfaf8] transition ${row.stock <= 2 || (row.guestVisible && ((row.serviceType === "glass" || row.serviceType === "both") && !(Number(row.glassPrice) > 0))) ? "venue-row-needs-attention" : ""}`}>
                       <td className="py-3.5 px-5">
                         <div className="font-medium text-[#2f221c] max-w-[310px] truncate">
                           {row.name}
@@ -1204,7 +1272,7 @@ export default function VenueWinePage() {
                             ? "bg-orange-50 text-orange-700"
                             : "bg-[#f3eee9] text-[#57463d]"
                         }`}>
-                          {row.stock}
+                          {formatQuantity(row.stock)}
                         </span>
                       </td>
 
