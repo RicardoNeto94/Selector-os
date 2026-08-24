@@ -1857,6 +1857,25 @@ and
   box-shadow: 0 0 0 3px rgba(82, 118, 106, 0.08) !important;
 }
 
+/* Search controls share one protected icon/text geometry. This deliberately
+   wins over legacy .so-input shorthand padding used by older modules. */
+.so-search-control {
+  position: relative;
+}
+
+.so-search-control .so-search-icon {
+  left: 14px !important;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.so-main-scroll .so-search-control input.so-search-input {
+  padding-left: 42px !important;
+  padding-right: 14px !important;
+}
+
 .so-table-head {
   border-bottom: 1px solid rgba(32, 50, 46, 0.08);
   background: rgba(231, 237, 233, 0.58);
@@ -1956,12 +1975,12 @@ and
 
 .so-location-chart {
   display: grid;
-  height: 245px;
+  height: 190px;
   grid-template-columns: repeat(7, minmax(34px, 1fr));
   align-items: end;
   gap: clamp(8px, 1.4vw, 18px);
-  margin-top: 18px;
-  padding: 20px 8px 0;
+  margin-top: 12px;
+  padding: 12px 8px 0;
   border-top: 1px solid rgba(32, 50, 46, 0.07);
   background-image: repeating-linear-gradient(to bottom, rgba(32, 50, 46, 0.055) 0, rgba(32, 50, 46, 0.055) 1px, transparent 1px, transparent 54px);
 }

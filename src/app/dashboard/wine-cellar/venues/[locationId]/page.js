@@ -15,6 +15,19 @@ function formatQuantity(value) {
   });
 }
 
+const LOCATION_TYPE_LABELS = {
+  master_cellar: "Master cellar",
+  venue_cellar: "Venue cellar",
+  bar_storage: "Bar storage",
+  service_station: "Service station",
+  private_collection: "Private collection",
+  transit: "Transit",
+};
+
+function locationTypeLabel(type) {
+  return LOCATION_TYPE_LABELS[type] || type || "Wine storage";
+}
+
 export default function VenueWinePage() {
   const supabase = createClient();
   const params = useParams();
@@ -25,6 +38,7 @@ export default function VenueWinePage() {
   const [location, setLocation] = useState(null);
   const [menu, setMenu] = useState(null);
   const [rows, setRows] = useState([]);
+  const [storeMappings, setStoreMappings] = useState([]);
   const [btgSuggestions, setBtgSuggestions] = useState([]);
   const [sakePairings, setSakePairings] = useState([]);
   const [savingPairing, setSavingPairing] = useState(false);
@@ -39,7 +53,10 @@ export default function VenueWinePage() {
   const [workspaceTab, setWorkspaceTab] = useState("wines");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const PAGE_SIZE = 50;
+  // Editable rows contain several inputs and toggles. Keeping the rendered page
+  // intentionally compact avoids scroll-time layout and paint spikes while
+  // search and filters continue to operate across the complete inventory.
+  const PAGE_SIZE = 30;
 
   useEffect(() => {
     if (locationId) {
@@ -69,6 +86,18 @@ export default function VenueWinePage() {
     }
 
     setLocation(locationData);
+
+    const { data: mappingData, error: mappingError } = await supabase
+      .from("wine_location_store_mappings")
+      .select("id, business_store_id, business_store_name")
+      .eq("location_id", locationId)
+      .order("business_store_name");
+
+    if (mappingError) {
+      console.error("STORE MAPPINGS ERROR:", mappingError);
+    }
+
+    setStoreMappings(mappingData || []);
 
     let menuData = null;
 
@@ -255,6 +284,22 @@ export default function VenueWinePage() {
             }
           : row
       )
+    );
+  }
+
+  function toggleServiceOption(row, option) {
+    const hasBottle = row.serviceType === "bottle" || row.serviceType === "both";
+    const hasGlass = row.serviceType === "glass" || row.serviceType === "both";
+    const nextBottle = option === "bottle" ? !hasBottle : hasBottle;
+    const nextGlass = option === "glass" ? !hasGlass : hasGlass;
+
+    // Every guest-visible wine must retain at least one service format.
+    if (!nextBottle && !nextGlass) return;
+
+    updateLocalWine(
+      row.wineId,
+      "serviceType",
+      nextBottle && nextGlass ? "both" : nextGlass ? "glass" : "bottle"
     );
   }
 
@@ -702,6 +747,11 @@ export default function VenueWinePage() {
   const stats = useMemo(() => {
     const available = rows.length;
 
+    const totalBottles = rows.reduce(
+      (total, row) => total + Number(row.stock || 0),
+      0
+    );
+
     const guestLive = rows.filter(
       (row) => row.guestVisible
     ).length;
@@ -731,20 +781,45 @@ export default function VenueWinePage() {
         !(Number(row.bottlePrice) > 0)
     ).length;
 
+    const pricingIssues = rows.filter(
+      (row) =>
+        row.guestVisible &&
+        (((row.serviceType === "bottle" || row.serviceType === "both") &&
+          !(Number(row.bottlePrice) > 0)) ||
+          ((row.serviceType === "glass" || row.serviceType === "both") &&
+            !(Number(row.glassPrice) > 0)))
+    ).length;
+
+    const btgSignals = dedupedBtgSuggestions.length;
+    const guestActions = pricingIssues + btgSignals;
+
     return {
       available,
+      totalBottles,
       guestLive,
       byTheGlass,
       lowStock,
       missingGlassPrice,
       missingBottlePrice,
-      attention:
-        lowStock +
-        missingGlassPrice +
-        missingBottlePrice +
-        dedupedBtgSuggestions.length,
+      pricingIssues,
+      btgSignals,
+      guestActions,
     };
   }, [rows, dedupedBtgSuggestions]);
+
+  const stockByType = useMemo(() => {
+    const totals = new Map();
+
+    rows.forEach((row) => {
+      const type = row.wineType || "Other";
+      totals.set(type, (totals.get(type) || 0) + Number(row.stock || 0));
+    });
+
+    return Array.from(totals.entries())
+      .map(([type, quantity]) => ({ type, quantity }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 6);
+  }, [rows]);
 
   const filteredRows = useMemo(() => {
     const query = search.toLowerCase().trim();
@@ -818,35 +893,80 @@ export default function VenueWinePage() {
     );
   }
 
+  const supportsGuestExperience = [
+    "venue_cellar",
+    "bar_storage",
+    "service_station",
+  ].includes(location.location_type);
+  const isStorageWorkspace = !supportsGuestExperience;
+  const supportsSakePairing = location.name?.toLowerCase().includes("koyo");
+  const workspaceAttention = isStorageWorkspace ? stats.lowStock : stats.guestActions;
+  const workspaceTabs = isStorageWorkspace
+    ? [["wines", "Inventory & guest controls", stats.available]]
+    : [
+        ["wines", "Inventory & guest list", stats.available],
+        ["confirmed", "Confirmed BTG", confirmedBtgSuggestions.length],
+        ["opportunities", "BTG opportunities", opportunityBtgSuggestions.length],
+        ...(supportsSakePairing
+          ? [["pairings", "Sake pairing", sakePairings.length]]
+          : []),
+      ];
+  const kpis = isStorageWorkspace
+    ? [
+        ["Physical bottles", formatQuantity(stats.totalBottles), "Authoritative stock"],
+        ["Unique wines", stats.available, "With stock above zero"],
+        ["Low-stock lines", stats.lowStock, "Two bottles or fewer"],
+        ["Source stores", storeMappings.length, "CompuCash mappings"],
+      ]
+    : [
+        ["Available wines", stats.available, "CompuCash stock above zero"],
+        ["On guest list", stats.guestLive, `${stats.available ? Math.round((stats.guestLive / stats.available) * 100) : 0}% of available wines`],
+        ["By the glass", stats.byTheGlass, stats.missingGlassPrice ? `${stats.missingGlassPrice} missing glass prices` : "Glass prices complete"],
+        ["Guest actions", stats.guestActions, stats.guestActions ? `${stats.pricingIssues} pricing · ${stats.btgSignals} BTG` : "Service setup complete"],
+      ];
+
   return (
-    <div className="venue-detail-page page-fade min-h-screen bg-[#f7f4ef]">
-      <div className="max-w-[1780px] mx-auto px-5 md:px-8 lg:px-10 py-7 md:py-9">
+    <div className={`venue-detail-page page-fade min-h-screen ${isStorageWorkspace ? "is-storage-workspace" : "is-guest-workspace"}`}>
+      <div className="venue-detail-shell max-w-[1780px] mx-auto px-5 md:px-8 lg:px-10 py-6 md:py-7">
         <button
           onClick={() =>
             router.push("/dashboard/wine-cellar/venues")
           }
-          className="inline-flex items-center gap-2 text-[12px] font-medium text-[#8a6a59] hover:text-[#3a2a24] transition mb-7"
+          className="venue-detail-back"
         >
           <span>←</span>
           <span>All venues</span>
         </button>
 
-        <section className="venue-detail-hero mb-7">
+        <section className="venue-detail-hero">
           <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.28em] text-[#a08371]">
-                Venue wine workspace
+              <div className="venue-detail-eyebrow">
+                {isStorageWorkspace ? "Inventory command centre" : "Guest wine workspace"}
               </div>
 
-              <h1 className="text-[34px] md:text-[42px] leading-none font-semibold tracking-[-0.035em] text-[#2f221c] mt-3">
+              <h1>
                 {location.name}
               </h1>
 
               <div className="flex flex-wrap items-center gap-2 mt-4">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#e5d9ce] bg-white/70 text-[11px] text-[#6f6058]">
-                  <span className={`w-1.5 h-1.5 rounded-full ${menu ? "bg-emerald-500" : "bg-slate-300"}`} />
-                  {menu ? "Menu linked" : "No wine menu linked"}
-                </span>
+                {isStorageWorkspace ? (
+                  <>
+                    <span className="venue-context-pill is-connected">
+                      <span />
+                      {storeMappings.length} CompuCash store{storeMappings.length === 1 ? "" : "s"} connected
+                    </span>
+                    <span className={`venue-context-pill ${menu ? "is-connected" : ""}`}>
+                      <span />
+                      {menu ? "Guest menu linked" : "Guest menu not linked"}
+                    </span>
+                  </>
+                ) : (
+                  <span className={`venue-context-pill ${menu ? "is-connected" : ""}`}>
+                    <span />
+                    {menu ? "Guest menu linked" : "Guest menu not linked"}
+                  </span>
+                )}
 
                 {menu && (
                   <span className="text-[12px] text-[#9a887c]">
@@ -854,19 +974,23 @@ export default function VenueWinePage() {
                   </span>
                 )}
 
-                <span className={`venue-health-pill ${stats.attention > 0 ? "has-alert" : "is-ready"}`}>
-                  {stats.attention > 0
-                    ? `${stats.attention} items to review`
-                    : "Guest experience ready"}
+                <span className={`venue-health-pill ${workspaceAttention > 0 ? "has-alert" : "is-ready"}`}>
+                  {workspaceAttention > 0
+                    ? isStorageWorkspace
+                      ? `${workspaceAttention} low-stock lines`
+                      : `${workspaceAttention} guest action${workspaceAttention === 1 ? "" : "s"}`
+                    : isStorageWorkspace ? "Inventory healthy" : "Guest experience ready"}
                 </span>
               </div>
 
               <p className="venue-detail-intro">
-                Control what guests can see, how each wine is served, and the prices shown on this venue&apos;s digital list.
+                {isStorageWorkspace
+                  ? "Monitor the physical stock received from CompuCash, inspect storage health and trace every connected business store from one operational view."
+                  : "Control what guests can see, how each wine is served and the prices shown on this venue’s digital list."}
               </p>
             </div>
 
-            {menu && (
+            {menu && !isStorageWorkspace && (
               <a
                 href={`/wine/${menu.slug}`}
                 target="_blank"
@@ -876,19 +1000,22 @@ export default function VenueWinePage() {
                 Open Guest View ↗
               </a>
             )}
+
+            {isStorageWorkspace && (
+              <div className="venue-node-identity">
+                <span>Location type</span>
+                <strong>{locationTypeLabel(location.location_type)}</strong>
+                <small>Physical inventory · CompuCash connected</small>
+              </div>
+            )}
           </div>
         </section>
 
-        <section className="venue-detail-kpis grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
-          {[
-            ["Available wines", stats.available, "CompuCash stock above zero"],
-            ["Guest live", stats.guestLive, `${stats.available ? Math.round((stats.guestLive / stats.available) * 100) : 0}% of available wines`],
-            ["By the glass", stats.byTheGlass, stats.missingGlassPrice ? `${stats.missingGlassPrice} missing prices` : "Prices complete"],
-            ["Needs review", stats.attention, `${stats.lowStock} low-stock wines`],
-          ].map(([label, value, meta]) => (
+        <section className="venue-detail-kpis grid grid-cols-2 xl:grid-cols-4 gap-3">
+          {kpis.map(([label, value, meta]) => (
             <div
               key={label}
-              className="rounded-2xl border border-[#e8ddd3] bg-white/80 px-5 py-4 shadow-[0_1px_2px_rgba(58,42,36,0.03)]"
+              className="venue-detail-kpi"
             >
               <div className="text-[10px] uppercase tracking-[0.18em] text-[#a08f84]">
                 {label}
@@ -905,12 +1032,24 @@ export default function VenueWinePage() {
           ))}
         </section>
 
-        {(stats.attention > 0 || !menu) && (
+        {!isStorageWorkspace && (stats.guestActions > 0 || stats.lowStock > 0 || !menu) && (
           <section className="venue-attention-panel" aria-label="Venue readiness">
             <div className="venue-attention-copy">
-              <span className="venue-attention-kicker">Recommended next actions</span>
-              <h2>Keep the guest list complete and service-ready</h2>
-              <p>Vaxeron only showcases available wines. Pricing and service settings still need to be complete for a clear guest experience.</p>
+              <span className="venue-attention-kicker">Service readiness</span>
+              <h2>{stats.guestActions > 0 || !menu ? "Complete the guest setup" : "Guest service is ready"}</h2>
+              <p>Guest-list setup and physical stock health are tracked separately, so the next action is always clear.</p>
+            </div>
+            <div className="venue-attention-statuses">
+              <div className={stats.guestActions > 0 || !menu ? "has-warning" : "is-ready"}>
+                <span>Guest setup</span>
+                <strong>{menu ? stats.guestActions : "Menu required"}</strong>
+                <small>{menu ? `${stats.pricingIssues} pricing · ${stats.btgSignals} BTG` : "Link a guest wine menu"}</small>
+              </div>
+              <div className={stats.lowStock > 0 ? "has-warning" : "is-ready"}>
+                <span>Stock health</span>
+                <strong>{stats.lowStock}</strong>
+                <small>{stats.lowStock === 1 ? "low-stock wine" : "low-stock wines"}</small>
+              </div>
             </div>
             <div className="venue-attention-actions">
               {!menu && <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>}
@@ -921,28 +1060,57 @@ export default function VenueWinePage() {
           </section>
         )}
 
-        <section className="venue-workspace-tabs rounded-2xl border border-[#e5d9ce] bg-white/75 p-1.5 mb-6 overflow-x-auto">
+        {isStorageWorkspace && (
+          <section className="venue-storage-overview">
+            <div className="venue-storage-source">
+              <span className="venue-storage-kicker">Connected inventory sources</span>
+              <h2>CompuCash store network</h2>
+              <p>Quantities from these business stores are consolidated into this physical Vaxeron location.</p>
+              <div className="venue-store-list">
+                {storeMappings.length > 0 ? storeMappings.map((mapping) => (
+                  <span key={mapping.id}><i />{mapping.business_store_name}</span>
+                )) : <span className="is-empty">No store mappings configured</span>}
+              </div>
+              <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Manage location mappings</button>
+            </div>
+            <div className="venue-stock-composition">
+              <div className="venue-storage-heading">
+                <div>
+                  <span className="venue-storage-kicker">Stock composition</span>
+                  <h2>Physical bottles by category</h2>
+                </div>
+                <strong>{formatQuantity(stats.totalBottles)} <small>btl</small></strong>
+              </div>
+              <div className="venue-composition-list">
+                {stockByType.map((item) => {
+                  const percentage = stats.totalBottles > 0 ? (item.quantity / stats.totalBottles) * 100 : 0;
+                  return (
+                    <div key={item.type} className="venue-composition-row">
+                      <div><span>{item.type}</span><strong>{formatQuantity(item.quantity)}</strong></div>
+                      <div className="venue-composition-track"><i style={{ width: `${Math.max(2, percentage)}%` }} /></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="venue-workspace-tabs overflow-x-auto">
           <div className="flex min-w-max gap-1">
-            {[
-              ["wines", "Inventory & guest list", stats.available],
-              ["confirmed", "Confirmed BTG review", confirmedBtgSuggestions.length],
-              ["opportunities", "BTG opportunities", opportunityBtgSuggestions.length],
-              ["pairings", "Sake Pairing", sakePairings.length],
-            ].map(([value, label, count]) => (
+            {workspaceTabs.map(([value, label, count]) => (
               <button
                 key={value}
                 onClick={() => setWorkspaceTab(value)}
                 className={`h-10 px-4 rounded-xl text-[12px] font-medium transition flex items-center gap-2 ${
                   workspaceTab === value
-                    ? "bg-[#3a2a24] text-white shadow-sm"
-                    : "text-[#75645b] hover:bg-[#f5eee8]"
+                    ? "is-active"
+                    : ""
                 }`}
               >
                 {label}
                 <span className={`min-w-5 h-5 px-1.5 rounded-full text-[10px] flex items-center justify-center ${
-                  workspaceTab === value
-                    ? "bg-white/15 text-white"
-                    : "bg-[#f1e8e1] text-[#8a6a59]"
+                    workspaceTab === value ? "is-active" : ""
                 }`}>
                   {count}
                 </span>
@@ -1078,7 +1246,7 @@ export default function VenueWinePage() {
                         <button
                           onClick={() => enableBtgSuggestion(suggestion)}
                           disabled={!wine || savingWineId === suggestion.wine_id}
-                          className="h-9 px-4 rounded-lg bg-[#8a3a2c] text-white text-[11px] font-medium disabled:opacity-35"
+                          className="venue-primary-action h-9 px-4 rounded-lg text-white text-[11px] font-medium disabled:opacity-35"
                         >
                           {savingWineId === suggestion.wine_id ? "Enabling..." : "Enable BTG"}
                         </button>
@@ -1098,7 +1266,7 @@ export default function VenueWinePage() {
                 <h2 className="text-[20px] font-semibold text-[#2f221c] mt-1">Sake Pairing</h2>
                 <p className="text-[12px] text-[#8c7c72] mt-1">Build and publish the sake journey presented with the Koyo omakase experience.</p>
               </div>
-              <button onClick={createSakePairing} disabled={!menu || savingPairing} className="h-10 px-4 rounded-xl bg-[#3a2a24] text-white text-[11px] font-medium disabled:opacity-35">
+              <button onClick={createSakePairing} disabled={!menu || savingPairing} className="venue-primary-action h-10 px-4 rounded-xl text-white text-[11px] font-medium disabled:opacity-35">
                 {savingPairing ? "Creating..." : "+ New Pairing"}
               </button>
             </div>
@@ -1139,7 +1307,7 @@ export default function VenueWinePage() {
                           <span className="block text-[9px] uppercase tracking-[0.18em] text-[#9c8c82] mb-2">Guest price €</span>
                           <input type="number" min="0" step="0.01" value={pairing.price ?? ""} onChange={(e) => updateLocalPairing(pairing.id, "price", e.target.value === "" ? "" : Number(e.target.value))} className="w-full h-11 rounded-xl border border-[#e2d7cd] bg-white px-4 text-[12px] text-[#3a2a24] outline-none" />
                         </label>
-                        <button onClick={() => saveSakePairing(pairing)} disabled={savingPairing} className="w-full h-11 rounded-xl bg-[#8a3a2c] text-white text-[11px] font-medium disabled:opacity-40">
+                        <button onClick={() => saveSakePairing(pairing)} disabled={savingPairing} className="venue-primary-action w-full h-11 rounded-xl text-white text-[11px] font-medium disabled:opacity-40">
                           {savingPairing ? "Saving..." : "Save Pairing"}
                         </button>
                       </div>
@@ -1180,19 +1348,27 @@ export default function VenueWinePage() {
         )}
 
         {workspaceTab === "wines" && (
-          <section className="rounded-2xl border border-[#e5d9ce] bg-white overflow-hidden">
+          <section className="venue-inventory-panel">
             <div className="venue-list-heading">
               <div>
-                <span>Venue catalogue</span>
-                <h2>Inventory &amp; guest wine list</h2>
-                <p>Stock comes from CompuCash. Use the controls below to decide what guests see and to complete service pricing.</p>
+                <span>Live inventory register</span>
+                <h2>Wine inventory</h2>
+                <p>{isStorageWorkspace
+                  ? "Physical quantities come from CompuCash. Guest visibility, service format, pricing and descriptions become active when a wine menu is linked."
+                  : "Stock comes from CompuCash. Use the controls below to decide what guests see and complete service pricing."}</p>
               </div>
               <div className="venue-list-legend">
                 <span><i className="is-live" /> Live on guest list</span>
                 <span><i className="is-warning" /> Action needed</span>
               </div>
             </div>
-            <div className="px-4 md:px-5 py-4 border-b border-[#eee5de] bg-[#fcfaf8]">
+            {!menu && (
+              <div className="venue-menu-lock">
+                <div><strong>Guest controls are currently locked</strong><span>Link a wine menu to this location to enable guest visibility, BTG, pricing and descriptions.</span></div>
+                <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>
+              </div>
+            )}
+            <div className="venue-inventory-toolbar">
               <div className="flex flex-col xl:flex-row xl:items-center gap-3">
                 <div className="relative flex-1">
                   <input
@@ -1206,19 +1382,17 @@ export default function VenueWinePage() {
 
                 <div className="flex gap-1.5 overflow-x-auto">
                   {[
-                    ["all", "All", rows.length],
-                    ["live", "Guest Live", stats.guestLive],
-                    ["glass", "By the Glass", stats.byTheGlass],
-                    ["hidden", "Hidden", rows.length - stats.guestLive],
-                    ["low", "Low Stock", stats.lowStock],
-                  ].map(([value, label, count]) => (
+                        ["all", "All", rows.length],
+                        ["live", "On guest list", stats.guestLive],
+                        ["glass", "By the Glass", stats.byTheGlass],
+                        ["hidden", "Hidden", rows.length - stats.guestLive],
+                        ["low", "Low Stock", stats.lowStock],
+                      ].map(([value, label, count]) => (
                     <button
                       key={value}
                       onClick={() => setFilter(value)}
                       className={`h-10 px-3.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition ${
-                        filter === value
-                          ? "bg-[#3a2a24] text-white"
-                          : "border border-[#e3d8ce] bg-white text-[#75645b] hover:bg-[#f7f2ed]"
+                        filter === value ? "is-active" : ""
                       }`}
                     >
                       {label} <span className="venue-filter-count">{count}</span>
@@ -1232,15 +1406,26 @@ export default function VenueWinePage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-[12px] min-w-[1320px]">
+            <div className="venue-inventory-table-wrap">
+              <table className="venue-inventory-table w-full text-[12px]">
+                <colgroup>
+                  <col className="venue-col-wine" />
+                  <col className="venue-col-type" />
+                  <col className="venue-col-stock" />
+                  <col className="venue-col-guest" />
+                  <col className="venue-col-service" />
+                  <col className="venue-col-price" />
+                  <col className="venue-col-price" />
+                  <col className="venue-col-description" />
+                  <col className="venue-col-action" />
+                </colgroup>
                 <thead className="bg-[#faf7f4] border-b border-[#e9dfd7]">
                   <tr className="text-[9px] uppercase tracking-[0.15em] text-[#9c8c82]">
                     <th className="py-3.5 px-5 text-left font-medium">Wine</th>
                     <th className="py-3.5 px-3 text-left font-medium">Type</th>
                     <th className="py-3.5 px-3 text-center font-medium">Stock</th>
                     <th className="py-3.5 px-3 text-center font-medium">Guest</th>
-                    <th className="py-3.5 px-3 text-left font-medium">Service</th>
+                    <th className="py-3.5 px-3 text-left font-medium">Serve as</th>
                     <th className="py-3.5 px-3 text-left font-medium">Bottle €</th>
                     <th className="py-3.5 px-3 text-left font-medium">Glass €</th>
                     <th className="py-3.5 px-3 text-left font-medium">Guest Description</th>
@@ -1279,7 +1464,7 @@ export default function VenueWinePage() {
                       <td className="py-3.5 px-3 text-center">
                         <button
                           onClick={() => toggleGuestWine(row)}
-                          disabled={savingWineId === row.wineId}
+                          disabled={!menu || savingWineId === row.wineId}
                           className={`inline-flex items-center gap-2 h-8 px-3 rounded-full text-[10px] font-semibold transition ${
                             row.guestVisible
                               ? "bg-emerald-50 text-emerald-700"
@@ -1294,18 +1479,22 @@ export default function VenueWinePage() {
                       </td>
 
                       <td className="py-3.5 px-3">
-                        <select
-                          value={row.serviceType}
-                          disabled={!row.guestVisible}
-                          onChange={(e) =>
-                            updateLocalWine(row.wineId, "serviceType", e.target.value)
-                          }
-                          className="h-9 min-w-[104px] border border-[#e2d7cd] rounded-lg px-3 bg-white text-[11px] text-[#4b3930] disabled:opacity-35 outline-none"
-                        >
-                          <option value="bottle">Bottle</option>
-                          <option value="glass">Glass</option>
-                          <option value="both">Both</option>
-                        </select>
+                        <div className="venue-service-toggles" aria-label={`Service format for ${row.name}`}>
+                          <button
+                            type="button"
+                            aria-pressed={row.serviceType === "bottle" || row.serviceType === "both"}
+                            disabled={!row.guestVisible}
+                            onClick={() => toggleServiceOption(row, "bottle")}
+                            className={row.serviceType === "bottle" || row.serviceType === "both" ? "is-active" : ""}
+                          >Bottle</button>
+                          <button
+                            type="button"
+                            aria-pressed={row.serviceType === "glass" || row.serviceType === "both"}
+                            disabled={!row.guestVisible}
+                            onClick={() => toggleServiceOption(row, "glass")}
+                            className={row.serviceType === "glass" || row.serviceType === "both" ? "is-active is-btg" : ""}
+                          >BTG</button>
+                        </div>
                       </td>
 
                       <td className="py-3.5 px-3">
@@ -1322,7 +1511,7 @@ export default function VenueWinePage() {
                               e.target.value === "" ? null : Number(e.target.value)
                             )
                           }
-                          className="w-[88px] h-9 border border-[#e2d7cd] rounded-lg px-3 bg-white text-[11px] text-[#3a2a24] disabled:opacity-35 outline-none focus:border-[#b89a87]"
+                          className="venue-price-input h-9 border border-[#e2d7cd] rounded-lg px-3 bg-white text-[11px] text-[#3a2a24] disabled:opacity-35 outline-none focus:border-[#b89a87]"
                         />
                       </td>
 
@@ -1345,7 +1534,7 @@ export default function VenueWinePage() {
                               ? "Set price"
                               : ""
                           }
-                          className={`w-[94px] h-9 border rounded-lg px-3 bg-white text-[11px] text-[#3a2a24] disabled:opacity-35 outline-none focus:border-[#b89a87] ${
+                          className={`venue-price-input h-9 border rounded-lg px-3 bg-white text-[11px] text-[#3a2a24] disabled:opacity-35 outline-none focus:border-[#b89a87] ${
                             row.guestVisible &&
                             (row.serviceType === "glass" || row.serviceType === "both") &&
                             row.glassPrice === null
@@ -1364,7 +1553,7 @@ export default function VenueWinePage() {
                             updateLocalWine(row.wineId, "description", e.target.value)
                           }
                           placeholder="Guest description"
-                          className="min-w-[250px] w-full h-9 border border-[#e2d7cd] rounded-lg px-3 bg-white text-[11px] text-[#3a2a24] disabled:opacity-35 outline-none focus:border-[#b89a87]"
+                          className="venue-description-input w-full h-9 border border-[#e2d7cd] rounded-lg px-3 bg-white text-[11px] text-[#3a2a24] disabled:opacity-35 outline-none focus:border-[#b89a87]"
                         />
                       </td>
 
@@ -1373,7 +1562,7 @@ export default function VenueWinePage() {
                           <button
                             onClick={() => saveWine(row)}
                             disabled={savingWineId === row.wineId}
-                            className="h-9 px-4 rounded-lg bg-[#8a3a2c] text-white text-[11px] font-medium hover:bg-[#713025] transition disabled:opacity-40"
+                            className="venue-primary-action h-9 px-4 rounded-lg text-white text-[11px] font-medium transition disabled:opacity-40"
                           >
                             {savingWineId === row.wineId ? "Saving..." : "Save"}
                           </button>

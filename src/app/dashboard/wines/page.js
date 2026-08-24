@@ -145,12 +145,11 @@ function MetricCard({
   return (
     <div
       className="
+        wine-cellar-metric
         bg-white/75
         border
         border-[#eadfd5]
         rounded-[24px]
-        px-5
-        py-5
         min-w-0
       "
     >
@@ -167,8 +166,8 @@ function MetricCard({
 
       <div
         className="
-          mt-3
-          text-[28px]
+          wine-cellar-metric-value
+          text-[25px]
           leading-none
           font-medium
           tracking-[-0.035em]
@@ -181,7 +180,7 @@ function MetricCard({
       {detail && (
         <div
           className="
-            mt-3
+            wine-cellar-metric-detail
             text-[10px]
             text-[#9b8d85]
           "
@@ -891,14 +890,14 @@ export default function WinesPage() {
   ===================================================== */
 
   return (
-    <div className="wine-cellar-page max-w-[1600px] mx-auto px-7 py-7 space-y-5">
+    <div className="wine-cellar-page max-w-[1600px] mx-auto px-5 py-3 space-y-3">
 
       {/* =================================================
           HEADER
       ================================================= */}
 
-      <div className="wine-cellar-hero flex items-start justify-between gap-6 flex-wrap">
-        <div>
+      <div className="wine-cellar-hero flex justify-between gap-6 flex-wrap">
+        <div className="wine-cellar-hero-copy">
           <div className="so-title">
             Wine Cellar
           </div>
@@ -909,7 +908,7 @@ export default function WinesPage() {
           </div>
 
           {compuCashStatus && (
-            <div className="mt-2 text-[10px] text-[#8f8178]">
+            <div className="wine-cellar-sync text-[10px] text-[#8f8178]">
               Compucash automatic sync: {compuCashStatus.automaticSyncEnabled ? "enabled" : "disabled"}
               {compuCashStatus.latestRun?.completed_at
                 ? ` · Last ${compuCashStatus.latestRun.status} ${formatDate(compuCashStatus.latestRun.completed_at)}`
@@ -919,7 +918,7 @@ export default function WinesPage() {
         </div>
 
         <div
-          className="
+          className="wine-cellar-actions
             flex
             items-center
             gap-2
@@ -1078,9 +1077,9 @@ export default function WinesPage() {
           SEARCH
       ================================================= */}
 
-      <div className="relative">
+      <div className="wine-cellar-search so-search-control relative">
         <MagnifyingGlassIcon
-          className="
+          className="so-search-icon
             absolute
             left-4
             top-1/2
@@ -1101,6 +1100,7 @@ export default function WinesPage() {
           placeholder="Search the cellar by wine, producer, region or vintage..."
           className="
             so-input
+            so-search-input
             w-full
             pl-11
           "

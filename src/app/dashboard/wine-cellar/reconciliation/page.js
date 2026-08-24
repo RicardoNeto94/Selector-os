@@ -2875,8 +2875,8 @@ const matchedValuationCount =
                 )}
 
                 <div className="bg-white/75 border border-[#eadfd5] rounded-[18px] px-4 py-3 flex items-center gap-3 flex-wrap">
-                  <div className="relative flex-1 min-w-[240px]">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#91a1ba]" />
+                  <div className="so-search-control relative flex-1 min-w-[240px]">
+                    <MagnifyingGlassIcon className="so-search-icon absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#91a1ba]" />
                     <input
                       value={search}
                       onChange={(event) => {
@@ -2884,7 +2884,7 @@ const matchedValuationCount =
                         setWorkspacePage(1);
                       }}
                       placeholder="Search wine, product number, barcode or store..."
-                      className="w-full border border-[#e7ddd4] rounded-xl bg-white pl-10 pr-4 py-2.5 text-[10px] text-[#33251f] outline-none focus:border-[#c8aa91]"
+                      className="so-search-input w-full border border-[#e7ddd4] rounded-xl bg-white pl-10 pr-4 py-2.5 text-[10px] text-[#33251f] outline-none focus:border-[#c8aa91]"
                     />
                   </div>
 
@@ -2984,8 +2984,8 @@ const matchedValuationCount =
             </div>
 
             <div className="px-5 md:px-6 py-4 border-b border-[#eadfd5]">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#91a1ba]" />
+              <div className="so-search-control relative">
+                <MagnifyingGlassIcon className="so-search-icon absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#91a1ba]" />
                 <input
                   autoFocus
                   value={manualWineSearch}
@@ -2993,7 +2993,7 @@ const matchedValuationCount =
                     setManualWineSearch(event.target.value)
                   }
                   placeholder="Search Vaxeron wine, producer, vintage, region or country..."
-                  className="w-full border border-[#e7ddd4] rounded-xl bg-white pl-10 pr-4 py-3 text-[10px] text-[#33251f] outline-none focus:border-[#c8aa91]"
+                  className="so-search-input w-full border border-[#e7ddd4] rounded-xl bg-white pl-10 pr-4 py-3 text-[10px] text-[#33251f] outline-none focus:border-[#c8aa91]"
                 />
               </div>
 

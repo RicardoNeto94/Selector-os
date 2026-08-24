@@ -1681,8 +1681,8 @@ export default function WineCatalogueImportPage() {
 
           <div className="rounded-[18px] border border-[#eadfd5] bg-white/75 px-4 py-3">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="relative min-w-[260px] flex-1">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#91a1ba]" />
+              <div className="so-search-control relative min-w-[260px] flex-1">
+                <MagnifyingGlassIcon className="so-search-icon absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#91a1ba]" />
                 <input
                   value={search}
                   onChange={(event) => {
@@ -1690,7 +1690,7 @@ export default function WineCatalogueImportPage() {
                     setPage(1);
                   }}
                   placeholder="Search wine, Product ID, number or barcode..."
-                  className="w-full rounded-xl border border-[#e7ddd4] bg-white py-2.5 pl-10 pr-4 text-[10px] text-[#33251f] outline-none focus:border-[#c8aa91]"
+                  className="so-search-input w-full rounded-xl border border-[#e7ddd4] bg-white py-2.5 pl-10 pr-4 text-[10px] text-[#33251f] outline-none focus:border-[#c8aa91]"
                 />
               </div>
 

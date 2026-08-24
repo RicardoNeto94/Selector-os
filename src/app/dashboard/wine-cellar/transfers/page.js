@@ -1039,13 +1039,14 @@ async function executeTransfer() {
 
         <div
           className="
+            so-search-control
             relative
             flex-1
           "
         >
 
           <MagnifyingGlassIcon
-            className="
+            className="so-search-icon
               absolute
               left-3
               top-1/2
@@ -1066,7 +1067,7 @@ async function executeTransfer() {
                 )
             }
             placeholder="Search wine, producer or notes..."
-            className="
+            className="so-search-input
               w-full
               border
               border-slate-200
