@@ -25,6 +25,63 @@ export function sumNetBottles(rows, getQuantity = (row) => row?.quantity) {
   );
 }
 
+export const BOTTLE_FORMATS = {
+  small: { label: "Small formats", detail: "Below 70cl" },
+  standard: { label: "Standard bottles", detail: "70–100cl" },
+  large: { label: "Magnum & large", detail: "Above 100cl" },
+  unknown: { label: "Size needs review", detail: "Missing or unclear size" },
+};
+
+export function parseBottleSizeCl(value) {
+  const text = String(value || "").trim().toLowerCase().replace(",", ".");
+  if (!text) return null;
+
+  const match = text.match(/(?:^|[^\d.])(\d+(?:\.\d+)?)\s*(ml|cl|l)\b/i);
+  if (!match) return null;
+
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+
+  if (match[2] === "ml") return amount / 10;
+  if (match[2] === "l") return amount * 100;
+  return amount;
+}
+
+export function bottleFormatForWine(wine) {
+  const source = wine?.wines || wine?.wine || wine;
+  const sizeCl = parseBottleSizeCl(source?.size) ?? parseBottleSizeCl(source?.name);
+  if (sizeCl === null) return "unknown";
+  if (sizeCl < 70) return "small";
+  if (sizeCl <= 100) return "standard";
+  return "large";
+}
+
+export function summarizeBottleFormats(rows, getQuantity = (row) => row?.stock ?? row?.quantity) {
+  const summary = {
+    small: 0,
+    standard: 0,
+    large: 0,
+    unknown: 0,
+    fractional: 0,
+    total: 0,
+  };
+
+  for (const row of rows || []) {
+    const quantity = positiveBottleQuantity(getQuantity(row));
+    if (quantity <= 0) continue;
+
+    const format = bottleFormatForWine(row);
+    summary[format] += quantity;
+    summary.total += quantity;
+
+    const wholeBottles = Math.floor(quantity + INVENTORY_ROUNDING_EPSILON);
+    const remainder = quantity - wholeBottles;
+    if (remainder > INVENTORY_ROUNDING_EPSILON) summary.fractional += remainder;
+  }
+
+  return summary;
+}
+
 export function normalizeWineCategory(wine) {
   const type = String(wine?.wine_type || "").trim().toLowerCase();
   const identity = `${wine?.name || ""} ${wine?.producer || ""}`.toLowerCase();

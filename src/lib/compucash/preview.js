@@ -11,7 +11,17 @@ export function normalizeCompuCashStore(store) {
 export function normalizeCompuCashProduct(product) {
   if (!Number.isInteger(product?.productId)) throw new Error("Invalid Compucash product ID.");
   const externalProductId = String(product.productId);
-  const stock = (product.storeQuantities ?? []).map((row) => ({
+  // Compucash parent products can expose storeQuantities that aggregate every
+  // product variation (for example a physical 37.5cl bottle plus its BTG CL
+  // variation). When the API exposes the base product as a variation whose ID
+  // matches the parent product ID, that variation is the authoritative physical
+  // balance. Falling back preserves products that have no variation payload.
+  const baseVariation = (product.productVariations ?? []).find(
+    (variation) => Number(variation?.productId) === product.productId
+  );
+  const authoritativeStoreQuantities =
+    baseVariation?.storeQuantities ?? product.storeQuantities ?? [];
+  const stock = authoritativeStoreQuantities.map((row) => ({
     externalProductId,
     externalStoreId: String(row.storeId),
     quantity: Number(row.quantity),
@@ -33,7 +43,10 @@ export function normalizeCompuCashProduct(product) {
 export function getProductExclusionReason(product) {
   if (!COMPUCASH_PHYSICAL_WINE_GROUP_IDS.has(product.productGroupId)) return "non_physical_wine_group";
   const name = product.name ?? "";
-  if (/\b(?:5|6|12|15)\s*cl\b/i.test(name)) return "by_the_glass_serving";
+  // Match standalone serving measures only. The previous word-boundary rule
+  // incorrectly treated the trailing `5cl` in a physical `37.5cl` half-bottle
+  // as a by-the-glass portion.
+  if (/(?<![\d.])(?:5|6|12|15)\s*cl\b/i.test(name)) return "by_the_glass_serving";
   if (/^\s*\(\s*c\s*\)/i.test(name) || /\(\s*c\s*\)\s*$/i.test(name)) {
     return "generic_placeholder";
   }

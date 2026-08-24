@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity, summarizeBottleFormats } from "@/lib/wineInventory";
 import "../venue-wines.css";
 
 function formatQuantity(value) {
@@ -156,6 +156,7 @@ export default function VenueWinePage() {
             country,
             grape,
             wine_type,
+            size,
             price,
             is_active
           )
@@ -232,6 +233,7 @@ export default function VenueWinePage() {
           country: wine.country || "",
           grape: wine.grape || "",
           wineType: wine.wine_type || "",
+          size: wine.size || "",
 
           stock: positiveBottleQuantity(inventory.quantity),
 
@@ -821,6 +823,8 @@ export default function VenueWinePage() {
       .slice(0, 6);
   }, [rows]);
 
+  const bottleFormats = useMemo(() => summarizeBottleFormats(rows), [rows]);
+
   const filteredRows = useMemo(() => {
     const query = search.toLowerCase().trim();
 
@@ -1030,6 +1034,21 @@ export default function VenueWinePage() {
               </div>
             </div>
           ))}
+        </section>
+
+        <section className="venue-format-summary" aria-label="Inventory by bottle format">
+          {Object.entries(BOTTLE_FORMATS).map(([key, format]) => (
+            <div key={key} className={key === "unknown" && bottleFormats[key] > 0 ? "needs-review" : ""}>
+              <span>{format.label}</span>
+              <strong>{formatQuantity(bottleFormats[key])}</strong>
+              <small>{format.detail}</small>
+            </div>
+          ))}
+          <div>
+            <span>Fractional / open</span>
+            <strong>{formatQuantity(bottleFormats.fractional)}</strong>
+            <small>Included in format totals</small>
+          </div>
         </section>
 
         {!isStorageWorkspace && (stats.guestActions > 0 || stats.lowStock > 0 || !menu) && (

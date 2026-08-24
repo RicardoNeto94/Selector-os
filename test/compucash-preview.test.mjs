@@ -18,6 +18,36 @@ test("preserves fractional physical stock", () => {
   assert.equal(product.stock[0].quantity, 2.37);
 });
 
+test("uses the base physical variation instead of variation-inclusive parent stock", () => {
+  const product = normalizeCompuCashProduct({
+    productId: 1121,
+    productNumber: "005705",
+    productName: "Yalumba Antique Muscat Rutherglen 37.5cl",
+    productGroupId: 63,
+    storeQuantities: [
+      { storeId: 5, quantity: 144 },
+      { storeId: 6, quantity: 1 },
+    ],
+    productVariations: [
+      {
+        productId: 5705,
+        storeQuantities: [{ storeId: 5, quantity: 144 }],
+      },
+      {
+        productId: 1121,
+        storeQuantities: [{ storeId: 6, quantity: 1 }],
+      },
+    ],
+  });
+
+  assert.deepEqual(product.stock, [{
+    externalProductId: "1121",
+    externalStoreId: "6",
+    quantity: 1,
+    storagePrice: null,
+  }]);
+});
+
 test("sums stores mapped to one location and emits explicit zeroes", () => {
   const plan = buildCompuCashInventoryPlan({
     rawProducts: [{
@@ -85,6 +115,10 @@ test("excludes BTG portions even inside a physical wine group", () => {
   assert.equal(
     getProductExclusionReason({ productGroupId: "77", name: "Junmai Daiginjo 6cl" }),
     "by_the_glass_serving"
+  );
+  assert.equal(
+    getProductExclusionReason({ productGroupId: "67", name: "Botrytis Semillon 37.5cl" }),
+    null
   );
 });
 

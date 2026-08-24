@@ -49,6 +49,47 @@
 button.inventory-kpi:hover { background:rgba(241,247,243,.95); }
 .inventory-kpi.is-active { z-index:1; background:rgba(238,246,241,.96); box-shadow:inset 0 -3px 0 #426b5e; }
 
+.inventory-format-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid rgba(105, 132, 123, .18);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, .64);
+}
+.inventory-format-grid > div,
+.inventory-format-grid > button { min-width: 0; padding: 13px 16px; border: 0; border-right: 1px solid rgba(105, 132, 123, .14); background: transparent; text-align: left; transition: background .18s ease, box-shadow .18s ease; }
+.inventory-format-grid > button { cursor: pointer; }
+.inventory-format-grid > button:hover { background: rgba(239, 246, 242, .72); }
+.inventory-format-grid > button.is-active { background: rgba(229, 240, 234, .92); box-shadow: inset 0 -3px 0 #426b5e; }
+.inventory-format-grid > :last-child { border-right: 0; }
+.inventory-format-grid span,
+.inventory-format-grid small { display: block; }
+.inventory-format-grid span { font-size: 8px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #71877f; }
+.inventory-format-grid strong { display: block; margin-top: 6px; font-size: 19px; line-height: 1; font-weight: 500; color: #29433b; }
+.inventory-format-grid small { margin-top: 5px; font-size: 8px; color: #91a09b; }
+.inventory-format-grid .needs-review { background: rgba(244, 231, 210, .45); }
+
+.size-review-panel { overflow: hidden; border: 1px solid rgba(174, 133, 68, .22); border-radius: 20px; background: rgba(255, 250, 240, .76); box-shadow: 0 16px 38px rgba(59, 48, 28, .06); }
+.size-review-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 18px 20px; border-bottom: 1px solid rgba(174, 133, 68, .14); }
+.size-review-heading span { font-size: 8px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: #8f7548; }
+.size-review-heading h2 { margin: 5px 0 0; font-size: 20px; font-weight: 500; color: #35463f; }
+.size-review-heading p { max-width: 720px; margin: 5px 0 0; font-size: 9px; line-height: 1.6; color: #7f8d87; }
+.size-review-heading > strong { display: inline-flex; flex: 0 0 auto; padding: 7px 11px; border-radius: 999px; background: rgba(231, 211, 171, .42); color: #7f6635; font-size: 9px; font-weight: 600; }
+.size-review-list { display: grid; grid-template-columns: 1fr 1fr; }
+.size-review-row { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 20px; border-right: 1px solid rgba(174, 133, 68, .11); border-bottom: 1px solid rgba(174, 133, 68, .11); }
+.size-review-row > div:first-child { min-width: 0; }
+.size-review-row strong,
+.size-review-row span { display: block; }
+.size-review-row strong { overflow: hidden; font-size: 10px; font-weight: 500; color: #35463f; text-overflow: ellipsis; white-space: nowrap; }
+.size-review-row span { margin-top: 4px; font-size: 8px; color: #8b948f; }
+.size-review-control { display: flex; flex: 0 0 auto; gap: 6px; }
+.size-review-control input { width: 92px; height: 35px; border: 1px solid rgba(86, 110, 101, .18); border-radius: 10px; background: rgba(255, 255, 255, .82); padding: 0 10px; color: #35463f; font-size: 10px; outline: none; }
+.size-review-control input:focus { border-color: rgba(66, 107, 94, .5); box-shadow: 0 0 0 3px rgba(66, 107, 94, .08); }
+.size-review-control button { height: 35px; border: 0; border-radius: 999px; background: #29433b; padding: 0 13px; color: #fff; font-size: 8px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.size-review-control button:disabled { cursor: not-allowed; opacity: .35; }
+.size-review-error { padding: 9px 20px; background: rgba(177, 73, 55, .08); color: #9d4c3e; font-size: 9px; }
+
 .inventory-table-card {
   border:1px solid rgba(255,255,255,.86);
   border-radius:27px;
@@ -105,4 +146,9 @@ button.inventory-kpi:hover { background:rgba(241,247,243,.95); }
   .inventory-header { border-radius:24px; }
   .inventory-kpi-grid { grid-template-columns:1fr; }
   .inventory-kpi-grid .inventory-kpi:last-child { grid-column:auto; }
+  .inventory-format-grid { grid-template-columns: 1fr 1fr; }
+  .size-review-list { grid-template-columns: 1fr; }
+  .size-review-row { align-items: flex-start; flex-direction: column; }
+  .size-review-control { width: 100%; }
+  .size-review-control input { flex: 1; width: auto; }
 }

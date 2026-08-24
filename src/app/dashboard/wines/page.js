@@ -10,17 +10,16 @@ import Papa from "papaparse";
 import {
   ArrowRightIcon,
   ArrowsRightLeftIcon,
-  BuildingStorefrontIcon,
+  CheckCircleIcon,
   CircleStackIcon,
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
   PlusIcon,
-  ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 
 
 import { createClient } from "@/lib/supabase/client";
-import { normalizeWineCategory, positiveBottleQuantity, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
 import "./wine-cellar.css";
 /* =======================================================
    CONSTANTS
@@ -409,6 +408,17 @@ export default function WinesPage() {
       0
     );
   }, [wines]);
+
+  const bottleFormats = useMemo(
+    () => summarizeBottleFormats(
+      wines.flatMap((wine) => (wine.inventory || []).map((row) => ({
+        ...row,
+        name: wine.name,
+        size: wine.size,
+      })))
+    ),
+    [wines]
+  );
 
   /* =====================================================
      WINE COMPOSITION
@@ -900,7 +910,7 @@ export default function WinesPage() {
           HEADER
       ================================================= */}
 
-      <div className="wine-cellar-hero flex justify-between gap-6 flex-wrap">
+      <div className="wine-cellar-hero">
         <div className="wine-cellar-hero-copy">
           <div className="so-title">
             Wine Cellar
@@ -911,24 +921,34 @@ export default function WinesPage() {
             and cellar operations
           </div>
 
-          {compuCashStatus && (
-            <div className="wine-cellar-sync text-[10px] text-[#8f8178]">
-              Compucash automatic sync: {compuCashStatus.automaticSyncEnabled ? "enabled" : "disabled"}
-              {compuCashStatus.latestRun?.completed_at
-                ? ` · Last ${compuCashStatus.latestRun.status} ${formatDate(compuCashStatus.latestRun.completed_at)}`
-                : " · No scheduled run recorded"}
-            </div>
-          )}
         </div>
 
-        <div
-          className="wine-cellar-actions
-            flex
-            items-center
-            gap-2
-            flex-wrap
-          "
-        >
+        {compuCashStatus && (
+          <div
+            className={`wine-sync-badge ${compuCashStatus.latestRun?.status === "succeeded" ? "is-success" : "needs-attention"}`}
+            title={compuCashStatus.automaticSyncEnabled ? "Automatic inventory sync is enabled" : "Most recent Compucash inventory sync"}
+          >
+            {compuCashStatus.latestRun?.status === "succeeded" ? (
+              <CheckCircleIcon aria-hidden="true" />
+            ) : (
+              <ExclamationTriangleIcon aria-hidden="true" />
+            )}
+            <span>
+              <strong>
+                {compuCashStatus.latestRun?.status === "succeeded"
+                  ? "Compucash sync succeeded"
+                  : "Compucash sync needs attention"}
+              </strong>
+              <small>
+                {compuCashStatus.latestRun?.completed_at
+                  ? formatDate(compuCashStatus.latestRun.completed_at)
+                  : "No completed sync recorded"}
+              </small>
+            </span>
+          </div>
+        )}
+
+        <div className="wine-cellar-actions">
           <button
             onClick={() =>
               router.push(
@@ -940,71 +960,6 @@ export default function WinesPage() {
             <PlusIcon className="w-4 h-4" />
 
             Add Wine
-          </button>
-
-          <label
-            className="
-              so-btn-ghost
-              cursor-pointer
-              flex
-              items-center
-              gap-2
-            "
-          >
-            <ArrowUpTrayIcon
-              className="w-4 h-4"
-            />
-
-            {file
-              ? file.name
-              : "Upload CSV"}
-
-            <input
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={(event) =>
-                setFile(
-                  event.target
-                    .files?.[0] ||
-                    null
-                )
-              }
-            />
-          </label>
-
-          {file && (
-            <button
-              onClick={importCSV}
-              disabled={importing}
-              className="so-btn-primary"
-            >
-              {importing
-                ? "Syncing"
-                : "Sync Inventory"}
-            </button>
-          )}
-
-          <button
-            onClick={() =>
-              router.push(
-                "/dashboard/wine-cellar/inventory"
-              )
-            }
-            className="so-btn-ghost"
-          >
-            Stock Control
-          </button>
-
-          <button
-            onClick={() =>
-              router.push(
-                "/dashboard/wine-cellar/venues"
-              )
-            }
-            className="so-btn-ghost"
-          >
-            Venue Wines
           </button>
         </div>
       </div>
@@ -1203,47 +1158,38 @@ export default function WinesPage() {
         )}
       </div>
 
-      {/* =================================================
-          KPI GRID
-      ================================================= */}
+      <section className="wine-portfolio-summary" aria-label="Wine portfolio summary">
+        <div className="wine-portfolio-primary">
+          <span>Available physical stock</span>
+          <strong>{formatNumber(totalBottles)}</strong>
+          <small>bottle-equivalents across {locationDistribution.length} active locations</small>
+        </div>
 
-      <div className="wine-cellar-kpis grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <MetricCard
-          label="Total Bottles"
-          value={formatNumber(
-            totalBottles
-          )}
-          detail="Physical stock across all cellar locations"
-        />
+        <div className="wine-portfolio-facts">
+          <div><strong>{formatNumber(uniqueWines)}</strong><span>available wines</span></div>
+          <div><strong>€{formatCurrency(cellarValue)}</strong><span>estimated value</span></div>
+          <div><strong>{formatNumber(zeroStockWines.length)}</strong><span>need ordering</span></div>
+        </div>
 
-        <MetricCard
-          label="Unique Wines"
-          value={formatNumber(
-            uniqueWines
-          )}
-          detail={`${formatNumber(
-            zeroStockWines.length
-          )} wines need ordering`}
-        />
-
-        <MetricCard
-          label="Cellar Value"
-          value={`€${formatCurrency(
-            cellarValue
-          )}`}
-          detail="Based on current wine selling price"
-        />
-
-        <MetricCard
-          label="Active Locations"
-          value={formatNumber(
-            locationDistribution.length
-          )}
-          detail={`${formatNumber(
-            locations.length
-          )} cellar locations configured`}
-        />
-      </div>
+        <div className="wine-portfolio-formats" aria-label="Stock by bottle format">
+          {Object.entries(BOTTLE_FORMATS).filter(([key]) => key !== "unknown").map(([key, format]) => (
+            <button
+              type="button"
+              key={key}
+              className={key === "unknown" && bottleFormats[key] > 0 ? "needs-review" : ""}
+              onClick={() => router.push(`/dashboard/wine-cellar/inventory${key === "unknown" ? "?format=unknown" : ""}`)}
+              title={format.detail}
+            >
+              <span>{format.label}</span>
+              <strong>{formatNumber(bottleFormats[key])}</strong>
+            </button>
+          ))}
+          <small>
+            <button type="button" className="wine-format-review-link" onClick={() => router.push("/dashboard/wine-cellar/inventory?format=unknown")}>{formatNumber(bottleFormats.unknown)} size to review</button>
+            <span> · {formatNumber(bottleFormats.fractional)} fractional/open included above</span>
+          </small>
+        </div>
+      </section>
 
       {/* =================================================
           INTELLIGENCE
@@ -1345,6 +1291,22 @@ export default function WinesPage() {
       {/* =================================================
           ACTIVITY
       ================================================= */}
+
+      <details className="wine-secondary-details">
+        <summary>
+          <div>
+            <span>Operations & activity</span>
+            <strong>Review what needs attention</strong>
+          </div>
+          <div className="wine-secondary-counts">
+            <span><strong>{formatNumber(zeroStockWines.length)}</strong> ordering</span>
+            <span><strong>{formatNumber(lowStockWines.length)}</strong> low stock</span>
+            <span><strong>{formatNumber(highValueLowStock.length)}</strong> high value</span>
+            <em>Open details</em>
+          </div>
+        </summary>
+
+        <div className="wine-secondary-details-body">
 
       <div
         className="
@@ -1979,6 +1941,8 @@ export default function WinesPage() {
           </div>
         )}
       </div>
+        </div>
+      </details>
 
     </div>
   );
