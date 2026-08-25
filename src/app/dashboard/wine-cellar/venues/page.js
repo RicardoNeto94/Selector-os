@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { bottleQuantity, positiveBottleQuantity, summarizeInventoryFamilies } from "@/lib/wineInventory";
 import "./venue-wines.css";
 
@@ -94,6 +95,7 @@ export default function VenueWinesPage() {
   const [menus, setMenus] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [storeMappings, setStoreMappings] = useState([]);
+  const [inventoryValuations, setInventoryValuations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingLocationId, setSavingLocationId] = useState(null);
   const [loadError, setLoadError] = useState("");
@@ -124,6 +126,7 @@ export default function VenueWinesPage() {
         mappingsResult,
         inventoryRows,
         menuItemRows,
+        valuationRows,
       ] = await Promise.all([
         supabase
           .from("wine_locations")
@@ -174,6 +177,13 @@ export default function VenueWinesPage() {
             `)
             .order("id", { ascending: true })
         ),
+
+        fetchAllRows(() =>
+          supabase
+            .from("wine_inventory_valuations")
+            .select("wine_id,location_id,cost_covered_quantity,unit_inventory_cost,unit_sale_price_net,unit_sale_price_gross")
+            .order("location_id", { ascending: true })
+        ),
       ]);
 
       if (locationsResult.error) throw locationsResult.error;
@@ -185,6 +195,7 @@ export default function VenueWinesPage() {
       setMenus(menusResult.data || []);
       setStoreMappings(mappingsResult.data || []);
       setMenuItems(menuItemRows);
+      setInventoryValuations(valuationRows);
     } catch (error) {
       console.error("LOCATIONS LOAD ERROR:", error);
       setLoadError(
@@ -588,6 +599,7 @@ export default function VenueWinesPage() {
       } else {
         inventoryByWine.set(wineId, {
           wine_id: wineId,
+          location_id: location.id,
           quantity: bottleQuantity(item.quantity),
           wines: item.wines || null,
         });
@@ -632,15 +644,13 @@ export default function VenueWinesPage() {
         0
       );
 
-    const stockValue = availableInventory.reduce(
-      (sum, item) => {
-        const price = Number(item.wines?.price || 0);
-        const quantity = positiveBottleQuantity(item.quantity);
-
-        return sum + price * quantity;
-      },
-      0
+    const locationValuations = inventoryValuations.filter(
+      (item) => String(item.location_id) === String(location.id)
     );
+    const valuation = summarizeInventoryValuation({
+      inventoryRows: allInventory,
+      valuationRows: locationValuations,
+    });
 
     const lowStock = availableInventory.filter(
       (item) => {
@@ -717,7 +727,8 @@ export default function VenueWinesPage() {
       netBottles,
       inventoryFamilies,
       negativeQuantity,
-      stockValue,
+      valuation,
+      valuationAvailable: locationValuations.length > 0,
       lowStock,
       byTheGlass,
       liveGuestWines,
@@ -777,7 +788,8 @@ export default function VenueWinesPage() {
       total.wines += stats.availableWines;
       total.live += stats.liveGuestWines;
       total.btg += stats.byTheGlass;
-      total.value += stats.stockValue;
+      total.cost += stats.valuation.inventoryCost;
+      total.revenue += stats.valuation.potentialRevenueNet;
       total.attention +=
         !stats.menu ||
         mappingsForLocation(location.id).length === 0 ||
@@ -791,7 +803,8 @@ export default function VenueWinesPage() {
       wines: 0,
       live: 0,
       btg: 0,
-      value: 0,
+      cost: 0,
+      revenue: 0,
       attention: 0,
     }
   );
@@ -1235,8 +1248,25 @@ export default function VenueWinesPage() {
                   </div>
 
                   <div className="venue-card-value">
-                    <div><span>Inventory value</span><strong>€{Math.round(stats.stockValue).toLocaleString()}</strong></div>
-                    <div><span>Wine / total units</span><strong>{formatQuantity(stats.inventoryFamilies.wine.positive)} <small>/ {formatQuantity(stats.inventoryFamilies.total.positive)}</small></strong></div>
+                    {stats.valuationAvailable ? (
+                      <>
+                        <div title="Current stock multiplied by Compucash average purchase cost">
+                          <span>Average-cost value</span>
+                          <strong>€{Math.round(stats.valuation.inventoryCost).toLocaleString()}</strong>
+                          <small>{Math.round(stats.valuation.costCoverage)}% cost coverage</small>
+                        </div>
+                        <div title="Current stock multiplied by the default Compucash sale price excluding VAT">
+                          <span>Potential net revenue</span>
+                          <strong>€{Math.round(stats.valuation.potentialRevenueNet).toLocaleString()}</strong>
+                          <small>{Math.round(stats.valuation.saleCoverage)}% price coverage</small>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div><span>Wine units</span><strong>{formatQuantity(stats.inventoryFamilies.wine.positive)}</strong></div>
+                        <div><span>Total physical units</span><strong>{formatQuantity(stats.inventoryFamilies.total.positive)}</strong></div>
+                      </>
+                    )}
                   </div>
 
                   <div className="venue-menu-control">

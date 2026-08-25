@@ -44,14 +44,13 @@ function OperationCard({ href, icon: Icon, eyebrow, title, description, meta }) 
 
 export default async function DashboardPage() {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
-  const [restaurantResult, menusResponse, dishesResponse, winesResponse, profilesResponse, pendingProfilesResponse, menuItemsResponse, locationsResult, inventoryRows, latestSyncResult] = await Promise.all([
+  const [restaurantResult, menusResponse, dishesResponse, profilesResponse, pendingProfilesResponse, menuItemRows, locationsResult, inventoryRows, latestSyncResult] = await Promise.all([
     supabase.from("restaurants").select("name").eq("id", RESTAURANT_ID).maybeSingle(),
     supabase.from("menus").select("*", { count: "exact", head: true }),
     supabase.from("menu_items").select("*", { count: "exact", head: true }),
-    supabase.from("wines").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "pending"),
-    supabase.from("wine_menu_items").select("*", { count: "exact", head: true }),
+    fetchAllRows(supabase, "wine_menu_items", "wine_id"),
     supabase.from("wine_locations").select("id,name,location_type,wine_menu_id").order("name"),
     fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id"),
     supabase.from("compucash_sync_runs").select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
@@ -59,12 +58,13 @@ export default async function DashboardPage() {
   const locations = locationsResult.data || [];
   const latestSync = latestSyncResult.data;
   const organisationName = restaurantResult.data?.name || "VAXERON Hospitality";
-  const winesCount = winesResponse.count || 0;
   const teamCount = profilesResponse.count || 0;
   const pendingTeamCount = pendingProfilesResponse.count || 0;
   const positiveRows = inventoryRows.filter((row) => positiveBottleQuantity(row.quantity) > 0);
   const totalWineUnits = positiveRows.reduce((total, row) => total + positiveBottleQuantity(row.quantity), 0);
-  const stockedWines = new Set(positiveRows.map((row) => String(row.wine_id))).size;
+  const stockedWineIds = new Set(positiveRows.map((row) => String(row.wine_id)));
+  const stockedWines = stockedWineIds.size;
+  const stockedMenuPlacements = menuItemRows.filter((row) => stockedWineIds.has(String(row.wine_id))).length;
   const lowStockRows = positiveRows.filter((row) => number(row.quantity) <= 2).length;
   const negativeRows = inventoryRows.filter((row) => bottleQuantity(row.quantity) < 0).length;
   const roundingRows = inventoryRows.filter((row) => number(row.quantity) < 0 && bottleQuantity(row.quantity) === 0).length;
@@ -83,16 +83,16 @@ export default async function DashboardPage() {
     </header>
 
     <section className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[18px] border border-[#ded3c8] bg-[#ded3c8] xl:grid-cols-5">
-      <StatCard label="Active Wines" value={formatNumber(winesCount)} description={`${formatNumber(stockedWines)} currently in stock`} />
-      <StatCard label="Bottles on Hand" value={formatNumber(totalWineUnits, 2)} description={`Across ${locations.length} storage locations`} />
-      <StatCard label="Guest Listings" value={formatNumber(menuItemsResponse.count || 0)} description="Items connected to wine menus" />
-      <StatCard label="Low Stock Rows" value={formatNumber(lowStockRows)} description="Positive balances at 2 bottles or fewer" tone={lowStockRows ? "warning" : "good"} />
-      <StatCard label="Last Sync" value={syncHealthy ? "Healthy" : "Check"} description={formatDate(latestSync?.completed_at)} tone={syncHealthy ? "good" : "warning"} />
+      <StatCard label="Active Wine Labels" value={formatNumber(stockedWines)} description="Unique labels with positive physical stock" />
+      <StatCard label="Physical Bottle Stock" value={formatNumber(totalWineUnits, 2)} description={`Bottle units across ${locations.length} locations · open fractions included`} />
+      <StatCard label="Active Menu Placements" value={formatNumber(stockedMenuPlacements)} description="Stocked wine-to-menu entries; one label can appear more than once" />
+      <StatCard label="Low-Stock Location Lines" value={formatNumber(lowStockRows)} description="Positive location balances at 2 units or fewer" tone={lowStockRows ? "warning" : "good"} />
+      <StatCard label="Compucash Sync" value={syncHealthy ? "Healthy" : "Check"} description={formatDate(latestSync?.completed_at)} tone={syncHealthy ? "good" : "warning"} />
     </section>
 
     <section className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
       <div className="so-dashboard-chart-card rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">
-        <div className="flex items-start justify-between gap-4"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Live estate</div><h2 className="mt-2 text-[22px] tracking-[-0.035em]">Inventory distribution</h2><p className="mt-1 text-[9px] text-[#95867b]">Current positive CompuCash-backed bottle balances by leading location.</p></div><div className="text-right"><strong className="block text-[20px] font-medium text-[#26322f]">{formatNumber(totalWineUnits, 2)}</strong><span className="text-[7px] uppercase tracking-[0.15em] text-[#909d98]">Total bottles</span></div></div>
+        <div className="flex items-start justify-between gap-4"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Live estate</div><h2 className="mt-2 text-[22px] tracking-[-0.035em]">Inventory distribution</h2><p className="mt-1 text-[9px] text-[#95867b]">Current positive CompuCash-backed physical stock by leading location.</p></div><div className="text-right"><strong className="block text-[20px] font-medium text-[#26322f]">{formatNumber(totalWineUnits, 2)}</strong><span className="text-[7px] uppercase tracking-[0.15em] text-[#909d98]">Bottle units</span></div></div>
         <div className="so-location-chart" aria-label="Inventory bottles by location">{venueMetrics.slice(0, 7).map((location) => { const height = Math.max(6, (location.quantity / maxVenueQuantity) * 100); return <Link key={location.id} href={`/dashboard/wine-cellar/venues/${location.id}`} className="so-location-column" title={`${location.name}: ${formatNumber(location.quantity, 2)} bottles`}><div className="so-location-value">{formatNumber(location.quantity, 1)}</div><div className="so-location-track"><div className="so-location-bar" style={{ height: `${height}%` }} /></div><span>{location.name}</span></Link>; })}</div>
         <div className="so-chart-footer"><span>Live inventory snapshot</span><Link href="/dashboard/wine-cellar/venues">Explore all venues →</Link></div>
       </div>
@@ -109,8 +109,8 @@ export default async function DashboardPage() {
 
     <section className="mt-5"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Quick actions</div><h2 className="mt-1 text-[20px] tracking-[-0.035em] md:text-[22px]">Run the operation</h2><p className="mt-1 text-[9px] text-[#95867b]">The most useful day-to-day workspaces.</p></div>
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <OperationCard href="/dashboard/wines" icon={BeakerIcon} eyebrow="Wine" title="Wine Cellar" description="Manage wine records, pricing and catalogue information." meta={`${formatNumber(winesCount)} active wines`} />
-        <OperationCard href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} eyebrow="Inventory" title="Stock Control" description="Review live quantities across cellar and venue storage." meta={`${formatNumber(totalWineUnits, 2)} bottles on hand`} />
+        <OperationCard href="/dashboard/wines" icon={BeakerIcon} eyebrow="Wine" title="Wine Cellar" description="Manage stocked wine records, pricing and catalogue information." meta={`${formatNumber(stockedWines)} active wine labels`} />
+        <OperationCard href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} eyebrow="Inventory" title="Stock Control" description="Review live quantities across cellar and venue storage." meta={`${formatNumber(totalWineUnits, 2)} physical bottle units`} />
         <OperationCard href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} eyebrow="Venues" title="Venue Wines" description="Control venue selections and guest-facing availability." meta={`${locations.length} storage locations`} />
         <OperationCard href="/dashboard/wine-cellar/reconciliation" icon={ClipboardDocumentCheckIcon} eyebrow="Exceptions" title="Stock Issues" description="Review negative balances and discrepancies reported by the Compucash sync." meta={`${negativeRows} balances need review`} />
         <OperationCard href="/dashboard/menu" icon={RectangleStackIcon} eyebrow="Experience" title="Menus" description="Manage digital menus presented to guests." meta={`${menusResponse.count || 0} menus configured`} />

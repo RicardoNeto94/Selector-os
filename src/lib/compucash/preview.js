@@ -21,6 +21,9 @@ export function normalizeCompuCashProduct(product) {
   );
   const authoritativeStoreQuantities =
     baseVariation?.storeQuantities ?? product.storeQuantities ?? [];
+  const salePrices = normalizeSalePrices(
+    baseVariation?.salePrices?.length ? baseVariation.salePrices : product.salePrices
+  );
   const stock = authoritativeStoreQuantities.map((row) => ({
     externalProductId,
     externalStoreId: String(row.storeId),
@@ -36,6 +39,11 @@ export function normalizeCompuCashProduct(product) {
     barcode: nullable(product.productBarcode),
     name: nullable(product.productName),
     productGroupId: product.productGroupId == null ? null : String(product.productGroupId),
+    salePrices,
+    defaultSalePrice:
+      salePrices.find((row) => row.isDefault && row.salePriceGross !== null) ??
+      salePrices.find((row) => row.salePriceGross !== null) ??
+      null,
     stock,
   };
 }
@@ -170,6 +178,7 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
   const matchedWineIds = new Set();
   const productsByWine = new Map();
   const sourceGroupsByWine = new Map();
+  const valuationsByWineLocation = new Map();
   const unmatchedProducts = [];
   const conflicts = [];
 
@@ -197,6 +206,7 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
         name: product.name,
       },
     ]);
+    const defaultSalePrice = product.defaultSalePrice;
     for (const locationId of locationIds) {
       const key = `${match.wineId}|${locationId}`;
       if (!quantities.has(key)) quantities.set(key, 0);
@@ -206,6 +216,32 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
       if (!target) continue;
       const key = `${match.wineId}|${target.locationId}`;
       quantities.set(key, (quantities.get(key) ?? 0) + stock.quantity);
+
+      const valuation = valuationsByWineLocation.get(key) ?? {
+        wine_id: match.wineId,
+        location_id: target.locationId,
+        external_product_id: product.externalProductId,
+        external_store_ids: [],
+        quantity_snapshot: 0,
+        priced_quantity: 0,
+        inventory_cost_value: 0,
+        fallback_unit_cost: null,
+        unit_sale_price_gross: defaultSalePrice?.salePriceGross ?? null,
+        unit_sale_price_net: defaultSalePrice?.salePriceNet ?? null,
+        vat_percent: defaultSalePrice?.vatPercent ?? null,
+        sale_price_group_id: defaultSalePrice?.salePriceGroupId ?? null,
+      };
+      valuation.external_store_ids.push(stock.externalStoreId);
+      const positiveQuantity = Math.max(0, Number(stock.quantity || 0));
+      valuation.quantity_snapshot += positiveQuantity;
+      if (stock.storagePrice !== null && stock.storagePrice >= 0) {
+        valuation.fallback_unit_cost ??= stock.storagePrice;
+        if (positiveQuantity > 0) {
+          valuation.priced_quantity += positiveQuantity;
+          valuation.inventory_cost_value += positiveQuantity * stock.storagePrice;
+        }
+      }
+      valuationsByWineLocation.set(key, valuation);
     }
   }
 
@@ -216,6 +252,34 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
     })
     .sort((a, b) =>
       `${a.locationId}|${a.wineId}`.localeCompare(`${b.locationId}|${b.wineId}`)
+    );
+
+  const sourceUpdatedAt = new Date().toISOString();
+  const valuations = [...valuationsByWineLocation.values()]
+    .map((row) => ({
+      wine_id: row.wine_id,
+      location_id: row.location_id,
+      external_product_id: row.external_product_id,
+      external_store_ids: [...new Set(row.external_store_ids)].sort(),
+      quantity_snapshot: normalizeMoney(row.quantity_snapshot, 6),
+      cost_covered_quantity: normalizeMoney(row.priced_quantity, 6),
+      unit_inventory_cost:
+        row.priced_quantity > 0
+          ? normalizeMoney(row.inventory_cost_value / row.priced_quantity, 6)
+          : row.fallback_unit_cost,
+      inventory_cost_value:
+        row.priced_quantity > 0
+          ? normalizeMoney(row.inventory_cost_value, 4)
+          : null,
+      unit_sale_price_gross: row.unit_sale_price_gross,
+      unit_sale_price_net: row.unit_sale_price_net,
+      vat_percent: row.vat_percent,
+      sale_price_group_id: row.sale_price_group_id,
+      currency_code: "EUR",
+      source_updated_at: sourceUpdatedAt,
+    }))
+    .sort((a, b) =>
+      `${a.location_id}|${a.wine_id}`.localeCompare(`${b.location_id}|${b.wine_id}`)
     );
 
   return {
@@ -232,6 +296,7 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
     wineSources: [...sourceGroupsByWine.values()].sort((a, b) =>
       a.wine_id.localeCompare(b.wine_id)
     ),
+    valuations,
   };
 }
 
@@ -266,4 +331,34 @@ function normalizeIdentifier(value) {
 function nullable(value) {
   const text = String(value ?? "").trim();
   return text || null;
+}
+
+function normalizeSalePrices(rows = []) {
+  return (rows ?? []).map((row) => {
+    const salePriceGross = finiteOrNull(row.salePrice ?? row.price);
+    const vatPercent = finiteOrNull(row.vatPercent);
+    const suppliedNet = finiteOrNull(row.salePriceWithoutVat);
+    const salePriceNet = suppliedNet ?? (
+      salePriceGross !== null && vatPercent !== null
+        ? salePriceGross / (1 + vatPercent / 100)
+        : null
+    );
+    return {
+      salePriceGroupId: nullable(row.salePriceGID ?? row.salePriceGid),
+      salePriceGross,
+      salePriceNet: salePriceNet === null ? null : normalizeMoney(salePriceNet, 6),
+      vatPercent,
+      isDefault: Boolean(row.isDefault),
+    };
+  });
+}
+
+function finiteOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeMoney(value, precision = 6) {
+  return Number(Number(value || 0).toFixed(precision));
 }

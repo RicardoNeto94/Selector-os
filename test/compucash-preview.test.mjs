@@ -18,6 +18,30 @@ test("preserves fractional physical stock", () => {
   assert.equal(product.stock[0].quantity, 2.37);
 });
 
+test("normalizes Compucash cost and default gross/net sale prices", () => {
+  const product = normalizeCompuCashProduct({
+    productId: 502,
+    productNumber: "W-502",
+    productGroupId: 15,
+    storeQuantities: [{ storeId: 13, quantity: 2, storagePrice: 20 }],
+    salePrices: [{
+      salePriceGID: 4,
+      salePrice: 49.2,
+      vatPercent: 22,
+      isDefault: true,
+    }],
+  });
+
+  assert.equal(product.stock[0].storagePrice, 20);
+  assert.deepEqual(product.defaultSalePrice, {
+    salePriceGroupId: "4",
+    salePriceGross: 49.2,
+    salePriceNet: 40.327869,
+    vatPercent: 22,
+    isDefault: true,
+  });
+});
+
 test("uses the base physical variation instead of variation-inclusive parent stock", () => {
   const product = normalizeCompuCashProduct({
     productId: 1121,
@@ -72,6 +96,51 @@ test("sums stores mapped to one location and emits explicit zeroes", () => {
     { wineId: "wine-1", locationId: "main", quantity: 5.5 },
   ]);
   assert.deepEqual(plan.wineSources, [{ wine_id: "wine-1", product_group_id: "15" }]);
+});
+
+test("builds weighted store-level valuation snapshots", () => {
+  const plan = buildCompuCashInventoryPlan({
+    rawProducts: [{
+      productId: 503,
+      productNumber: "W-503",
+      productName: "Physical bottle 75cl",
+      productGroupId: 15,
+      storeQuantities: [
+        { storeId: 26, quantity: 2, storagePrice: 10 },
+        { storeId: 27, quantity: 1, storagePrice: 16 },
+      ],
+      salePrices: [{
+        salePriceGID: 8,
+        salePrice: 36.6,
+        salePriceWithoutVat: 30,
+        vatPercent: 22,
+        isDefault: true,
+      }],
+    }],
+    storeTargets: [
+      { externalStoreId: "26", locationId: "main" },
+      { externalStoreId: "27", locationId: "main" },
+    ],
+    wines: [{ id: "wine-1", business_product_number: "W-503" }],
+  });
+
+  assert.equal(plan.valuations.length, 1);
+  assert.deepEqual(plan.valuations[0], {
+    wine_id: "wine-1",
+    location_id: "main",
+    external_product_id: "503",
+    external_store_ids: ["26", "27"],
+    quantity_snapshot: 3,
+    cost_covered_quantity: 3,
+    unit_inventory_cost: 12,
+    inventory_cost_value: 36,
+    unit_sale_price_gross: 36.6,
+    unit_sale_price_net: 30,
+    vat_percent: 22,
+    sale_price_group_id: "8",
+    currency_code: "EUR",
+    source_updated_at: plan.valuations[0].source_updated_at,
+  });
 });
 
 test("reports multiple Compucash products mapped to one Vaxeron wine", () => {

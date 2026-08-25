@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { BOTTLE_FORMATS, fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
 import "../venue-wines.css";
 
@@ -38,6 +39,7 @@ export default function VenueWinePage() {
   const [location, setLocation] = useState(null);
   const [menu, setMenu] = useState(null);
   const [rows, setRows] = useState([]);
+  const [inventoryValuations, setInventoryValuations] = useState([]);
   const [storeMappings, setStoreMappings] = useState([]);
   const [btgSuggestions, setBtgSuggestions] = useState([]);
   const [sakePairings, setSakePairings] = useState([]);
@@ -170,6 +172,20 @@ export default function VenueWinePage() {
 
     let menuItemsData = [];
 
+    let valuationData = [];
+    try {
+      valuationData = await fetchAllQueryRows(() => supabase
+        .from("wine_inventory_valuations")
+        .select("wine_id,location_id,cost_covered_quantity,unit_inventory_cost,unit_sale_price_net,unit_sale_price_gross,vat_percent,source_updated_at")
+        .eq("location_id", locationId)
+        .order("wine_id"));
+    } catch (valuationError) {
+      // The table is intentionally administrator-only. Operational roles get
+      // an empty commercial view while retaining all stock and service tools.
+      console.info("INVENTORY VALUATIONS UNAVAILABLE FOR CURRENT ROLE");
+    }
+    setInventoryValuations(valuationData);
+
     if (menuData) {
       const { data, error } = await supabase
         .from("wine_menu_items")
@@ -188,6 +204,9 @@ export default function VenueWinePage() {
         String(item.wine_id),
         item,
       ])
+    );
+    const valuationMap = new Map(
+      valuationData.map((item) => [String(item.wine_id), item])
     );
 
     const {
@@ -221,6 +240,7 @@ export default function VenueWinePage() {
         const menuItem = itemMap.get(
           String(inventory.wine_id)
         );
+        const valuation = valuationMap.get(String(inventory.wine_id));
 
         return {
           wineId: inventory.wine_id,
@@ -266,6 +286,11 @@ export default function VenueWinePage() {
               : null,
 
           description: menuItem?.description || "",
+
+          averagePurchaseCost: valuation?.unit_inventory_cost ?? null,
+          compucashSalePriceNet: valuation?.unit_sale_price_net ?? null,
+          compucashSalePriceGross: valuation?.unit_sale_price_gross ?? null,
+          compucashVatPercent: valuation?.vat_percent ?? null,
         };
       })
       .sort((a, b) =>
@@ -827,6 +852,18 @@ export default function VenueWinePage() {
 
   const bottleFormats = useMemo(() => summarizeBottleFormats(rows), [rows]);
 
+  const commercialSummary = useMemo(
+    () => summarizeInventoryValuation({
+      inventoryRows: rows.map((row) => ({
+        wine_id: row.wineId,
+        location_id: locationId,
+        quantity: row.stock,
+      })),
+      valuationRows: inventoryValuations,
+    }),
+    [inventoryValuations, locationId, rows]
+  );
+
   const filteredRows = useMemo(() => {
     const query = search.toLowerCase().trim();
 
@@ -926,9 +963,9 @@ export default function VenueWinePage() {
       ]
     : [
         ["Available wines", stats.available, "CompuCash stock above zero"],
-        ["Wine / total units", `${formatQuantity(stats.inventoryFamilies.wine.positive)} / ${formatQuantity(stats.inventoryFamilies.total.positive)}`, "Wine excludes sake and alcohol-free"],
+        ["Physical units", formatQuantity(stats.inventoryFamilies.total.positive), "Includes wine, sake and alcohol-free"],
         ["By the glass", stats.byTheGlass, stats.missingGlassPrice ? `${stats.missingGlassPrice} missing glass prices` : "Glass prices complete"],
-        ["Guest actions", stats.guestActions, stats.guestActions ? `${stats.pricingIssues} pricing · ${stats.btgSignals} BTG` : "Service setup complete"],
+        ["Low-stock wines", stats.lowStock, "Two physical units or fewer"],
       ];
 
   return (
@@ -1038,20 +1075,73 @@ export default function VenueWinePage() {
           ))}
         </section>
 
-        <section className="venue-format-summary" aria-label="Inventory by bottle format">
-          {Object.entries(BOTTLE_FORMATS).map(([key, format]) => (
-            <div key={key} className={key === "unknown" && bottleFormats[key] > 0 ? "needs-review" : ""}>
-              <span>{format.label}</span>
-              <strong>{formatQuantity(bottleFormats[key])}</strong>
-              <small>{format.detail}</small>
+        <details className="venue-insights-panel">
+          <summary>
+            <div className="venue-insights-title">
+              <span>Inventory intelligence</span>
+              <strong>Commercial &amp; stock insights</strong>
+              <small>Average cost, revenue coverage and bottle formats</small>
             </div>
-          ))}
-          <div>
-            <span>Fractional / open</span>
-            <strong>{formatQuantity(bottleFormats.fractional)}</strong>
-            <small>Included in format totals</small>
+            <div className="venue-insights-glance" aria-hidden="true">
+              {inventoryValuations.length > 0 && (
+                <span><small>Average cost value</small>€{Math.round(commercialSummary.inventoryCost).toLocaleString()}</span>
+              )}
+              <span><small>Standard bottles</small>{formatQuantity(bottleFormats.standard)}</span>
+              <i>⌄</i>
+            </div>
+          </summary>
+
+          <div className="venue-insights-content">
+            {inventoryValuations.length > 0 && (
+              <section className="venue-commercial-overview" aria-label="Administrator commercial overview">
+                <div className="venue-commercial-heading">
+                  <div>
+                    <span>Administrator view · Compucash</span>
+                    <h2>Commercial overview</h2>
+                  </div>
+                  <p>Average purchase cost and revenue potential for this location’s current physical stock.</p>
+                </div>
+                <div className="venue-commercial-metrics">
+                  <div title="Current stock multiplied by Compucash average purchase cost">
+                    <span>Inventory at average cost</span>
+                    <strong>€{Math.round(commercialSummary.inventoryCost).toLocaleString()}</strong>
+                    <small>{commercialSummary.costCoverage.toFixed(1)}% cost coverage</small>
+                  </div>
+                  <div title="Current stock multiplied by the default Compucash selling price excluding VAT">
+                    <span>Potential net revenue</span>
+                    <strong>€{Math.round(commercialSummary.potentialRevenueNet).toLocaleString()}</strong>
+                    <small>€{Math.round(commercialSummary.potentialRevenueGross).toLocaleString()} including VAT</small>
+                  </div>
+                  <div title="Comparable net revenue minus average purchase cost">
+                    <span>Potential gross profit</span>
+                    <strong>€{Math.round(commercialSummary.potentialGrossProfit).toLocaleString()}</strong>
+                    <small>{commercialSummary.potentialMargin.toFixed(1)}% margin on priced stock</small>
+                  </div>
+                  <div className={commercialSummary.saleCoverage < 90 ? "needs-coverage" : ""}>
+                    <span>Selling-price coverage</span>
+                    <strong>{commercialSummary.saleCoverage.toFixed(1)}%</strong>
+                    <small>{commercialSummary.saleCoverage < 90 ? "Revenue estimate is partial" : "Revenue estimate is well covered"}</small>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            <section className="venue-format-summary" aria-label="Inventory by bottle format">
+              {Object.entries(BOTTLE_FORMATS).map(([key, format]) => (
+                <div key={key} className={key === "unknown" && bottleFormats[key] > 0 ? "needs-review" : ""}>
+                  <span>{format.label}</span>
+                  <strong>{formatQuantity(bottleFormats[key])}</strong>
+                  <small>{format.detail}</small>
+                </div>
+              ))}
+              <div>
+                <span>Fractional / open</span>
+                <strong>{formatQuantity(bottleFormats.fractional)}</strong>
+                <small>Included in format totals</small>
+              </div>
+            </section>
           </div>
-        </section>
+        </details>
 
         {!isStorageWorkspace && (stats.guestActions > 0 || stats.lowStock > 0 || !menu) && (
           <section className="venue-attention-panel" aria-label="Venue readiness">
@@ -1060,17 +1150,9 @@ export default function VenueWinePage() {
               <h2>{stats.guestActions > 0 || !menu ? "Complete the guest setup" : "Guest service is ready"}</h2>
               <p>Guest-list setup and physical stock health are tracked separately, so the next action is always clear.</p>
             </div>
-            <div className="venue-attention-statuses">
-              <div className={stats.guestActions > 0 || !menu ? "has-warning" : "is-ready"}>
-                <span>Guest setup</span>
-                <strong>{menu ? stats.guestActions : "Menu required"}</strong>
-                <small>{menu ? `${stats.pricingIssues} pricing · ${stats.btgSignals} BTG` : "Link a guest wine menu"}</small>
-              </div>
-              <div className={stats.lowStock > 0 ? "has-warning" : "is-ready"}>
-                <span>Stock health</span>
-                <strong>{stats.lowStock}</strong>
-                <small>{stats.lowStock === 1 ? "low-stock wine" : "low-stock wines"}</small>
-              </div>
+            <div className="venue-attention-summary" aria-label="Venue action summary">
+              <span><strong>{menu ? stats.guestActions : "Menu required"}</strong> guest setup</span>
+              <span><strong>{stats.lowStock}</strong> low stock</span>
             </div>
             <div className="venue-attention-actions">
               {!menu && <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>}
@@ -1464,6 +1546,17 @@ export default function VenueWinePage() {
                         <div className="text-[10px] text-[#a29389] mt-1 max-w-[310px] truncate">
                           {[row.producer, row.vintage, row.region].filter(Boolean).join(" · ")}
                         </div>
+                        {inventoryValuations.length > 0 && row.averagePurchaseCost !== null && (
+                          <details className="venue-row-commercial">
+                            <summary>Commercial details</summary>
+                            <div>
+                              <span>Avg purchase <strong>€{Number(row.averagePurchaseCost).toFixed(2)}</strong></span>
+                              <span>Cost value <strong>€{(Number(row.averagePurchaseCost) * Number(row.stock || 0)).toFixed(2)}</strong></span>
+                              <span>Compucash net sale <strong>{row.compucashSalePriceNet == null ? "—" : `€${Number(row.compucashSalePriceNet).toFixed(2)}`}</strong></span>
+                              <span>Gross sale <strong>{row.compucashSalePriceGross == null ? "—" : `€${Number(row.compucashSalePriceGross).toFixed(2)}`}</strong></span>
+                            </div>
+                          </details>
+                        )}
                       </td>
 
                       <td className="py-3.5 px-3">

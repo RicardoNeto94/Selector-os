@@ -91,20 +91,30 @@ export async function POST(request) {
       locations,
       storeTargets: COMPUCASH_STORE_TARGETS,
     });
-    if (!rows.length) {
-      return NextResponse.json({ success: true, updated: 0, checksum });
+    let data = { updated: 0, movements: 0, processed: 0, unchanged: 0 };
+    if (rows.length) {
+      const inventoryResponse = await admin.rpc("apply_wine_inventory_reconciliation", {
+        p_rows: rows,
+      });
+      if (inventoryResponse.error) throw inventoryResponse.error;
+      data = inventoryResponse.data ?? data;
     }
-
-    const { data, error } = await admin.rpc("apply_wine_inventory_reconciliation", {
-      p_rows: rows,
+    const sourceGroupResponse = await admin.rpc("apply_compucash_wine_source_groups", {
+      p_rows: plan.wineSources,
     });
-    if (error) throw error;
+    if (sourceGroupResponse.error) throw sourceGroupResponse.error;
+    const valuationResponse = await admin.rpc("apply_compucash_inventory_valuations", {
+      p_rows: plan.valuations,
+    });
+    if (valuationResponse.error) throw valuationResponse.error;
 
     return NextResponse.json({
       success: true,
       checksum,
       submittedRows: rows.length,
       result: data ?? {},
+      sourceGroupsUpdated: sourceGroupResponse.data ?? 0,
+      valuationsUpdated: valuationResponse.data ?? 0,
     });
   } catch (error) {
     console.error("COMPUCASH SYNC ERROR:", error);

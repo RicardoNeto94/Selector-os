@@ -19,6 +19,7 @@ import {
 
 
 import { createClient } from "@/lib/supabase/client";
+import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { BOTTLE_FORMATS, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
 import "./wine-cellar.css";
 /* =======================================================
@@ -132,6 +133,39 @@ async function loadAllActiveWines(supabase) {
   }
 }
 
+async function loadAllInventoryValuations(supabase) {
+  const rows = [];
+  const pageSize = 1000;
+
+  for (let from = 0; ; from += pageSize) {
+    const result = await supabase
+      .from("wine_inventory_valuations")
+      .select(`
+        wine_id,
+        location_id,
+        quantity_snapshot,
+        cost_covered_quantity,
+        unit_inventory_cost,
+        inventory_cost_value,
+        unit_sale_price_gross,
+        unit_sale_price_net,
+        vat_percent,
+        sale_price_group_id,
+        currency_code,
+        cost_basis,
+        source_updated_at
+      `)
+      .eq("source", "compucash")
+      .range(from, from + pageSize - 1);
+
+    if (result.error) return result;
+    rows.push(...(result.data || []));
+    if ((result.data || []).length < pageSize) {
+      return { data: rows, error: null };
+    }
+  }
+}
+
 /* =======================================================
    KPI CARD
 ======================================================= */
@@ -209,6 +243,9 @@ export default function WinesPage() {
   const [movements, setMovements] =
     useState([]);
 
+  const [inventoryValuations, setInventoryValuations] =
+    useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -220,6 +257,7 @@ export default function WinesPage() {
 
   const [selectedCompositionType, setSelectedCompositionType] = useState(null);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
+  const [donutRevealComplete, setDonutRevealComplete] = useState(false);
 
   const [file, setFile] =
     useState(null);
@@ -267,6 +305,7 @@ export default function WinesPage() {
       winesResult,
       locationsResult,
       movementsResult,
+      valuationsResult,
     ] = await Promise.all([
       loadAllActiveWines(supabase),
 
@@ -299,6 +338,8 @@ export default function WinesPage() {
           ascending: false,
         })
         .limit(12),
+
+      loadAllInventoryValuations(supabase),
     ]);
 
     if (winesResult.error) {
@@ -322,6 +363,13 @@ export default function WinesPage() {
       );
     }
 
+    if (valuationsResult.error) {
+      console.error(
+        "INVENTORY VALUATIONS ERROR:",
+        valuationsResult.error
+      );
+    }
+
     const mappedWines = (
       winesResult.data || []
     ).map((wine) => {
@@ -339,7 +387,7 @@ export default function WinesPage() {
       };
     });
 
-    setWines(mappedWines);
+    setWines(mappedWines.filter((wine) => Number(wine.stock || 0) > 0));
 
     setLocations(
       locationsResult.data || []
@@ -347,6 +395,10 @@ export default function WinesPage() {
 
     setMovements(
       movementsResult.data || []
+    );
+
+    setInventoryValuations(
+      valuationsResult.data || []
     );
 
     setLoading(false);
@@ -408,17 +460,17 @@ export default function WinesPage() {
     ).length;
   }, [wines]);
 
-  const cellarValue = useMemo(() => {
-    return wines.reduce(
-      (sum, wine) =>
-        sum +
-        (
-          Number(wine.stock || 0) *
-          Number(wine.price || 0)
-        ),
-      0
-    );
-  }, [wines]);
+  const valuationSummary = useMemo(() => {
+    return summarizeInventoryValuation({
+      inventoryRows: wines.flatMap((wine) =>
+        (wine.inventory || []).map((inventory) => ({
+          ...inventory,
+          wine_id: wine.id,
+        }))
+      ),
+      valuationRows: inventoryValuations,
+    });
+  }, [inventoryValuations, wines]);
 
   const bottleFormats = useMemo(
     () => summarizeBottleFormats(
@@ -554,16 +606,20 @@ export default function WinesPage() {
     });
   }, [wineComposition]);
 
+  useEffect(() => {
+    if (!compositionSegments.length) return undefined;
+
+    setDonutRevealComplete(false);
+    const revealTimer = window.setTimeout(() => {
+      setDonutRevealComplete(true);
+    }, 1300);
+
+    return () => window.clearTimeout(revealTimer);
+  }, [compositionSegments]);
+
   /* =====================================================
      ATTENTION
   ===================================================== */
-
-  const zeroStockWines = useMemo(() => {
-    return wines.filter(
-      (wine) =>
-        Number(wine.stock || 0) === 0
-    );
-  }, [wines]);
 
   const lowStockWines = useMemo(() => {
     return wines.filter((wine) => {
@@ -1173,13 +1229,26 @@ export default function WinesPage() {
         <div className="wine-portfolio-primary">
           <span>Total physical units</span>
           <strong>{formatNumber(inventoryFamilies.total.positive)}</strong>
-          <small>Wine {formatNumber(inventoryFamilies.wine.positive)} · Sake & shochu {formatNumber(inventoryFamilies.sake.positive)} · Other {formatNumber(inventoryFamilies.nonAlcoholic.positive + inventoryFamilies.other.positive)}</small>
+          <small>{formatNumber(uniqueWines)} active labels with positive physical stock</small>
         </div>
 
-        <div className="wine-portfolio-facts">
-          <div><strong>{formatNumber(uniqueWines)}</strong><span>available wines</span></div>
-          <div><strong>€{formatCurrency(cellarValue)}</strong><span>estimated value</span></div>
-          <div><strong>{formatNumber(zeroStockWines.length)}</strong><span>need ordering</span></div>
+        <div className="wine-portfolio-facts" aria-label="Compucash inventory valuation">
+          <div title="Current stock multiplied by Compucash StoreQuantity.storagePrice">
+            <strong>€{formatCurrency(valuationSummary.inventoryCost)}</strong>
+            <span>average purchase cost · {formatNumber(valuationSummary.costCoverage)}% covered</span>
+          </div>
+          <div title="Current stock multiplied by the default Compucash sale price excluding VAT">
+            <strong>€{formatCurrency(valuationSummary.potentialRevenueNet)}</strong>
+            <span>potential net revenue · {formatNumber(valuationSummary.saleCoverage)}% covered</span>
+          </div>
+          <div title={`Potential gross guest revenue €${formatCurrency(valuationSummary.potentialRevenueGross)}`}>
+            <strong>€{formatCurrency(valuationSummary.potentialGrossProfit)}</strong>
+            <span>potential gross profit</span>
+          </div>
+          <div title="Potential gross profit divided by comparable net revenue">
+            <strong>{formatNumber(valuationSummary.potentialMargin)}%</strong>
+            <span>potential margin</span>
+          </div>
         </div>
 
         <div className="wine-portfolio-formats" aria-label="Stock by bottle format">
@@ -1215,27 +1284,31 @@ export default function WinesPage() {
 
           <div className="wine-donut-layout">
             <div className="wine-donut" aria-label="Interactive wine category distribution">
-              <svg viewBox="0 0 100 100" role="group" aria-label="Select a wine category segment">
+              <svg viewBox="0 0 100 100" role="img" aria-label="Wine category distribution. Use the category list to select a segment.">
                 <circle className="wine-donut-track" cx="50" cy="50" r="40" pathLength="100" />
-                {compositionSegments.map((item) => {
-                  const isActive = selectedComposition?.type === item.type;
-                  return <circle
-                    key={item.type}
-                    className={`wine-donut-segment ${isActive ? "is-active" : "is-muted"}`}
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    pathLength="100"
-                    stroke={item.color}
-                    strokeDasharray={`${Math.max(item.percentage - .35, .15)} ${100 - Math.max(item.percentage - .35, .15)}`}
-                    strokeDashoffset={-item.start}
-                    tabIndex="0"
-                    role="button"
-                    aria-label={`${getWineTypeLabel(item.type)}, ${item.percentage.toFixed(1)} percent`}
-                    onClick={() => setSelectedCompositionType(item.type)}
-                    onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedCompositionType(item.type); } }}
-                  />;
-                })}
+                <defs>
+                  <mask id="wine-donut-reveal-mask" maskUnits="userSpaceOnUse">
+                    <circle className="wine-donut-reveal" cx="50" cy="50" r="40" pathLength="100" />
+                  </mask>
+                </defs>
+                <g mask={donutRevealComplete ? undefined : "url(#wine-donut-reveal-mask)"}>
+                  {compositionSegments.map((item) => {
+                    const isActive = selectedComposition?.type === item.type;
+                    return <circle
+                      key={item.type}
+                      className={`wine-donut-segment ${isActive ? "is-active" : "is-muted"}`}
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      pathLength="100"
+                      stroke={item.color}
+                      strokeDasharray={`${Math.max(item.percentage - .35, .15)} ${100 - Math.max(item.percentage - .35, .15)}`}
+                      strokeDashoffset={-item.start}
+                      aria-hidden="true"
+                      onClick={() => setSelectedCompositionType(item.type)}
+                    />;
+                  })}
+                </g>
               </svg>
               <span key={selectedComposition?.type || "empty"} className="wine-donut-center">
                 <small>{selectedComposition ? getWineTypeLabel(selectedComposition.type) : "Cellar"}</small>
@@ -1310,7 +1383,6 @@ export default function WinesPage() {
             <strong>Review what needs attention</strong>
           </div>
           <div className="wine-secondary-counts">
-            <span><strong>{formatNumber(zeroStockWines.length)}</strong> ordering</span>
             <span><strong>{formatNumber(lowStockWines.length)}</strong> low stock</span>
             <span><strong>{formatNumber(highValueLowStock.length)}</strong> high value</span>
             <em>Open details</em>
@@ -1705,63 +1777,10 @@ export default function WinesPage() {
           className="
             grid
             grid-cols-1
-            md:grid-cols-3
+            md:grid-cols-2
             gap-4
           "
         >
-          <button
-            onClick={() =>
-              router.push(
-                "/dashboard/wine-cellar/inventory?stock=out"
-              )
-            }
-            className="
-              text-left
-              bg-[#faf7f3]
-              border
-              border-[#eee4db]
-              rounded-[20px]
-              p-5
-              transition-all
-              hover:-translate-y-[1px]
-            "
-          >
-            <div
-              className="
-                text-[9px]
-                uppercase
-                tracking-[0.18em]
-                text-[#91a1ba]
-              "
-            >
-              Needs Ordering
-            </div>
-
-            <div
-              className="
-                mt-3
-                text-[27px]
-                font-medium
-                text-[#30231f]
-              "
-            >
-              {formatNumber(
-                zeroStockWines.length
-              )}
-            </div>
-
-            <div
-              className="
-                mt-2
-                text-[10px]
-                text-[#9b8d85]
-              "
-            >
-              Wines held separately because
-              physical stock is zero
-            </div>
-          </button>
-
           <button
             onClick={() =>
               router.push(
