@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { BOTTLE_FORMATS, fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity, summarizeBottleFormats } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
 import "../venue-wines.css";
 
 function formatQuantity(value) {
@@ -753,6 +753,7 @@ export default function VenueWinePage() {
       (total, row) => total + Number(row.stock || 0),
       0
     );
+    const inventoryFamilies = summarizeInventoryFamilies(rows, (row) => row.stock);
 
     const guestLive = rows.filter(
       (row) => row.guestVisible
@@ -798,6 +799,7 @@ export default function VenueWinePage() {
     return {
       available,
       totalBottles,
+      inventoryFamilies,
       guestLive,
       byTheGlass,
       lowStock,
@@ -917,14 +919,14 @@ export default function VenueWinePage() {
       ];
   const kpis = isStorageWorkspace
     ? [
-        ["Physical bottles", formatQuantity(stats.totalBottles), "Authoritative stock"],
-        ["Unique wines", stats.available, "With stock above zero"],
+        ["Wine bottles", formatQuantity(stats.inventoryFamilies.wine.positive), "Excludes sake and alcohol-free"],
+        ["Total physical units", formatQuantity(stats.inventoryFamilies.total.positive), "All positive Compucash stock"],
         ["Low-stock lines", stats.lowStock, "Two bottles or fewer"],
         ["Source stores", storeMappings.length, "CompuCash mappings"],
       ]
     : [
         ["Available wines", stats.available, "CompuCash stock above zero"],
-        ["On guest list", stats.guestLive, `${stats.available ? Math.round((stats.guestLive / stats.available) * 100) : 0}% of available wines`],
+        ["Wine / total units", `${formatQuantity(stats.inventoryFamilies.wine.positive)} / ${formatQuantity(stats.inventoryFamilies.total.positive)}`, "Wine excludes sake and alcohol-free"],
         ["By the glass", stats.byTheGlass, stats.missingGlassPrice ? `${stats.missingGlassPrice} missing glass prices` : "Glass prices complete"],
         ["Guest actions", stats.guestActions, stats.guestActions ? `${stats.pricingIssues} pricing · ${stats.btgSignals} BTG` : "Service setup complete"],
       ];

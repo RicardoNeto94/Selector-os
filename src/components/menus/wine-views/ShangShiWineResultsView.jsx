@@ -3,6 +3,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -25,6 +26,23 @@ function formatPrice(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
+}
+
+function hasPositivePrice(value) {
+  return Number.isFinite(Number(value)) && Number(value) > 0;
+}
+
+function normalizeServings(servings) {
+  return (Array.isArray(servings) ? servings : [])
+    .map((serving) => ({
+      ...serving,
+      serving_cl: Number(serving.serving_cl),
+      price: serving.price === null || serving.price === undefined
+        ? null
+        : Number(serving.price),
+    }))
+    .filter((serving) => hasPositivePrice(serving.price))
+    .sort((a, b) => Number(a.serving_cl || 0) - Number(b.serving_cl || 0));
 }
 
 function getWine(item) {
@@ -101,7 +119,9 @@ function getWine(item) {
       item.price_override !== null &&
       item.price_override !== undefined
         ? Number(item.price_override)
-        : Number(rawWine.price || 0),
+        : rawWine.price !== null && rawWine.price !== undefined
+          ? Number(rawWine.price)
+          : null,
 
     service_type:
       item.service_type ||
@@ -112,6 +132,8 @@ function getWine(item) {
       item.glass_price !== undefined
         ? Number(item.glass_price)
         : null,
+
+    servings: normalizeServings(item.servings),
   };
 }
 
@@ -131,6 +153,28 @@ function isByTheGlass(wine) {
     wine?.service_type === "glass" ||
     wine?.service_type === "both"
   );
+}
+
+function glassOffers(wine) {
+  if (!isByTheGlass(wine)) {
+    return [];
+  }
+
+  if (wine.servings?.length > 0) {
+    return wine.servings;
+  }
+
+  return hasPositivePrice(wine.glass_price)
+    ? [{ id: `${wine.id}-glass`, serving_cl: null, price: Number(wine.glass_price) }]
+    : [];
+}
+
+function hasBottleOffer(wine) {
+  return wine?.service_type !== "glass" && hasPositivePrice(wine?.price);
+}
+
+function hasGuestOffer(wine) {
+  return hasBottleOffer(wine) || glassOffers(wine).length > 0;
 }
 
 function includesSearch(wine, search) {
@@ -163,16 +207,18 @@ function matchesPriceRange(
     return true;
   }
 
-  const useGlassPrice =
-    serviceType === "glass" &&
-    isByTheGlass(wine);
+  const candidatePrices = serviceType === "glass"
+    ? glassOffers(wine).map((serving) => Number(serving.price))
+    : hasBottleOffer(wine)
+      ? [Number(wine.price)]
+      : glassOffers(wine).map((serving) => Number(serving.price));
 
-  const price = useGlassPrice
-    ? Number(wine.glass_price || 0)
-    : Number(wine.price || 0);
+  const price = candidatePrices.length > 0
+    ? Math.min(...candidatePrices)
+    : 0;
 
   if (priceFilter === "0-50") {
-    return price >= 0 && price <= 50;
+    return price > 0 && price <= 50;
   }
 
   if (priceFilter === "50-100") {
@@ -243,6 +289,7 @@ export default function ShangShiWineResultsView({
   menu,
   items = [],
   filters = {},
+  isOnline = true,
   onBack,
 }) {
   const [localFilters, setLocalFilters] =
@@ -263,12 +310,25 @@ export default function ShangShiWineResultsView({
   const [selectedWine, setSelectedWine] =
     useState(null);
 
+  const scrollRef = useRef(null);
+  const detailScrollRef = useRef(null);
+
   useEffect(() => {
     setLocalFilters({
       ...EMPTY_FILTERS,
       ...(filters || {}),
     });
   }, [filters]);
+
+  useEffect(() => {
+    if (!selectedWine) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      detailScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+  }, [selectedWine]);
 
   /* =====================================================
      NORMALIZED WINE ROWS
@@ -279,7 +339,7 @@ export default function ShangShiWineResultsView({
       .map((item, index) => {
         const wine = getWine(item);
 
-        if (!wine) {
+        if (!wine || !hasGuestOffer(wine)) {
           return null;
         }
 
@@ -485,6 +545,22 @@ export default function ShangShiWineResultsView({
     visibleCategories,
   ]);
 
+  const categoryCounts = useMemo(() => {
+    const counts = new Map();
+
+    wineRows.forEach(({ wine }) => {
+      const key = normalizeLower(wine.wine_type);
+      if (key) counts.set(key, (counts.get(key) || 0) + 1);
+    });
+
+    return counts;
+  }, [wineRows]);
+
+  const byTheGlassCount = useMemo(
+    () => wineRows.filter(({ wine }) => glassOffers(wine).length > 0).length,
+    [wineRows]
+  );
+
   /* =====================================================
      FILTERED RESULTS
   ===================================================== */
@@ -496,7 +572,7 @@ export default function ShangShiWineResultsView({
         (
           localFilters.service_type ===
             "glass" &&
-          isByTheGlass(wine)
+          glassOffers(wine).length > 0
         );
 
       const matchesGrape =
@@ -552,15 +628,19 @@ export default function ShangShiWineResultsView({
 
       const priceA =
         localFilters.service_type === "glass" &&
-        isByTheGlass(wineA)
-          ? Number(wineA.glass_price || 0)
-          : Number(wineA.price || 0);
+        glassOffers(wineA).length > 0
+          ? Number(glassOffers(wineA)[0].price)
+          : hasBottleOffer(wineA)
+            ? Number(wineA.price)
+            : Number(glassOffers(wineA)[0]?.price || Number.MAX_SAFE_INTEGER);
 
       const priceB =
         localFilters.service_type === "glass" &&
-        isByTheGlass(wineB)
-          ? Number(wineB.glass_price || 0)
-          : Number(wineB.price || 0);
+        glassOffers(wineB).length > 0
+          ? Number(glassOffers(wineB)[0].price)
+          : hasBottleOffer(wineB)
+            ? Number(wineB.price)
+            : Number(glassOffers(wineB)[0]?.price || Number.MAX_SAFE_INTEGER);
 
       return priceA - priceB;
     })
@@ -603,6 +683,8 @@ export default function ShangShiWineResultsView({
       wine_type: category,
       service_type: "",
     }));
+
+    requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }));
   }
 
   function selectByTheGlass() {
@@ -614,6 +696,8 @@ export default function ShangShiWineResultsView({
       wine_type: "",
       service_type: "glass",
     }));
+
+    requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }));
   }
 
   function clearAllFilters() {
@@ -627,16 +711,13 @@ export default function ShangShiWineResultsView({
   ===================================================== */
 
   if (selectedWine) {
-    const showBottlePrice =
-      selectedWine.service_type !==
-      "glass";
+    const showBottlePrice = hasBottleOffer(selectedWine);
 
-    const showGlassPrice =
-      isByTheGlass(selectedWine) &&
-      selectedWine.glass_price !== null;
+    const selectedGlassOffers = glassOffers(selectedWine);
 
     return (
       <div
+        ref={detailScrollRef}
         className="
           fixed
           inset-0
@@ -856,7 +937,7 @@ export default function ShangShiWineResultsView({
                     <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#C9A96A]/42">
                       {selectedWine.bottle_size
                         ? `${selectedWine.bottle_size}`
-                        : "75 cl"}
+                        : "Bottle service"}
                     </div>
                   </div>
 
@@ -869,26 +950,17 @@ export default function ShangShiWineResultsView({
                 </div>
               )}
 
-              {showGlassPrice && (
-                <div className="flex min-h-[58px] items-center justify-between gap-6 py-4">
+              {selectedGlassOffers.map((serving) => (
+                <div key={serving.id || `${serving.serving_cl}-${serving.price}`} className="flex min-h-[58px] items-center justify-between gap-6 border-b border-[#C9A96A]/10 py-5 last:border-b-0">
                   <div>
-                    <div className="text-[15px] text-[#E7DDC9]/78">
-                      By the glass
-                    </div>
-
+                    <div className="text-[15px] text-[#E7DDC9]/78">By the glass</div>
                     <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#C9A96A]/42">
-                      Glass serving
+                      {serving.serving_cl ? `${formatPrice(serving.serving_cl)} cl serving` : "Glass serving"}
                     </div>
                   </div>
-
-                  <div className="font-serif text-[30px] font-light text-[#E3C588]">
-                    €
-                    {formatPrice(
-                      selectedWine.glass_price
-                    )}
-                  </div>
+                  <div className="font-serif text-[30px] font-light text-[#E3C588]">€{formatPrice(serving.price)}</div>
                 </div>
-              )}
+              ))}
             </section>
           </article>
         </div>
@@ -902,6 +974,7 @@ export default function ShangShiWineResultsView({
 
   return (
     <div
+      ref={scrollRef}
       className="
         h-[100dvh]
         overflow-y-auto
@@ -927,9 +1000,13 @@ export default function ShangShiWineResultsView({
           "contain",
         touchAction: "pan-y",
         scrollbarWidth: "none",
+        paddingTop: "env(safe-area-inset-top)",
+        paddingRight: "env(safe-area-inset-right)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
       }}
     >
-      <div className="mx-auto min-h-full w-full max-w-[1080px] px-6 pb-24 pt-5 sm:px-30 lg:px-14">
+      <div className="mx-auto min-h-full w-full max-w-[1080px] px-6 pb-24 pt-5 sm:px-10 lg:px-14">
         {/* AMAN-STYLE HEADER */}
 
         <header className="mb-6">
@@ -991,6 +1068,15 @@ export default function ShangShiWineResultsView({
                 "
               >
                 Wine Collection
+              </div>
+
+              <div
+                className={`mt-2 text-[8px] uppercase tracking-[0.18em] ${
+                  isOnline ? "text-[#D8B873]/45" : "text-[#F0B88D]"
+                }`}
+                aria-live="polite"
+              >
+                {isOnline ? "Live cellar" : "Connection interrupted"}
               </div>
             </div>
 
@@ -1173,13 +1259,15 @@ export default function ShangShiWineResultsView({
 
         <nav
           className="
-            relative
+            sticky
+            top-0
             z-40
             -mx-6
             border-b
             border-[#C9A96A]/[0.08]
-            bg-transparent
+            bg-[#00251b]/90
             px-5
+            backdrop-blur-xl
             
             sm:-mx-10
             sm:px-7
@@ -1192,7 +1280,7 @@ export default function ShangShiWineResultsView({
               flex
               min-h-[62px]
               items-center
-              gap-10
+              gap-7
               overflow-x-auto
               whitespace-nowrap
               [scrollbar-width:none]
@@ -1222,6 +1310,9 @@ export default function ShangShiWineResultsView({
               `}
             >
               All wines
+              <span className="ml-2 text-[9px] tracking-normal opacity-45">
+                {wineRows.length}
+              </span>
 
               {!activeWineType &&
                 !localFilters.service_type && (
@@ -1250,6 +1341,9 @@ export default function ShangShiWineResultsView({
               `}
             >
               By the glass
+              <span className="ml-2 text-[9px] tracking-normal opacity-45">
+                {byTheGlassCount}
+              </span>
 
               {localFilters.service_type ===
                 "glass" && (
@@ -1289,6 +1383,9 @@ export default function ShangShiWineResultsView({
                   `}
                 >
                   {displayWineType(category)}
+                  <span className="ml-2 text-[9px] tracking-normal opacity-45">
+                    {categoryCounts.get(normalizeLower(category)) || 0}
+                  </span>
 
                   {active && (
                     <span className="absolute inset-x-0 bottom-0 h-px bg-[#E3C588]" />
@@ -1328,7 +1425,7 @@ export default function ShangShiWineResultsView({
                   }
                 `}
               >
-                More
+                More styles
                 <span className="text-[13px] opacity-60">
                   {moreOpen ? "⌃" : "⌄"}
                 </span>
@@ -1446,12 +1543,10 @@ export default function ShangShiWineResultsView({
               return null;
             }
 
-            const byTheGlass =
-              isByTheGlass(wine);
+            const wineGlassOffers = glassOffers(wine);
+            const byTheGlass = wineGlassOffers.length > 0;
 
-            const showBottlePrice =
-              wine.service_type !==
-              "glass";
+            const showBottlePrice = hasBottleOffer(wine);
 
             const rowKey =
               item.id ||
@@ -1464,6 +1559,7 @@ export default function ShangShiWineResultsView({
                   border-b
                   border-[#C9A96A]/[0.09]
                 "
+                style={{ contentVisibility: "auto", containIntrinsicSize: "92px" }}
               >
                 <button
                   type="button"
@@ -1593,44 +1689,14 @@ export default function ShangShiWineResultsView({
                         </div>
                       )}
 
-                      {byTheGlass &&
-                        wine.glass_price !==
-                          null && (
-                          <div
-                            className={
-                              wine.service_type ===
-                              "both"
-                                ? "mt-3"
-                                : ""
-                            }
-                          >
-                            <div
-                              className="
-                                font-serif
-                                text-[21px]
-                                font-light
-                                text-[#E3C588]
-                              "
-                            >
-                              €
-                              {formatPrice(
-                                wine.glass_price
-                              )}
-                            </div>
-
-                            <div
-                              className="
-                                mt-1
-                                text-[8px]
-                                uppercase
-                                tracking-[0.16em]
-                                text-[#C9A96A]/38
-                              "
-                            >
-                              Glass
-                            </div>
+                      {byTheGlass && wineGlassOffers.map((serving, index) => (
+                        <div key={serving.id || `${serving.serving_cl}-${serving.price}`} className={showBottlePrice || index > 0 ? "mt-3" : ""}>
+                          <div className="font-serif text-[21px] font-light text-[#E3C588]">€{formatPrice(serving.price)}</div>
+                          <div className="mt-1 text-[8px] uppercase tracking-[0.16em] text-[#C9A96A]/38">
+                            {serving.serving_cl ? `${formatPrice(serving.serving_cl)} cl` : "Glass"}
                           </div>
-                        )}
+                        </div>
+                      ))}
                     </div>
 
 

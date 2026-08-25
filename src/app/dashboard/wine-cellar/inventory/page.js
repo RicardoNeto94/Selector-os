@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowPathIcon, CheckCircleIcon, ChevronDownIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { BOTTLE_FORMATS, bottleFormatForWine, bottleQuantity, fetchAllQueryRows, parseBottleSizeCl, positiveBottleQuantity, summarizeBottleFormats } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, bottleFormatForWine, bottleQuantity, fetchAllQueryRows, parseBottleSizeCl, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
 import "./inventory.css";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +62,7 @@ export default function WineInventoryPage() {
     return Array.from(map.values());
   }, [inventory]);
   const metrics = useMemo(() => ({ positiveUnits: wines.reduce((sum, wine) => sum + wine.stock, 0), available: wines.filter((wine) => wine.stock > 0).length, low: wines.filter((wine) => wine.stock > 0 && wine.stock <= 2).length, out: wines.filter((wine) => wine.stock <= 0).length, negative: inventory.filter((row) => bottleQuantity(row.quantity) < 0).length, value: wines.reduce((sum, wine) => sum + wine.stock * number(wine.price), 0) }), [wines, inventory]);
+  const inventoryFamilies = useMemo(() => summarizeInventoryFamilies(inventory, (row) => row.quantity), [inventory]);
   const bottleFormats = useMemo(() => summarizeBottleFormats(inventory, (row) => row.quantity), [inventory]);
   const filteredWines = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -91,7 +92,7 @@ export default function WineInventoryPage() {
 
     <section className={`mt-5 flex flex-col gap-3 rounded-[18px] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${syncHealthy ? "border-[#d5dfcf] bg-[#eff4ec]" : "border-[#ead2c4] bg-[#f8ebe3]"}`}><div className="flex items-center gap-3">{syncHealthy ? <CheckCircleIcon className="h-5 w-5 text-[#647c5c]" /> : <ExclamationTriangleIcon className="h-5 w-5 text-[#a95836]" />}<div><div className="text-[10px] font-medium">{syncHealthy ? "Compucash inventory is connected" : "Compucash sync needs attention"}</div><div className="mt-0.5 text-[9px] text-[#7f7066]">Last completed {syncDate(latestSync?.completed_at)}</div></div></div><div className="text-[9px] text-[#7f7066]">{latestSync ? `${number(latestSync.products_matched).toLocaleString("en-GB")} matched · ${number(latestSync.unmatched_products).toLocaleString("en-GB")} unmatched` : "No synchronization history"}</div></section>
 
-    <section className="inventory-kpi-grid mt-5 grid grid-cols-2 overflow-hidden lg:grid-cols-5"><Kpi label="Bottles on hand" value={quantity(metrics.positiveUnits)} detail={`Positive physical stock across ${locations.length} locations`} /><Kpi label="Available wines" value={metrics.available.toLocaleString("en-GB")} detail="Every wine with stock above zero" active={stockFilter === "available"} onClick={() => setStockFilter("available")} tone="good" /><Kpi label="Low stock" value={metrics.low.toLocaleString("en-GB")} detail="Positive balance of 2 bottles or less" active={stockFilter === "low"} onClick={() => setStockFilter("low")} tone="warning" /><Kpi label="Needs ordering" value={metrics.out.toLocaleString("en-GB")} detail={metrics.negative ? `${metrics.negative} negative balances also need review` : "Held outside the available inventory"} active={stockFilter === "out"} onClick={() => setStockFilter("out")} tone="warning" /><Kpi label="Available value" value={money(metrics.value)} detail="Positive stock only" /></section>
+    <section className="inventory-kpi-grid mt-5 grid grid-cols-2 overflow-hidden lg:grid-cols-5"><Kpi label="Total physical units" value={quantity(inventoryFamilies.total.positive)} detail={`All positive Compucash balances across ${locations.length} locations`} /><Kpi label="Wine bottles" value={quantity(inventoryFamilies.wine.positive)} detail="Wine only · excludes sake and alcohol-free" /><Kpi label="Sake & shochu" value={quantity(inventoryFamilies.sake.positive)} detail="Physical sake and shochu units" /><Kpi label="Available labels" value={metrics.available.toLocaleString("en-GB")} detail="Every product with stock above zero" active={stockFilter === "available"} onClick={() => setStockFilter("available")} tone="good" /><Kpi label="Needs ordering" value={metrics.out.toLocaleString("en-GB")} detail={metrics.negative ? `${metrics.negative} negative balances also need review` : "Held outside the available inventory"} active={stockFilter === "out"} onClick={() => setStockFilter("out")} tone="warning" /></section>
 
     <section className="inventory-format-grid mt-4" aria-label="Stock by bottle format">
       {Object.entries(BOTTLE_FORMATS).map(([key, format]) => <button type="button" key={key} onClick={() => setSelectedFormat((current) => current === key ? "all" : key)} className={`${key === "unknown" && bottleFormats[key] > 0 ? "needs-review" : ""} ${selectedFormat === key ? "is-active" : ""}`}><span>{format.label}</span><strong>{quantity(bottleFormats[key])}</strong><small>{format.detail}</small></button>)}

@@ -11,6 +11,14 @@ export const metadata = {
   description:
     "VAXERON unifies guest experience, wine programmes, inventory, and operational workflows into one connected platform for modern hospitality.",
 
+  manifest: "/manifest.json",
+
+  appleWebApp: {
+    capable: true,
+    title: "VAXERON",
+    statusBarStyle: "default",
+  },
+
   icons: {
     icon: "/favicon.ico",
     apple: "/burman-icon.png",
@@ -49,16 +57,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>
-        <link rel="manifest" href="/manifest.json" />
-
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="VAXERON" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-        <link rel="apple-touch-icon" href="/icon-192.png" />
-        <link rel="icon" href="/favicon.ico" />
       </head>
 
       <body>

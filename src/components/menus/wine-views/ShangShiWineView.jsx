@@ -1,7 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import WineResultsView from "./ShangShiWineResultsView";
+
+const EMPTY_FILTERS = {
+  wine_type: "",
+  country: "",
+  region: "",
+  vintage: "",
+  grapes: "",
+  price: "",
+  service_type: "",
+};
+
+const SHARED_IPAD_IDLE_TIMEOUT = 5 * 60 * 1000;
 
 function getWine(item) {
   if (Array.isArray(item?.wines)) {
@@ -15,19 +27,19 @@ function normalize(str) {
   return String(str || "").trim();
 }
 
+function hasPositivePrice(value) {
+  return Number.isFinite(Number(value)) && Number(value) > 0;
+}
+
+function isGlassService(serviceType) {
+  return serviceType === "glass" || serviceType === "both";
+}
+
 export default function ShangShiWineView({
   menu,
   items,
 }) {
-  const [filters, setFilters] = useState({
-    wine_type: "",
-    country: "",
-    region: "",
-    vintage: "",
-    grapes: "",
-    price: "",
-    service_type: "",
-  });
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
 
   const [showResults, setShowResults] =
     useState(false);
@@ -38,6 +50,51 @@ export default function ShangShiWineView({
   const [transitioning, setTransitioning] =
     useState(false);
 
+  const [isOnline, setIsOnline] = useState(true);
+  const idleTimerRef = useRef(null);
+
+  useEffect(() => {
+    const updateConnection = () => setIsOnline(window.navigator.onLine);
+    updateConnection();
+    window.addEventListener("online", updateConnection);
+    window.addEventListener("offline", updateConnection);
+
+    return () => {
+      window.removeEventListener("online", updateConnection);
+      window.removeEventListener("offline", updateConnection);
+    };
+  }, []);
+
+  useEffect(() => {
+    const returnToWelcome = () => {
+      setShowAdvanced(false);
+      setShowResults(false);
+      setTransitioning(false);
+      setFilters({ ...EMPTY_FILTERS });
+    };
+
+    const resetIdleTimer = () => {
+      window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = window.setTimeout(
+        returnToWelcome,
+        SHARED_IPAD_IDLE_TIMEOUT
+      );
+    };
+
+    const activityEvents = ["pointerdown", "touchstart", "keydown"];
+    activityEvents.forEach((eventName) =>
+      window.addEventListener(eventName, resetIdleTimer, { passive: true })
+    );
+    resetIdleTimer();
+
+    return () => {
+      window.clearTimeout(idleTimerRef.current);
+      activityEvents.forEach((eventName) =>
+        window.removeEventListener(eventName, resetIdleTimer)
+      );
+    };
+  }, []);
+
   /* =======================================================
      GUEST WINE DATA
   ======================================================= */
@@ -45,12 +102,27 @@ export default function ShangShiWineView({
   const guestItems = useMemo(() => {
     return (items || []).map((item) => {
       const wine = getWine(item);
+      const serviceType = item?.service_type || "bottle";
+      const bottlePrice =
+        item?.price_override !== null && item?.price_override !== undefined
+          ? Number(item.price_override)
+          : Number(wine.price || 0);
+      const servings = Array.isArray(item?.servings)
+        ? item.servings
+            .map((serving) => ({
+              ...serving,
+              serving_cl: Number(serving.serving_cl),
+              price: serving.price === null || serving.price === undefined
+                ? null
+                : Number(serving.price),
+            }))
+            .filter((serving) => hasPositivePrice(serving.price))
+        : [];
 
       return {
         ...item,
 
-        service_type:
-          item?.service_type || "bottle",
+        service_type: serviceType,
 
         glass_price:
           item?.glass_price !== null &&
@@ -58,11 +130,9 @@ export default function ShangShiWineView({
             ? Number(item.glass_price)
             : null,
 
-        price_override:
-          item?.price_override !== null &&
-          item?.price_override !== undefined
-            ? Number(item.price_override)
-            : null,
+        servings,
+
+        price_override: bottlePrice,
 
         wines: {
           ...wine,
@@ -71,9 +141,17 @@ export default function ShangShiWineView({
             item?.price_override !== null &&
             item?.price_override !== undefined
               ? Number(item.price_override)
-              : wine.price,
+              : Number(wine.price || 0),
         },
       };
+    }).filter((item) => {
+      const hasBottleOffer =
+        item.service_type !== "glass" && hasPositivePrice(item.price_override);
+      const hasGlassOffer =
+        isGlassService(item.service_type) &&
+        (hasPositivePrice(item.glass_price) || item.servings.length > 0);
+
+      return hasBottleOffer || hasGlassOffer;
     });
   }, [items]);
 
@@ -84,11 +162,41 @@ export default function ShangShiWineView({
   const byTheGlassCount = useMemo(() => {
     return guestItems.filter(
       (item) =>
-        (item.service_type === "glass" ||
-          item.service_type === "both") &&
-        item.glass_price !== null
+        isGlassService(item.service_type) &&
+        (hasPositivePrice(item.glass_price) || item.servings.length > 0)
     ).length;
   }, [guestItems]);
+
+  const matchingCount = useMemo(() => {
+    return guestItems.filter((item) => {
+      const wine = getWine(item);
+      const matchesType = !filters.wine_type || normalize(wine.wine_type).toLowerCase() === filters.wine_type.toLowerCase();
+      const matchesCountry = !filters.country || normalize(wine.country) === filters.country;
+      const matchesRegion = !filters.region || normalize(wine.region) === filters.region;
+      const matchesVintage = !filters.vintage || String(wine.vintage) === String(filters.vintage);
+      const matchesGrape = !filters.grapes || normalize(wine.grapes).toLowerCase().includes(filters.grapes.toLowerCase());
+      const matchesService = !filters.service_type || (
+        filters.service_type === "glass" &&
+        isGlassService(item.service_type) &&
+        (hasPositivePrice(item.glass_price) || item.servings.length > 0)
+      );
+
+      const glassPrices = [item.glass_price, ...item.servings.map((serving) => serving.price)]
+        .filter(hasPositivePrice)
+        .map(Number);
+      const relevantPrice = filters.service_type === "glass"
+        ? Math.min(...glassPrices)
+        : Number(item.price_override || Math.min(...glassPrices));
+      const matchesPrice = !filters.price || (
+        (filters.price === "0-50" && relevantPrice > 0 && relevantPrice <= 50) ||
+        (filters.price === "50-100" && relevantPrice > 50 && relevantPrice <= 100) ||
+        (filters.price === "100-150" && relevantPrice > 100 && relevantPrice <= 150) ||
+        (filters.price === "150+" && relevantPrice > 150)
+      );
+
+      return matchesType && matchesCountry && matchesRegion && matchesVintage && matchesGrape && matchesService && matchesPrice;
+    }).length;
+  }, [guestItems, filters]);
 
   /* =======================================================
      ADAPTIVE FILTER DATA
@@ -169,6 +277,7 @@ export default function ShangShiWineView({
         menu={menu}
         items={guestItems}
         filters={filters}
+        isOnline={isOnline}
         onBack={() => {
           setShowResults(false);
 
@@ -182,7 +291,8 @@ export default function ShangShiWineView({
 
   return (
     <div
-className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[#F3E9D2]"      style={{
+      className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[#F3E9D2]"
+      style={{
         backgroundImage: `
           linear-gradient(
             90deg,
@@ -195,6 +305,10 @@ className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        paddingTop: "env(safe-area-inset-top)",
+        paddingRight: "env(safe-area-inset-right)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
       }}
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#00140e]/20 via-[#00140e]/30 to-[#00140e]/10" />
@@ -245,10 +359,10 @@ className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[
             </p>
 
             <div className="mb-10 text-[11px] uppercase tracking-[0.28em] text-[#E3C588]/62 md:text-[12px]">
-              {guestItems.length} Wines Available
+              {matchingCount} {matchingCount === 1 ? "Wine" : "Wines"} Available
             </div>
 
-            <div className="mb-8 flex items-center justify-center gap-10 md:gap-16">
+            <div className="mb-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 md:gap-x-16">
               {["red", "white", "rose", "sparkling"].map((type) => {
                 const active = filters.wine_type === type;
 
@@ -311,7 +425,7 @@ className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[
               }}
               className="group mx-auto flex w-full max-w-[760px] items-center justify-between border border-[#E3C588]/38 bg-[#E3C588]/[0.04] px-8 py-5 text-[13px] uppercase tracking-[0.34em] text-[#E3C588] transition-all hover:border-[#E3C588]/58 hover:bg-[#E3C588]/[0.08] md:text-[14px]"
             >
-              <span>Explore the Collection</span>
+              <span>Explore {matchingCount} {matchingCount === 1 ? "Selection" : "Selections"}</span>
               <span className="text-[23px] leading-none transition-transform group-hover:translate-x-1">
                 →
               </span>
@@ -415,15 +529,7 @@ className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[
               <button
                 type="button"
                 onClick={() =>
-                  setFilters({
-                    wine_type: "",
-                    country: "",
-                    region: "",
-                    vintage: "",
-                    grapes: "",
-                    price: "",
-                    service_type: "",
-                  })
+                  setFilters({ ...EMPTY_FILTERS })
                 }
                 className="text-[11px] uppercase tracking-[0.26em] text-[#E3C588]/45 transition-colors hover:text-[#E3C588]/80"
               >
@@ -435,12 +541,23 @@ className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#00140e] text-[
                 onClick={() => setShowAdvanced(false)}
                 className="min-w-[210px] rounded-full border border-[#E3C588]/35 bg-[#E3C588]/10 px-7 py-3.5 text-[12px] uppercase tracking-[0.26em] text-[#E3C588] transition-all hover:bg-[#E3C588]/15"
               >
-                Apply Filters
+                View {matchingCount} {matchingCount === 1 ? "Wine" : "Wines"}
               </button>
             </div>
           </section>
         </div>
       )}
+
+      <div
+        className={`pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border px-3 py-1.5 text-[9px] uppercase tracking-[0.18em] backdrop-blur-md transition-colors md:bottom-6 ${
+          isOnline
+            ? "border-[#E3C588]/12 bg-[#00140e]/32 text-[#E3C588]/46"
+            : "border-[#D89A6A]/28 bg-[#2a160d]/78 text-[#F0B88D]"
+        }`}
+        aria-live="polite"
+      >
+        {isOnline ? "Live wine list" : "Connection interrupted · showing current session"}
+      </div>
     </div>
   );
 }

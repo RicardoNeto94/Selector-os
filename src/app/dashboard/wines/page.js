@@ -19,7 +19,7 @@ import {
 
 
 import { createClient } from "@/lib/supabase/client";
-import { BOTTLE_FORMATS, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
 import "./wine-cellar.css";
 /* =======================================================
    CONSTANTS
@@ -389,6 +389,17 @@ export default function WinesPage() {
       0
     );
   }, [wines]);
+
+  const inventoryFamilies = useMemo(
+    () => summarizeInventoryFamilies(
+      wines.flatMap((wine) => (wine.inventory || []).map((row) => ({
+        ...row,
+        wines: wine,
+      }))),
+      (row) => row.quantity
+    ),
+    [wines]
+  );
 
   const uniqueWines = useMemo(() => {
     return wines.filter(
@@ -1160,9 +1171,9 @@ export default function WinesPage() {
 
       <section className="wine-portfolio-summary" aria-label="Wine portfolio summary">
         <div className="wine-portfolio-primary">
-          <span>Available physical stock</span>
-          <strong>{formatNumber(totalBottles)}</strong>
-          <small>bottle-equivalents across {locationDistribution.length} active locations</small>
+          <span>Total physical units</span>
+          <strong>{formatNumber(inventoryFamilies.total.positive)}</strong>
+          <small>Wine {formatNumber(inventoryFamilies.wine.positive)} · Sake & shochu {formatNumber(inventoryFamilies.sake.positive)} · Other {formatNumber(inventoryFamilies.nonAlcoholic.positive + inventoryFamilies.other.positive)}</small>
         </div>
 
         <div className="wine-portfolio-facts">

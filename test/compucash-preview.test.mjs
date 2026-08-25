@@ -71,6 +71,7 @@ test("sums stores mapped to one location and emits explicit zeroes", () => {
     { wineId: "wine-1", locationId: "koyo", quantity: 0 },
     { wineId: "wine-1", locationId: "main", quantity: 5.5 },
   ]);
+  assert.deepEqual(plan.wineSources, [{ wine_id: "wine-1", product_group_id: "15" }]);
 });
 
 test("reports multiple Compucash products mapped to one Vaxeron wine", () => {

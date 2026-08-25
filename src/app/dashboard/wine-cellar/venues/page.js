@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { bottleQuantity, positiveBottleQuantity } from "@/lib/wineInventory";
+import { bottleQuantity, positiveBottleQuantity, summarizeInventoryFamilies } from "@/lib/wineInventory";
 import "./venue-wines.css";
 
 const PAGE_SIZE = 1000;
@@ -620,6 +620,8 @@ export default function VenueWinesPage() {
       0
     );
 
+    const inventoryFamilies = summarizeInventoryFamilies(allInventory, (item) => item.quantity);
+
     const negativeQuantity = allInventory
       .filter(
         (item) => bottleQuantity(item.quantity) < 0
@@ -713,6 +715,7 @@ export default function VenueWinesPage() {
       availableWines: availableInventory.length,
       totalBottles,
       netBottles,
+      inventoryFamilies,
       negativeQuantity,
       stockValue,
       lowStock,
@@ -1233,7 +1236,7 @@ export default function VenueWinesPage() {
 
                   <div className="venue-card-value">
                     <div><span>Inventory value</span><strong>€{Math.round(stats.stockValue).toLocaleString()}</strong></div>
-                    <div><span>Physical stock</span><strong>{formatQuantity(stats.totalBottles)} <small>btl</small></strong></div>
+                    <div><span>Wine / total units</span><strong>{formatQuantity(stats.inventoryFamilies.wine.positive)} <small>/ {formatQuantity(stats.inventoryFamilies.total.positive)}</small></strong></div>
                   </div>
 
                   <div className="venue-menu-control">

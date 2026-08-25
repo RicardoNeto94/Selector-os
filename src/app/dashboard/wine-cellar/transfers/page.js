@@ -175,6 +175,13 @@ export default function WineTransfersPage() {
   ] = useState("all");
 
   const [
+    movementPage,
+    setMovementPage
+  ] = useState(1);
+
+  const movementsPerPage = 100;
+
+  const [
   inventory,
   setInventory
 ] = useState([]);
@@ -257,6 +264,12 @@ const [
           `)
           .order(
             "created_at",
+            {
+              ascending: false
+            }
+          )
+          .order(
+            "id",
             {
               ascending: false
             }
@@ -799,6 +812,44 @@ async function executeTransfer() {
     "return"
 
   ];
+
+  const movementPageCount = Math.max(
+    1,
+    Math.ceil(
+      filteredMovements.length /
+      movementsPerPage
+    )
+  );
+
+  const visibleMovements = useMemo(() => {
+
+    const start =
+      (movementPage - 1) *
+      movementsPerPage;
+
+    return filteredMovements.slice(
+      start,
+      start + movementsPerPage
+    );
+
+  }, [
+    filteredMovements,
+    movementPage
+  ]);
+
+  useEffect(() => {
+    setMovementPage(1);
+  }, [
+    search,
+    typeFilter,
+    locationFilter
+  ]);
+
+  useEffect(() => {
+    if (movementPage > movementPageCount) {
+      setMovementPage(movementPageCount);
+    }
+  }, [movementPage, movementPageCount]);
 
   /* =====================================================
      LOADING
@@ -1361,7 +1412,7 @@ async function executeTransfer() {
                   )
                   : (
 
-                    filteredMovements.map(
+                    visibleMovements.map(
                       movement => {
 
                         const wine =
@@ -1652,19 +1703,63 @@ async function executeTransfer() {
 
         <span>
 
+          Showing
+          {" "}
           {
-            filteredMovements.length
+            filteredMovements.length === 0
+              ? 0
+              : ((movementPage - 1) * movementsPerPage) + 1
+          }
+          –
+          {
+            Math.min(
+              movementPage * movementsPerPage,
+              filteredMovements.length
+            )
           }
           {" "}
-          movements shown
+          of
+          {" "}
+          {filteredMovements.length}
+          {" "}
+          movements
 
         </span>
 
-        <span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              setMovementPage(page =>
+                Math.max(1, page - 1)
+              )
+            }
+            disabled={movementPage === 1}
+            className="so-btn-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
 
-          Wine movement ledger
+          <span className="min-w-20 text-center">
+            Page {movementPage} of {movementPageCount}
+          </span>
 
-        </span>
+          <button
+            type="button"
+            onClick={() =>
+              setMovementPage(page =>
+                Math.min(
+                  movementPageCount,
+                  page + 1
+                )
+              )
+            }
+            disabled={movementPage === movementPageCount}
+            className="so-btn-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
 
       </div>
 

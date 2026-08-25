@@ -169,6 +169,7 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
   const quantities = new Map();
   const matchedWineIds = new Set();
   const productsByWine = new Map();
+  const sourceGroupsByWine = new Map();
   const unmatchedProducts = [];
   const conflicts = [];
 
@@ -184,6 +185,10 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
     }
 
     matchedWineIds.add(match.wineId);
+    sourceGroupsByWine.set(match.wineId, {
+      wine_id: match.wineId,
+      product_group_id: product.productGroupId,
+    });
     productsByWine.set(match.wineId, [
       ...(productsByWine.get(match.wineId) ?? []),
       {
@@ -224,6 +229,9 @@ export function buildCompuCashInventoryPlan({ rawProducts, storeTargets, wines, 
     duplicateWineMatches: [...productsByWine.entries()]
       .filter(([, matchedProducts]) => matchedProducts.length > 1)
       .map(([wineId, matchedProducts]) => ({ wineId, products: matchedProducts })),
+    wineSources: [...sourceGroupsByWine.values()].sort((a, b) =>
+      a.wine_id.localeCompare(b.wine_id)
+    ),
   };
 }
 

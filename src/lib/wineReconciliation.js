@@ -1543,7 +1543,8 @@ async function loadInventory({
           "location_id",
           locationIds
         )
-        .order("wine_id"));
+        .order("wine_id")
+        .order("location_id"));
 
     inventoryRows.push(
       ...data
@@ -1714,7 +1715,8 @@ export async function reconcileWineInventory({
       `)
       .in("wine_id", globalBtgWineIds)
       .gt("quantity", 0)
-      .order("wine_id"));
+      .order("wine_id")
+      .order("location_id"));
 
     const positiveInventoryByWine =
       new Map();

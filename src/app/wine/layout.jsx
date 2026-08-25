@@ -13,7 +13,6 @@ export default function WineLayout({ children }) {
         color: "#ffffff",
         overscrollBehavior: "none",
         WebkitOverflowScrolling: "touch",
-        touchAction: "none",
       }}
     >
       {children}

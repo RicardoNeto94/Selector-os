@@ -54,6 +54,10 @@ export async function runAutomaticCompuCashSync({ admin, triggerSource = "cron" 
     if (response.error) throw response.error;
     result = response.data ?? result;
   }
+  const sourceGroupResponse = await admin.rpc("apply_compucash_wine_source_groups", {
+    p_rows: plan.wineSources,
+  });
+  if (sourceGroupResponse.error) throw sourceGroupResponse.error;
   const btgSuggestions = await refreshCompuCashBtgSuggestions({
     admin,
     rawProducts,
@@ -70,6 +74,7 @@ export async function runAutomaticCompuCashSync({ admin, triggerSource = "cron" 
     productsMatched: plan.productsMatched,
     unmatchedProducts: plan.unmatchedProducts.length,
     changedRows: rows.length,
+    sourceGroupsUpdated: sourceGroupResponse.data ?? 0,
     result,
     btgSuggestions,
   };

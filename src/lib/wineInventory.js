@@ -25,6 +25,50 @@ export function sumNetBottles(rows, getQuantity = (row) => row?.quantity) {
   );
 }
 
+export const COMPUCASH_INVENTORY_FAMILIES = {
+  wine: new Set(["14", "15", "16", "63", "67", "68", "76"]),
+  sake: new Set(["77"]),
+  nonAlcoholic: new Set(["78"]),
+};
+
+export function inventoryFamilyForWine(wine) {
+  const source = wine?.wines || wine?.wine || wine || {};
+  const groupId = String(source.compucash_product_group_id ?? "").trim();
+
+  if (COMPUCASH_INVENTORY_FAMILIES.wine.has(groupId)) return "wine";
+  if (COMPUCASH_INVENTORY_FAMILIES.sake.has(groupId)) return "sake";
+  if (COMPUCASH_INVENTORY_FAMILIES.nonAlcoholic.has(groupId)) return "nonAlcoholic";
+
+  const category = normalizeWineCategory(source);
+  if (category === "sake" || category === "shochu") return "sake";
+  if (category === "non-alcoholic") return "nonAlcoholic";
+  if (["red", "white", "rose", "sparkling", "fortified", "dessert"].includes(category)) {
+    return "wine";
+  }
+  return "other";
+}
+
+export function summarizeInventoryFamilies(rows, getQuantity = (row) => row?.stock ?? row?.quantity) {
+  const summary = {
+    wine: { positive: 0, net: 0 },
+    sake: { positive: 0, net: 0 },
+    nonAlcoholic: { positive: 0, net: 0 },
+    other: { positive: 0, net: 0 },
+    total: { positive: 0, net: 0 },
+  };
+
+  for (const row of rows || []) {
+    const quantity = bottleQuantity(getQuantity(row));
+    const family = inventoryFamilyForWine(row);
+    summary[family].net += quantity;
+    summary[family].positive += Math.max(0, quantity);
+    summary.total.net += quantity;
+    summary.total.positive += Math.max(0, quantity);
+  }
+
+  return summary;
+}
+
 export const BOTTLE_FORMATS = {
   small: { label: "Small formats", detail: "Below 70cl" },
   standard: { label: "Standard bottles", detail: "70–100cl" },
