@@ -5,6 +5,14 @@ function validTokenHash(value) {
   return typeof value === "string" && value.length >= 20 && value.length <= 512 && !/\s/.test(value);
 }
 
+function validEmail(value) {
+  return typeof value === "string" && value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function validOtpCode(value) {
+  return typeof value === "string" && /^\d{6}$/.test(value);
+}
+
 function firstForwardedValue(value) {
   return value?.split(",")[0]?.trim() || "";
 }
@@ -30,10 +38,10 @@ function trustedRequestOrigins(request) {
   return origins;
 }
 
-function redirectToError(request, reason) {
+function redirectToError(request, reason, publicError = "invalid_invitation") {
   console.error(`INVITE_ACCEPT_REJECTED reason=${reason}`);
   return NextResponse.redirect(
-    new URL("/invite/accept?error=invalid_invitation", request.url),
+    new URL(`/invite/accept?error=${publicError}`, request.url),
     { status: 303 }
   );
 }
@@ -51,17 +59,24 @@ export async function POST(request) {
 
   const formData = await request.formData();
   const tokenHash = formData.get("token_hash");
+  const email = formData.get("email")?.trim().toLowerCase();
+  const otpCode = formData.get("otp_code")?.trim();
   const verificationType = formData.get("verification_type") === "recovery"
     ? "recovery"
     : "invite";
-  if (!validTokenHash(tokenHash)) return redirectToError(request, "invalid_token_shape");
+  const usingTokenHash = validTokenHash(tokenHash);
+  const usingInviteCode =
+    verificationType === "invite" && validEmail(email) && validOtpCode(otpCode);
+  if (!usingTokenHash && !usingInviteCode) {
+    return redirectToError(request, "invalid_credential_shape", "invalid_code");
+  }
 
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({
-      token_hash: tokenHash,
-      type: verificationType,
-    });
+    const verification = usingInviteCode
+      ? { email, token: otpCode, type: "invite" }
+      : { token_hash: tokenHash, type: verificationType };
+    const { error } = await supabase.auth.verifyOtp(verification);
 
     if (error) {
       // A recipient may already have consumed the one-time token in this
@@ -77,7 +92,11 @@ export async function POST(request) {
       console.error(
         `INVITE_OTP_FAILED code=${error.code || "unknown"} status=${error.status || "unknown"} message=${error.message || "unknown"}`
       );
-      return redirectToError(request, "otp_verification_failed");
+      return redirectToError(
+        request,
+        "otp_verification_failed",
+        usingInviteCode ? "invalid_code" : "invalid_invitation"
+      );
     }
 
     return NextResponse.redirect(new URL("/invite", request.url), { status: 303 });

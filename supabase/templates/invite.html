@@ -61,15 +61,23 @@
             </tr>
             <tr>
               <td style="padding:0 38px 31px;">
-                <p style="margin:0 0 17px;color:#6f7974;font-size:12px;line-height:1.7;">Use the secure button below to review the workspace and create your account.</p>
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                <p style="margin:0 0 17px;color:#6f7974;font-size:12px;line-height:1.7;">Use this one-time invitation code to securely create your Vaxeron account.</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px;border:1px solid #d9ded8;border-radius:14px;background:#ffffff;">
                   <tr>
-                    <td style="border-radius:999px;background:#243a33;">
-                      <a href="{{ .SiteURL }}/invite/accept?token_hash={{ .TokenHash }}&amp;type=invite" style="display:inline-block;padding:16px 25px;color:#f7f5ef;font-size:10px;font-weight:600;letter-spacing:1.8px;text-decoration:none;text-transform:uppercase;">Review invitation &nbsp;→</a>
+                    <td align="center" style="padding:18px 12px;">
+                      <span style="display:block;margin-bottom:8px;color:#929a95;font-size:8px;letter-spacing:1.8px;text-transform:uppercase;">Your invitation code</span>
+                      <strong style="display:block;color:#24332e;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:500;letter-spacing:8px;line-height:1;">{{ .Token }}</strong>
                     </td>
                   </tr>
                 </table>
-                <p style="margin:18px 0 0;color:#969d98;font-size:9px;line-height:1.6;">For your security, use the invitation only if you recognise {{ .Data.organization_name }} and the sender named above. Invitation links expire automatically.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="border-radius:999px;background:#243a33;">
+                      <a href="{{ .SiteURL }}/invite/accept" style="display:inline-block;padding:16px 25px;color:#f7f5ef;font-size:10px;font-weight:600;letter-spacing:1.8px;text-decoration:none;text-transform:uppercase;">Enter invitation code &nbsp;→</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:18px 0 0;color:#969d98;font-size:9px;line-height:1.6;">Enter the email address that received this message together with the code above. For your security, use the invitation only if you recognise {{ .Data.organization_name }} and the sender named above. Codes expire automatically.</p>
               </td>
             </tr>
             <tr>

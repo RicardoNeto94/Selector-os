@@ -19,6 +19,8 @@ export default async function AcceptInvitationPage({ searchParams }) {
   const error = params?.error;
   const verificationType = params?.type === "recovery" ? "recovery" : "invite";
   const canAccept = validTokenHash(tokenHash) && !error;
+  const codeError = error === "invalid_code";
+  const showCodeEntry = verificationType === "invite" && !canAccept;
 
   return (
     <main className="vx-auth-login vx-invite-login">
@@ -39,11 +41,19 @@ export default async function AcceptInvitationPage({ searchParams }) {
               <LockClosedIcon aria-hidden="true" />
             </div>
             <div className="vx-auth-kicker"><span /> Private invitation</div>
-            <h1>{canAccept ? "Your invitation is ready." : "This invitation needs attention."}</h1>
+            <h1>
+              {canAccept
+                ? "Your invitation is ready."
+                : showCodeEntry
+                  ? "Enter your invitation code."
+                  : "This invitation needs attention."}
+            </h1>
             <p className="vx-auth-intro">
               {canAccept
                 ? "Confirm that you want to accept this private Vaxeron invitation. Your secure account session will only be created after you continue."
-                : "This invitation link is invalid, expired or has already been used. Ask the workspace administrator to send a new invitation."}
+                : showCodeEntry
+                  ? "Use the email address and six-digit code shown in your invitation email. The code is verified only after you submit it here."
+                  : "This invitation link is invalid, expired or has already been used. Ask the workspace administrator to send a new invitation."}
             </p>
 
             {canAccept ? (
@@ -55,6 +65,44 @@ export default async function AcceptInvitationPage({ searchParams }) {
                   <ArrowRightIcon aria-hidden="true" />
                 </button>
               </form>
+            ) : showCodeEntry ? (
+              <form method="post" action="/api/auth/accept-invite" className="vx-auth-form">
+                <input type="hidden" name="verification_type" value="invite" />
+                <label className="vx-auth-field">
+                  <span>Email address</span>
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    placeholder="name@company.com"
+                    required
+                    autoFocus
+                  />
+                </label>
+                <label className="vx-auth-field vx-invite-code-field">
+                  <span>Six-digit invitation code</span>
+                  <input
+                    type="text"
+                    name="otp_code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]{6}"
+                    minLength={6}
+                    maxLength={6}
+                    placeholder="000000"
+                    required
+                  />
+                </label>
+                {codeError && (
+                  <div className="vx-auth-error" role="alert">
+                    That code is invalid or has expired. Check the newest invitation email or ask your administrator to resend it.
+                  </div>
+                )}
+                <button type="submit" className="vx-auth-submit">
+                  <span>Verify and continue</span>
+                  <ArrowRightIcon aria-hidden="true" />
+                </button>
+              </form>
             ) : (
               <Link className="vx-auth-submit" href="/sign-in">
                 <span>Return to sign in</span>
@@ -62,9 +110,9 @@ export default async function AcceptInvitationPage({ searchParams }) {
               </Link>
             )}
 
-            {canAccept && (
+            {(canAccept || showCodeEntry) && (
               <p className="vx-invite-fineprint">
-                This confirmation step protects one-time invitations from automated email security scanners.
+                The one-time credential is consumed only when this secure form is submitted, protecting it from automated email security scanners.
               </p>
             )}
           </div>
