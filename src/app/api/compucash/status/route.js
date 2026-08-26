@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCompuCashStatus } from "@/lib/compucash/server";
+import { getCompuCashTenantStatus } from "@/lib/compucash/server";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 
 export const dynamic = "force-dynamic";
 
@@ -13,18 +14,25 @@ export async function GET(request) {
         { status: authorization.error.status }
       );
     }
-    const status = getCompuCashStatus();
-    const latestResult = await authorization.admin
+    const status = await getCompuCashTenantStatus({
+      admin: authorization.admin,
+      tenant: authorization.tenant,
+    });
+    const latestRunQuery = authorization.admin
       .from("compucash_sync_runs")
       .select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at")
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: false });
+    const latestResult = await scopeTenantQuery(
+      latestRunQuery,
+      authorization.tenant
+    )
       .limit(1)
       .maybeSingle();
 
     return NextResponse.json(
       {
         ...status,
-        connected: status.configured,
+        connected: status.connected ?? status.configured,
         automaticSyncEnabled:
           process.env.COMPUCASH_SYNC_WRITES_ENABLED === "true" &&
           Boolean(process.env.CRON_SECRET),

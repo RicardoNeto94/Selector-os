@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "audit:tenancy": "node --env-file=.env.local scripts/audit-tenant-isolation.mjs",
     "test:compucash": "node --test test/compucash-preview.test.mjs",
+    "test:routing": "node --test test/guest-host-routing.test.mjs",
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint --ignore-path .gitignore --fix ."
   },

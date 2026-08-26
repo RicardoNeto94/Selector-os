@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { CompuCashClient } from "@/lib/compucash/client";
-import { COMPUCASH_STORE_TARGETS } from "@/lib/compucash/constants";
 import {
   buildCompuCashInventoryPlan,
   buildCompuCashPreview,
   validateCompuCashSync,
 } from "@/lib/compucash/preview";
-import { getCompuCashConfig } from "@/lib/compucash/server";
+import { getCompuCashTenantRuntime } from "@/lib/compucash/server";
 import { checksumInventoryRows } from "@/lib/compucash/syncPlan";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -23,9 +23,12 @@ export async function POST(request) {
         { status: authorization.error.status }
       );
     }
-
-    const config = getCompuCashConfig();
-    const client = new CompuCashClient(config);
+    const scopeRows = (query) => scopeTenantQuery(query, authorization.tenant);
+    const runtime = await getCompuCashTenantRuntime({
+      admin: authorization.admin,
+      tenant: authorization.tenant,
+    });
+    const client = new CompuCashClient(runtime.config);
     await client.authenticate();
 
     const [rawStores, wines, aliases] = await Promise.all([
@@ -33,28 +36,30 @@ export async function POST(request) {
       fetchAllRows(
         authorization.admin,
         "wines",
-        "id,sku,business_product_number,business_barcode"
+        "id,sku,business_product_number,business_barcode",
+        scopeRows
       ),
       fetchAllRows(
         authorization.admin,
         "wine_business_aliases",
-        "wine_id,business_product_id,business_product_number,business_barcode"
+        "wine_id,business_product_id,business_product_number,business_barcode",
+        scopeRows
       ),
     ]);
 
     const rawProducts = await client.getProducts({
-      storeIds: COMPUCASH_STORE_TARGETS.map((row) => row.externalStoreId),
+      storeIds: runtime.storeTargets.map((row) => row.externalStoreId),
     });
     const preview = buildCompuCashPreview({
       rawStores,
       rawProducts,
-      storeTargets: COMPUCASH_STORE_TARGETS,
+      storeTargets: runtime.storeTargets,
       wines,
       aliases,
     });
     const plan = buildCompuCashInventoryPlan({
       rawProducts,
-      storeTargets: COMPUCASH_STORE_TARGETS,
+      storeTargets: runtime.storeTargets,
       wines,
       aliases,
     });

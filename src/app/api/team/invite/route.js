@@ -1,25 +1,20 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAdministrator } from "@/lib/server/requireAdministrator";
+import { scopeTenantQuery, tenantWriteFields } from "@/lib/server/tenantContext";
 
 export const dynamic = "force-dynamic";
 
-function createAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-}
-
 export async function POST(request) {
-  const supabaseAdmin = createAdminClient();
-
   try {
+    const authorizationResult = await requireAdministrator(request);
+    if (authorizationResult.error) {
+      return NextResponse.json(
+        { error: authorizationResult.error.message },
+        { status: authorizationResult.error.status }
+      );
+    }
+    const supabaseAdmin = authorizationResult.admin;
+    const tenant = authorizationResult.tenant;
     const body = await request.json();
 
     const {
@@ -60,108 +55,6 @@ export async function POST(request) {
     }
 
     /* =====================================================
-       VERIFY REQUESTING USER
-    ===================================================== */
-
-    const authorization =
-      request.headers.get("authorization");
-
-    const accessToken = authorization?.startsWith(
-      "Bearer "
-    )
-      ? authorization.slice(7)
-      : null;
-
-    if (!accessToken) {
-      return NextResponse.json(
-        {
-          error: "Authentication required.",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
-
-    const {
-      data: requesterData,
-      error: requesterError,
-    } = await supabaseAdmin.auth.getUser(
-      accessToken
-    );
-
-    const requester = requesterData?.user;
-
-    if (requesterError || !requester) {
-      return NextResponse.json(
-        {
-          error: "Invalid authentication session.",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
-
-    /* =====================================================
-       VERIFY TEAM.MANAGE PERMISSION
-    ===================================================== */
-
-    const {
-      data: requesterRoles = [],
-      error: requesterRolesError,
-    } = await supabaseAdmin
-      .from("user_roles")
-      .select(`
-        role_id,
-        roles (
-          id,
-          slug,
-          role_permissions (
-            permissions (
-              slug
-            )
-          )
-        )
-      `)
-      .eq("user_id", requester.id);
-
-    if (requesterRolesError) {
-      throw requesterRolesError;
-    }
-
-    const canManageTeam = requesterRoles.some(
-      (userRole) => {
-        if (
-          userRole.roles?.slug ===
-          "administrator"
-        ) {
-          return true;
-        }
-
-        return (
-          userRole.roles?.role_permissions || []
-        ).some(
-          (rolePermission) =>
-            rolePermission.permissions?.slug ===
-            "team.manage"
-        );
-      }
-    );
-
-    if (!canManageTeam) {
-      return NextResponse.json(
-        {
-          error:
-            "You do not have permission to manage team access.",
-        },
-        {
-          status: 403,
-        }
-      );
-    }
-
-    /* =====================================================
        VERIFY ROLE
     ===================================================== */
 
@@ -191,6 +84,23 @@ export async function POST(request) {
           status: 400,
         }
       );
+    }
+
+    const uniqueLocationIds = [...new Set(locationIds)].filter(Boolean);
+    if (uniqueLocationIds.length > 0) {
+      const locationQuery = supabaseAdmin
+        .from("wine_locations")
+        .select("id")
+        .in("id", uniqueLocationIds);
+      const { data: allowedLocations, error: locationError } =
+        await scopeTenantQuery(locationQuery, tenant);
+      if (locationError) throw locationError;
+      if ((allowedLocations ?? []).length !== uniqueLocationIds.length) {
+        return NextResponse.json(
+          { error: "One or more selected venues do not belong to this workspace." },
+          { status: 400 }
+        );
+      }
     }
 
     /* =====================================================
@@ -299,6 +209,40 @@ export async function POST(request) {
       throw userRoleError;
     }
 
+    if (tenant?.source === "membership") {
+      const tenantRole = ["administrator", "manager", "operator", "viewer"].includes(
+        role.slug
+      )
+        ? role.slug
+        : "operator";
+      const organizationMembership = await supabaseAdmin
+        .from("organization_memberships")
+        .upsert(
+          {
+            organization_id: tenant.organization.id,
+            user_id: invitedUser.id,
+            role: tenantRole,
+            status: "invited",
+          },
+          { onConflict: "organization_id,user_id" }
+        );
+      if (organizationMembership.error) throw organizationMembership.error;
+
+      if (tenant.property?.id) {
+        const propertyMembership = await supabaseAdmin
+          .from("property_memberships")
+          .upsert(
+            {
+              property_id: tenant.property.id,
+              user_id: invitedUser.id,
+              role: tenantRole,
+            },
+            { onConflict: "property_id,user_id" }
+          );
+        if (propertyMembership.error) throw propertyMembership.error;
+      }
+    }
+
     /* =====================================================
        VENUE ACCESS
     ===================================================== */
@@ -307,11 +251,10 @@ export async function POST(request) {
       Array.isArray(locationIds) &&
       locationIds.length > 0
     ) {
-      const venueRows = [
-        ...new Set(locationIds),
-      ].map((locationId) => ({
+      const venueRows = uniqueLocationIds.map((locationId) => ({
         user_id: invitedUser.id,
         location_id: locationId,
+        ...tenantWriteFields(tenant),
       }));
 
       const {

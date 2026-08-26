@@ -1,20 +1,31 @@
 import AppearanceSettingsForm from "./AppearanceSettingsForm";
 import LogoUploader from "./LogoUploader";
 import { createAdminClient } from "@/lib/server/requireAdministrator";
+import { requireDashboardUser } from "@/lib/server/requireDashboardUser";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 import { BuildingOffice2Icon, CheckCircleIcon, LinkIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
-const RESTAURANT_ID = "0a8fb8bb-b4c8-4f05-9874-929637521f58";
 
 function InfoCard({ icon: Icon, eyebrow, title, children }) {
   return <section className="rounded-[22px] border border-[#ded3c8] bg-[#fbf8f3] p-5 md:p-6"><div className="flex items-start gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#dfd1c5] bg-[#f7f1eb]"><Icon className="h-4 w-4 text-[#8e6c5c]" /></div><div><div className="text-[8px] uppercase tracking-[0.24em] text-[#a17865]">{eyebrow}</div><h2 className="mt-1 text-[17px] tracking-[-0.025em] text-[#30241f]">{title}</h2></div></div><div className="mt-5">{children}</div></section>;
 }
 
 export default async function SettingsPage() {
+  const access = await requireDashboardUser();
+  if (!access.allowed) return null;
   const admin = createAdminClient();
+  const restaurantQuery = scopeTenantQuery(
+    admin.from("restaurants").select("id,name,slug,logo_url,theme_logo_url,theme_primary_color,theme_background_style,theme_card_style,theme_density"),
+    access.tenant
+  ).order("id").limit(1).maybeSingle();
+  const syncQuery = scopeTenantQuery(
+    admin.from("compucash_sync_runs").select("status,completed_at,products_matched,unmatched_products"),
+    access.tenant
+  ).order("created_at", { ascending: false }).limit(1).maybeSingle();
   const [{ data: restaurant, error }, { data: latestSync }] = await Promise.all([
-    admin.from("restaurants").select("id,name,slug,logo_url,theme_logo_url,theme_primary_color,theme_background_style,theme_card_style,theme_density").eq("id", RESTAURANT_ID).maybeSingle(),
-    admin.from("compucash_sync_runs").select("status,completed_at,products_matched,unmatched_products").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    restaurantQuery,
+    syncQuery,
   ]);
   if (error || !restaurant) throw new Error(error?.message || "Vaxeron organisation configuration was not found.");
   const syncHealthy = latestSync?.status === "succeeded";

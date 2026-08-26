@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
@@ -49,6 +50,11 @@ export default function VenueWinePage() {
 
   const [loading, setLoading] = useState(true);
   const [savingWineId, setSavingWineId] = useState(null);
+  const [descriptionAssistantOpen, setDescriptionAssistantOpen] = useState(false);
+  const [descriptionAssistantBusy, setDescriptionAssistantBusy] = useState(false);
+  const [descriptionAssistantError, setDescriptionAssistantError] = useState("");
+  const [descriptionDrafts, setDescriptionDrafts] = useState([]);
+  const [descriptionDraftsRemaining, setDescriptionDraftsRemaining] = useState(0);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -65,6 +71,17 @@ export default function VenueWinePage() {
       loadData();
     }
   }, [locationId]);
+
+  useEffect(() => {
+    if (!descriptionAssistantOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [descriptionAssistantOpen]);
 
   async function loadData() {
     setLoading(true);
@@ -160,6 +177,7 @@ export default function VenueWinePage() {
             wine_type,
             size,
             price,
+            description,
             is_active
           )
         `)
@@ -285,7 +303,9 @@ export default function VenueWinePage() {
               ? Number(menuItem.glass_price)
               : null,
 
-          description: menuItem?.description || "",
+          description: menuItem?.description || wine.description || "",
+          hasVenueDescription: Boolean(menuItem?.description?.trim()),
+          hasMasterDescription: Boolean(wine.description?.trim()),
 
           averagePurchaseCost: valuation?.unit_inventory_cost ?? null,
           compucashSalePriceNet: valuation?.unit_sale_price_net ?? null,
@@ -453,6 +473,88 @@ export default function VenueWinePage() {
     }
 
     setSavingWineId(null);
+  }
+
+  async function generateMissingDescriptions() {
+    const missing = rows.filter(
+      (row) => row.guestVisible && !String(row.description || "").trim()
+    );
+    if (!missing.length) return;
+
+    setDescriptionAssistantOpen(true);
+    setDescriptionAssistantBusy(true);
+    setDescriptionAssistantError("");
+    setDescriptionDrafts([]);
+
+    try {
+      const response = await fetch("/api/wines/descriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate",
+          locationId,
+          wineIds: missing.slice(0, 24).map((row) => row.wineId),
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Unable to generate descriptions.");
+
+      setDescriptionDrafts(
+        (payload.descriptions || []).map((draft) => ({ ...draft, selected: true }))
+      );
+      setDescriptionDraftsRemaining(
+        Math.max(0, missing.length - (payload.descriptions || []).length)
+      );
+    } catch (error) {
+      setDescriptionAssistantError(error.message || "Unable to generate descriptions.");
+    } finally {
+      setDescriptionAssistantBusy(false);
+    }
+  }
+
+  function updateDescriptionDraft(wineId, field, value) {
+    setDescriptionDrafts((drafts) =>
+      drafts.map((draft) => draft.wineId === wineId ? { ...draft, [field]: value } : draft)
+    );
+  }
+
+  async function approveDescriptionDrafts() {
+    const selected = descriptionDrafts.filter(
+      (draft) => draft.selected && String(draft.description || "").trim()
+    );
+    if (!selected.length) return;
+
+    setDescriptionAssistantBusy(true);
+    setDescriptionAssistantError("");
+    try {
+      const response = await fetch("/api/wines/descriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "apply",
+          locationId,
+          descriptions: selected.map(({ wineId, description }) => ({ wineId, description })),
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Unable to approve descriptions.");
+
+      const approvedByWine = new Map(
+        selected.map((draft) => [String(draft.wineId), draft.description.trim()])
+      );
+      setRows((currentRows) => currentRows.map((row) => {
+        const approved = approvedByWine.get(String(row.wineId));
+        return approved
+          ? { ...row, description: approved, hasMasterDescription: true }
+          : row;
+      }));
+      setDescriptionDrafts([]);
+      setDescriptionAssistantOpen(false);
+    } catch (error) {
+      setDescriptionAssistantError(error.message || "Unable to approve descriptions.");
+    } finally {
+      setDescriptionAssistantBusy(false);
+    }
   }
 
   async function enableBtgSuggestion(suggestion) {
@@ -818,8 +920,12 @@ export default function VenueWinePage() {
             !(Number(row.glassPrice) > 0)))
     ).length;
 
+    const missingDescriptions = rows.filter(
+      (row) => row.guestVisible && !String(row.description || "").trim()
+    ).length;
+
     const btgSignals = dedupedBtgSuggestions.length;
-    const guestActions = pricingIssues + btgSignals;
+    const guestActions = pricingIssues + btgSignals + missingDescriptions;
 
     return {
       available,
@@ -831,6 +937,7 @@ export default function VenueWinePage() {
       missingGlassPrice,
       missingBottlePrice,
       pricingIssues,
+      missingDescriptions,
       btgSignals,
       guestActions,
     };
@@ -903,6 +1010,13 @@ export default function VenueWinePage() {
     });
   }, [rows, search, filter]);
 
+  const missingGuestDescriptionCount = useMemo(
+    () => rows.filter(
+      (row) => row.guestVisible && !String(row.description || "").trim()
+    ).length,
+    [rows]
+  );
+
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
 
   const paginatedRows = useMemo(() => {
@@ -954,23 +1068,9 @@ export default function VenueWinePage() {
           ? [["pairings", "Sake pairing", sakePairings.length]]
           : []),
       ];
-  const kpis = isStorageWorkspace
-    ? [
-        ["Wine bottles", formatQuantity(stats.inventoryFamilies.wine.positive), "Excludes sake and alcohol-free"],
-        ["Total physical units", formatQuantity(stats.inventoryFamilies.total.positive), "All positive Compucash stock"],
-        ["Low-stock lines", stats.lowStock, "Two bottles or fewer"],
-        ["Source stores", storeMappings.length, "CompuCash mappings"],
-      ]
-    : [
-        ["Available wines", stats.available, "CompuCash stock above zero"],
-        ["Physical units", formatQuantity(stats.inventoryFamilies.total.positive), "Includes wine, sake and alcohol-free"],
-        ["By the glass", stats.byTheGlass, stats.missingGlassPrice ? `${stats.missingGlassPrice} missing glass prices` : "Glass prices complete"],
-        ["Low-stock wines", stats.lowStock, "Two physical units or fewer"],
-      ];
-
   return (
     <div className={`venue-detail-page page-fade min-h-screen ${isStorageWorkspace ? "is-storage-workspace" : "is-guest-workspace"}`}>
-      <div className="venue-detail-shell max-w-[1780px] mx-auto px-5 md:px-8 lg:px-10 py-6 md:py-7">
+      <div className="venue-detail-shell px-5 md:px-8 lg:px-10 py-6 md:py-7">
         <button
           onClick={() =>
             router.push("/dashboard/wine-cellar/venues")
@@ -1054,27 +1154,6 @@ export default function VenueWinePage() {
           </div>
         </section>
 
-        <section className="venue-detail-kpis grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {kpis.map(([label, value, meta]) => (
-            <div
-              key={label}
-              className="venue-detail-kpi"
-            >
-              <div className="text-[10px] uppercase tracking-[0.18em] text-[#a08f84]">
-                {label}
-              </div>
-              <div className="flex items-end justify-between gap-3 mt-3">
-                <div className="text-[30px] leading-none font-semibold tracking-[-0.04em] text-[#2f221c]">
-                  {value}
-                </div>
-                <div className="text-[10px] text-[#b1a39a] text-right">
-                  {meta}
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-
         <details className="venue-insights-panel">
           <summary>
             <div className="venue-insights-title">
@@ -1156,6 +1235,7 @@ export default function VenueWinePage() {
             </div>
             <div className="venue-attention-actions">
               {!menu && <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>}
+              {stats.missingDescriptions > 0 && <button type="button" onClick={generateMissingDescriptions}>Draft {Math.min(24, stats.missingDescriptions)} descriptions</button>}
               {stats.missingGlassPrice > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("glass"); }}>Add {stats.missingGlassPrice} glass prices</button>}
               {dedupedBtgSuggestions.length > 0 && <button type="button" onClick={() => setWorkspaceTab(confirmedBtgSuggestions.length ? "confirmed" : "opportunities")}>Review {dedupedBtgSuggestions.length} BTG signals</button>}
               {stats.lowStock > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("low"); }}>Review low stock</button>}
@@ -1460,9 +1540,22 @@ export default function VenueWinePage() {
                   ? "Physical quantities come from CompuCash. Guest visibility, service format, pricing and descriptions become active when a wine menu is linked."
                   : "Stock comes from CompuCash. Use the controls below to decide what guests see and complete service pricing."}</p>
               </div>
-              <div className="venue-list-legend">
-                <span><i className="is-live" /> Live on guest list</span>
-                <span><i className="is-warning" /> Action needed</span>
+              <div className="venue-list-heading-actions">
+                {menu && missingGuestDescriptionCount > 0 && (
+                  <button
+                    type="button"
+                    className="venue-description-assistant-trigger"
+                    onClick={generateMissingDescriptions}
+                  >
+                    <span aria-hidden="true">✦</span>
+                    Draft {Math.min(24, missingGuestDescriptionCount)} descriptions
+                    <small>{missingGuestDescriptionCount} missing</small>
+                  </button>
+                )}
+                <div className="venue-list-legend">
+                  <span><i className="is-live" /> Live on guest list</span>
+                  <span><i className="is-warning" /> Action needed</span>
+                </div>
               </div>
             </div>
             {!menu && (
@@ -1715,6 +1808,93 @@ export default function VenueWinePage() {
             )}
           </section>
         )}
+
+        {descriptionAssistantOpen && typeof document !== "undefined" && createPortal((
+          <div className="venue-description-assistant-backdrop" role="presentation">
+            <section
+              className="venue-description-assistant"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="wine-description-assistant-title"
+            >
+              <header>
+                <div>
+                  <span>Vaxeron intelligence · Administrator review</span>
+                  <h2 id="wine-description-assistant-title">Guest description drafts</h2>
+                  <p>AI prepares factual drafts from existing wine metadata. Nothing reaches the guest list until you approve it.</p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close description assistant"
+                  onClick={() => !descriptionAssistantBusy && setDescriptionAssistantOpen(false)}
+                >×</button>
+              </header>
+
+              {descriptionAssistantBusy && descriptionDrafts.length === 0 ? (
+                <div className="venue-description-assistant-loading">
+                  <i aria-hidden="true">✦</i>
+                  <strong>Preparing a carefully grounded batch…</strong>
+                  <span>Usually this takes a few seconds.</span>
+                </div>
+              ) : descriptionAssistantError ? (
+                <div className="venue-description-assistant-error">
+                  <strong>Description assistant is not ready</strong>
+                  <span>{descriptionAssistantError}</span>
+                </div>
+              ) : descriptionDrafts.length === 0 ? (
+                <div className="venue-description-assistant-empty">
+                  Every stocked wine on this guest list already has a description.
+                </div>
+              ) : (
+                <div className="venue-description-draft-list">
+                  {descriptionDrafts.map((draft) => (
+                    <article key={draft.wineId} className={draft.selected ? "is-selected" : ""}>
+                      <label className="venue-description-draft-select">
+                        <input
+                          type="checkbox"
+                          checked={draft.selected}
+                          onChange={(event) => updateDescriptionDraft(draft.wineId, "selected", event.target.checked)}
+                        />
+                        <span />
+                      </label>
+                      <div>
+                        <h3>{draft.name}</h3>
+                        <textarea
+                          value={draft.description}
+                          maxLength={420}
+                          rows={3}
+                          onChange={(event) => updateDescriptionDraft(draft.wineId, "description", event.target.value)}
+                        />
+                        <small>{draft.description.length}/420 · Shared description for every venue without its own override</small>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              <footer>
+                <div>
+                  <strong>{descriptionDrafts.filter((draft) => draft.selected).length}</strong> selected
+                  {descriptionDraftsRemaining > 0 && <span> · {descriptionDraftsRemaining} remain for another batch</span>}
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    className="is-secondary"
+                    disabled={descriptionAssistantBusy}
+                    onClick={() => setDescriptionAssistantOpen(false)}
+                  >Cancel</button>
+                  <button
+                    type="button"
+                    className="is-primary"
+                    disabled={descriptionAssistantBusy || !descriptionDrafts.some((draft) => draft.selected && draft.description.trim())}
+                    onClick={approveDescriptionDrafts}
+                  >{descriptionAssistantBusy ? "Saving…" : "Approve selected"}</button>
+                </div>
+              </footer>
+            </section>
+          </div>
+        ), document.body)}
       </div>
     </div>
   );

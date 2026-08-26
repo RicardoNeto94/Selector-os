@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import { CompuCashClient } from "@/lib/compucash/client";
-import { COMPUCASH_STORE_TARGETS } from "@/lib/compucash/constants";
 import {
   buildCompuCashInventoryPlan,
   buildCompuCashPreview,
   validateCompuCashSync,
 } from "@/lib/compucash/preview";
-import { getCompuCashConfig } from "@/lib/compucash/server";
+import { getCompuCashTenantRuntime } from "@/lib/compucash/server";
 import {
   buildChangedInventoryRows,
   checksumInventoryRows,
 } from "@/lib/compucash/syncPlan";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,30 +42,34 @@ export async function POST(request) {
     }
 
     const admin = authorization.admin;
-    const config = getCompuCashConfig();
-    const client = new CompuCashClient(config);
+    const scopeRows = (query) => scopeTenantQuery(query, authorization.tenant);
+    const runtime = await getCompuCashTenantRuntime({
+      admin,
+      tenant: authorization.tenant,
+    });
+    const client = new CompuCashClient(runtime.config);
     await client.authenticate();
 
     const [rawStores, wines, aliases, currentRows, locations] = await Promise.all([
       client.getStores(),
-      fetchAllRows(admin, "wines", "id,sku,business_product_number,business_barcode"),
-      fetchAllRows(admin, "wine_business_aliases", "wine_id,business_product_id,business_product_number,business_barcode"),
-      fetchAllRows(admin, "wine_inventory", "wine_id,location_id,quantity"),
-      fetchAllRows(admin, "wine_locations", "id,name"),
+      fetchAllRows(admin, "wines", "id,sku,business_product_number,business_barcode", scopeRows),
+      fetchAllRows(admin, "wine_business_aliases", "wine_id,business_product_id,business_product_number,business_barcode", scopeRows),
+      fetchAllRows(admin, "wine_inventory", "wine_id,location_id,quantity", scopeRows),
+      fetchAllRows(admin, "wine_locations", "id,name", scopeRows),
     ]);
     const rawProducts = await client.getProducts({
-      storeIds: COMPUCASH_STORE_TARGETS.map((row) => row.externalStoreId),
+      storeIds: runtime.storeTargets.map((row) => row.externalStoreId),
     });
     const preview = buildCompuCashPreview({
       rawStores,
       rawProducts,
-      storeTargets: COMPUCASH_STORE_TARGETS,
+      storeTargets: runtime.storeTargets,
       wines,
       aliases,
     });
     const plan = buildCompuCashInventoryPlan({
       rawProducts,
-      storeTargets: COMPUCASH_STORE_TARGETS,
+      storeTargets: runtime.storeTargets,
       wines,
       aliases,
     });
@@ -89,7 +93,7 @@ export async function POST(request) {
       plannedRows: plan.rows,
       currentRows,
       locations,
-      storeTargets: COMPUCASH_STORE_TARGETS,
+      storeTargets: runtime.storeTargets,
     });
     let data = { updated: 0, movements: 0, processed: 0, unchanged: 0 };
     if (rows.length) {

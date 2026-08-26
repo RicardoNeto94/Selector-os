@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 import "../spa.css";
 
 export default function BurmanSpaProductsPage() {
-
-  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,44 +14,9 @@ export default function BurmanSpaProductsPage() {
 
     async function loadData() {
 
-      const { data: categoriesData = [] } =
-  await supabase
-    .from("spa_categories")
-    .select(`
-      *,
-      spa_products(*)
-    `)
-    .eq("type", "selfcare")
-    .order("position");
-
-const productIds = categoriesData
-  .flatMap((category) => category.spa_products || [])
-  .map((product) => product.id);
-
-const { data: variantsData = [] } =
-  await supabase
-    .from("spa_product_variants")
-    .select("*")
-    .in("product_id", productIds)
-    .order("position");
-
-const categoriesWithVariants = categoriesData.map((category) => ({
-
-  ...category,
-
-  spa_products: (category.spa_products || []).map((product) => ({
-
-    ...product,
-
-    variants: variantsData.filter(
-      (variant) => variant.product_id === product.id
-    )
-
-  }))
-
-}));
-
-setCategories(categoriesWithVariants);
+      const response = await fetch("/api/public-spa/burman?type=selfcare");
+      const payload = response.ok ? await response.json() : { categories: [] };
+      setCategories(payload.categories || []);
 setLoading(false);
 
     }

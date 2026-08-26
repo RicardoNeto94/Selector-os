@@ -1,9 +1,20 @@
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
+import {
+  scopeTenantQuery,
+  tenantWriteFields,
+} from "@/lib/server/tenantContext";
 
 const BTG_GROUP_ID = "336";
 const SAKE_GROUP_ID = "77";
 
-export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, storeTargets }) {
+export async function refreshCompuCashBtgSuggestions({
+  admin,
+  rawProducts,
+  storeTargets,
+  tenant,
+}) {
+  const scopeRows = (query) => scopeTenantQuery(query, tenant);
+  const tenantFields = tenantWriteFields(tenant);
   const btgProducts = rawProducts.filter((product) => {
     const groupId = String(product.productGroupId ?? "");
     return (
@@ -13,12 +24,12 @@ export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, store
   });
   const productIds = new Set(btgProducts.map((product) => String(product.productId)));
   const [aliases, inventory, locations, menuItems, existingSuggestions, menuServings] = await Promise.all([
-    fetchAllRows(admin, "wine_business_aliases", "wine_id,business_product_id"),
-    fetchAllRows(admin, "wine_inventory", "wine_id,location_id,quantity"),
-    fetchAllRows(admin, "wine_locations", "id,wine_menu_id"),
-    fetchAllRows(admin, "wine_menu_items", "id,wine_menu_id,wine_id,service_type,glass_price"),
-    fetchAllRows(admin, "wine_btg_suggestions", "wine_id,location_id,business_product_number,business_product_name,status"),
-    fetchAllRows(admin, "wine_menu_servings", "id,wine_menu_item_id,compucash_product_id,price,is_active,source"),
+    fetchAllRows(admin, "wine_business_aliases", "wine_id,business_product_id", scopeRows),
+    fetchAllRows(admin, "wine_inventory", "wine_id,location_id,quantity", scopeRows),
+    fetchAllRows(admin, "wine_locations", "id,wine_menu_id", scopeRows),
+    fetchAllRows(admin, "wine_menu_items", "id,wine_menu_id,wine_id,service_type,glass_price", scopeRows),
+    fetchAllRows(admin, "wine_btg_suggestions", "wine_id,location_id,business_product_number,business_product_name,status", scopeRows),
+    fetchAllRows(admin, "wine_menu_servings", "id,wine_menu_item_id,compucash_product_id,price,is_active,source", scopeRows),
   ]);
   const aliasByProductId = new Map(
     aliases
@@ -78,6 +89,7 @@ export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, store
           Number.isFinite(Number(row.salePrice ?? row.price))
         );
         servingRows.push({
+          ...tenantFields,
           wine_menu_item_id: menuItem.id,
           compucash_product_id: String(product.productId),
           serving_cl: servingCl,
@@ -92,6 +104,7 @@ export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, store
       if (enabledBtg.has(`${menuId}|${alias.wine_id}`)) continue;
       if (!suggestionType) continue;
       const row = {
+        ...tenantFields,
         wine_id: alias.wine_id,
         location_id: locationId,
         business_product_number: product.productNumber || null,
@@ -106,10 +119,10 @@ export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, store
     }
   }
   const mappedLocationIds = [...storesByLocation.keys()];
-  const stale = await admin
+  const stale = await scopeTenantQuery(admin
     .from("wine_btg_suggestions")
     .delete()
-    .eq("status", "pending")
+    .eq("status", "pending"), tenant)
     .in("location_id", mappedLocationIds);
   if (stale.error) throw stale.error;
   if (suggestions.length) {
@@ -126,10 +139,10 @@ export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, store
     const item = menuItems.find((row) => row.id === menuItemId);
     const itemServings = servingRows.filter((row) => row.wine_menu_item_id === menuItemId);
     const firstPrice = itemServings.find((row) => row.price !== null)?.price ?? null;
-    const updated = await admin.from("wine_menu_items").update({
+    const updated = await scopeTenantQuery(admin.from("wine_menu_items").update({
       service_type: item?.service_type === "glass" ? "glass" : "both",
       ...(firstPrice !== null ? { glass_price: firstPrice } : {}),
-    }).eq("id", menuItemId);
+    }).eq("id", menuItemId), tenant);
     if (updated.error) throw updated.error;
   }
   const productById = new Map(
@@ -144,11 +157,11 @@ export async function refreshCompuCashBtgSuggestions({ admin, rawProducts, store
     if (!priceRow) continue;
     const price = Number(priceRow.salePrice ?? priceRow.price);
     if (Math.abs(Number(serving.price ?? 0) - price) <= 0.000001) continue;
-    const updated = await admin.from("wine_menu_servings").update({
+    const updated = await scopeTenantQuery(admin.from("wine_menu_servings").update({
       price,
       last_synced_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }).eq("id", serving.id);
+    }).eq("id", serving.id), tenant);
     if (updated.error) throw updated.error;
     pricesUpdated += 1;
   }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 
 export const dynamic = "force-dynamic";
 
@@ -13,24 +13,6 @@ export async function POST(request) {
         { status: authorization.error.status }
       );
     }
-    const supabaseUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    const serviceRoleKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json(
-        {
-          error:
-            "Vaxeron server inventory configuration is missing.",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
-
     const body = await request.json();
 
     const rows = Array.isArray(body?.rows)
@@ -49,14 +31,31 @@ export async function POST(request) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const wineIds = [...new Set(rows.map((row) => row?.wine_id).filter(Boolean))];
+    const locationIds = [...new Set(rows.map((row) => row?.location_id).filter(Boolean))];
+    if (wineIds.length === 0 || locationIds.length === 0) {
+      return NextResponse.json({ error: "Every reconciliation row requires a wine and location." }, { status: 400 });
+    }
+
+    const [wineResult, locationResult] = await Promise.all([
+      scopeTenantQuery(
+        authorization.admin.from("wines").select("id").in("id", wineIds),
+        authorization.tenant
+      ),
+      scopeTenantQuery(
+        authorization.admin.from("wine_locations").select("id").in("id", locationIds),
+        authorization.tenant
+      ),
+    ]);
+    if (wineResult.error || locationResult.error) throw wineResult.error || locationResult.error;
+    if ((wineResult.data ?? []).length !== wineIds.length || (locationResult.data ?? []).length !== locationIds.length) {
+      return NextResponse.json({ error: "One or more reconciliation rows do not belong to this workspace." }, { status: 403 });
+    }
 
     const {
       data,
       error,
-    } = await supabase.rpc(
+    } = await authorization.admin.rpc(
       "apply_wine_inventory_reconciliation",
       {
         p_rows: rows,

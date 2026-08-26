@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
 export default function CollectionPage() {
-
-  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,14 +12,9 @@ export default function CollectionPage() {
 
     async function loadData() {
 
-      const { data = [] } =
-        await supabase
-          .from("merchandise_categories")
-          .select(`
-            *,
-            merchandise_products(*)
-          `)
-          .order("position");
+      const response = await fetch("/api/public-collection");
+      const payload = response.ok ? await response.json() : { categories: [] };
+      const data = payload.categories || [];
 
       setCategories(data);
       setLoading(false);

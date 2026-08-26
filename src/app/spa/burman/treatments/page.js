@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 import "../spa.css";
 
 export default function BurmanSpaProductsPage() {
-
-  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,15 +14,9 @@ export default function BurmanSpaProductsPage() {
 
     async function loadData() {
 
-      const { data: categoriesData = [] } =
-        await supabase
-          .from("spa_categories")
-          .select(`
-            *,
-            spa_products(*)
-          `)
-          .eq("type", "treatments")
-          .order("position");
+      const response = await fetch("/api/public-spa/burman?type=treatments");
+      const payload = response.ok ? await response.json() : { categories: [] };
+      const categoriesData = payload.categories || [];
 
       setCategories(categoriesData);
       setLoading(false);

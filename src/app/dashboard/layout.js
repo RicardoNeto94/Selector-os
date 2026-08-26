@@ -10,5 +10,9 @@ export default async function DashboardLayout({ children }) {
   const access = await requireDashboardUser();
   if (access.reason === "session") redirect("/sign-in?reason=session-required");
   if (!access.allowed) redirect("/access-pending");
-  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
+  return (
+    <DashboardLayoutClient workspace={access.tenant}>
+      {children}
+    </DashboardLayoutClient>
+  );
 }

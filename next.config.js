@@ -39,31 +39,6 @@ const nextConfig = {
       { source: "/dashboard/:path*", headers: [{ key: "Cache-Control", value: "private, no-store, no-cache, must-revalidate" }] },
     ];
   },
-
-  async rewrites() {
-    return [
-      {
-        source: "/",
-        has: [
-          {
-            type: "host",
-            value: "burman.vaxeron.com",
-          },
-        ],
-        destination: "/menu/burman-hotel",
-      },
-      {
-        source: "/",
-        has: [
-          {
-            type: "host",
-            value: "foxden.vaxeron.com",
-          },
-        ],
-        destination: "/menu/foxden",
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

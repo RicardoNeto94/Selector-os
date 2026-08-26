@@ -5,21 +5,5 @@
       "path": "/api/cron/compucash",
       "schedule": "0 * * * *"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "has": [
-        { "type": "host", "value": "burman.vaxeron.com" }
-      ],
-      "dest": "/menu/burman-hotel"
-    },
-    {
-      "src": "/(.*)",
-      "has": [
-        { "type": "host", "value": "foxden.vaxeron.com" }
-      ],
-      "dest": "/menu/foxden"
-    }
   ]
 }

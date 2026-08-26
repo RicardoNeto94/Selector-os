@@ -3,6 +3,8 @@ import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
 import { createClient } from "@supabase/supabase-js";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 import { bottleQuantity, positiveBottleQuantity } from "@/lib/wineInventory";
+import { requireDashboardUser } from "@/lib/server/requireDashboardUser";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 import {
   ArrowRightIcon, ArrowPathIcon, BeakerIcon, BuildingStorefrontIcon,
   CheckCircleIcon, CircleStackIcon, ClipboardDocumentCheckIcon,
@@ -10,7 +12,6 @@ import {
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
-const RESTAURANT_ID = "0a8fb8bb-b4c8-4f05-9874-929637521f58";
 const number = (value) => Number(value || 0);
 const formatNumber = (value, digits = 0) => new Intl.NumberFormat("en-GB", { maximumFractionDigits: digits }).format(number(value));
 const formatDate = (value) => value ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(value)) : "Not yet run";
@@ -43,23 +44,32 @@ function OperationCard({ href, icon: Icon, eyebrow, title, description, meta }) 
 }
 
 export default async function DashboardPage() {
+  const access = await requireDashboardUser();
+  if (!access.allowed) return null;
+  const tenant = access.tenant;
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
-  const [restaurantResult, menusResponse, dishesResponse, profilesResponse, pendingProfilesResponse, menuItemRows, locationsResult, inventoryRows, latestSyncResult] = await Promise.all([
-    supabase.from("restaurants").select("name").eq("id", RESTAURANT_ID).maybeSingle(),
-    supabase.from("menus").select("*", { count: "exact", head: true }),
-    supabase.from("menu_items").select("*", { count: "exact", head: true }),
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "pending"),
-    fetchAllRows(supabase, "wine_menu_items", "wine_id"),
-    supabase.from("wine_locations").select("id,name,location_type,wine_menu_id").order("name"),
-    fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id"),
-    supabase.from("compucash_sync_runs").select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+  const organizationId = tenant.organization.id;
+  const memberCountQuery = tenant.source === "membership"
+    ? supabase.from("organization_memberships").select("user_id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "active")
+    : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "active");
+  const pendingMemberCountQuery = tenant.source === "membership"
+    ? supabase.from("organization_memberships").select("user_id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "invited")
+    : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending");
+  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, menuItemRows, locationsResult, inventoryRows, latestSyncResult] = await Promise.all([
+    scopeTenantQuery(supabase.from("menus").select("*", { count: "exact", head: true }), tenant),
+    scopeTenantQuery(supabase.from("menu_items").select("*", { count: "exact", head: true }), tenant),
+    memberCountQuery,
+    pendingMemberCountQuery,
+    fetchAllRows(supabase, "wine_menu_items", "wine_id", (query) => scopeTenantQuery(query, tenant)),
+    scopeTenantQuery(supabase.from("wine_locations").select("id,name,location_type,wine_menu_id").order("name"), tenant),
+    fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id", (query) => scopeTenantQuery(query, tenant)),
+    scopeTenantQuery(supabase.from("compucash_sync_runs").select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at").order("created_at", { ascending: false }).limit(1), tenant).maybeSingle(),
   ]);
   const locations = locationsResult.data || [];
   const latestSync = latestSyncResult.data;
-  const organisationName = restaurantResult.data?.name || "VAXERON Hospitality";
-  const teamCount = profilesResponse.count || 0;
-  const pendingTeamCount = pendingProfilesResponse.count || 0;
+  const organisationName = tenant.property?.name || tenant.organization.name || "VAXERON Hospitality";
+  const teamCount = membershipsResponse.count || 0;
+  const pendingTeamCount = pendingMembershipsResponse.count || 0;
   const positiveRows = inventoryRows.filter((row) => positiveBottleQuantity(row.quantity) > 0);
   const totalWineUnits = positiveRows.reduce((total, row) => total + positiveBottleQuantity(row.quantity), 0);
   const stockedWineIds = new Set(positiveRows.map((row) => String(row.wine_id)));

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient as createCookieClient } from "@/lib/supabase/server";
+import { resolveTenantContext } from "@/lib/server/tenantContext";
 
 export function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -38,14 +39,18 @@ export async function requireAdministrator(request) {
     return { admin, user, error: { status: 403, message: "Active account required." } };
   }
 
-  const { data, error } = await admin
-    .from("user_roles")
-    .select("roles!inner(slug)")
-    .eq("user_id", user.id);
-  if (error) throw error;
-  const isAdministrator = (data ?? []).some((row) => row.roles?.slug === "administrator");
-  if (!isAdministrator) {
-    return { admin, user, error: { status: 403, message: "Administrator access required." } };
+  const tenant = await resolveTenantContext(admin, user.id);
+  if (
+    !tenant?.organization ||
+    !["owner", "administrator"].includes(tenant.organization.role)
+  ) {
+    return {
+      admin,
+      user,
+      tenant,
+      error: { status: 403, message: "Organization administrator access required." },
+    };
   }
-  return { admin, user, error: null };
+
+  return { admin, user, tenant, error: null };
 }

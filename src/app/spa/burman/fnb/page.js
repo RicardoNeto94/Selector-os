@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 import "../spa.css";
 
 export default function BurmanSpaFnbPage() {
-
-  const supabase = createClient();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,15 +14,9 @@ export default function BurmanSpaFnbPage() {
 
     async function loadData() {
 
-      const { data: categoriesData = [] } =
-        await supabase
-          .from("spa_categories")
-          .select(`
-            *,
-            spa_products(*)
-          `)
-          .eq("type", "fnb")
-          .order("position");
+      const response = await fetch("/api/public-spa/burman?type=fnb");
+      const payload = response.ok ? await response.json() : { categories: [] };
+      const categoriesData = payload.categories || [];
 
       setCategories(categoriesData);
       setLoading(false);

@@ -91,6 +91,7 @@ function SectionLabel({
 
 export default function DashboardLayout({
   children,
+  workspace,
 }) {
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
@@ -335,7 +336,7 @@ export default function DashboardLayout({
             <div className="so-user-meta">
 
               <div className="so-user-name">
-                Burman Hotel OÜ
+                {workspace?.organization?.name || "Vaxeron"}
               </div>
 
               <div className="so-user-tag">
@@ -365,7 +366,7 @@ export default function DashboardLayout({
         <header className="so-workspace-bar">
           <div className="so-workspace-context">
             <span>Workspace</span>
-            <strong>Burman Hotel</strong>
+            <strong>{workspace?.property?.name || workspace?.organization?.name || "Workspace"}</strong>
           </div>
 
           <div className="so-workspace-actions">

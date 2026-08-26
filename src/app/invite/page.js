@@ -203,6 +203,16 @@ export default function InvitePage() {
         throw profileError;
       }
 
+      const { error: membershipError } = await supabase.rpc(
+        "activate_current_memberships"
+      );
+      // During the additive rollout the RPC may not exist until the tenant
+      // enforcement migration is applied. Existing Burman invitations retain
+      // their legacy behaviour in that short transition window.
+      if (membershipError && !["PGRST202", "42883"].includes(membershipError.code)) {
+        throw membershipError;
+      }
+
       /* ===============================================
          COMPLETE
       =============================================== */

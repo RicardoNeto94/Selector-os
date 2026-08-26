@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient as createCookieClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/server/requireAdministrator";
+import { resolveTenantContext } from "@/lib/server/tenantContext";
 
 export async function requireDashboardUser() {
   const cookieClient = await createCookieClient();
@@ -9,7 +10,14 @@ export async function requireDashboardUser() {
   const user = authData?.user ?? null;
 
   if (authError || !user) {
-    return { user: null, profile: null, roles: [], allowed: false, reason: "session" };
+    return {
+      user: null,
+      profile: null,
+      roles: [],
+      tenant: null,
+      allowed: false,
+      reason: "session",
+    };
   }
 
   const admin = createAdminClient();
@@ -21,6 +29,22 @@ export async function requireDashboardUser() {
   if (profileResult.error || rolesResult.error) throw profileResult.error || rolesResult.error;
   const profile = profileResult.data;
   const roles = (rolesResult.data ?? []).map((row) => row.roles?.slug).filter(Boolean);
-  const allowed = profile?.status === "active" && roles.length > 0;
-  return { user, profile, roles, allowed, reason: allowed ? null : "approval" };
+  const accountIsActive = profile?.status === "active";
+  const tenant = accountIsActive
+    ? await resolveTenantContext(admin, user.id)
+    : null;
+  // Tenant membership is the source of workspace access. Legacy user_roles
+  // remain available for feature-level permissions during the transition, but
+  // a newly provisioned organization owner must not depend on a Burman-era
+  // role row in order to enter their own workspace.
+  const allowed = accountIsActive && Boolean(tenant?.organization);
+
+  return {
+    user,
+    profile,
+    roles,
+    tenant,
+    allowed,
+    reason: allowed ? null : "approval",
+  };
 }

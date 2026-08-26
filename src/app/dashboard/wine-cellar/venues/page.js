@@ -70,8 +70,6 @@ export default function VenueWinesPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  const RESTAURANT_ID = "0a8fb8bb-b4c8-4f05-9874-929637521f58";
-
   const LOCATION_TYPES = [
     ["master_cellar", "Master cellar"],
     ["venue_cellar", "Venue cellar"],
@@ -91,6 +89,7 @@ export default function VenueWinesPage() {
   };
 
   const [locations, setLocations] = useState([]);
+  const [restaurantId, setRestaurantId] = useState(null);
   const [inventory, setInventory] = useState([]);
   const [menus, setMenus] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -127,6 +126,7 @@ export default function VenueWinesPage() {
         inventoryRows,
         menuItemRows,
         valuationRows,
+        restaurantResult,
       ] = await Promise.all([
         supabase
           .from("wine_locations")
@@ -184,11 +184,19 @@ export default function VenueWinesPage() {
             .select("wine_id,location_id,cost_covered_quantity,unit_inventory_cost,unit_sale_price_net,unit_sale_price_gross")
             .order("location_id", { ascending: true })
         ),
+
+        supabase
+          .from("restaurants")
+          .select("id")
+          .order("id")
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       if (locationsResult.error) throw locationsResult.error;
       if (menusResult.error) throw menusResult.error;
       if (mappingsResult.error) throw mappingsResult.error;
+      if (restaurantResult.error) throw restaurantResult.error;
 
       setLocations(locationsResult.data || []);
       setInventory(inventoryRows);
@@ -196,6 +204,7 @@ export default function VenueWinesPage() {
       setStoreMappings(mappingsResult.data || []);
       setMenuItems(menuItemRows);
       setInventoryValuations(valuationRows);
+      setRestaurantId(restaurantResult.data?.id || null);
     } catch (error) {
       console.error("LOCATIONS LOAD ERROR:", error);
       setLoadError(
@@ -286,6 +295,10 @@ export default function VenueWinesPage() {
       setActionError("Location name is required.");
       return;
     }
+    if (!restaurantId) {
+      setActionError("The active hospitality workspace could not be resolved.");
+      return;
+    }
 
     setSavingForm(true);
     setActionError("");
@@ -295,7 +308,7 @@ export default function VenueWinesPage() {
       const { data, error } = await supabase.rpc(
         "create_wine_location",
         {
-          p_restaurant_id: RESTAURANT_ID,
+          p_restaurant_id: restaurantId,
           p_name: form.name.trim(),
           p_location_type: form.location_type,
           p_parent_location_id:

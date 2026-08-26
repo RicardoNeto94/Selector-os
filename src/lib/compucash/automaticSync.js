@@ -1,36 +1,45 @@
 import "server-only";
 import { CompuCashClient } from "./client";
-import { COMPUCASH_STORE_TARGETS } from "./constants";
 import {
   buildCompuCashInventoryPlan,
   buildCompuCashPreview,
   validateCompuCashSync,
 } from "./preview";
-import { getCompuCashConfig } from "./server";
+import { getCompuCashTenantRuntime } from "./server";
 import { buildChangedInventoryRows, checksumInventoryRows } from "./syncPlan";
 import { refreshCompuCashBtgSuggestions } from "./btgSuggestions";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
+import {
+  scopeTenantQuery,
+  tenantWriteFields,
+} from "@/lib/server/tenantContext";
 
-export async function runAutomaticCompuCashSync({ admin, triggerSource = "cron" }) {
+export async function runAutomaticCompuCashSync({
+  admin,
+  tenant,
+  triggerSource = "cron",
+}) {
   const startedAt = new Date().toISOString();
   if (process.env.COMPUCASH_SYNC_WRITES_ENABLED !== "true") {
     throw new Error("Compucash inventory writes are disabled.");
   }
 
-  const client = new CompuCashClient(getCompuCashConfig());
+  const runtime = await getCompuCashTenantRuntime({ admin, tenant });
+  const scopeRows = (query) => scopeTenantQuery(query, tenant);
+  const client = new CompuCashClient(runtime.config);
   await client.authenticate();
   const [rawStores, wines, aliases, currentRows, locations] = await Promise.all([
     client.getStores(),
-    fetchAllRows(admin, "wines", "id,sku,business_product_number,business_barcode"),
-    fetchAllRows(admin, "wine_business_aliases", "wine_id,business_product_id,business_product_number,business_barcode"),
-    fetchAllRows(admin, "wine_inventory", "wine_id,location_id,quantity"),
-    fetchAllRows(admin, "wine_locations", "id,name"),
+    fetchAllRows(admin, "wines", "id,sku,business_product_number,business_barcode", scopeRows),
+    fetchAllRows(admin, "wine_business_aliases", "wine_id,business_product_id,business_product_number,business_barcode", scopeRows),
+    fetchAllRows(admin, "wine_inventory", "wine_id,location_id,quantity", scopeRows),
+    fetchAllRows(admin, "wine_locations", "id,name", scopeRows),
   ]);
   const rawProducts = await client.getProducts({
-    storeIds: COMPUCASH_STORE_TARGETS.map((row) => row.externalStoreId),
+    storeIds: runtime.storeTargets.map((row) => row.externalStoreId),
   });
-  const preview = buildCompuCashPreview({ rawStores, rawProducts, storeTargets: COMPUCASH_STORE_TARGETS, wines, aliases });
-  const plan = buildCompuCashInventoryPlan({ rawProducts, storeTargets: COMPUCASH_STORE_TARGETS, wines, aliases });
+  const preview = buildCompuCashPreview({ rawStores, rawProducts, storeTargets: runtime.storeTargets, wines, aliases });
+  const plan = buildCompuCashInventoryPlan({ rawProducts, storeTargets: runtime.storeTargets, wines, aliases });
   const validation = validateCompuCashSync({ preview, plan });
   if (!validation.safe) {
     throw new Error(`Compucash safety validation failed: ${validation.failures.join(", ")}`);
@@ -40,7 +49,7 @@ export async function runAutomaticCompuCashSync({ admin, triggerSource = "cron" 
     plannedRows: plan.rows,
     currentRows,
     locations,
-    storeTargets: COMPUCASH_STORE_TARGETS,
+    storeTargets: runtime.storeTargets,
     replaceMappedLocationInventory: true,
   });
   const maximumChangedRows = Number(process.env.COMPUCASH_MAX_CHANGED_ROWS || 3000);
@@ -65,7 +74,8 @@ export async function runAutomaticCompuCashSync({ admin, triggerSource = "cron" 
   const btgSuggestions = await refreshCompuCashBtgSuggestions({
     admin,
     rawProducts,
-    storeTargets: COMPUCASH_STORE_TARGETS,
+    storeTargets: runtime.storeTargets,
+    tenant,
   });
 
   const summary = {
@@ -83,22 +93,41 @@ export async function runAutomaticCompuCashSync({ admin, triggerSource = "cron" 
     result,
     btgSuggestions,
   };
-  await recordRun(admin, summary);
+  await recordRun(admin, summary, tenant);
+  if (runtime.connection?.id) {
+    const connectionUpdate = await admin
+      .from("integration_connections")
+      .update({
+        last_successful_sync_at: summary.completedAt,
+        updated_at: summary.completedAt,
+      })
+      .eq("id", runtime.connection.id)
+      .eq("organization_id", tenant.organization.id);
+    if (connectionUpdate.error) {
+      console.error("COMPUCASH CONNECTION STATUS ERROR:", connectionUpdate.error);
+    }
+  }
   return summary;
 }
 
-export async function recordFailedCompuCashRun(admin, error, triggerSource = "cron") {
+export async function recordFailedCompuCashRun(
+  admin,
+  error,
+  triggerSource = "cron",
+  tenant = null
+) {
   await recordRun(admin, {
     success: false,
     triggerSource,
     startedAt: new Date().toISOString(),
     completedAt: new Date().toISOString(),
     error: error?.message || "Unknown Compucash sync error",
-  });
+  }, tenant);
 }
 
-async function recordRun(admin, run) {
+async function recordRun(admin, run, tenant) {
   const response = await admin.from("compucash_sync_runs").insert({
+    ...tenantWriteFields(tenant),
     trigger_source: run.triggerSource,
     status: run.success ? "succeeded" : "failed",
     checksum: run.checksum ?? null,

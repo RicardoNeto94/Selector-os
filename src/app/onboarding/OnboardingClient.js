@@ -96,18 +96,21 @@ export default function OnboardingClient({ existingRestaurant }) {
         if (error) throw error;
         upserted = data;
       } else {
-        // Create new restaurant
-        const { data, error } = await supabase
-          .from("restaurants")
-          .insert({
-            ...payload,
-            owner_id: user.id,
-          })
-          .select("*")
-          .maybeSingle();
+        // Provision the organization, first property, memberships and
+        // restaurant atomically. The database derives ownership from auth.uid().
+        const { data, error } = await supabase.rpc(
+          "provision_hospitality_workspace",
+          {
+            p_name: payload.name,
+            p_slug: payload.slug,
+            p_location: payload.location,
+            p_cuisine: payload.cuisine,
+            p_plan: selectedPlan,
+          }
+        );
 
         if (error) throw error;
-        upserted = data;
+        upserted = data?.restaurant || null;
       }
 
       if (!upserted || !upserted.id) {
