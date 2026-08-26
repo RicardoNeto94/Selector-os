@@ -36,6 +36,13 @@ const nextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/selectoros-logo.png",
+        headers: [
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          { key: "Cache-Control", value: "public, max-age=604800, immutable" },
+        ],
+      },
       { source: "/dashboard/:path*", headers: [{ key: "Cache-Control", value: "private, no-store, no-cache, must-revalidate" }] },
     ];
   },
