@@ -13,6 +13,7 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
   ShieldCheckIcon,
+  TrashIcon,
   UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -51,6 +52,9 @@ export default function TeamAccessPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [inviting, setInviting] = useState(false);
   const [resendingUserId, setResendingUserId] = useState("");
+  const [removingUserId, setRemovingUserId] = useState("");
+  const [memberToRemove, setMemberToRemove] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState("");
   const [team, setTeam] = useState([]);
   const [roles, setRoles] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -86,6 +90,7 @@ export default function TeamAccessPage() {
       setRoles(result.roles || []);
       setLocations(result.locations || []);
       setWorkspace(result.workspace || null);
+      setCurrentUserId(result.currentUserId || "");
     } catch (error) {
       console.error("TEAM LOAD ERROR:", error);
       setErrorMessage(error?.message || "Unable to load team access.");
@@ -104,18 +109,19 @@ export default function TeamAccessPage() {
   }, [search, statusFilter, pageSize]);
 
   useEffect(() => {
-    if (!showInviteModal) return undefined;
+    if (!showInviteModal && !memberToRemove) return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKeyDown = (event) => {
       if (event.key === "Escape" && !inviting) setShowInviteModal(false);
+      if (event.key === "Escape" && !removingUserId) setMemberToRemove(null);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [showInviteModal, inviting]);
+  }, [showInviteModal, memberToRemove, inviting, removingUserId]);
 
   const filteredTeam = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -234,6 +240,28 @@ export default function TeamAccessPage() {
       setErrorMessage(error?.message || "Unable to resend access email.");
     } finally {
       setResendingUserId("");
+    }
+  }
+
+  async function removeTeamMember() {
+    if (!memberToRemove) return;
+    setRemovingUserId(memberToRemove.id);
+    setMessage("");
+    setErrorMessage("");
+    try {
+      const response = await authenticatedRequest(`/api/team/${memberToRemove.id}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || "Unable to remove this team member.");
+      setMemberToRemove(null);
+      setMessage(result?.message || `${displayName(memberToRemove)} was removed from this workspace.`);
+      await loadData({ quiet: true });
+    } catch (error) {
+      console.error("TEAM MEMBER REMOVAL ERROR:", error);
+      setErrorMessage(error?.message || "Unable to remove this team member.");
+    } finally {
+      setRemovingUserId("");
     }
   }
 
@@ -391,6 +419,17 @@ export default function TeamAccessPage() {
                       <span className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${STATUS_STYLE[status] || STATUS_STYLE.pending}`}>
                         {status}
                       </span>
+                      {member.id !== currentUserId && (
+                        <button
+                          type="button"
+                          onClick={() => setMemberToRemove(member)}
+                          aria-label={`Remove ${displayName(member)}`}
+                          title="Remove from workspace"
+                          className="grid h-8 w-8 place-items-center rounded-full border border-[#ead9d5] bg-white text-[#9a5547] transition hover:border-[#d9a99f] hover:bg-[#fff4f1]"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </article>
                 );
@@ -498,6 +537,38 @@ export default function TeamAccessPage() {
               </div>
             </div>
           </form>
+        </div>
+      )}
+
+      {memberToRemove && (
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-[#0d211b]/55 p-4 backdrop-blur-md" onMouseDown={() => !removingUserId && setMemberToRemove(null)}>
+          <section onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/80 bg-[#f8faf9] shadow-[0_35px_100px_rgba(8,27,21,.34)]">
+            <div className="flex items-start justify-between border-b border-[#dce7e2] px-6 py-5">
+              <div>
+                <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[.24em] text-[#9a5547]"><TrashIcon className="h-4 w-4" /> Workspace access</div>
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em] text-[#17372d]">Remove {displayName(memberToRemove)}?</h2>
+              </div>
+              <button type="button" disabled={Boolean(removingUserId)} onClick={() => setMemberToRemove(null)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#d6e2dd] bg-white text-[#597168] disabled:opacity-50"><XMarkIcon className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4 px-6 py-6 text-sm leading-6 text-[#667c74]">
+              <p>
+                This immediately removes access to <strong className="text-[#17372d]">{workspace?.propertyName || workspace?.organizationName || "this workspace"}</strong>, its venues and operational data.
+              </p>
+              <div className="rounded-2xl border border-[#eadbd6] bg-[#fff5f2] px-4 py-3 text-xs leading-5 text-[#875044]">
+                {memberToRemove.status === "pending"
+                  ? "The pending invitation will stop working. If this is their only Vaxeron workspace, the unused account will also be deleted."
+                  : "If this is their only Vaxeron workspace, their account will also be deleted. Access in any other customer workspace is preserved."}
+              </div>
+              <p className="text-xs text-[#879991]">This action cannot be undone. You can invite the person again later.</p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#dce7e2] bg-white/70 px-6 py-4">
+              <button type="button" disabled={Boolean(removingUserId)} onClick={() => setMemberToRemove(null)} className="h-11 rounded-full border border-[#d3dfda] bg-white px-5 text-xs font-semibold disabled:opacity-50">Cancel</button>
+              <button type="button" disabled={Boolean(removingUserId)} onClick={removeTeamMember} className="inline-flex h-11 items-center gap-2 rounded-full bg-[#8f493d] px-5 text-xs font-semibold text-white transition hover:bg-[#783c33] disabled:cursor-wait disabled:opacity-55">
+                {removingUserId && <ArrowPathIcon className="h-4 w-4 animate-spin" />}
+                {removingUserId ? "Removing…" : "Remove access"}
+              </button>
+            </div>
+          </section>
         </div>
       )}
     </main>

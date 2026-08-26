@@ -143,6 +143,7 @@ export async function GET(request) {
       team,
       roles: rolesResult.data || [],
       locations: locationsResult.data || [],
+      currentUserId: authorization.user.id,
       workspace: {
         organizationName: tenant.organization?.name || "Vaxeron",
         propertyName: tenant.property?.name || tenant.organization?.name || "Workspace",
