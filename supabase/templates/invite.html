@@ -3,7 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light only" />
     <title>Your invitation to Vaxeron</title>
+    <style>
+      :root { color-scheme: light only; }
+      body, table, td { color-scheme: light only !important; }
+    </style>
   </head>
   <body style="margin:0;padding:0;background:#eeefe9;color:#24332e;font-family:Arial,Helvetica,sans-serif;">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
@@ -18,7 +24,7 @@
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td valign="middle">
-                      <img src="https://vaxeron.com/selectoros-logo.png" width="28" height="35" alt="Vaxeron" style="display:inline-block;vertical-align:middle;border:0;" />
+                      <img src="https://vaxeron.com/selectoros-logo.png" width="28" height="35" alt="" style="display:inline-block;width:28px;height:35px;vertical-align:middle;border:0;outline:none;text-decoration:none;" />
                       <span style="display:inline-block;margin-left:13px;vertical-align:middle;color:#202824;font-size:16px;font-weight:600;letter-spacing:5px;">VAXERON</span>
                     </td>
                     <td align="right" valign="middle" style="color:#8a928d;font-size:9px;letter-spacing:2px;text-transform:uppercase;">Private invitation</td>
@@ -55,11 +61,11 @@
             </tr>
             <tr>
               <td style="padding:0 38px 31px;">
-                <p style="margin:0 0 17px;color:#6f7974;font-size:12px;line-height:1.7;">Vaxeron brings guest experiences, wine operations and connected hospitality teams into one clear workspace.</p>
+                <p style="margin:0 0 17px;color:#6f7974;font-size:12px;line-height:1.7;">Use the secure button below to review the workspace and create your account.</p>
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td style="border-radius:999px;background:#243a33;">
-                      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 25px;color:#f7f5ef;font-size:10px;font-weight:600;letter-spacing:1.8px;text-decoration:none;text-transform:uppercase;">Review invitation &nbsp;→</a>
+                      <a href="{{ .SiteURL }}/invite/accept?token_hash={{ .TokenHash }}" style="display:inline-block;padding:16px 25px;color:#f7f5ef;font-size:10px;font-weight:600;letter-spacing:1.8px;text-decoration:none;text-transform:uppercase;">Review invitation &nbsp;→</a>
                     </td>
                   </tr>
                 </table>
