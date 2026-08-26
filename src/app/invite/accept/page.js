@@ -17,6 +17,7 @@ export default async function AcceptInvitationPage({ searchParams }) {
   const params = await searchParams;
   const tokenHash = params?.token_hash;
   const error = params?.error;
+  const verificationType = params?.type === "recovery" ? "recovery" : "invite";
   const canAccept = validTokenHash(tokenHash) && !error;
 
   return (
@@ -48,8 +49,9 @@ export default async function AcceptInvitationPage({ searchParams }) {
             {canAccept ? (
               <form method="post" action="/api/auth/accept-invite">
                 <input type="hidden" name="token_hash" value={tokenHash} />
+                <input type="hidden" name="verification_type" value={verificationType} />
                 <button type="submit" className="vx-auth-submit">
-                  <span>Accept invitation</span>
+                  <span>{verificationType === "recovery" ? "Continue securely" : "Accept invitation"}</span>
                   <ArrowRightIcon aria-hidden="true" />
                 </button>
               </form>

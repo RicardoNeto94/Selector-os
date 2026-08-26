@@ -24,13 +24,16 @@ export async function POST(request) {
 
   const formData = await request.formData();
   const tokenHash = formData.get("token_hash");
+  const verificationType = formData.get("verification_type") === "recovery"
+    ? "recovery"
+    : "invite";
   if (!validTokenHash(tokenHash)) return redirectToError(request);
 
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
-      type: "invite",
+      type: verificationType,
     });
 
     if (error) {

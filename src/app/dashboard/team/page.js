@@ -50,6 +50,7 @@ export default function TeamAccessPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [resendingUserId, setResendingUserId] = useState("");
   const [team, setTeam] = useState([]);
   const [roles, setRoles] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -215,6 +216,27 @@ export default function TeamAccessPage() {
     }
   }
 
+  async function resendInvitation(member) {
+    setResendingUserId(member.id);
+    setMessage("");
+    setErrorMessage("");
+    try {
+      const response = await authenticatedRequest("/api/team/resend-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: member.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || "Unable to resend access email.");
+      setMessage(`A new secure access email was sent to ${member.email}.`);
+    } catch (error) {
+      console.error("TEAM INVITATION RESEND ERROR:", error);
+      setErrorMessage(error?.message || "Unable to resend access email.");
+    } finally {
+      setResendingUserId("");
+    }
+  }
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#edf3ef] px-4 py-5 text-[#17372d] sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-[1580px] space-y-5">
@@ -354,7 +376,18 @@ export default function TeamAccessPage() {
                         {(member.roles || []).some((role) => role.slug === "administrator") ? "All workspace venues" : locationNames.join(", ") || "No venues assigned"}
                       </div>
                     </div>
-                    <div className="flex lg:justify-end">
+                    <div className="flex items-center gap-2 lg:justify-end">
+                      {status === "pending" && (
+                        <button
+                          type="button"
+                          onClick={() => resendInvitation(member)}
+                          disabled={Boolean(resendingUserId)}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#d9e4df] bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.1em] text-[#49675d] transition hover:border-[#9ab5aa] disabled:cursor-wait disabled:opacity-55"
+                        >
+                          <ArrowPathIcon className={`h-3.5 w-3.5 ${resendingUserId === member.id ? "animate-spin" : ""}`} />
+                          {resendingUserId === member.id ? "Sending" : "Resend access"}
+                        </button>
+                      )}
                       <span className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${STATUS_STYLE[status] || STATUS_STYLE.pending}`}>
                         {status}
                       </span>
