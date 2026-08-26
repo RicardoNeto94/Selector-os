@@ -52,7 +52,7 @@ export default async function AcceptInvitationPage({ searchParams }) {
               {canAccept
                 ? "Confirm that you want to accept this private Vaxeron invitation. Your secure account session will only be created after you continue."
                 : showCodeEntry
-                  ? "Use the email address and six-digit code shown in your invitation email. The code is verified only after you submit it here."
+                  ? "Use the email address and invitation code shown in your email. The code is verified only after you submit it here."
                   : "This invitation link is invalid, expired or has already been used. Ask the workspace administrator to send a new invitation."}
             </p>
 
@@ -80,16 +80,16 @@ export default async function AcceptInvitationPage({ searchParams }) {
                   />
                 </label>
                 <label className="vx-auth-field vx-invite-code-field">
-                  <span>Six-digit invitation code</span>
+                  <span>Invitation code</span>
                   <input
                     type="text"
                     name="otp_code"
                     inputMode="numeric"
                     autoComplete="one-time-code"
-                    pattern="[0-9]{6}"
+                    pattern="[0-9]{6,8}"
                     minLength={6}
-                    maxLength={6}
-                    placeholder="000000"
+                    maxLength={8}
+                    placeholder="00000000"
                     required
                   />
                 </label>
