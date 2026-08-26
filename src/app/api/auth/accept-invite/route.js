@@ -5,7 +5,33 @@ function validTokenHash(value) {
   return typeof value === "string" && value.length >= 20 && value.length <= 512 && !/\s/.test(value);
 }
 
-function redirectToError(request) {
+function firstForwardedValue(value) {
+  return value?.split(",")[0]?.trim() || "";
+}
+
+function trustedRequestOrigins(request) {
+  const requestUrl = new URL(request.url);
+  const forwardedHost = firstForwardedValue(request.headers.get("x-forwarded-host"));
+  const forwardedProtocol =
+    firstForwardedValue(request.headers.get("x-forwarded-proto")) || requestUrl.protocol.replace(":", "");
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const origins = new Set([requestUrl.origin]);
+
+  if (forwardedHost) origins.add(`${forwardedProtocol}://${forwardedHost}`);
+
+  if (configuredSiteUrl) {
+    try {
+      origins.add(new URL(configuredSiteUrl).origin);
+    } catch {
+      // A malformed optional site URL must not break invitation verification.
+    }
+  }
+
+  return origins;
+}
+
+function redirectToError(request, reason) {
+  console.error(`INVITE_ACCEPT_REJECTED reason=${reason}`);
   return NextResponse.redirect(
     new URL("/invite/accept?error=invalid_invitation", request.url),
     { status: 303 }
@@ -13,13 +39,14 @@ function redirectToError(request) {
 }
 
 export async function POST(request) {
-  const requestUrl = new URL(request.url);
   const origin = request.headers.get("origin");
-  if (origin && origin !== requestUrl.origin) return redirectToError(request);
+  if (origin && !trustedRequestOrigins(request).has(origin)) {
+    return redirectToError(request, "untrusted_origin");
+  }
 
   const contentType = request.headers.get("content-type") || "";
   if (!contentType.includes("application/x-www-form-urlencoded") && !contentType.includes("multipart/form-data")) {
-    return redirectToError(request);
+    return redirectToError(request, "unsupported_content_type");
   }
 
   const formData = await request.formData();
@@ -27,7 +54,7 @@ export async function POST(request) {
   const verificationType = formData.get("verification_type") === "recovery"
     ? "recovery"
     : "invite";
-  if (!validTokenHash(tokenHash)) return redirectToError(request);
+  if (!validTokenHash(tokenHash)) return redirectToError(request, "invalid_token_shape");
 
   try {
     const supabase = await createClient();
@@ -47,17 +74,17 @@ export async function POST(request) {
         return NextResponse.redirect(new URL("/invite", request.url), { status: 303 });
       }
 
-      console.error("Invitation verification failed:", {
-        message: error.message,
-        code: error.code,
-        status: error.status,
-      });
-      return redirectToError(request);
+      console.error(
+        `INVITE_OTP_FAILED code=${error.code || "unknown"} status=${error.status || "unknown"} message=${error.message || "unknown"}`
+      );
+      return redirectToError(request, "otp_verification_failed");
     }
 
     return NextResponse.redirect(new URL("/invite", request.url), { status: 303 });
   } catch (error) {
-    console.error("Unexpected invitation verification error:", error);
-    return redirectToError(request);
+    console.error(
+      `INVITE_ACCEPT_UNEXPECTED message=${error?.message || "unknown"}`
+    );
+    return redirectToError(request, "unexpected_error");
   }
 }
