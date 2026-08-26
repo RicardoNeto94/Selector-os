@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your invitation to Vaxeron</title>
+  </head>
+  <body style="margin:0;padding:0;background:#eeefe9;color:#24332e;font-family:Arial,Helvetica,sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+      {{ .Data.invited_by_name }} invited you to join {{ .Data.property_name }} in Vaxeron.
+    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#eeefe9;">
+      <tr>
+        <td align="center" style="padding:34px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:620px;background:#f8f8f4;border:1px solid #dfe2dc;border-radius:24px;overflow:hidden;">
+            <tr>
+              <td style="padding:30px 38px 25px;border-bottom:1px solid #e3e5df;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td valign="middle">
+                      <img src="https://vaxeron.com/selectoros-logo.png" width="28" height="35" alt="Vaxeron" style="display:inline-block;vertical-align:middle;border:0;" />
+                      <span style="display:inline-block;margin-left:13px;vertical-align:middle;color:#202824;font-size:16px;font-weight:600;letter-spacing:5px;">VAXERON</span>
+                    </td>
+                    <td align="right" valign="middle" style="color:#8a928d;font-size:9px;letter-spacing:2px;text-transform:uppercase;">Private invitation</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:42px 38px 20px;">
+                <p style="margin:0 0 18px;color:#9a7943;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;">{{ .Data.organization_name }}</p>
+                <h1 style="margin:0;color:#24332e;font-family:Georgia,'Times New Roman',serif;font-size:38px;font-weight:400;line-height:1.08;letter-spacing:-1.2px;">
+                  {{ if .Data.first_name }}Welcome, {{ .Data.first_name }}.{{ else }}You are invited.{{ end }}
+                </h1>
+                <p style="margin:21px 0 0;color:#717b76;font-size:14px;line-height:1.75;">
+                  <strong style="color:#414c47;font-weight:600;">{{ .Data.invited_by_name }}</strong> has invited you to join <strong style="color:#414c47;font-weight:600;">{{ .Data.property_name }}</strong> in Vaxeron as {{ .Data.role_name }}.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px 38px 28px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #dde1db;border-bottom:1px solid #dde1db;">
+                  <tr>
+                    <td width="50%" style="padding:16px 12px 16px 0;border-right:1px solid #dde1db;">
+                      <span style="display:block;margin-bottom:6px;color:#929a95;font-size:8px;letter-spacing:1.7px;text-transform:uppercase;">Workspace</span>
+                      <strong style="color:#36433e;font-size:12px;font-weight:600;">{{ .Data.property_name }}</strong>
+                    </td>
+                    <td width="50%" style="padding:16px 0 16px 18px;">
+                      <span style="display:block;margin-bottom:6px;color:#929a95;font-size:8px;letter-spacing:1.7px;text-transform:uppercase;">Access level</span>
+                      <strong style="color:#36433e;font-size:12px;font-weight:600;">{{ .Data.role_name }}</strong>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 38px 31px;">
+                <p style="margin:0 0 17px;color:#6f7974;font-size:12px;line-height:1.7;">Vaxeron brings guest experiences, wine operations and connected hospitality teams into one clear workspace.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="border-radius:999px;background:#243a33;">
+                      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 25px;color:#f7f5ef;font-size:10px;font-weight:600;letter-spacing:1.8px;text-decoration:none;text-transform:uppercase;">Review invitation &nbsp;→</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:18px 0 0;color:#969d98;font-size:9px;line-height:1.6;">For your security, use the invitation only if you recognise {{ .Data.organization_name }} and the sender named above. Invitation links expire automatically.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 38px;background:#24332e;color:#c7cec9;">
+                <p style="margin:0 0 6px;color:#f3f1e9;font-family:Georgia,'Times New Roman',serif;font-size:17px;">Hospitality, thoughtfully connected.</p>
+                <p style="margin:0;color:#9fa9a3;font-size:9px;line-height:1.7;">This access invitation was initiated by {{ .Data.organization_name }}. Vaxeron will never ask you to send a password by email.</p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:18px 0 0;color:#909792;font-size:8px;letter-spacing:1px;text-transform:uppercase;">© Vaxeron · Private hospitality workspace</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

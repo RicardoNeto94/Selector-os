@@ -111,6 +111,27 @@ export async function POST(request) {
       .trim()
       .toLowerCase();
 
+    const { data: inviterProfile, error: inviterProfileError } =
+      await supabaseAdmin
+        .from("profiles")
+        .select("first_name,last_name,email")
+        .eq("id", authorizationResult.user.id)
+        .maybeSingle();
+    if (inviterProfileError) throw inviterProfileError;
+
+    const inviterName = [
+      inviterProfile?.first_name,
+      inviterProfile?.last_name,
+    ]
+      .map((value) => value?.trim())
+      .filter(Boolean)
+      .join(" ") || authorizationResult.user.email || "Your administrator";
+
+    const organizationName =
+      tenant.organization?.name?.trim() || "Your hospitality company";
+    const propertyName =
+      tenant.property?.name?.trim() || organizationName;
+
     const {
       data: invitationData,
       error: invitationError,
@@ -124,6 +145,14 @@ export async function POST(request) {
             job_title: jobTitle?.trim() || "",
             department:
               department?.trim() || "",
+            organization_name: organizationName,
+            property_name: propertyName,
+            invited_by_name: inviterName,
+            invited_by_email:
+              inviterProfile?.email || authorizationResult.user.email || "",
+            role_name: role.name,
+            venue_count: uniqueLocationIds.length,
+            invitation_context_version: 1,
           },
           redirectTo: `${
   process.env.NEXT_PUBLIC_SITE_URL ||

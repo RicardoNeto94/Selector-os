@@ -361,3 +361,53 @@
   .vx-auth-form-wrap,.vx-auth-story>img,.vx-auth-story-copy { animation:none; }
   .vx-auth-submit,.vx-auth-submit svg,.vx-auth-back svg { transition:none; }
 }
+
+/* VAXERON invitation — contextual welcome before account activation */
+.vx-invite-panel { overflow-y:auto; }
+.vx-invite-wrap { width:min(100%,520px); padding-top:48px; padding-bottom:34px; }
+.vx-invite-intro { max-width:500px; margin-bottom:26px; }
+.vx-invite-intro strong { color:#454d48; font-weight:500; }
+.vx-invite-context {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  margin:0 0 25px; border-top:1px solid var(--auth-line); border-bottom:1px solid var(--auth-line);
+}
+.vx-invite-context>div { min-width:0; padding:15px 14px 15px 0; }
+.vx-invite-context>div+div { padding-left:14px; border-left:1px solid var(--auth-line); }
+.vx-invite-context span { display:block; margin-bottom:6px; color:#959a95; font-size:8px; letter-spacing:.16em; text-transform:uppercase; }
+.vx-invite-context strong { display:block; overflow:hidden; color:#3b443f; font-size:11px; font-weight:500; line-height:1.4; text-overflow:ellipsis; white-space:nowrap; }
+.vx-invite-capabilities { display:grid; gap:10px; margin-bottom:25px; }
+.vx-invite-capabilities>div { display:grid; grid-template-columns:20px 1fr; gap:11px; align-items:start; }
+.vx-invite-capabilities svg { width:16px; height:16px; padding:2px; border:1px solid #aebbb5; border-radius:50%; color:#35554b; }
+.vx-invite-capabilities p { margin:0; color:#858b86; font-size:10px; line-height:1.55; }
+.vx-invite-capabilities strong { display:block; margin-bottom:1px; color:#4a534e; font-size:9px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; }
+.vx-invite-fineprint { margin:15px 0 0; color:#999e99; font-size:8px; line-height:1.65; }
+.vx-invite-step-back { display:inline-flex; align-items:center; gap:7px; margin:0 0 24px; padding:0; border:0; background:transparent; color:#777e79; cursor:pointer; font:inherit; font-size:9px; letter-spacing:.08em; text-transform:uppercase; }
+.vx-invite-step-back svg { width:13px; transition:transform 180ms ease; }
+.vx-invite-step-back:hover svg { transform:translateX(-3px); }
+.vx-invite-status { padding:42px 0; }
+.vx-invite-status-mark { width:46px; height:46px; display:grid; place-items:center; margin-bottom:26px; border:1px solid #cfd2cc; border-radius:50%; color:#5f7169; }
+.vx-invite-status-mark svg { width:19px; }
+.vx-invite-status-mark.is-loading { animation:vxInvitePulse 1.8s ease-in-out infinite; }
+.vx-invite-status .vx-auth-submit { width:100%; text-decoration:none; }
+@keyframes vxInvitePulse { 50% { border-color:#a38757; color:#9d7940; box-shadow:0 0 0 9px rgba(182,138,66,.07); } }
+@media (min-width:901px) and (max-height:850px) {
+  .vx-invite-wrap { padding-top:25px; padding-bottom:22px; }
+  .vx-invite-wrap .vx-auth-kicker { margin-bottom:14px; }
+  .vx-invite-wrap h1 { font-size:46px; }
+  .vx-invite-intro { margin:12px 0 18px; line-height:1.6; }
+  .vx-invite-context { margin-bottom:17px; }
+  .vx-invite-context>div { padding-top:11px; padding-bottom:11px; }
+  .vx-invite-capabilities { gap:7px; margin-bottom:17px; }
+  .vx-invite-fineprint { margin-top:10px; }
+}
+@media (max-width:520px) {
+  .vx-invite-wrap { padding-top:42px; }
+  .vx-invite-context { grid-template-columns:1fr; }
+  .vx-invite-context>div { padding:11px 0; }
+  .vx-invite-context>div+div { padding-left:0; border-top:1px solid var(--auth-line); border-left:0; }
+  .vx-invite-context strong { white-space:normal; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .vx-invite-status-mark.is-loading { animation:none; }
+  .vx-invite-step-back svg { transition:none; }
+}
