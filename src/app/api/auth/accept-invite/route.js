@@ -37,6 +37,16 @@ export async function POST(request) {
     });
 
     if (error) {
+      // A recipient may already have consumed the one-time token in this
+      // browser (for example before a deployment or after going back to the
+      // email). Preserve that legitimate session instead of presenting the
+      // used token as a failed invitation. The /invite page performs the
+      // authoritative pending-profile and membership validation server-side.
+      const { data: existingSession } = await supabase.auth.getUser();
+      if (existingSession?.user) {
+        return NextResponse.redirect(new URL("/invite", request.url), { status: 303 });
+      }
+
       console.error("Invitation verification failed:", {
         message: error.message,
         code: error.code,
