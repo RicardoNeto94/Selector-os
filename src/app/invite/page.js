@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -42,7 +42,7 @@ function expectedInvitationError(message) {
 }
 
 export default function InvitePage() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [stage, setStage] = useState("introduction");
@@ -85,22 +85,23 @@ export default function InvitePage() {
           );
         }
 
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("status")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (profileError) throw profileError;
-        if (profile?.status !== "pending") {
+        const validationResponse = await fetch("/api/team/activate", {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+          cache: "no-store",
+        });
+        const validation = await validationResponse.json();
+        if (!validationResponse.ok) {
           throw expectedInvitationError(
-            "This invitation has already been completed or is no longer active."
+            validation?.error || "This invitation is no longer active."
           );
         }
 
-        const metadata = user.user_metadata || {};
+        const metadata = validation.metadata || user.user_metadata || {};
         if (!active) return;
         setInvitation({
-          email: user.email || "",
+          email: validation.email || user.email || "",
           firstName: cleanText(metadata.first_name, ""),
           organizationName: cleanText(
             metadata.organization_name,
