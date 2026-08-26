@@ -43,6 +43,13 @@ export async function POST(request) {
       );
     }
 
+    if (!firstName?.trim() || !lastName?.trim()) {
+      return NextResponse.json(
+        { error: "First and last name are required." },
+        { status: 400 }
+      );
+    }
+
     if (!roleId) {
       return NextResponse.json(
         {
@@ -87,6 +94,12 @@ export async function POST(request) {
     }
 
     const uniqueLocationIds = [...new Set(locationIds)].filter(Boolean);
+    if (role.slug !== "administrator" && uniqueLocationIds.length === 0) {
+      return NextResponse.json(
+        { error: "Select at least one venue for this role." },
+        { status: 400 }
+      );
+    }
     if (uniqueLocationIds.length > 0) {
       const locationQuery = supabaseAdmin
         .from("wine_locations")
@@ -152,6 +165,8 @@ export async function POST(request) {
               inviterProfile?.email || authorizationResult.user.email || "",
             role_name: role.name,
             venue_count: uniqueLocationIds.length,
+            organization_id: tenant.organization.id,
+            property_id: tenant.property?.id || "",
             invitation_context_version: 1,
           },
           redirectTo: `${

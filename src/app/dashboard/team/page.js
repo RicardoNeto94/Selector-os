@@ -2,16 +2,23 @@
 
 export const dynamic = "force-dynamic";
 
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
+  ArrowPathIcon,
+  BuildingStorefrontIcon,
+  CheckCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EnvelopeIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  ShieldCheckIcon,
+  UserGroupIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { createClient } from "@/lib/supabase/client";
 
 const PAGE_SIZES = [10, 25, 50];
-
 const EMPTY_FORM = {
   firstName: "",
   lastName: "",
@@ -23,1105 +30,443 @@ const EMPTY_FORM = {
   locationIds: [],
 };
 
+const STATUS_STYLE = {
+  active: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  pending: "border-amber-200 bg-amber-50 text-amber-700",
+  inactive: "border-slate-200 bg-slate-50 text-slate-500",
+};
+
+function initials(member) {
+  const value = [member.first_name, member.last_name].filter(Boolean).join(" ") || member.email || "?";
+  return value.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+}
+
+function displayName(member) {
+  return [member.first_name, member.last_name].filter(Boolean).join(" ").trim() || "Invited team member";
+}
+
 export default function TeamAccessPage() {
-  const supabase =
-    createClient();
+  const supabase = useMemo(() => createClient(), []);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [inviting, setInviting] = useState(false);
+  const [team, setTeam] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [workspace, setWorkspace] = useState(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [mounted, setMounted] =
-    useState(false);
+  const authenticatedRequest = useCallback(async (url, options = {}) => {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    const token = data?.session?.access_token;
+    if (!token) throw new Error("Your Vaxeron session has expired. Sign in again.");
+    return fetch(url, {
+      ...options,
+      headers: { ...options.headers, Authorization: `Bearer ${token}` },
+    });
+  }, [supabase]);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [inviting, setInviting] =
-    useState(false);
-
-  const [team, setTeam] =
-    useState([]);
-
-  const [roles, setRoles] =
-    useState([]);
-
-  const [locations, setLocations] =
-    useState([]);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [roleFilter, setRoleFilter] =
-    useState("all");
-
-  const [statusFilter, setStatusFilter] =
-    useState("all");
-
-  const [page, setPage] =
-    useState(1);
-
-  const [pageSize, setPageSize] =
-    useState(10);
-
-  const [
-    showInviteModal,
-    setShowInviteModal,
-  ] = useState(false);
-
-  const [form, setForm] =
-    useState(EMPTY_FORM);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const loadData = useCallback(async ({ quiet = false } = {}) => {
+    quiet ? setRefreshing(true) : setLoading(true);
+    setErrorMessage("");
+    try {
+      const response = await authenticatedRequest("/api/team");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || "Unable to load team access.");
+      setTeam(result.team || []);
+      setRoles(result.roles || []);
+      setLocations(result.locations || []);
+      setWorkspace(result.workspace || null);
+    } catch (error) {
+      console.error("TEAM LOAD ERROR:", error);
+      setErrorMessage(error?.message || "Unable to load team access.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [authenticatedRequest]);
 
   useEffect(() => {
-    setMounted(true);
     loadData();
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     setPage(1);
-  }, [
-    search,
-    roleFilter,
-    statusFilter,
-    pageSize,
-  ]);
+  }, [search, statusFilter, pageSize]);
 
-  async function loadData() {
-    setLoading(true);
-
-    try {
-      const [
-        profilesResponse,
-        rolesResponse,
-        locationsResponse,
-        userRolesResponse,
-        venueAccessResponse,
-      ] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select(`
-            id,
-            email,
-            first_name,
-            last_name,
-            phone,
-            job_title,
-            department,
-            status,
-            created_at
-          `)
-          .order("created_at", {
-            ascending: false,
-          }),
-
-        supabase
-          .from("roles")
-          .select(`
-            id,
-            name,
-            slug,
-            description
-          `)
-          .order("name"),
-
-        supabase
-          .from("wine_locations")
-          .select(`
-            id,
-            name
-          `)
-          .order("name"),
-
-        supabase
-          .from("user_roles")
-          .select(`
-            user_id,
-            role_id,
-            roles (
-              id,
-              name,
-              slug
-            )
-          `),
-
-        supabase
-          .from("user_venue_access")
-          .select(`
-            user_id,
-            location_id,
-            wine_locations (
-              id,
-              name
-            )
-          `),
-      ]);
-
-      if (profilesResponse.error) {
-        throw profilesResponse.error;
-      }
-
-      if (rolesResponse.error) {
-        throw rolesResponse.error;
-      }
-
-      if (locationsResponse.error) {
-        throw locationsResponse.error;
-      }
-
-      if (userRolesResponse.error) {
-        throw userRolesResponse.error;
-      }
-
-      if (venueAccessResponse.error) {
-        throw venueAccessResponse.error;
-      }
-
-      const profiles =
-        profilesResponse.data || [];
-
-      const userRoles =
-        userRolesResponse.data || [];
-
-      const venueAccess =
-        venueAccessResponse.data || [];
-
-      const teamRows = profiles.map(
-        (profile) => {
-          const assignedRoles =
-            userRoles
-              .filter(
-                (row) =>
-                  row.user_id === profile.id
-              )
-              .map((row) => row.roles)
-              .filter(Boolean);
-
-          const assignedLocations =
-            venueAccess
-              .filter(
-                (row) =>
-                  row.user_id === profile.id
-              )
-              .map(
-                (row) =>
-                  row.wine_locations
-              )
-              .filter(Boolean);
-
-          return {
-            ...profile,
-            roles: assignedRoles,
-            locations:
-              assignedLocations,
-          };
-        }
-      );
-
-      setTeam(teamRows);
-
-      setRoles(
-        rolesResponse.data || []
-      );
-
-      setLocations(
-        locationsResponse.data || []
-      );
-    } catch (error) {
-      console.error(
-        "TEAM LOAD ERROR:",
-        error
-      );
-
-      setErrorMessage(
-        error?.message ||
-          "Unable to load team access."
-      );
-    }
-
-    setLoading(false);
-  }
+  useEffect(() => {
+    if (!showInviteModal) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event) => {
+      if (event.key === "Escape" && !inviting) setShowInviteModal(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showInviteModal, inviting]);
 
   const filteredTeam = useMemo(() => {
-    const query = search
-      .trim()
-      .toLowerCase();
-
+    const query = search.trim().toLowerCase();
     return team.filter((member) => {
-      const fullName = [
-        member.first_name,
-        member.last_name,
-      ]
-        .filter(Boolean)
-        .join(" ");
-
       const haystack = [
-        fullName,
+        displayName(member),
         member.email,
         member.job_title,
         member.department,
-        ...(member.roles || []).map(
-          (role) => role.name
-        ),
-        ...(member.locations || []).map(
-          (location) => location.name
-        ),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      const roleMatch =
-        roleFilter === "all" ||
-        (member.roles || []).some(
-          (role) =>
-            role.id === roleFilter
-        );
-
-      const statusMatch =
-        statusFilter === "all" ||
-        member.status === statusFilter;
-
-      return (
-        (!query ||
-          haystack.includes(query)) &&
-        roleMatch &&
-        statusMatch
-      );
+        ...(member.roles || []).map((role) => role.name),
+        ...(member.locations || []).map((location) => location.name),
+      ].filter(Boolean).join(" ").toLowerCase();
+      return (!query || haystack.includes(query))
+        && (statusFilter === "all" || member.status === statusFilter);
     });
-  }, [
-    team,
-    search,
-    roleFilter,
-    statusFilter,
-  ]);
+  }, [team, search, statusFilter]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      filteredTeam.length / pageSize
-    )
-  );
+  const metrics = useMemo(() => ({
+    total: team.length,
+    active: team.filter((member) => member.status === "active").length,
+    pending: team.filter((member) => member.status === "pending").length,
+    administrators: team.filter((member) => (member.roles || []).some((role) => role.slug === "administrator")).length,
+  }), [team]);
 
-  const safePage = Math.min(
-    page,
-    totalPages
-  );
-
-  const start =
-    (safePage - 1) * pageSize;
-
-  const pageTeam = filteredTeam.slice(
-    start,
-    start + pageSize
-  );
-
-  const activeUsers = team.filter(
-    (member) =>
-      member.status === "active"
-  ).length;
-
-  const pendingUsers = team.filter(
-    (member) =>
-      member.status === "pending"
-  ).length;
-
-  const administrators = team.filter(
-    (member) =>
-      (member.roles || []).some(
-        (role) =>
-          role.slug === "administrator"
-      )
-  ).length;
+  const totalPages = Math.max(1, Math.ceil(filteredTeam.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageTeam = filteredTeam.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const selectedRole = roles.find((role) => role.id === form.roleId);
+  const isAdministrator = selectedRole?.slug === "administrator";
 
   function openInviteModal() {
-    setForm({
-      ...EMPTY_FORM,
-      roleId: roles[0]?.id || "",
-    });
-
+    setForm(EMPTY_FORM);
     setMessage("");
     setErrorMessage("");
     setShowInviteModal(true);
   }
 
-  function toggleLocation(locationId) {
-    setForm((current) => {
-      const exists =
-        current.locationIds.includes(
-          locationId
-        );
-
-      return {
-        ...current,
-        locationIds: exists
-          ? current.locationIds.filter(
-              (id) => id !== locationId
-            )
-          : [
-              ...current.locationIds,
-              locationId,
-            ],
-      };
-    });
+  function closeInviteModal() {
+    if (!inviting) setShowInviteModal(false);
   }
 
-  async function inviteTeamMember() {
-    if (!form.email.trim()) {
-      setErrorMessage(
-        "Email address is required."
-      );
+  function chooseRole(roleId) {
+    const role = roles.find((item) => item.id === roleId);
+    setForm((current) => ({
+      ...current,
+      roleId,
+      locationIds: role?.slug === "administrator" ? [] : current.locationIds,
+    }));
+  }
 
+  function toggleLocation(locationId) {
+    setForm((current) => ({
+      ...current,
+      locationIds: current.locationIds.includes(locationId)
+        ? current.locationIds.filter((id) => id !== locationId)
+        : [...current.locationIds, locationId],
+    }));
+  }
+
+  async function inviteTeamMember(event) {
+    event.preventDefault();
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setErrorMessage("Add the team member’s first and last name.");
       return;
     }
-
+    if (!form.email.trim()) {
+      setErrorMessage("Add a valid work email address.");
+      return;
+    }
     if (!form.roleId) {
-      setErrorMessage(
-        "Select a role."
-      );
-
+      setErrorMessage("Choose the person’s access role intentionally.");
+      return;
+    }
+    if (!isAdministrator && locations.length > 0 && form.locationIds.length === 0) {
+      setErrorMessage("Choose at least one venue, or select Administrator for full workspace access.");
       return;
     }
 
     setInviting(true);
-    setMessage("");
     setErrorMessage("");
-
     try {
-      const {
-        data: sessionData,
-        error: sessionError,
-      } =
-        await supabase.auth.getSession();
-
-      if (sessionError) {
-        throw sessionError;
-      }
-
-      const accessToken =
-        sessionData?.session?.access_token;
-
-      if (!accessToken) {
-        throw new Error(
-          "Your VAXERON session has expired. Sign in again."
-        );
-      }
-
-      const response = await fetch(
-        "/api/team/invite",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-
-          body: JSON.stringify(form),
-        }
-      );
-
-      const result =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result?.error ||
-            "Unable to invite team member."
-        );
-      }
-
-      await loadData();
-
-      setMessage(
-        `Invitation sent to ${form.email.trim()}.`
-      );
-
-      setForm(EMPTY_FORM);
-
+      const response = await authenticatedRequest("/api/team/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || "Unable to invite team member.");
       setShowInviteModal(false);
+      setForm(EMPTY_FORM);
+      setMessage(`Invitation sent to ${form.email.trim()}.`);
+      await loadData({ quiet: true });
     } catch (error) {
-      console.error(
-        "TEAM INVITE ERROR:",
-        error
-      );
-
-      setErrorMessage(
-        error?.message ||
-          "Unable to invite team member."
-      );
+      console.error("TEAM INVITE ERROR:", error);
+      setErrorMessage(error?.message || "Unable to invite team member.");
+    } finally {
+      setInviting(false);
     }
-
-    setInviting(false);
-  }
-
-  function displayName(member) {
-    const name = [
-      member.first_name,
-      member.last_name,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
-
-    return name || "Unnamed Team Member";
-  }
-
-  if (!mounted) {
-    return (
-      <div className="page-fade min-h-screen bg-[#f7f3ed] px-8 py-8 text-[#8f8177]">
-        Loading team access...
-      </div>
-    );
   }
 
   return (
-    <div className="page-fade min-h-screen bg-[#f7f3ed] text-[#30241f]">
-      <div className="mx-auto max-w-[1700px] px-5 py-7 md:px-8 lg:px-10">
-
-        {/* =================================================
-            HEADER
-        ================================================= */}
-
-        <header className="flex flex-col gap-5 border-b border-[#ded3c8] pb-7 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="text-[9px] uppercase tracking-[0.34em] text-[#a17865]">
-              VAXERON Access Control
+    <main className="min-h-screen overflow-x-hidden bg-[#edf3ef] px-4 py-5 text-[#17372d] sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1580px] space-y-5">
+        <section className="overflow-hidden rounded-[30px] border border-white/90 bg-[radial-gradient(circle_at_90%_10%,rgba(205,232,218,.82),transparent_35%),linear-gradient(135deg,rgba(255,255,255,.9),rgba(246,250,247,.72))] shadow-[0_24px_60px_rgba(25,58,47,.08)] backdrop-blur-xl">
+          <div className="flex flex-col gap-6 px-6 py-7 lg:flex-row lg:items-center lg:justify-between lg:px-9">
+            <div>
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.28em] text-[#66857a]">
+                <ShieldCheckIcon className="h-4 w-4" />
+                People & permissions
+              </div>
+              <h1 className="mt-3 text-[34px] font-semibold tracking-[-.045em] sm:text-[44px]">Team & Access</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6d837b]">
+                Invite colleagues, assign operational roles and limit access to the venues they actually manage.
+              </p>
+              {workspace && (
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d9e6e0] bg-white/70 px-3 py-2 text-xs text-[#4d685f]">
+                  <BuildingStorefrontIcon className="h-4 w-4" />
+                  {workspace.propertyName || workspace.organizationName || "Current workspace"}
+                </div>
+              )}
             </div>
 
-            <h1 className="mt-3 text-[34px] font-medium tracking-[-0.04em] md:text-[44px]">
-              Team & Access
-            </h1>
-
-            <p className="mt-2 max-w-[650px] text-[12px] text-[#8a7b70]">
-              Manage hospitality users,
-              operational roles and venue
-              access.
-            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[520px]">
+              {[
+                ["People", metrics.total],
+                ["Active", metrics.active],
+                ["Invited", metrics.pending],
+                ["Admins", metrics.administrators],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-[20px] border border-white bg-white/66 px-4 py-3 shadow-sm">
+                  <div className="text-[9px] font-semibold uppercase tracking-[.22em] text-[#81968e]">{label}</div>
+                  <div className="mt-1 text-2xl font-semibold tracking-[-.04em]">{value}</div>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          <button
-            onClick={openInviteModal}
-            className="min-h-10 rounded-full bg-[#963d2d] px-5 text-[10px] uppercase tracking-[0.15em] text-white"
-          >
-            + Add Team Member
-          </button>
-        </header>
-
-        {/* =================================================
-            FEEDBACK
-        ================================================= */}
-
-        {message && (
-          <div className="mt-5 rounded-[16px] border border-[#cdd7c6] bg-[#f3f7ef] px-5 py-4 text-[10px] text-[#607257]">
-            {message}
+        {(message || errorMessage) && (
+          <div className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${errorMessage ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+            {errorMessage ? <ShieldCheckIcon className="mt-0.5 h-5 w-5 shrink-0" /> : <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />}
+            <span>{errorMessage || message}</span>
           </div>
         )}
 
-        {errorMessage &&
-          !showInviteModal && (
-            <div className="mt-5 rounded-[16px] border border-[#dfc5bd] bg-[#fbf1ee] px-5 py-4 text-[10px] text-[#963d2d]">
-              {errorMessage}
+        <section className="rounded-[28px] border border-white/90 bg-white/65 shadow-[0_18px_50px_rgba(25,58,47,.07)] backdrop-blur-xl">
+          <div className="flex flex-col gap-4 border-b border-[#dae6e1] p-5 md:flex-row md:items-center md:justify-between lg:p-6">
+            <div>
+              <h2 className="text-xl font-semibold tracking-[-.025em]">Workspace team</h2>
+              <p className="mt-1 text-xs text-[#789087]">Only people connected to this workspace are shown here.</p>
             </div>
-          )}
-
-        {/* =================================================
-            SUMMARY
-        ================================================= */}
-
-        <section className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[20px] border border-[#ded3c8] bg-[#ded3c8] lg:grid-cols-4">
-          {[
-            ["Team Members", team.length],
-            ["Active", activeUsers],
-            ["Pending", pendingUsers],
-            [
-              "Administrators",
-              administrators,
-            ],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="bg-[#fbf8f3] px-5 py-4"
-            >
-              <div className="text-[8px] uppercase tracking-[0.22em] text-[#a29184]">
-                {label}
-              </div>
-
-              <div className="mt-2 text-[21px] tracking-[-0.03em]">
-                {value}
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* =================================================
-            DIRECTORY
-        ================================================= */}
-
-        <section className="mt-5 overflow-hidden rounded-[22px] border border-[#ded3c8] bg-[#fbf8f3]">
-
-          {/* FILTERS */}
-
-          <div className="grid gap-3 border-b border-[#e4dad1] p-4 lg:grid-cols-[1fr_220px_200px_auto]">
-            <input
-              value={search}
-              onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
-              }
-              placeholder="Search team member, email, role, venue or department..."
-              className="min-h-11 rounded-xl border border-[#ddd0c5] bg-white/70 px-4 text-[11px] outline-none"
-            />
-
-            <select
-              value={roleFilter}
-              onChange={(event) =>
-                setRoleFilter(
-                  event.target.value
-                )
-              }
-              className="min-h-11 rounded-xl border border-[#ddd0c5] bg-white/70 px-3 text-[10px] outline-none"
-            >
-              <option value="all">
-                All roles
-              </option>
-
-              {roles.map((role) => (
-                <option
-                  key={role.id}
-                  value={role.id}
-                >
-                  {role.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(
-                  event.target.value
-                )
-              }
-              className="min-h-11 rounded-xl border border-[#ddd0c5] bg-white/70 px-3 text-[10px] outline-none"
-            >
-              <option value="all">
-                All statuses
-              </option>
-
-              <option value="active">
-                Active
-              </option>
-
-              <option value="pending">
-                Pending
-              </option>
-
-              <option value="inactive">
-                Inactive
-              </option>
-            </select>
-
             <button
-              onClick={() => {
-                setSearch("");
-                setRoleFilter("all");
-                setStatusFilter("all");
-              }}
-              className="px-4 text-[9px] uppercase tracking-[0.18em] text-[#8d7567]"
+              type="button"
+              onClick={openInviteModal}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#17372d] px-5 text-xs font-semibold uppercase tracking-[.14em] text-white shadow-[0_12px_28px_rgba(23,55,45,.2)] transition hover:-translate-y-0.5 hover:bg-[#21483b]"
             >
-              Clear
+              <PlusIcon className="h-5 w-5" />
+              Invite team member
             </button>
           </div>
 
-          {/* COUNT */}
-
-          <div className="flex items-center justify-between border-b border-[#e4dad1] px-5 py-3 text-[9px] text-[#95867b]">
-            <span>
-              Showing{" "}
-              {filteredTeam.length
-                ? start + 1
-                : 0}
-              –
-              {Math.min(
-                start + pageSize,
-                filteredTeam.length
-              )}{" "}
-              of {filteredTeam.length} users
-            </span>
-
-            <label className="flex items-center gap-2">
-              Rows
-
-              <select
-                value={pageSize}
-                onChange={(event) =>
-                  setPageSize(
-                    Number(
-                      event.target.value
-                    )
-                  )
-                }
-                className="rounded-lg border border-[#ddd0c5] bg-white px-2 py-1"
-              >
-                {PAGE_SIZES.map((size) => (
-                  <option key={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
+          <div className="flex flex-col gap-3 border-b border-[#e1eae6] p-4 md:flex-row md:items-center md:justify-between lg:px-6">
+            <label className="relative block w-full md:max-w-xl">
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#80958d]" />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search people, roles or venues"
+                className="h-12 w-full rounded-2xl border border-[#d8e4df] bg-white/80 pl-12 pr-4 text-sm outline-none transition placeholder:text-[#9aaba5] focus:border-[#87a99c] focus:ring-4 focus:ring-[#dceae4]"
+              />
             </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                ["all", "All", metrics.total],
+                ["active", "Active", metrics.active],
+                ["pending", "Invited", metrics.pending],
+                ["inactive", "Inactive", team.filter((member) => member.status === "inactive").length],
+              ].map(([value, label, count]) => (
+                <button
+                  type="button"
+                  key={value}
+                  onClick={() => setStatusFilter(value)}
+                  className={`rounded-full border px-4 py-2.5 text-xs font-medium transition ${statusFilter === value ? "border-[#17372d] bg-[#17372d] text-white" : "border-[#d9e4df] bg-white/70 text-[#60776e] hover:border-[#9ab5aa]"}`}
+                >
+                  {label} <span className="ml-1 opacity-65">{count}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => loadData({ quiet: true })}
+                aria-label="Refresh team"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#d9e4df] bg-white/70 text-[#60776e]"
+              >
+                <ArrowPathIcon className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              </button>
+            </div>
           </div>
 
-          {/* TEAM ROWS */}
-
-          <div className="divide-y divide-[#ebe3dc]">
-            {loading ? (
-              <div className="px-5 py-16 text-center text-[11px] text-[#95867b]">
-                Loading team...
+          {loading ? (
+            <div className="grid min-h-[320px] place-items-center text-sm text-[#748980]">
+              <div className="flex items-center gap-3"><ArrowPathIcon className="h-5 w-5 animate-spin" /> Loading workspace access…</div>
+            </div>
+          ) : pageTeam.length === 0 ? (
+            <div className="grid min-h-[320px] place-items-center px-6 text-center">
+              <div>
+                <UserGroupIcon className="mx-auto h-10 w-10 text-[#8ba098]" />
+                <h3 className="mt-3 text-lg font-semibold">No team members found</h3>
+                <p className="mt-1 text-sm text-[#748980]">Try another search or invite the first person to this workspace.</p>
               </div>
-            ) : pageTeam.length === 0 ? (
-              <div className="px-5 py-16 text-center">
-                <div className="text-[12px]">
-                  No team members found
-                </div>
-
-                <div className="mt-2 text-[9px] text-[#95867b]">
-                  Adjust the filters or add a
-                  team member.
-                </div>
-              </div>
-            ) : (
-              pageTeam.map((member) => {
-                const primaryRole =
-                  member.roles?.[0];
-
+            </div>
+          ) : (
+            <div className="divide-y divide-[#e2ebe7]">
+              {pageTeam.map((member) => {
+                const roleNames = (member.roles || []).map((role) => role.name);
+                const locationNames = (member.locations || []).map((location) => location.name);
+                const status = member.status || "pending";
                 return (
-                  <article
-                    key={member.id}
-                    className="grid gap-4 px-5 py-4 transition hover:bg-[#f7f1eb] md:grid-cols-[minmax(0,1.3fr)_minmax(140px,0.7fr)_minmax(180px,1fr)_110px] md:items-center"
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate text-[11px] font-medium md:text-[12px]">
-                        {displayName(member)}
-                      </div>
-
-                      <div className="mt-1 truncate text-[9px] text-[#94847a]">
-                        {member.email || "—"}
-                      </div>
-
-                      <div className="mt-1 text-[8px] text-[#a29287]">
-                        {[
-                          member.job_title,
-                          member.department,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ") || "—"}
+                  <article key={member.id} className="grid gap-4 px-5 py-5 transition hover:bg-white/55 lg:grid-cols-[minmax(280px,1.3fr)_minmax(180px,.7fr)_minmax(240px,1fr)_auto] lg:items-center lg:px-6">
+                    <div className="flex min-w-0 items-center gap-4">
+                      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#17372d] text-sm font-semibold text-white shadow-sm">{initials(member)}</div>
+                      <div className="min-w-0">
+                        <div className="truncate font-semibold text-[#18382e]">{displayName(member)}</div>
+                        <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-[#789087]">
+                          <EnvelopeIcon className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{member.email}</span>
+                        </div>
+                        {(member.job_title || member.department) && <div className="mt-1 truncate text-xs text-[#8b9d96]">{[member.job_title, member.department].filter(Boolean).join(" · ")}</div>}
                       </div>
                     </div>
-
                     <div>
-                      <div className="mb-1.5 text-[7px] uppercase tracking-[0.18em] text-[#a29287] md:hidden">
-                        Role
-                      </div>
-
-                      <span className="inline-flex rounded-full border border-[#dfd1c5] px-2.5 py-1 text-[8px] text-[#806d60]">
-                        {primaryRole?.name ||
-                          "No role"}
-                      </span>
+                      <div className="text-[9px] font-semibold uppercase tracking-[.2em] text-[#8ba098]">Role</div>
+                      <div className="mt-1.5 text-sm font-medium">{roleNames.join(", ") || "Role not assigned"}</div>
                     </div>
-
-                    <div className="min-w-0">
-                      <div className="mb-1.5 text-[7px] uppercase tracking-[0.18em] text-[#a29287] md:hidden">
-                        Venue Access
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        {primaryRole?.slug ===
-                        "administrator" ? (
-                          <span className="rounded-full bg-[#eee5dc] px-2.5 py-1 text-[8px] text-[#756357]">
-                            All VAXERON
-                          </span>
-                        ) : member.locations
-                            ?.length ? (
-                          member.locations
-                            .slice(0, 3)
-                            .map((location) => (
-                              <span
-                                key={
-                                  location.id
-                                }
-                                className="rounded-full bg-[#eee5dc] px-2.5 py-1 text-[8px] text-[#756357]"
-                              >
-                                {location.name}
-                              </span>
-                            ))
-                        ) : (
-                          <span className="text-[9px] text-[#b09f94]">
-                            No venue access
-                          </span>
-                        )}
-
-                        {member.locations
-                          ?.length > 3 && (
-                          <span className="rounded-full bg-[#eee5dc] px-2.5 py-1 text-[8px] text-[#756357]">
-                            +
-                            {member.locations
-                              .length - 3}
-                          </span>
-                        )}
+                    <div>
+                      <div className="text-[9px] font-semibold uppercase tracking-[.2em] text-[#8ba098]">Venue access</div>
+                      <div className="mt-1.5 line-clamp-2 text-sm text-[#5f766d]">
+                        {(member.roles || []).some((role) => role.slug === "administrator") ? "All workspace venues" : locationNames.join(", ") || "No venues assigned"}
                       </div>
                     </div>
-
-                    <div className="md:text-right">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-[8px] capitalize ${
-                          member.status ===
-                          "active"
-                            ? "bg-[#edf2e9] text-[#64705d]"
-                            : member.status ===
-                              "pending"
-                            ? "bg-[#f3eadf] text-[#99724f]"
-                            : "bg-[#f1e5e1] text-[#9b5c50]"
-                        }`}
-                      >
-                        {member.status ||
-                          "active"}
+                    <div className="flex lg:justify-end">
+                      <span className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${STATUS_STYLE[status] || STATUS_STYLE.pending}`}>
+                        {status}
                       </span>
                     </div>
                   </article>
                 );
-              })
-            )}
-          </div>
-
-          {/* PAGINATION */}
-
-          <div className="flex flex-col gap-3 border-t border-[#e4dad1] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-[9px] text-[#95867b]">
-              Page {safePage} of{" "}
-              {totalPages}
+              })}
             </div>
+          )}
 
+          <div className="flex flex-col gap-3 border-t border-[#dfe9e5] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-xs text-[#789087]">
+              Showing {filteredTeam.length ? (safePage - 1) * pageSize + 1 : 0}–{Math.min(safePage * pageSize, filteredTeam.length)} of {filteredTeam.length}
+            </div>
             <div className="flex items-center gap-2">
-              <button
-                disabled={safePage === 1}
-                onClick={() => setPage(1)}
-                className="h-9 rounded-full border border-[#d9cbc0] px-3 text-[9px] disabled:opacity-30"
-              >
-                First
-              </button>
-
-              <button
-                disabled={safePage === 1}
-                onClick={() =>
-                  setPage((current) =>
-                    Math.max(
-                      1,
-                      current - 1
-                    )
-                  )
-                }
-                className="h-9 rounded-full border border-[#d9cbc0] px-4 text-[9px] disabled:opacity-30"
-              >
-                Previous
-              </button>
-
-              <span className="min-w-16 text-center text-[9px] text-[#806d60]">
-                {safePage} / {totalPages}
-              </span>
-
-              <button
-                disabled={
-                  safePage === totalPages
-                }
-                onClick={() =>
-                  setPage((current) =>
-                    Math.min(
-                      totalPages,
-                      current + 1
-                    )
-                  )
-                }
-                className="h-9 rounded-full border border-[#d9cbc0] px-4 text-[9px] disabled:opacity-30"
-              >
-                Next
-              </button>
-
-              <button
-                disabled={
-                  safePage === totalPages
-                }
-                onClick={() =>
-                  setPage(totalPages)
-                }
-                className="h-9 rounded-full border border-[#d9cbc0] px-3 text-[9px] disabled:opacity-30"
-              >
-                Last
-              </button>
+              <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-10 rounded-xl border border-[#d7e3de] bg-white px-3 text-xs outline-none">
+                {PAGE_SIZES.map((size) => <option key={size} value={size}>{size} per page</option>)}
+              </select>
+              <button type="button" disabled={safePage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="grid h-10 w-10 place-items-center rounded-xl border border-[#d7e3de] bg-white disabled:opacity-35"><ChevronLeftIcon className="h-4 w-4" /></button>
+              <div className="min-w-14 text-center text-xs">{safePage} / {totalPages}</div>
+              <button type="button" disabled={safePage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="grid h-10 w-10 place-items-center rounded-xl border border-[#d7e3de] bg-white disabled:opacity-35"><ChevronRightIcon className="h-4 w-4" /></button>
             </div>
           </div>
         </section>
       </div>
 
-      {/* ===================================================
-          INVITE MODAL
-      =================================================== */}
-
       {showInviteModal && (
-        <div
-          className="fixed inset-0 z-[100] overflow-y-auto bg-[#2c211d]/45 p-3 backdrop-blur-sm md:p-6"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-                event.currentTarget &&
-              !inviting
-            ) {
-              setShowInviteModal(false);
-            }
-          }}
-        >
-          <div className="mx-auto my-3 w-full max-w-[920px] overflow-hidden rounded-[24px] border border-[#ded0c5] bg-[#f8f4ee] shadow-2xl md:my-8">
-
-            {/* MODAL HEADER */}
-
-            <div className="sticky top-0 z-20 flex items-start justify-between border-b border-[#dfd3c8] bg-[#f8f4ee]/95 px-5 py-5 backdrop-blur md:px-7">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#0d211b]/55 p-3 backdrop-blur-md sm:p-6" onMouseDown={closeInviteModal}>
+          <form onSubmit={inviteTeamMember} onMouseDown={(event) => event.stopPropagation()} className="flex max-h-[calc(100dvh-24px)] w-full max-w-4xl flex-col overflow-hidden rounded-[30px] border border-white/80 bg-[#f7faf8] shadow-[0_35px_100px_rgba(8,27,21,.34)] sm:max-h-[calc(100dvh-48px)]">
+            <div className="flex items-start justify-between border-b border-[#dce7e2] px-6 py-5 sm:px-8 sm:py-6">
               <div>
-                <div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">
-                  Access Provisioning
-                </div>
-
-                <h2 className="mt-2 text-[24px] tracking-[-0.03em]">
-                  Add Team Member
-                </h2>
-
-                <div className="mt-1 text-[10px] text-[#8e7d72]">
-                  Invite a hospitality user
-                  and define their operational
-                  access.
-                </div>
+                <div className="text-[9px] font-semibold uppercase tracking-[.26em] text-[#6d887e]">Secure workspace invitation</div>
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em] text-[#17372d] sm:text-3xl">Invite a team member</h2>
+                <p className="mt-1.5 max-w-2xl text-sm text-[#71867e]">They will receive a private email, create their password and only see the access you assign here.</p>
               </div>
-
-              <button
-                disabled={inviting}
-                onClick={() =>
-                  setShowInviteModal(false)
-                }
-                className="h-10 w-10 rounded-full border border-[#d9cbc0] text-[18px] disabled:opacity-40"
-              >
-                ×
-              </button>
+              <button type="button" onClick={closeInviteModal} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#d6e2dd] bg-white text-[#597168]"><XMarkIcon className="h-5 w-5" /></button>
             </div>
 
-            {/* MODAL CONTENT */}
-
-            <div className="grid gap-7 p-5 md:p-7 lg:grid-cols-[1fr_0.9fr]">
-
-              {/* MEMBER DETAILS */}
-
-              <section>
-                <div className="text-[8px] uppercase tracking-[0.24em] text-[#9b8779]">
-                  Team Member
-                </div>
-
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {[
-                    [
-                      "First name",
-                      "firstName",
-                    ],
-                    [
-                      "Last name",
-                      "lastName",
-                    ],
-                    [
-                      "Email address",
-                      "email",
-                    ],
-                    ["Phone", "phone"],
-                    [
-                      "Job title",
-                      "jobTitle",
-                    ],
-                    [
-                      "Department",
-                      "department",
-                    ],
-                  ].map(([label, field]) => (
-                    <label
-                      key={field}
-                      className={
-                        field === "email"
-                          ? "sm:col-span-2"
-                          : ""
-                      }
-                    >
-                      <span className="mb-1.5 block text-[8px] text-[#958277]">
-                        {label}
-                      </span>
-
-                      <input
-                        type={
-                          field === "email"
-                            ? "email"
-                            : "text"
-                        }
-                        value={form[field]}
-                        onChange={(event) =>
-                          setForm(
-                            (current) => ({
-                              ...current,
-                              [field]:
-                                event.target
-                                  .value,
-                            })
-                          )
-                        }
-                        className="min-h-11 w-full rounded-xl border border-[#ddd0c5] bg-white/65 px-3 text-[11px] outline-none"
-                      />
-                    </label>
-                  ))}
-                </div>
-              </section>
-
-              {/* ACCESS */}
-
-              <section>
-                <div className="text-[8px] uppercase tracking-[0.24em] text-[#9b8779]">
-                  Role & Access
-                </div>
-
-                <label className="mt-4 block">
-                  <span className="mb-1.5 block text-[8px] text-[#958277]">
-                    Operational role
-                  </span>
-
-                  <select
-                    value={form.roleId}
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          roleId:
-                            event.target
-                              .value,
-                        })
-                      )
-                    }
-                    className="min-h-11 w-full rounded-xl border border-[#ddd0c5] bg-white/65 px-3 text-[11px] outline-none"
-                  >
-                    <option value="">
-                      Select role
-                    </option>
-
-                    {roles.map((role) => (
-                      <option
-                        key={role.id}
-                        value={role.id}
-                      >
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <div className="mt-5">
-                  <div className="text-[8px] text-[#958277]">
-                    Venue / cellar access
+            <div className="overflow-y-auto overscroll-contain px-6 py-5 sm:px-8 sm:py-6">
+              <div className="grid gap-6 lg:grid-cols-[1fr_.9fr]">
+                <section className="space-y-4">
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[.22em] text-[#718a81]">1 · Person</div>
+                    <p className="mt-1 text-xs text-[#8a9d96]">Use their professional details so the invitation is clear.</p>
                   </div>
-
-                  <div className="mt-2 overflow-hidden rounded-[16px] border border-[#dfd3c8] bg-white/45">
-                    {locations.map(
-                      (location) => {
-                        const selected =
-                          form.locationIds.includes(
-                            location.id
-                          );
-
-                        return (
-                          <button
-                            key={location.id}
-                            type="button"
-                            onClick={() =>
-                              toggleLocation(
-                                location.id
-                              )
-                            }
-                            className="flex w-full items-center justify-between gap-4 border-b border-[#e8dfd7] px-4 py-3 text-left last:border-0"
-                          >
-                            <span className="truncate text-[10px]">
-                              {location.name}
-                            </span>
-
-                            <span
-                              className={`flex h-5 w-5 items-center justify-center rounded-full border text-[9px] ${
-                                selected
-                                  ? "border-[#963d2d] bg-[#963d2d] text-white"
-                                  : "border-[#d8c9bd] text-transparent"
-                              }`}
-                            >
-                              ✓
-                            </span>
-                          </button>
-                        );
-                      }
-                    )}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs font-medium">First name<input required value={form.firstName} onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))} className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none focus:border-[#83a698] focus:ring-4 focus:ring-[#dfece7]" /></label>
+                    <label className="text-xs font-medium">Last name<input required value={form.lastName} onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))} className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none focus:border-[#83a698] focus:ring-4 focus:ring-[#dfece7]" /></label>
                   </div>
-
-                  <div className="mt-3 text-[8px] leading-4 text-[#a29287]">
-                    Administrators receive
-                    full VAXERON access.
-                    Venue selections define
-                    operational location access
-                    for restricted roles.
+                  <label className="block text-xs font-medium">Work email<input required type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="name@hotel.com" className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none placeholder:text-[#a4b2ad] focus:border-[#83a698] focus:ring-4 focus:ring-[#dfece7]" /></label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs font-medium">Job title<input value={form.jobTitle} onChange={(event) => setForm((current) => ({ ...current, jobTitle: event.target.value }))} placeholder="Head Sommelier" className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none placeholder:text-[#a4b2ad] focus:border-[#83a698]" /></label>
+                    <label className="text-xs font-medium">Department<input value={form.department} onChange={(event) => setForm((current) => ({ ...current, department: event.target.value }))} className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none focus:border-[#83a698]" /></label>
                   </div>
-                </div>
-              </section>
-            </div>
+                  <label className="block text-xs font-medium">Phone <span className="font-normal text-[#91a19b]">(optional)</span><input value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none focus:border-[#83a698]" /></label>
+                </section>
 
-            {/* ERROR */}
-
-            {errorMessage && (
-              <div className="mx-5 mb-4 rounded-[14px] border border-[#dfc5bd] bg-[#fbf1ee] px-4 py-3 text-[9px] text-[#963d2d] md:mx-7">
-                {errorMessage}
+                <section className="space-y-4 rounded-[24px] border border-[#d9e5df] bg-white/70 p-5">
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[.22em] text-[#718a81]">2 · Permissions</div>
+                    <p className="mt-1 text-xs text-[#8a9d96]">Choose the minimum access needed. Administrator grants the entire workspace.</p>
+                  </div>
+                  <label className="block text-xs font-medium">Role
+                    <select required value={form.roleId} onChange={(event) => chooseRole(event.target.value)} className="mt-2 h-12 w-full rounded-2xl border border-[#d6e2dd] bg-white px-4 text-sm outline-none focus:border-[#83a698]">
+                      <option value="">Choose a role intentionally</option>
+                      {roles.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
+                    </select>
+                  </label>
+                  {selectedRole && (
+                    <div className={`rounded-2xl border p-3 text-xs leading-5 ${isAdministrator ? "border-amber-200 bg-amber-50 text-amber-800" : "border-[#d9e6e0] bg-[#f2f7f4] text-[#5f776e]"}`}>
+                      <strong>{selectedRole.name}.</strong> {selectedRole.description || (isAdministrator ? "Full access to every venue and administrative area." : "Access is limited to the selected venues.")}
+                    </div>
+                  )}
+                  <div className={isAdministrator ? "pointer-events-none opacity-40" : ""}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-xs font-medium">Venue access</div>
+                      <div className="flex gap-2 text-[10px] font-semibold uppercase tracking-[.1em]">
+                        <button type="button" onClick={() => setForm((current) => ({ ...current, locationIds: locations.map((location) => location.id) }))} className="text-[#3e6d5d]">Select all</button>
+                        <button type="button" onClick={() => setForm((current) => ({ ...current, locationIds: [] }))} className="text-[#899b94]">Clear</button>
+                      </div>
+                    </div>
+                    <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-2xl border border-[#dce6e2] bg-white p-2">
+                      {locations.length ? locations.map((location) => (
+                        <label key={location.id} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-xs transition hover:bg-[#edf5f1]">
+                          <input type="checkbox" checked={form.locationIds.includes(location.id)} onChange={() => toggleLocation(location.id)} className="h-4 w-4 accent-[#17372d]" />
+                          <span>{location.name}</span>
+                        </label>
+                      )) : <div className="px-3 py-4 text-xs text-[#8b9d96]">No venue locations configured.</div>}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl bg-[#17372d] p-4 text-white">
+                    <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[.2em] text-white/60"><EnvelopeIcon className="h-4 w-4" /> Invitation preview</div>
+                    <p className="mt-2 text-sm leading-5">{form.email || "The team member"} will be invited to {workspace?.propertyName || workspace?.organizationName || "this workspace"} as {selectedRole?.name || "the role you select"}.</p>
+                  </div>
+                </section>
               </div>
-            )}
-
-            {/* MODAL ACTIONS */}
-
-            <div className="sticky bottom-0 flex justify-end gap-2 border-t border-[#dfd3c8] bg-[#f8f4ee]/95 px-5 py-4 backdrop-blur md:px-7">
-              <button
-                disabled={inviting}
-                onClick={() =>
-                  setShowInviteModal(false)
-                }
-                className="min-h-11 rounded-full border border-[#d9cbc0] px-5 text-[9px] uppercase tracking-[0.16em] disabled:opacity-40"
-              >
-                Cancel
-              </button>
-
-              <button
-                disabled={
-                  inviting ||
-                  !form.email.trim() ||
-                  !form.roleId
-                }
-                onClick={inviteTeamMember}
-                className="min-h-11 rounded-full bg-[#963d2d] px-6 text-[9px] uppercase tracking-[0.16em] text-white disabled:opacity-50"
-              >
-                {inviting
-                  ? "Sending..."
-                  : "Send Invitation"}
-              </button>
+              {errorMessage && <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</div>}
             </div>
-          </div>
+
+            <div className="flex flex-col-reverse gap-3 border-t border-[#dce7e2] bg-white/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <p className="text-xs text-[#82968e]">No account is active until the recipient accepts the email invitation.</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={closeInviteModal} className="h-11 rounded-full border border-[#d3dfda] bg-white px-5 text-xs font-semibold">Cancel</button>
+                <button type="submit" disabled={inviting} className="inline-flex h-11 items-center gap-2 rounded-full bg-[#17372d] px-5 text-xs font-semibold text-white disabled:opacity-50">
+                  {inviting && <ArrowPathIcon className="h-4 w-4 animate-spin" />}
+                  {inviting ? "Sending…" : "Send invitation"}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       )}
-    </div>
+    </main>
   );
 }

@@ -152,20 +152,17 @@ export default function InvitePage() {
       const { error: passwordError } = await supabase.auth.updateUser({ password });
       if (passwordError) throw passwordError;
 
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ status: "active", updated_at: new Date().toISOString() })
-        .eq("id", user.id);
-      if (profileError) throw profileError;
-
-      const { error: membershipError } = await supabase.rpc(
-        "activate_current_memberships"
-      );
-      if (
-        membershipError &&
-        !["PGRST202", "42883"].includes(membershipError.code)
-      ) {
-        throw membershipError;
+      const activationResponse = await fetch("/api/team/activate", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      });
+      const activationResult = await activationResponse.json();
+      if (!activationResponse.ok) {
+        throw new Error(
+          activationResult?.error || "Unable to activate your Vaxeron access."
+        );
       }
 
       router.replace("/dashboard");
