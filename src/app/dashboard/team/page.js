@@ -233,11 +233,11 @@ export default function TeamAccessPage() {
         body: JSON.stringify({ userId: member.id }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result?.error || "Unable to resend access email.");
-      setMessage(`A new secure access email was sent to ${member.email}.`);
+      if (!response.ok) throw new Error(result?.error || "Unable to resend invitation.");
+      setMessage(`A new invitation was sent to ${member.email}.`);
     } catch (error) {
       console.error("TEAM INVITATION RESEND ERROR:", error);
-      setErrorMessage(error?.message || "Unable to resend access email.");
+      setErrorMessage(error?.message || "Unable to resend invitation.");
     } finally {
       setResendingUserId("");
     }
@@ -413,7 +413,7 @@ export default function TeamAccessPage() {
                           className="inline-flex items-center gap-1.5 rounded-full border border-[#d9e4df] bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.1em] text-[#49675d] transition hover:border-[#9ab5aa] disabled:cursor-wait disabled:opacity-55"
                         >
                           <ArrowPathIcon className={`h-3.5 w-3.5 ${resendingUserId === member.id ? "animate-spin" : ""}`} />
-                          {resendingUserId === member.id ? "Sending" : "Resend access"}
+                          {resendingUserId === member.id ? "Sending" : "Resend invitation"}
                         </button>
                       )}
                       <span className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${STATUS_STYLE[status] || STATUS_STYLE.pending}`}>

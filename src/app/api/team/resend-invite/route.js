@@ -48,10 +48,44 @@ export async function POST(request) {
       );
     }
 
+    const { data: authUserData, error: authUserError } =
+      await admin.auth.admin.getUserById(userId);
+    if (authUserError) throw authUserError;
+
+    const authUser = authUserData?.user;
+    if (!authUser || authUser.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "This account is already active and no longer needs an invitation." },
+        { status: 400 }
+      );
+    }
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vaxeron.com";
-    const { error: resendError } = await admin.auth.resetPasswordForEmail(
+    const invitationMetadata = {
+      ...(authUser.user_metadata || {}),
+      organization_name:
+        tenant.organization?.name ||
+        authUser.user_metadata?.organization_name ||
+        "Your hospitality company",
+      property_name:
+        tenant.property?.name ||
+        authUser.user_metadata?.property_name ||
+        tenant.organization?.name ||
+        "Your hospitality company",
+      organization_id: tenant.organization.id,
+      property_id:
+        tenant.property?.id || authUser.user_metadata?.property_id || "",
+      invitation_context_version: 1,
+    };
+
+    // Re-issue an actual invitation. Password recovery is deliberately not used
+    // here because it sends the recovery template and creates the wrong token type.
+    const { error: resendError } = await admin.auth.admin.inviteUserByEmail(
       profile.email,
-      { redirectTo: `${siteUrl}/invite` }
+      {
+        data: invitationMetadata,
+        redirectTo: `${siteUrl}/invite`,
+      }
     );
     if (resendError) throw resendError;
 
