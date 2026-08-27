@@ -36,7 +36,7 @@ const QUICK_DESTINATIONS = [
   ["Venue Wines", "Venue stock and guest wine lists", "/dashboard/wine-cellar/venues"],
   ["Stock Control", "Inventory balances by location", "/dashboard/wine-cellar/inventory"],
   ["Stock Issues", "Reconciliation and exceptions", "/dashboard/wine-cellar/reconciliation"],
-  ["Ordering", "Reorder alerts and purchase workflow", "/dashboard/wine-cellar/ordering"],
+  ["Ordering", "Zero-stock notifications from Compucash", "/dashboard/wine-cellar/ordering"],
   ["Movements", "Transfers and stock history", "/dashboard/wine-cellar/transfers"],
   ["Team & Access", "Users, roles and invitations", "/dashboard/team"],
   ["Settings", "Organisation and platform settings", "/dashboard/settings"],
@@ -106,7 +106,7 @@ export default function DashboardLayout({
     let active = true;
     fetch("/api/wine-cellar/orders?summary=1", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
-      .then((result) => { if (active) setOrderingAlerts(Number(result?.summary?.awaitingApproval || 0)); })
+      .then((result) => { if (active) setOrderingAlerts(Number(result?.summary?.notifications || 0)); })
       .catch(() => {});
     return () => { active = false; };
   }, [pathname]);

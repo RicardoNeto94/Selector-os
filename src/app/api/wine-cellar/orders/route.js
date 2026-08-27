@@ -36,23 +36,20 @@ export async function GET(request) {
     const scope = (query) => scopeTenantQuery(query, access.tenant);
     const summaryOnly = new URL(request.url).searchParams.get("summary") === "1";
 
-    const [inventory, rules, orders] = await Promise.all([
+    const [inventory, rules, orders, valuations] = await Promise.all([
       fetchAllRows(access.admin, "wine_inventory", "id,wine_id,location_id,quantity,wines(id,name,producer,vintage,wine_type,size,is_active),wine_locations(id,name,location_type)", (query) => scope(query).order("id")),
       fetchAllRows(access.admin, "wine_reorder_rules", "*", (query) => scope(query).eq("enabled", true).order("updated_at", { ascending: false })),
       fetchAllRows(access.admin, "wine_order_requests", "*", (query) => scope(query).order("created_at", { ascending: false })),
+      fetchAllRows(access.admin, "wine_inventory_valuations", "wine_id,location_id,unit_inventory_cost,currency_code", (query) => scope(query).eq("source", "compucash").order("wine_id")),
     ]);
 
     const ruleMap = new Map(rules.map((rule) => [`${rule.wine_id}|${rule.location_id}`, rule]));
     const activeOrderKeys = new Set(orders.filter((order) => ACTIVE_STATUSES.includes(order.status)).map((order) => `${order.wine_id}|${order.location_id}`));
-    const alerts = inventory.filter((row) => {
-      if (!row.wines?.is_active || !row.wine_locations) return false;
-      const rule = ruleMap.get(`${row.wine_id}|${row.location_id}`);
-      const current = Number(row.quantity || 0);
-      // A generated zero-balance matrix must not create thousands of noisy
-      // alerts. Zero stock remains actionable after an administrator explicitly
-      // enables a reorder rule for that wine and location.
-      return (current > 0 || Boolean(rule)) && current <= Number(rule?.reorder_point ?? 2);
-    });
+    // Valuation rows are written from the Compucash product/store payload. Using
+    // them as evidence prevents generated empty wine/location matrix rows from
+    // becoming false ordering notifications.
+    const valuationKeys = new Set(valuations.map((row) => `${row.wine_id}|${row.location_id}`));
+    const alerts = inventory.filter((row) => row.wines?.is_active && row.wine_locations && valuationKeys.has(`${row.wine_id}|${row.location_id}`) && Number(row.quantity || 0) <= 0);
     const summary = {
       alerts: alerts.length,
       urgent: alerts.filter((row) => ruleMap.has(`${row.wine_id}|${row.location_id}`) && Number(row.quantity || 0) <= 0).length,
@@ -60,10 +57,10 @@ export async function GET(request) {
       suggestions: alerts.filter((row) => !ruleMap.has(`${row.wine_id}|${row.location_id}`) && !activeOrderKeys.has(`${row.wine_id}|${row.location_id}`)).length,
       approved: orders.filter((order) => order.status === "approved").length,
       ordered: orders.filter((order) => order.status === "ordered").length,
+      notifications: alerts.length,
     };
     if (summaryOnly) return NextResponse.json({ summary }, { headers: { "Cache-Control": "no-store" } });
 
-    const valuations = await fetchAllRows(access.admin, "wine_inventory_valuations", "wine_id,location_id,unit_inventory_cost,currency_code", (query) => scope(query).eq("source", "compucash").order("wine_id"));
     return NextResponse.json({ inventory, rules, orders, valuations, summary }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("WINE ORDERING LOAD ERROR:", error);
