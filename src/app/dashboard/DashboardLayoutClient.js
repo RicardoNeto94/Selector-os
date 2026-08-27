@@ -19,6 +19,7 @@ import {
   SparklesIcon,
   ArrowsRightLeftIcon,
   ClipboardDocumentCheckIcon,
+  BellAlertIcon,
   UsersIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
@@ -35,6 +36,7 @@ const QUICK_DESTINATIONS = [
   ["Venue Wines", "Venue stock and guest wine lists", "/dashboard/wine-cellar/venues"],
   ["Stock Control", "Inventory balances by location", "/dashboard/wine-cellar/inventory"],
   ["Stock Issues", "Reconciliation and exceptions", "/dashboard/wine-cellar/reconciliation"],
+  ["Ordering", "Reorder alerts and purchase workflow", "/dashboard/wine-cellar/ordering"],
   ["Movements", "Transfers and stock history", "/dashboard/wine-cellar/transfers"],
   ["Team & Access", "Users, roles and invitations", "/dashboard/team"],
   ["Settings", "Organisation and platform settings", "/dashboard/settings"],
@@ -49,6 +51,7 @@ function NavItem({
   isActive,
   icon: Icon,
   label,
+  badge,
 }) {
   return (
     <Link
@@ -67,6 +70,7 @@ function NavItem({
       <span className="so-nav-label">
         {label}
       </span>
+      {Number(badge) > 0 && <span className="so-nav-badge" aria-label={`${badge} items need attention`}>{Number(badge) > 99 ? "99+" : badge}</span>}
     </Link>
   );
 }
@@ -96,6 +100,16 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
+  const [orderingAlerts, setOrderingAlerts] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/wine-cellar/orders?summary=1", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((result) => { if (active) setOrderingAlerts(Number(result?.summary?.awaitingApproval || 0)); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [pathname]);
 
   useEffect(() => {
     function handleCommandKey(event) {
@@ -282,6 +296,16 @@ export default function DashboardLayout({
   icon={ClipboardDocumentCheckIcon}
   label="Stock Issues"
 />
+
+            <NavItem
+              href="/dashboard/wine-cellar/ordering"
+              isActive={isActive(
+                "/dashboard/wine-cellar/ordering"
+              )}
+              icon={BellAlertIcon}
+              label="Ordering"
+              badge={orderingAlerts}
+            />
 
             <NavItem
               href="/dashboard/wine-cellar/transfers"

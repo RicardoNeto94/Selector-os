@@ -8,7 +8,7 @@ import { scopeTenantQuery } from "@/lib/server/tenantContext";
 import {
   ArrowRightIcon, ArrowPathIcon, BeakerIcon, BuildingStorefrontIcon,
   CheckCircleIcon, CircleStackIcon, ClipboardDocumentCheckIcon,
-  ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, UsersIcon,
+  ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, UsersIcon, BellAlertIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
     pendingMemberCountQuery,
     fetchAllRows(supabase, "wine_menu_items", "wine_id", (query) => scopeTenantQuery(query, tenant)),
     scopeTenantQuery(supabase.from("wine_locations").select("id,name,location_type,wine_menu_id").order("name"), tenant),
-    fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id", (query) => scopeTenantQuery(query, tenant)),
+    fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id,wines(is_active)", (query) => scopeTenantQuery(query, tenant)),
     scopeTenantQuery(supabase.from("compucash_sync_runs").select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at").order("created_at", { ascending: false }).limit(1), tenant).maybeSingle(),
   ]);
   const locations = locationsResult.data || [];
@@ -76,6 +76,7 @@ export default async function DashboardPage() {
   const stockedWines = stockedWineIds.size;
   const stockedMenuPlacements = menuItemRows.filter((row) => stockedWineIds.has(String(row.wine_id))).length;
   const lowStockRows = positiveRows.filter((row) => number(row.quantity) <= 2).length;
+  const reorderSignalRows = inventoryRows.filter((row) => row.wines?.is_active && number(row.quantity) > 0 && number(row.quantity) <= 2).length;
   const negativeRows = inventoryRows.filter((row) => bottleQuantity(row.quantity) < 0).length;
   const roundingRows = inventoryRows.filter((row) => number(row.quantity) < 0 && bottleQuantity(row.quantity) === 0).length;
   const venueMetrics = locations.map((location) => {
@@ -112,6 +113,7 @@ export default async function DashboardPage() {
           <StatusRow icon={syncHealthy ? CheckCircleIcon : ExclamationTriangleIcon} title={syncHealthy ? "Compucash sync succeeded" : "Compucash sync needs attention"} detail={latestSync ? `${formatNumber(latestSync.products_matched)} products matched · ${formatNumber(latestSync.changed_rows)} rows changed · ${formatDate(latestSync.completed_at)}` : compucashConfigured ? "Connected; awaiting the first run" : "Production credentials are incomplete"} href="/dashboard/wines" tone={syncHealthy ? "good" : "warning"} />
           <StatusRow icon={ExclamationTriangleIcon} title={`${negativeRows} negative inventory balances`} detail={`${roundingRows} additional tiny rounding residues are safely hidden from guests`} href="/dashboard/wine-cellar/reconciliation" tone={negativeRows ? "warning" : "good"} />
           <StatusRow icon={CircleStackIcon} title={`${lowStockRows} low-stock inventory rows`} detail="Positive venue balances at two bottles or fewer" href="/dashboard/wine-cellar/inventory" tone={lowStockRows ? "warning" : "good"} />
+          <StatusRow icon={BellAlertIcon} title="Ordering Centre ready" detail={`${reorderSignalRows} quiet low-stock suggestions; notifications activate after approval`} href="/dashboard/wine-cellar/ordering" tone="good" />
           <StatusRow icon={UsersIcon} title={pendingTeamCount ? `${pendingTeamCount} pending team invitation` : "Team access is up to date"} detail={`${teamCount} profiles currently registered`} href="/dashboard/team" tone={pendingTeamCount ? "warning" : "good"} />
         </div>
       </div>
@@ -123,6 +125,7 @@ export default async function DashboardPage() {
         <OperationCard href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} eyebrow="Inventory" title="Stock Control" description="Review live quantities across cellar and venue storage." meta={`${formatNumber(totalWineUnits, 2)} physical bottle units`} />
         <OperationCard href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} eyebrow="Venues" title="Venue Wines" description="Control venue selections and guest-facing availability." meta={`${locations.length} storage locations`} />
         <OperationCard href="/dashboard/wine-cellar/reconciliation" icon={ClipboardDocumentCheckIcon} eyebrow="Exceptions" title="Stock Issues" description="Review negative balances and discrepancies reported by the Compucash sync." meta={`${negativeRows} balances need review`} />
+        <OperationCard href="/dashboard/wine-cellar/ordering" icon={BellAlertIcon} eyebrow="Purchasing" title="Ordering Centre" description="Approve reorder recommendations and follow purchases through delivery." meta={`${reorderSignalRows} quiet suggestions`} />
         <OperationCard href="/dashboard/menu" icon={RectangleStackIcon} eyebrow="Experience" title="Menus" description="Manage digital menus presented to guests." meta={`${menusResponse.count || 0} menus configured`} />
         <OperationCard href="/dashboard/experiences" icon={ClockIcon} eyebrow="Guest Journey" title="Dining" description="Manage dining experiences and hospitality content." meta={`${dishesResponse.count || 0} menu items`} />
         <OperationCard href="/dashboard/team" icon={UsersIcon} eyebrow="Access" title="Team & Access" description="Invite team members and control operational access." meta={pendingTeamCount ? `${pendingTeamCount} invitation pending` : `${teamCount} team members`} />
