@@ -391,6 +391,7 @@
 .vx-invite-status .vx-auth-submit { width:100%; text-decoration:none; }
 .vx-invite-status .vx-auth-form { margin-top:26px; text-align:left; }
 .vx-invite-code-field input { font-size:24px; letter-spacing:.32em; font-variant-numeric:tabular-nums; }
+.vx-invite-code-help { margin:0; color:#929a95; font-size:8px; line-height:1.65; }
 @keyframes vxInvitePulse { 50% { border-color:#a38757; color:#9d7940; box-shadow:0 0 0 9px rgba(182,138,66,.07); } }
 @media (min-width:901px) and (max-height:850px) {
   .vx-invite-wrap { padding-top:25px; padding-bottom:22px; }

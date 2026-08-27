@@ -234,7 +234,7 @@ export default function TeamAccessPage() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result?.error || "Unable to resend invitation.");
-      setMessage(`A new invitation was sent to ${member.email}.`);
+      setMessage(`A new invitation was sent to ${member.email}. Only the code in this newest email will work.`);
     } catch (error) {
       console.error("TEAM INVITATION RESEND ERROR:", error);
       setErrorMessage(error?.message || "Unable to resend invitation.");

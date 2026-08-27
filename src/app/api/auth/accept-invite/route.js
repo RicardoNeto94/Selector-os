@@ -13,7 +13,7 @@ function validOtpCode(value) {
   // Supabase projects can be configured with different email OTP lengths.
   // Vaxeron currently receives eight-digit invite codes in production, while
   // six-digit codes remain common and valid in other environments.
-  return typeof value === "string" && /^\d{6,8}$/.test(value);
+  return typeof value === "string" && /^\d{6,10}$/.test(value);
 }
 
 function firstForwardedValue(value) {
@@ -63,7 +63,7 @@ export async function POST(request) {
   const formData = await request.formData();
   const tokenHash = formData.get("token_hash");
   const email = formData.get("email")?.trim().toLowerCase();
-  const otpCode = formData.get("otp_code")?.trim();
+  const otpCode = formData.get("otp_code")?.replace(/\D/g, "").slice(0, 10);
   const verificationType = formData.get("verification_type") === "recovery"
     ? "recovery"
     : "invite";

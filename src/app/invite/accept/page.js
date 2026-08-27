@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeftIcon, ArrowRightIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import InviteCodeForm from "./InviteCodeForm";
 import "../../../styles/auth.css";
 
 export const dynamic = "force-dynamic";
@@ -66,43 +67,7 @@ export default async function AcceptInvitationPage({ searchParams }) {
                 </button>
               </form>
             ) : showCodeEntry ? (
-              <form method="post" action="/api/auth/accept-invite" className="vx-auth-form">
-                <input type="hidden" name="verification_type" value="invite" />
-                <label className="vx-auth-field">
-                  <span>Email address</span>
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    placeholder="name@company.com"
-                    required
-                    autoFocus
-                  />
-                </label>
-                <label className="vx-auth-field vx-invite-code-field">
-                  <span>Invitation code</span>
-                  <input
-                    type="text"
-                    name="otp_code"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    pattern="[0-9]{6,8}"
-                    minLength={6}
-                    maxLength={8}
-                    placeholder="00000000"
-                    required
-                  />
-                </label>
-                {codeError && (
-                  <div className="vx-auth-error" role="alert">
-                    That code is invalid or has expired. Check the newest invitation email or ask your administrator to resend it.
-                  </div>
-                )}
-                <button type="submit" className="vx-auth-submit">
-                  <span>Verify and continue</span>
-                  <ArrowRightIcon aria-hidden="true" />
-                </button>
-              </form>
+              <InviteCodeForm initialError={codeError} />
             ) : (
               <Link className="vx-auth-submit" href="/sign-in">
                 <span>Return to sign in</span>
