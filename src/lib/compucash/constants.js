@@ -15,7 +15,7 @@ export const COMPUCASH_STORE_TARGETS = [
   ["27", "6cbec95d-ebb8-47be-92cc-89c2c14b0fd0", "Burman Beverage Store"],
   ["26", "6cbec95d-ebb8-47be-92cc-89c2c14b0fd0", "Juri Beverage Warehouse"],
   ["5", "6cbec95d-ebb8-47be-92cc-89c2c14b0fd0", "Main Store Beverages"],
-  ["7", "9a5816fd-159d-4bba-b274-01766f90b10b", "Casino Bar Beverages"],
+  ["7", "f8762405-c48c-42e6-94ff-fc526abf8adb", "Casino Bar Beverages"],
   ["11", "801fc04b-1d17-44c4-869a-cced1ecc1f7a", "Ecrin Beverages"],
   ["6", "85c1962f-535e-4667-93ff-a1d70206d1e6", "Fox Den Beverages"],
   ["13", "8686f110-ef73-4d28-802e-c0944e0dea24", "Koyo Beverages"],

@@ -7,6 +7,19 @@ import {
   normalizeCompuCashProduct,
 } from "../src/lib/compucash/preview.js";
 import { buildChangedInventoryRows } from "../src/lib/compucash/syncPlan.js";
+import { COMPUCASH_STORE_TARGETS } from "../src/lib/compucash/constants.js";
+
+test("maps Casino Bar Beverages into the Bombay Club venue", () => {
+  const target = COMPUCASH_STORE_TARGETS.find(
+    (row) => row.externalStoreId === "7"
+  );
+
+  assert.deepEqual(target, {
+    externalStoreId: "7",
+    locationId: "f8762405-c48c-42e6-94ff-fc526abf8adb",
+    expectedName: "Casino Bar Beverages",
+  });
+});
 
 test("preserves fractional physical stock", () => {
   const product = normalizeCompuCashProduct({
