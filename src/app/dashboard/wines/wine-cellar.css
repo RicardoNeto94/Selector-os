@@ -95,9 +95,11 @@
 .wine-cellar-actions {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .wine-cellar-actions .so-btn-primary,
+.wine-cellar-actions .so-btn-secondary,
 .wine-cellar-actions .so-btn-ghost {
   min-height: 34px;
   padding-inline: 14px;
@@ -472,6 +474,7 @@
   .wine-sync-badge { grid-column: auto; grid-row: auto; width: 100%; }
   .wine-cellar-actions { width: 100%; }
   .wine-cellar-actions .so-btn-primary,
+  .wine-cellar-actions .so-btn-secondary,
   .wine-cellar-actions .so-btn-ghost { flex: 1 1 auto; }
   .wine-cellar-metric { min-height: 104px; padding: 14px; }
   .wine-donut-layout { grid-template-columns: 1fr; }

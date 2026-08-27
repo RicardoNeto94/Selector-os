@@ -6,12 +6,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
 import {
   ArrowRightIcon,
   ArrowsRightLeftIcon,
   CheckCircleIcon,
   CircleStackIcon,
+  ArrowDownTrayIcon,
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -143,6 +145,8 @@ async function loadAllInventoryValuations(supabase) {
       .select(`
         wine_id,
         location_id,
+        external_product_id,
+        external_store_ids,
         quantity_snapshot,
         cost_covered_quantity,
         unit_inventory_cost,
@@ -240,6 +244,9 @@ export default function WinesPage() {
   const [locations, setLocations] =
     useState([]);
 
+  const [storeMappings, setStoreMappings] =
+    useState([]);
+
   const [movements, setMovements] =
     useState([]);
 
@@ -263,6 +270,9 @@ export default function WinesPage() {
     useState(null);
 
   const [importing, setImporting] =
+    useState(false);
+
+  const [exporting, setExporting] =
     useState(false);
 
   const [
@@ -304,6 +314,7 @@ export default function WinesPage() {
     const [
       winesResult,
       locationsResult,
+      storeMappingsResult,
       movementsResult,
       valuationsResult,
     ] = await Promise.all([
@@ -321,6 +332,11 @@ export default function WinesPage() {
         .order("name", {
           ascending: true,
         }),
+
+      supabase
+        .from("wine_location_store_mappings")
+        .select("location_id,business_store_id,business_store_name")
+        .order("business_store_name", { ascending: true }),
 
       supabase
         .from("wine_movements")
@@ -363,6 +379,13 @@ export default function WinesPage() {
       );
     }
 
+    if (storeMappingsResult.error) {
+      console.error(
+        "STORE MAPPINGS ERROR:",
+        storeMappingsResult.error
+      );
+    }
+
     if (valuationsResult.error) {
       console.error(
         "INVENTORY VALUATIONS ERROR:",
@@ -391,6 +414,10 @@ export default function WinesPage() {
 
     setLocations(
       locationsResult.data || []
+    );
+
+    setStoreMappings(
+      storeMappingsResult.data || []
     );
 
     setMovements(
@@ -715,6 +742,231 @@ export default function WinesPage() {
   }, [search, wines]);
 
   /* =====================================================
+     COMPUCASH RECONCILIATION EXPORT
+  ===================================================== */
+
+  function exportInventoryReconciliation() {
+    if (exporting || wines.length === 0) return;
+
+    setExporting(true);
+
+    try {
+      const valuationByKey = new Map(
+        inventoryValuations.map((row) => [
+          `${row.wine_id}|${row.location_id}`,
+          row,
+        ])
+      );
+      const mappingsByLocation = new Map();
+
+      for (const mapping of storeMappings) {
+        const locationId = String(mapping.location_id);
+        const existing = mappingsByLocation.get(locationId) || [];
+        existing.push(mapping);
+        mappingsByLocation.set(locationId, existing);
+      }
+
+      const detailRows = [];
+
+      for (const wine of wines) {
+        const inventoryByLocation = new Map();
+
+        for (const inventory of wine.inventory || []) {
+          const locationId = String(inventory.location_id || "");
+          inventoryByLocation.set(
+            locationId,
+            (inventoryByLocation.get(locationId) || 0) +
+              positiveBottleQuantity(inventory.quantity)
+          );
+        }
+
+        for (const [locationId, vaxeronQuantity] of inventoryByLocation) {
+          if (vaxeronQuantity <= 0) continue;
+
+          const key = `${wine.id}|${locationId}`;
+          const valuation = valuationByKey.get(key);
+          const location = locationsMap[locationId];
+          const mappings = mappingsByLocation.get(locationId) || [];
+          const compucashQuantity = valuation
+            ? positiveBottleQuantity(valuation.quantity_snapshot)
+            : null;
+          const difference = compucashQuantity == null
+            ? null
+            : vaxeronQuantity - compucashQuantity;
+          const quantityMatches = difference != null && Math.abs(difference) < 0.001;
+          const unitCost = valuation?.unit_inventory_cost == null
+            ? null
+            : Number(valuation.unit_inventory_cost);
+          const costCoveredQuantity = valuation
+            ? Math.min(
+                vaxeronQuantity,
+                positiveBottleQuantity(valuation.cost_covered_quantity)
+              )
+            : 0;
+          const salePriceNet = valuation?.unit_sale_price_net == null
+            ? null
+            : Number(valuation.unit_sale_price_net);
+          const salePriceGross = valuation?.unit_sale_price_gross == null
+            ? null
+            : Number(valuation.unit_sale_price_gross);
+
+          detailRows.push({
+            "Comparison status": !valuation
+              ? "Missing Compucash snapshot"
+              : quantityMatches
+                ? "Matched"
+                : "Quantity mismatch",
+            "Wine label": wine.name || "Unnamed wine",
+            Producer: wine.producer || "",
+            Vintage: wine.vintage || "NV",
+            Category: getWineTypeLabel(normalizeWineCategory(wine)),
+            "Bottle size": wine.size || "Needs review",
+            "Vaxeron SKU": wine.sku || "",
+            "Business product number": wine.business_product_number || "",
+            "Compucash product ID": valuation?.external_product_id || "",
+            "Vaxeron location": location?.name || "Unknown location",
+            "Location type": location?.location_type || "",
+            "Mapped Compucash stores": mappings
+              .map((mapping) => mapping.business_store_name)
+              .filter(Boolean)
+              .join(" | "),
+            "Mapped store IDs": (valuation?.external_store_ids?.length
+              ? valuation.external_store_ids
+              : mappings.map((mapping) => mapping.business_store_id)
+            ).filter(Boolean).join(" | "),
+            "Vaxeron quantity": vaxeronQuantity,
+            "Compucash quantity snapshot": compucashQuantity,
+            "Quantity difference": difference,
+            "Average purchase price": unitCost,
+            "Cost-covered quantity": costCoveredQuantity,
+            "Vaxeron inventory value": unitCost == null
+              ? null
+              : costCoveredQuantity * unitCost,
+            "Compucash snapshot value": valuation?.inventory_cost_value == null
+              ? null
+              : Number(valuation.inventory_cost_value),
+            "Selling price net": salePriceNet,
+            "Selling price gross": salePriceGross,
+            "Potential net revenue": salePriceNet == null
+              ? null
+              : vaxeronQuantity * salePriceNet,
+            "Potential gross revenue": salePriceGross == null
+              ? null
+              : vaxeronQuantity * salePriceGross,
+            Currency: valuation?.currency_code || "EUR",
+            "Purchase-cost basis": valuation?.cost_basis || "",
+            "Compucash source updated": valuation?.source_updated_at || "",
+          });
+        }
+      }
+
+      detailRows.sort((a, b) =>
+        a["Vaxeron location"].localeCompare(b["Vaxeron location"]) ||
+        a["Wine label"].localeCompare(b["Wine label"])
+      );
+
+      const locationRows = Array.from(
+        detailRows.reduce((map, row) => {
+          const locationName = row["Vaxeron location"];
+          const current = map.get(locationName) || {
+            Location: locationName,
+            "Active labels": 0,
+            "Vaxeron quantity": 0,
+            "Compucash quantity snapshot": 0,
+            "Quantity difference": 0,
+            "Inventory at average cost": 0,
+            "Rows requiring review": 0,
+          };
+          current["Active labels"] += 1;
+          current["Vaxeron quantity"] += Number(row["Vaxeron quantity"] || 0);
+          current["Compucash quantity snapshot"] += Number(row["Compucash quantity snapshot"] || 0);
+          current["Quantity difference"] += Number(row["Quantity difference"] || 0);
+          current["Inventory at average cost"] += Number(row["Vaxeron inventory value"] || 0);
+          if (row["Comparison status"] !== "Matched") current["Rows requiring review"] += 1;
+          map.set(locationName, current);
+          return map;
+        }, new Map()).values()
+      ).sort((a, b) => a.Location.localeCompare(b.Location));
+
+      const matchedRows = detailRows.filter((row) => row["Comparison status"] === "Matched").length;
+      const mismatchRows = detailRows.length - matchedRows;
+      const vaxeronTotal = detailRows.reduce((sum, row) => sum + Number(row["Vaxeron quantity"] || 0), 0);
+      const compucashTotal = detailRows.reduce((sum, row) => sum + Number(row["Compucash quantity snapshot"] || 0), 0);
+      const reportGeneratedAt = new Date();
+      const summaryRows = [
+        ["Vaxeron / Compucash inventory reconciliation"],
+        ["Generated", reportGeneratedAt.toISOString()],
+        ["Scope", "Active wine labels with Vaxeron physical stock above zero"],
+        ["Latest Compucash sync status", compuCashStatus?.latestRun?.status || "Unknown"],
+        ["Latest Compucash sync completed", compuCashStatus?.latestRun?.completed_at || ""],
+        ["Compucash products received", compuCashStatus?.latestRun?.products_received ?? ""],
+        ["Compucash products matched", compuCashStatus?.latestRun?.products_matched ?? ""],
+        ["Compucash products unmatched", compuCashStatus?.latestRun?.unmatched_products ?? ""],
+        [],
+        ["Active wine labels", new Set(detailRows.map((row) => `${row["Wine label"]}|${row.Producer}|${row.Vintage}`)).size],
+        ["Active wine/location rows", detailRows.length],
+        ["Active locations", locationRows.length],
+        ["Vaxeron physical quantity", vaxeronTotal],
+        ["Compucash quantity snapshot", compucashTotal],
+        ["Quantity difference", vaxeronTotal - compucashTotal],
+        ["Matched rows", matchedRows],
+        ["Rows requiring review", mismatchRows],
+        ["Inventory at average purchase cost", valuationSummary.inventoryCost],
+        ["Purchase-cost coverage (%)", valuationSummary.costCoverage],
+        ["Potential net revenue", valuationSummary.potentialRevenueNet],
+        ["Currency", "EUR"],
+        [],
+        ["Interpretation"],
+        ["Vaxeron quantity", "Current positive quantity stored in Vaxeron for the wine and location."],
+        ["Compucash quantity snapshot", "Quantity received from Compucash during the valuation/sync snapshot."],
+        ["Average purchase price", "Compucash StoreQuantity.storagePrice; treated as average purchase cost."],
+        ["Quantity difference", "Vaxeron quantity minus Compucash quantity. Zero means the row reconciles."],
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
+      const locationSheet = XLSX.utils.json_to_sheet(locationRows);
+      const detailSheet = XLSX.utils.json_to_sheet(detailRows);
+
+      summarySheet["!cols"] = [{ wch: 36 }, { wch: 78 }];
+      locationSheet["!cols"] = [
+        { wch: 24 }, { wch: 14 }, { wch: 18 }, { wch: 28 },
+        { wch: 18 }, { wch: 27 }, { wch: 20 },
+      ];
+      detailSheet["!cols"] = [
+        { wch: 25 }, { wch: 42 }, { wch: 28 }, { wch: 10 }, { wch: 16 },
+        { wch: 14 }, { wch: 16 }, { wch: 24 }, { wch: 22 }, { wch: 24 },
+        { wch: 18 }, { wch: 38 }, { wch: 24 }, { wch: 18 }, { wch: 28 },
+        { wch: 19 }, { wch: 23 }, { wch: 22 }, { wch: 24 }, { wch: 25 },
+        { wch: 20 }, { wch: 22 }, { wch: 23 }, { wch: 25 }, { wch: 10 },
+        { wch: 26 }, { wch: 24 },
+      ];
+      if (detailSheet["!ref"]) {
+        detailSheet["!autofilter"] = { ref: detailSheet["!ref"] };
+      }
+      if (locationSheet["!ref"]) {
+        locationSheet["!autofilter"] = { ref: locationSheet["!ref"] };
+      }
+
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+      XLSX.utils.book_append_sheet(workbook, locationSheet, "Locations");
+      XLSX.utils.book_append_sheet(workbook, detailSheet, "Wine detail");
+
+      const dateStamp = reportGeneratedAt.toISOString().slice(0, 10);
+      XLSX.writeFile(
+        workbook,
+        `vaxeron-compucash-reconciliation-${dateStamp}.xlsx`,
+        { compression: true }
+      );
+    } catch (error) {
+      console.error("INVENTORY EXPORT ERROR:", error);
+      window.alert("Vaxeron could not create the inventory export. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  /* =====================================================
      CSV IMPORT
   ===================================================== */
 
@@ -1016,6 +1268,17 @@ export default function WinesPage() {
         )}
 
         <div className="wine-cellar-actions">
+          <button
+            type="button"
+            onClick={exportInventoryReconciliation}
+            disabled={exporting}
+            className="so-btn-secondary"
+            title="Export the current Vaxeron inventory beside its Compucash quantity and purchase-cost snapshot"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            {exporting ? "Preparing export" : "Export inventory"}
+          </button>
+
           <button
             onClick={() =>
               router.push(
