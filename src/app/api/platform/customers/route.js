@@ -45,6 +45,22 @@ export async function GET(request) {
       .order("created_at", { ascending: false });
     if (error) throw error;
 
+    const organizationIds = (organizations || []).map((organization) => organization.id);
+    const syncRunsResult = organizationIds.length
+      ? await admin
+          .from("compucash_sync_runs")
+          .select("organization_id,status,started_at,completed_at,products_received,products_matched,unmatched_products")
+          .in("organization_id", organizationIds)
+          .order("started_at", { ascending: false })
+      : { data: [], error: null };
+    if (syncRunsResult.error) throw syncRunsResult.error;
+    const latestCompucashSyncByOrganization = new Map();
+    for (const run of syncRunsResult.data || []) {
+      if (!latestCompucashSyncByOrganization.has(run.organization_id)) {
+        latestCompucashSyncByOrganization.set(run.organization_id, run);
+      }
+    }
+
     const ownerIds = [...new Set(
       (organizations || []).flatMap((organization) =>
         (organization.organization_memberships || [])
@@ -77,6 +93,7 @@ export async function GET(request) {
         properties: organization.properties || [],
         settings: organization.organization_platform_settings || null,
         integrations: organization.integration_connections || [],
+        latestCompucashSync: latestCompucashSyncByOrganization.get(organization.id) || null,
         memberCount: (organization.organization_memberships || []).length,
       };
     });

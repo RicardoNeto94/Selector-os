@@ -2,3 +2,7 @@
 @media(max-width:900px){.topbar{height:auto;padding:18px 22px}.secureBadge{display:none}.content{width:min(100% - 28px,1440px);padding-top:30px}.hero{align-items:flex-start}.metrics{grid-template-columns:1fr 1fr}.customerMain{grid-template-columns:1fr}.customerFacts{grid-template-columns:1fr 1fr 1fr}.customerFooter{align-items:flex-start;flex-direction:column}.modulePicker{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.topActions a{font-size:0;padding:0;width:43px;justify-content:center}.topActions a svg{font-size:initial}.hero{flex-direction:column}.hero h1{font-size:44px}.metrics{grid-template-columns:1fr 1fr}.metrics article{padding:16px}.customerCard,.directory>header{padding-left:18px;padding-right:18px}.customerFacts{grid-template-columns:1fr}.inlineControls{width:100%;flex-direction:column;align-items:stretch}.inlineControls label{justify-content:space-between}.formGrid,.modulePicker{grid-template-columns:1fr}.wide{grid-column:auto}.modalLayer{padding:0}.modal{max-height:100vh;height:100vh;border-radius:0}.modal>header,.formBody,.modal>footer{padding-left:20px;padding-right:20px}}
 .resendButton{border:1px solid rgba(23,52,45,.13);border-radius:12px;background:#fff;color:#17342d;padding:10px 12px;cursor:pointer;font-weight:650}.resendButton:disabled{opacity:.5;cursor:wait}
+.content{padding-top:48px}
+.hero{padding-top:8px;padding-bottom:30px}
+.hero h1{font-size:clamp(42px,4.25vw,66px);color:#17342d!important}
+.directory h2,.customerTitle h3,.modal h2{color:#17342d!important}

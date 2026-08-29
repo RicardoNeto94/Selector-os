@@ -54,6 +54,11 @@ function formatDate(value) {
   return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
 }
 
+function hasLiveConnection(customer) {
+  return customer.integrations?.some((item) => item.status === "active")
+    || customer.latestCompucashSync?.status === "succeeded";
+}
+
 export default function PlatformAdminPage() {
   const supabase = useMemo(() => createClient(), []);
   const [customers, setCustomers] = useState([]);
@@ -114,7 +119,7 @@ export default function PlatformAdminPage() {
     total: customers.length,
     live: customers.filter((customer) => customer.status === "active" && customer.settings?.onboarding_status === "live").length,
     onboarding: customers.filter((customer) => ["invited", "in_progress", "ready"].includes(customer.settings?.onboarding_status)).length,
-    integrations: customers.reduce((count, customer) => count + customer.integrations.filter((item) => item.status === "active").length, 0),
+    integrations: customers.filter(hasLiveConnection).length,
   }), [customers]);
 
   function setField(field, value) {
@@ -249,6 +254,14 @@ export default function PlatformAdminPage() {
                 const settings = customer.settings || {};
                 const modules = settings.enabled_modules || {};
                 const integration = customer.integrations.find((item) => item.status === "active");
+                const compucashSync = customer.latestCompucashSync?.status === "succeeded"
+                  ? customer.latestCompucashSync
+                  : null;
+                const inventoryDetail = integration
+                  ? `${integration.provider} connected`
+                  : compucashSync
+                    ? `Compucash synced ${formatDate(compucashSync.completed_at || compucashSync.started_at)}`
+                    : "No live API connection";
                 return (
                   <article className={styles.customerCard} key={customer.id}>
                     <div className={styles.customerMain}>
@@ -262,7 +275,7 @@ export default function PlatformAdminPage() {
                       <div className={styles.customerFacts}>
                         <div><span>Owner</span><strong>{ownerName(customer.owner)}</strong><small>{customer.owner?.email || "No owner profile"}</small></div>
                         <div><span>Onboarding</span><strong>{(settings.onboarding_status || "unconfigured").replaceAll("_", " ")}</strong><small>{customer.owner?.membershipStatus === "invited" ? "Invitation pending" : "Membership active"}</small></div>
-                        <div><span>Inventory</span><strong>{settings.inventory_mode || "manual"}</strong><small>{integration ? `${integration.provider} connected` : "No live API connection"}</small></div>
+                        <div><span>Inventory</span><strong>{settings.inventory_mode || (compucashSync ? "api" : "manual")}</strong><small>{inventoryDetail}</small></div>
                       </div>
                     </div>
                     <div className={styles.customerFooter}>
