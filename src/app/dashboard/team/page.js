@@ -18,6 +18,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/lib/supabase/client";
+import { getRoleAccessDefinition, ROLE_ACCESS_DEFINITIONS } from "@/lib/access/roleDefinitions";
 
 const PAGE_SIZES = [10, 25, 50];
 const EMPTY_FORM = {
@@ -143,7 +144,7 @@ export default function TeamAccessPage() {
     total: team.length,
     active: team.filter((member) => member.status === "active").length,
     pending: team.filter((member) => member.status === "pending").length,
-    administrators: team.filter((member) => (member.roles || []).some((role) => role.slug === "administrator")).length,
+    administrators: team.filter((member) => ["owner", "administrator"].includes(member.membership_role)).length,
   }), [team]);
 
   const totalPages = Math.max(1, Math.ceil(filteredTeam.length / pageSize));
@@ -151,6 +152,7 @@ export default function TeamAccessPage() {
   const pageTeam = filteredTeam.slice((safePage - 1) * pageSize, safePage * pageSize);
   const selectedRole = roles.find((role) => role.id === form.roleId);
   const isAdministrator = selectedRole?.slug === "administrator";
+  const selectedRoleAccess = getRoleAccessDefinition(selectedRole?.slug);
 
   function openInviteModal() {
     setForm(EMPTY_FORM);
@@ -266,37 +268,37 @@ export default function TeamAccessPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#edf3ef] px-4 py-5 text-[#17372d] sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-[1580px] space-y-5">
-        <section className="overflow-hidden rounded-[30px] border border-white/90 bg-[radial-gradient(circle_at_90%_10%,rgba(205,232,218,.82),transparent_35%),linear-gradient(135deg,rgba(255,255,255,.9),rgba(246,250,247,.72))] shadow-[0_24px_60px_rgba(25,58,47,.08)] backdrop-blur-xl">
-          <div className="flex flex-col gap-6 px-6 py-7 lg:flex-row lg:items-center lg:justify-between lg:px-9">
+    <main className="min-h-screen overflow-x-hidden bg-[#edf3ef] px-3 py-3 text-[#17372d] sm:px-5 lg:px-6">
+      <div className="mx-auto w-full max-w-[1580px] space-y-4">
+        <section className="overflow-hidden rounded-[20px] border border-white/90 bg-[radial-gradient(circle_at_90%_10%,rgba(205,232,218,.55),transparent_35%),linear-gradient(135deg,rgba(255,255,255,.88),rgba(246,250,247,.72))] shadow-[0_12px_34px_rgba(25,58,47,.055)]">
+          <div className="flex flex-col gap-4 px-5 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-7">
             <div>
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.28em] text-[#66857a]">
                 <ShieldCheckIcon className="h-4 w-4" />
                 People & permissions
               </div>
-              <h1 className="mt-3 text-[34px] font-semibold tracking-[-.045em] sm:text-[44px]">Team & Access</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6d837b]">
+              <h1 className="mt-2 text-[31px] font-semibold tracking-[-.045em] sm:text-[36px]">Team & Access</h1>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-[#6d837b]">
                 Invite colleagues, assign operational roles and limit access to the venues they actually manage.
               </p>
               {workspace && (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d9e6e0] bg-white/70 px-3 py-2 text-xs text-[#4d685f]">
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#d9e6e0] bg-white/70 px-3 py-1.5 text-[11px] text-[#4d685f]">
                   <BuildingStorefrontIcon className="h-4 w-4" />
                   {workspace.propertyName || workspace.organizationName || "Current workspace"}
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[520px]">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[15px] border border-[#dce7e2] bg-[#dce7e2] sm:grid-cols-4 lg:min-w-[480px]">
               {[
                 ["People", metrics.total],
                 ["Active", metrics.active],
                 ["Invited", metrics.pending],
                 ["Admins", metrics.administrators],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-[20px] border border-white bg-white/66 px-4 py-3 shadow-sm">
+                <div key={label} className="bg-white/76 px-4 py-2.5">
                   <div className="text-[9px] font-semibold uppercase tracking-[.22em] text-[#81968e]">{label}</div>
-                  <div className="mt-1 text-2xl font-semibold tracking-[-.04em]">{value}</div>
+                  <div className="mt-0.5 text-xl font-semibold tracking-[-.04em]">{value}</div>
                 </div>
               ))}
             </div>
@@ -310,7 +312,35 @@ export default function TeamAccessPage() {
           </div>
         )}
 
-        <section className="rounded-[28px] border border-white/90 bg-white/65 shadow-[0_18px_50px_rgba(25,58,47,.07)] backdrop-blur-xl">
+        <details className="group overflow-hidden rounded-[16px] border border-white/90 bg-white/60">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 marker:content-none sm:px-6">
+            <div>
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.22em] text-[#708a80]">
+                <ShieldCheckIcon className="h-4 w-4" /> Access level guide
+              </div>
+              <p className="mt-1 text-xs text-[#7c9088]">See exactly what each invited role can and cannot do.</p>
+            </div>
+            <ChevronRightIcon className="h-5 w-5 shrink-0 text-[#6e857c] transition-transform group-open:rotate-90" />
+          </summary>
+          <div className="grid gap-3 border-t border-[#dfe9e5] p-4 md:grid-cols-2 xl:grid-cols-5">
+            {Object.entries(ROLE_ACCESS_DEFINITIONS).map(([slug, definition]) => (
+              <article key={slug} className="rounded-[20px] border border-[#dce7e2] bg-white/76 p-4">
+                <h3 className="text-sm font-semibold text-[#17372d]">{definition.label}</h3>
+                <p className="mt-1 min-h-10 text-[11px] leading-5 text-[#72877f]">{definition.summary}</p>
+                <div className="mt-3 text-[9px] font-semibold uppercase tracking-[.16em] text-[#4f7567]">Can</div>
+                <ul className="mt-1 space-y-1 text-[10px] leading-4 text-[#62786f]">
+                  {definition.allows.map((item) => <li key={item}>• {item}</li>)}
+                </ul>
+                <div className="mt-3 text-[9px] font-semibold uppercase tracking-[.16em] text-[#9b6747]">Limits</div>
+                <ul className="mt-1 space-y-1 text-[10px] leading-4 text-[#7d756e]">
+                  {definition.limits.map((item) => <li key={item}>• {item}</li>)}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </details>
+
+        <section className="rounded-[20px] border border-white/90 bg-white/68 shadow-[0_10px_32px_rgba(25,58,47,.045)]">
           <div className="flex flex-col gap-4 border-b border-[#dae6e1] p-5 md:flex-row md:items-center md:justify-between lg:p-6">
             <div>
               <h2 className="text-xl font-semibold tracking-[-.025em]">Workspace team</h2>
@@ -378,9 +408,12 @@ export default function TeamAccessPage() {
           ) : (
             <div className="divide-y divide-[#e2ebe7]">
               {pageTeam.map((member) => {
-                const roleNames = (member.roles || []).map((role) => role.name);
+                const roleNames = member.membership_role === "owner"
+                  ? ["Workspace Owner"]
+                  : (member.roles || []).map((role) => role.name);
                 const locationNames = (member.locations || []).map((location) => location.name);
                 const status = member.status || "pending";
+                const isWorkspaceOwner = Boolean(member.is_protected_owner);
                 return (
                   <article key={member.id} className="grid gap-4 px-5 py-5 transition hover:bg-white/55 lg:grid-cols-[minmax(280px,1.3fr)_minmax(180px,.7fr)_minmax(240px,1fr)_auto] lg:items-center lg:px-6">
                     <div className="flex min-w-0 items-center gap-4">
@@ -401,7 +434,7 @@ export default function TeamAccessPage() {
                     <div>
                       <div className="text-[9px] font-semibold uppercase tracking-[.2em] text-[#8ba098]">Venue access</div>
                       <div className="mt-1.5 line-clamp-2 text-sm text-[#5f766d]">
-                        {(member.roles || []).some((role) => role.slug === "administrator") ? "All workspace venues" : locationNames.join(", ") || "No venues assigned"}
+                        {["owner", "administrator"].includes(member.membership_role) ? "All workspace venues" : locationNames.join(", ") || "No venues assigned"}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 lg:justify-end">
@@ -419,7 +452,7 @@ export default function TeamAccessPage() {
                       <span className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${STATUS_STYLE[status] || STATUS_STYLE.pending}`}>
                         {status}
                       </span>
-                      {member.id !== currentUserId && (
+                      {member.id !== currentUserId && !isWorkspaceOwner && (
                         <button
                           type="button"
                           onClick={() => setMemberToRemove(member)}
@@ -429,6 +462,11 @@ export default function TeamAccessPage() {
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
+                      )}
+                      {isWorkspaceOwner && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d8c895] bg-[#fff9e8] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[#80651a]" title="Protected owner account. Administrators cannot remove this user.">
+                          <ShieldCheckIcon className="h-3.5 w-3.5" /> Protected owner
+                        </span>
                       )}
                     </div>
                   </article>
@@ -497,7 +535,23 @@ export default function TeamAccessPage() {
                   </label>
                   {selectedRole && (
                     <div className={`rounded-2xl border p-3 text-xs leading-5 ${isAdministrator ? "border-amber-200 bg-amber-50 text-amber-800" : "border-[#d9e6e0] bg-[#f2f7f4] text-[#5f776e]"}`}>
-                      <strong>{selectedRole.name}.</strong> {selectedRole.description || (isAdministrator ? "Full access to every venue and administrative area." : "Access is limited to the selected venues.")}
+                      <strong>{selectedRoleAccess?.label || selectedRole.name}.</strong> {selectedRoleAccess?.summary || selectedRole.description || (isAdministrator ? "Full access to every venue and administrative area." : "Access is limited to the selected venues.")}
+                      {selectedRoleAccess && (
+                        <div className="mt-3 grid gap-3 border-t border-current/15 pt-3 sm:grid-cols-2">
+                          <div>
+                            <div className="font-semibold uppercase tracking-[.12em]">Can</div>
+                            <ul className="mt-1 space-y-1">
+                              {selectedRoleAccess.allows.map((item) => <li key={item}>• {item}</li>)}
+                            </ul>
+                          </div>
+                          <div>
+                            <div className="font-semibold uppercase tracking-[.12em]">Cannot</div>
+                            <ul className="mt-1 space-y-1">
+                              {selectedRoleAccess.limits.map((item) => <li key={item}>• {item}</li>)}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   <div className={isAdministrator ? "pointer-events-none opacity-40" : ""}>

@@ -23,6 +23,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { BOTTLE_FORMATS, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
+import { PortfolioRing } from "@/components/dashboard/OperationalVisuals";
 import "./wine-cellar.css";
 /* =======================================================
    CONSTANTS
@@ -264,7 +265,6 @@ export default function WinesPage() {
 
   const [selectedCompositionType, setSelectedCompositionType] = useState(null);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
-  const [donutRevealComplete, setDonutRevealComplete] = useState(false);
 
   const [file, setFile] =
     useState(null);
@@ -625,24 +625,15 @@ export default function WinesPage() {
   ) || locationDistribution[0] || null;
 
   const compositionSegments = useMemo(() => {
-    let cursor = 0;
     return wineComposition.slice(0, 8).map((item, index) => {
-      const start = cursor;
-      cursor += item.percentage;
-      return { ...item, start, color: WINE_CHART_COLORS[index % WINE_CHART_COLORS.length] };
+      return {
+        key: item.type,
+        label: getWineTypeLabel(item.type),
+        value: item.quantity,
+        color: WINE_CHART_COLORS[index % WINE_CHART_COLORS.length],
+      };
     });
   }, [wineComposition]);
-
-  useEffect(() => {
-    if (!compositionSegments.length) return undefined;
-
-    setDonutRevealComplete(false);
-    const revealTimer = window.setTimeout(() => {
-      setDonutRevealComplete(true);
-    }, 1300);
-
-    return () => window.clearTimeout(revealTimer);
-  }, [compositionSegments]);
 
   /* =====================================================
      ATTENTION
@@ -1545,56 +1536,11 @@ export default function WinesPage() {
             <small>{formatNumber(totalBottles)} bottles</small>
           </div>
 
-          <div className="wine-donut-layout">
-            <div className="wine-donut" aria-label="Interactive wine category distribution">
-              <svg viewBox="0 0 100 100" role="img" aria-label="Wine category distribution. Use the category list to select a segment.">
-                <circle className="wine-donut-track" cx="50" cy="50" r="40" pathLength="100" />
-                <defs>
-                  <mask id="wine-donut-reveal-mask" maskUnits="userSpaceOnUse">
-                    <circle className="wine-donut-reveal" cx="50" cy="50" r="40" pathLength="100" />
-                  </mask>
-                </defs>
-                <g mask={donutRevealComplete ? undefined : "url(#wine-donut-reveal-mask)"}>
-                  {compositionSegments.map((item) => {
-                    const isActive = selectedComposition?.type === item.type;
-                    return <circle
-                      key={item.type}
-                      className={`wine-donut-segment ${isActive ? "is-active" : "is-muted"}`}
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      pathLength="100"
-                      stroke={item.color}
-                      strokeDasharray={`${Math.max(item.percentage - .35, .15)} ${100 - Math.max(item.percentage - .35, .15)}`}
-                      strokeDashoffset={-item.start}
-                      aria-hidden="true"
-                      onClick={() => setSelectedCompositionType(item.type)}
-                    />;
-                  })}
-                </g>
-              </svg>
-              <span key={selectedComposition?.type || "empty"} className="wine-donut-center">
-                <small>{selectedComposition ? getWineTypeLabel(selectedComposition.type) : "Cellar"}</small>
-                <strong>{selectedComposition ? `${selectedComposition.percentage.toFixed(1)}%` : "0%"}</strong>
-                <em>{selectedComposition ? `${formatNumber(selectedComposition.quantity)} bottles` : "No stock"}</em>
-              </span>
-            </div>
-
-            <div className="wine-chart-legend">
-              {wineComposition.slice(0, 8).map((item, index) => (
-                <button
-                  type="button"
-                  key={item.type}
-                  onClick={() => setSelectedCompositionType(item.type)}
-                  className={selectedComposition?.type === item.type ? "is-active" : ""}
-                >
-                  <i style={{ background: WINE_CHART_COLORS[index % WINE_CHART_COLORS.length] }} />
-                  <span>{getWineTypeLabel(item.type)}</span>
-                  <strong>{item.percentage.toFixed(1)}%</strong>
-                </button>
-              ))}
-            </div>
-          </div>
+          <PortfolioRing
+            items={compositionSegments}
+            selectedKey={selectedComposition?.type}
+            onSelect={setSelectedCompositionType}
+          />
         </section>
 
         <section className="wine-analytics-card wine-location-card">

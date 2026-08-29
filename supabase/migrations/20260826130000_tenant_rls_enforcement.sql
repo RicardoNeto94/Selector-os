@@ -1,6 +1,51 @@
 -- Phase 3: enforce organization/property isolation.
 -- Apply only after 20260823180000 and 20260826120000.
 
+-- Repair rows written by legacy/service-role integrations before tenant
+-- columns become mandatory. Every source below is already tenant-owned.
+update public.wine_inventory as child
+set organization_id = parent.organization_id,
+    property_id = parent.property_id
+from public.wine_locations as parent
+where child.location_id = parent.id
+  and (child.organization_id is null or child.property_id is null);
+
+update public.wine_inventory_valuations as child
+set organization_id = parent.organization_id,
+    property_id = parent.property_id
+from public.wine_locations as parent
+where child.location_id = parent.id
+  and (child.organization_id is null or child.property_id is null);
+
+update public.wine_movements as child
+set organization_id = parent.organization_id,
+    property_id = parent.property_id
+from public.wines as parent
+where child.wine_id = parent.id
+  and (child.organization_id is null or child.property_id is null);
+
+with resolved_memberships as (
+  select
+    organization_membership.user_id,
+    organization_membership.organization_id,
+    min(property_membership.property_id::text)::uuid as property_id
+  from public.organization_memberships as organization_membership
+  join public.property_memberships as property_membership
+    on property_membership.user_id = organization_membership.user_id
+  join public.properties as property
+    on property.id = property_membership.property_id
+   and property.organization_id = organization_membership.organization_id
+  where organization_membership.status = 'active'
+  group by organization_membership.user_id, organization_membership.organization_id
+  having count(distinct property_membership.property_id) = 1
+)
+update public.user_roles as child
+set organization_id = resolved.organization_id,
+    property_id = resolved.property_id
+from resolved_memberships as resolved
+where child.user_id = resolved.user_id
+  and (child.organization_id is null or child.property_id is null);
+
 create or replace function public.can_write_tenant(
   target_organization_id uuid,
   target_property_id uuid default null
@@ -253,6 +298,18 @@ begin
   if not found then
     raise exception 'Referenced % record does not exist.', tg_argv[1];
   end if;
+
+  -- Server-side integrations do not have auth.uid(). Safely derive missing
+  -- ownership from the referenced tenant parent before validating it. When a
+  -- child has multiple parents, the following parent triggers confirm they
+  -- all belong to exactly the same organization/property.
+  if new.organization_id is null then
+    new.organization_id := parent_organization_id;
+  end if;
+  if new.property_id is null and parent_property_id is not null then
+    new.property_id := parent_property_id;
+  end if;
+
   if new.organization_id is distinct from parent_organization_id
     or (
       parent_property_id is not null

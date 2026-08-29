@@ -36,10 +36,10 @@ function StatusRow({ icon: Icon, title, detail, href, tone = "neutral" }) {
 }
 
 function OperationCard({ href, icon: Icon, eyebrow, title, description, meta }) {
-  return <Link href={href} className="group flex min-h-[126px] flex-col justify-between rounded-[18px] border border-[#ded3c8] bg-[#fbf8f3] p-4 transition duration-300 hover:-translate-y-[2px] hover:border-[#cdb9aa] hover:shadow-[0_16px_40px_rgba(63,42,31,0.06)]">
-    <div><div className="flex items-start justify-between gap-4"><div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dfd1c5] bg-[#f7f1eb]"><Icon className="h-4 w-4 text-[#8e6c5c]" /></div><ArrowRightIcon className="h-3.5 w-3.5 text-[#b7a79c] transition group-hover:translate-x-1 group-hover:text-[#963d2d]" /></div>
-      <div className="mt-3 text-[7px] uppercase tracking-[0.24em] text-[#a17865]">{eyebrow}</div><div className="mt-1 text-[14px] tracking-[-0.02em] text-[#30241f]">{title}</div><div className="mt-1 max-w-[300px] text-[8.5px] leading-[1.45] text-[#928278]">{description}</div></div>
-    <div className="mt-3 border-t border-[#ebe2da] pt-2 text-[8px] text-[#a29287]">{meta}</div>
+  return <Link href={href} className="group grid min-h-[88px] grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-[16px] border border-[#ded3c8] bg-[#fbf8f3] p-3.5 transition duration-200 hover:border-[#b9ccc5] hover:bg-white">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#dfd1c5] bg-[#f7f1eb]"><Icon className="h-4 w-4 text-[#8e6c5c]" /></div>
+    <div className="min-w-0"><div className="text-[7px] uppercase tracking-[0.22em] text-[#a17865]">{eyebrow}</div><div className="mt-0.5 text-[13px] tracking-[-0.01em] text-[#30241f]">{title}</div><div className="mt-0.5 truncate text-[8px] text-[#928278]" title={description}>{meta}</div></div>
+    <ArrowRightIcon className="h-3.5 w-3.5 text-[#b7a79c] transition group-hover:translate-x-0.5 group-hover:text-[#55766b]" />
   </Link>;
 }
 
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
     </section>
 
     <section className="mt-5"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Quick actions</div><h2 className="mt-1 text-[20px] tracking-[-0.035em] md:text-[22px]">Run the operation</h2><p className="mt-1 text-[9px] text-[#95867b]">The most useful day-to-day workspaces.</p></div>
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         <OperationCard href="/dashboard/wines" icon={BeakerIcon} eyebrow="Wine" title="Wine Cellar" description="Manage stocked wine records, pricing and catalogue information." meta={`${formatNumber(stockedWines)} active wine labels`} />
         <OperationCard href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} eyebrow="Inventory" title="Stock Control" description="Review live quantities across cellar and venue storage." meta={`${formatNumber(totalWineUnits, 2)} physical bottle units`} />
         <OperationCard href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} eyebrow="Venues" title="Venue Wines" description="Control venue selections and guest-facing availability." meta={`${locations.length} storage locations`} />
@@ -136,6 +136,5 @@ export default async function DashboardPage() {
     </section>
 
     <PwaRefreshControl />
-    <section className="mt-7 flex flex-col gap-4 rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d9d8c9] bg-[#f3f5ed]"><span className={`h-1.5 w-1.5 rounded-full ${syncHealthy ? "bg-[#7f9872]" : "bg-[#b86745]"}`} /></div><div><div className="text-[9px] font-medium">VAXERON operational</div><div className="mt-0.5 text-[8px] text-[#9b8b80]">Inventory, venues and guest experience connected</div></div></div><div className="text-[7px] uppercase tracking-[0.24em] text-[#ad9d92]">Hospitality, orchestrated.</div></section>
   </div></div>;
 }

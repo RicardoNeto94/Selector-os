@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { BOTTLE_FORMATS, fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
+import { ReadinessFunnel } from "@/components/dashboard/OperationalVisuals";
 import "../venue-wines.css";
 
 function formatQuantity(value) {
@@ -924,6 +925,20 @@ export default function VenueWinePage() {
       (row) => row.guestVisible && !String(row.description || "").trim()
     ).length;
 
+    const priced = rows.filter((row) => {
+      if (!row.guestVisible) return false;
+      const bottleReady = row.serviceType === "glass" || Number(row.bottlePrice) > 0;
+      const glassReady = row.serviceType === "bottle" || Number(row.glassPrice) > 0;
+      return bottleReady && glassReady;
+    }).length;
+
+    const guestReady = rows.filter((row) => {
+      if (!row.guestVisible || !String(row.description || "").trim()) return false;
+      const bottleReady = row.serviceType === "glass" || Number(row.bottlePrice) > 0;
+      const glassReady = row.serviceType === "bottle" || Number(row.glassPrice) > 0;
+      return bottleReady && glassReady;
+    }).length;
+
     const btgSignals = dedupedBtgSuggestions.length;
     const guestActions = pricingIssues + btgSignals + missingDescriptions;
 
@@ -938,6 +953,8 @@ export default function VenueWinePage() {
       missingBottlePrice,
       pricingIssues,
       missingDescriptions,
+      priced,
+      guestReady,
       btgSignals,
       guestActions,
     };
@@ -1057,6 +1074,7 @@ export default function VenueWinePage() {
   ].includes(location.location_type);
   const isStorageWorkspace = !supportsGuestExperience;
   const supportsSakePairing = location.name?.toLowerCase().includes("koyo");
+  const isBespokeWineExperience = ["koyo-wine", "shang-shi-wine"].includes(menu?.slug);
   const workspaceAttention = isStorageWorkspace ? stats.lowStock : stats.guestActions;
   const workspaceTabs = isStorageWorkspace
     ? [["wines", "Inventory & guest controls", stats.available]]
@@ -1133,15 +1151,28 @@ export default function VenueWinePage() {
               </p>
             </div>
 
-            {menu && !isStorageWorkspace && (
-              <a
-                href={`/wine/${menu.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center h-11 px-5 rounded-xl border border-[#ded2c7] bg-white text-[12px] font-medium text-[#4b3930] hover:bg-[#f2ebe4] transition shadow-sm"
-              >
-                Open Guest View ↗
-              </a>
+            {!isStorageWorkspace && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push(isBespokeWineExperience
+                    ? `/dashboard/wine-menus/${menu.slug}/editor`
+                    : `/dashboard/wine-menus/studio?locationId=${location.id}`)}
+                  className="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-[#17332c] text-[11px] font-semibold tracking-[0.04em] text-white hover:bg-[#244b40] transition shadow-sm"
+                >
+                  {menu ? "Manage Digital Wine List" : "Create Digital Wine List"}
+                </button>
+                {menu && (
+                  <a
+                    href={`/wine/${menu.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center h-11 px-5 rounded-xl border border-[#d6e0dc] bg-white text-[11px] font-medium text-[#36534b] hover:bg-[#edf5f2] transition shadow-sm"
+                  >
+                    Open Guest View ↗
+                  </a>
+                )}
+              </div>
             )}
 
             {isStorageWorkspace && (
@@ -1223,24 +1254,37 @@ export default function VenueWinePage() {
         </details>
 
         {!isStorageWorkspace && (stats.guestActions > 0 || stats.lowStock > 0 || !menu) && (
-          <section className="venue-attention-panel" aria-label="Venue readiness">
-            <div className="venue-attention-copy">
-              <span className="venue-attention-kicker">Service readiness</span>
-              <h2>{stats.guestActions > 0 || !menu ? "Complete the guest setup" : "Guest service is ready"}</h2>
-              <p>Guest-list setup and physical stock health are tracked separately, so the next action is always clear.</p>
+          <details className="venue-attention-panel venue-readiness-disclosure" aria-label="Venue readiness">
+            <summary>
+              <div className="venue-attention-copy">
+                <span className="venue-attention-kicker">Service readiness</span>
+                <h2>{stats.guestActions > 0 || !menu ? "Complete the guest setup" : "Guest service is ready"}</h2>
+                <p>Open the readiness view for pricing, descriptions and stock actions.</p>
+              </div>
+              <div className="venue-attention-summary" aria-label="Venue action summary">
+                <span><strong>{menu ? stats.guestActions : "Menu required"}</strong> guest setup</span>
+                <span><strong>{stats.lowStock}</strong> low stock</span>
+              </div>
+              <i className="venue-readiness-chevron" aria-hidden="true">⌄</i>
+            </summary>
+            <div className="venue-readiness-body">
+              <div className="venue-readiness-funnel">
+                <ReadinessFunnel steps={[
+                  { label: "Available", value: stats.available },
+                  { label: "Guest list", value: stats.guestLive },
+                  { label: "Priced", value: stats.priced },
+                  { label: "Guest ready", value: stats.guestReady },
+                ]} />
+              </div>
+              <div className="venue-attention-actions">
+                {!menu && <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>}
+                {stats.missingDescriptions > 0 && <button type="button" onClick={generateMissingDescriptions}>Draft {Math.min(24, stats.missingDescriptions)} descriptions</button>}
+                {stats.missingGlassPrice > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("glass"); }}>Add {stats.missingGlassPrice} glass prices</button>}
+                {dedupedBtgSuggestions.length > 0 && <button type="button" onClick={() => setWorkspaceTab(confirmedBtgSuggestions.length ? "confirmed" : "opportunities")}>Review {dedupedBtgSuggestions.length} BTG signals</button>}
+                {stats.lowStock > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("low"); }}>Review low stock</button>}
+              </div>
             </div>
-            <div className="venue-attention-summary" aria-label="Venue action summary">
-              <span><strong>{menu ? stats.guestActions : "Menu required"}</strong> guest setup</span>
-              <span><strong>{stats.lowStock}</strong> low stock</span>
-            </div>
-            <div className="venue-attention-actions">
-              {!menu && <button type="button" onClick={() => router.push("/dashboard/wine-cellar/venues")}>Link a wine menu</button>}
-              {stats.missingDescriptions > 0 && <button type="button" onClick={generateMissingDescriptions}>Draft {Math.min(24, stats.missingDescriptions)} descriptions</button>}
-              {stats.missingGlassPrice > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("glass"); }}>Add {stats.missingGlassPrice} glass prices</button>}
-              {dedupedBtgSuggestions.length > 0 && <button type="button" onClick={() => setWorkspaceTab(confirmedBtgSuggestions.length ? "confirmed" : "opportunities")}>Review {dedupedBtgSuggestions.length} BTG signals</button>}
-              {stats.lowStock > 0 && <button type="button" onClick={() => { setWorkspaceTab("wines"); setFilter("low"); }}>Review low stock</button>}
-            </div>
-          </section>
+          </details>
         )}
 
         {isStorageWorkspace && (

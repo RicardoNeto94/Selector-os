@@ -42,7 +42,12 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL("/#request-access", req.url));
   }
 
-  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+  if (
+    pathname === "/dashboard" ||
+    pathname.startsWith("/dashboard/") ||
+    pathname === "/platform-admin" ||
+    pathname.startsWith("/platform-admin/")
+  ) {
     const hasAuthCookie = req.cookies
       .getAll()
       .some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));

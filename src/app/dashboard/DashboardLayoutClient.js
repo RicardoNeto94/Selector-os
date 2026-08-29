@@ -22,6 +22,10 @@ import {
   BellAlertIcon,
   UsersIcon,
   MagnifyingGlassIcon,
+  ChevronDownIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -89,6 +93,23 @@ function SectionLabel({
   );
 }
 
+function NavGroup({ label, open, active, onToggle, children }) {
+  return (
+    <section className={`so-nav-group ${open ? "is-open" : ""} ${active ? "has-active" : ""}`}>
+      <button
+        type="button"
+        className="so-nav-group-trigger"
+        aria-expanded={open}
+        onClick={onToggle}
+      >
+        <span>{label}</span>
+        <ChevronDownIcon aria-hidden="true" />
+      </button>
+      {open && <div className="so-nav-group-items">{children}</div>}
+    </section>
+  );
+}
+
 /* =======================================================
    DASHBOARD LAYOUT
 ======================================================= */
@@ -96,17 +117,27 @@ function SectionLabel({
 export default function DashboardLayout({
   children,
   workspace,
+  platformAdministrator,
 }) {
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
   const [orderingAlerts, setOrderingAlerts] = useState(0);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notificationSummary, setNotificationSummary] = useState({});
+  const [navReady, setNavReady] = useState(false);
+  const [openGroups, setOpenGroups] = useState({ experience: true, wine: true, account: true });
 
   useEffect(() => {
     let active = true;
     fetch("/api/wine-cellar/orders?summary=1", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
-      .then((result) => { if (active) setOrderingAlerts(Number(result?.summary?.notifications || 0)); })
+      .then((result) => {
+        if (!active) return;
+        const summary = result?.summary || {};
+        setOrderingAlerts(Number(summary.notifications || 0));
+        setNotificationSummary(summary);
+      })
       .catch(() => {});
     return () => { active = false; };
   }, [pathname]);
@@ -118,12 +149,32 @@ export default function DashboardLayout({
         setCommandOpen((value) => !value);
       }
 
-      if (event.key === "Escape") setCommandOpen(false);
+      if (event.key === "Escape") {
+        setCommandOpen(false);
+        setNotificationOpen(false);
+      }
     }
 
     window.addEventListener("keydown", handleCommandKey);
     return () => window.removeEventListener("keydown", handleCommandKey);
   }, []);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem("vaxeron-sidebar-groups") || "{}");
+      setOpenGroups((current) => ({ ...current, ...stored }));
+    } catch {}
+    setNavReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!navReady) return;
+    window.localStorage.setItem("vaxeron-sidebar-groups", JSON.stringify(openGroups));
+  }, [navReady, openGroups]);
+
+  useEffect(() => {
+    setNotificationOpen(false);
+  }, [pathname]);
 
   const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail]) =>
     `${label} ${detail}`.toLowerCase().includes(commandQuery.trim().toLowerCase())
@@ -152,6 +203,11 @@ export default function DashboardLayout({
     },
     [pathname]
   );
+
+  const experienceActive = ["/dashboard/dishes", "/dashboard/menu", "/dashboard/experiences", "/dashboard/spa"].some(isActive);
+  const wineActive = ["/dashboard/wines", "/dashboard/wine-cellar", "/dashboard/wine-menus"].some(isActive);
+  const accountActive = ["/dashboard/team", "/dashboard/settings"].some(isActive);
+  const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }));
 
   return (
     <div className="so-dashboard-root">
@@ -214,11 +270,8 @@ export default function DashboardLayout({
                 EXPERIENCE
             =============================================== */}
 
-            <SectionLabel>
-              Experience
-            </SectionLabel>
-
-            <NavItem
+            <NavGroup label="Experience" open={openGroups.experience} active={experienceActive} onToggle={() => toggleGroup("experience")}>
+              <NavItem
               href="/dashboard/dishes"
               isActive={isActive(
                 "/dashboard/dishes"
@@ -227,7 +280,7 @@ export default function DashboardLayout({
               label="Dishes"
             />
 
-            <NavItem
+              <NavItem
               href="/dashboard/menu"
               isActive={isActive(
                 "/dashboard/menu"
@@ -236,7 +289,7 @@ export default function DashboardLayout({
               label="Menus"
             />
 
-            <NavItem
+              <NavItem
               href="/dashboard/experiences"
               isActive={isActive(
                 "/dashboard/experiences"
@@ -245,24 +298,22 @@ export default function DashboardLayout({
               label="Dining"
             />
 
-            <NavItem
+              <NavItem
               href="/dashboard/spa"
               isActive={isActive(
                 "/dashboard/spa"
               )}
               icon={SparklesIcon}
               label="Spa"
-            />
+              />
+            </NavGroup>
 
             {/* ===============================================
                 WINE OPERATIONS
             =============================================== */}
 
-            <SectionLabel>
-              Wine
-            </SectionLabel>
-
-            <NavItem
+            <NavGroup label="Wine operations" open={openGroups.wine} active={wineActive} onToggle={() => toggleGroup("wine")}>
+              <NavItem
               href="/dashboard/wines"
               isActive={isActive(
                 "/dashboard/wines"
@@ -271,7 +322,7 @@ export default function DashboardLayout({
               label="Wine Cellar"
             />
 
-            <NavItem
+              <NavItem
               href="/dashboard/wine-cellar/venues"
               isActive={isActive(
                 "/dashboard/wine-cellar/venues"
@@ -280,7 +331,7 @@ export default function DashboardLayout({
               label="Venue Wines"
             />
 
-            <NavItem
+              <NavItem
               href="/dashboard/wine-cellar/inventory"
               isActive={isActive(
                 "/dashboard/wine-cellar/inventory"
@@ -288,16 +339,16 @@ export default function DashboardLayout({
               icon={CircleStackIcon}
               label="Stock Control"
             />
-            <NavItem
+              <NavItem
   href="/dashboard/wine-cellar/reconciliation"
   isActive={isActive(
     "/dashboard/wine-cellar/reconciliation"
   )}
   icon={ClipboardDocumentCheckIcon}
   label="Stock Issues"
-/>
+              />
 
-            <NavItem
+              <NavItem
               href="/dashboard/wine-cellar/ordering"
               isActive={isActive(
                 "/dashboard/wine-cellar/ordering"
@@ -307,39 +358,44 @@ export default function DashboardLayout({
               badge={orderingAlerts}
             />
 
-            <NavItem
+              <NavItem
               href="/dashboard/wine-cellar/transfers"
               isActive={isActive(
                 "/dashboard/wine-cellar/transfers"
               )}
               icon={ArrowsRightLeftIcon}
               label="Movements"
-            />
+              />
+            </NavGroup>
 
             {/* ===============================================
                 ACCOUNT
             =============================================== */}
 
-            <SectionLabel>
-              Account
-            </SectionLabel>
-
-<NavItem
-  href="/dashboard/team"
-  isActive={isActive(
-    "/dashboard/team"
-  )}
-  icon={UsersIcon}
-  label="Team & Access"
-/>
-            <NavItem
+            <NavGroup label="Workspace" open={openGroups.account} active={accountActive} onToggle={() => toggleGroup("account")}>
+              <NavItem
+                href="/dashboard/team"
+                isActive={isActive("/dashboard/team")}
+                icon={UsersIcon}
+                label="Team & Access"
+              />
+              <NavItem
               href="/dashboard/settings"
               isActive={isActive(
                 "/dashboard/settings"
               )}
               icon={Cog6ToothIcon}
               label="Settings"
-            />
+              />
+              {platformAdministrator && (
+                <NavItem
+                  href="/platform-admin"
+                  isActive={false}
+                  icon={ShieldCheckIcon}
+                  label="Control Centre"
+                />
+              )}
+            </NavGroup>
 
           </nav>
 
@@ -400,6 +456,17 @@ export default function DashboardLayout({
               <kbd>⌘ K</kbd>
             </button>
 
+            <button
+              type="button"
+              className={`so-notification-button ${orderingAlerts > 0 ? "has-alerts" : ""}`}
+              aria-label={orderingAlerts > 0 ? `${orderingAlerts} inventory notifications` : "Notifications"}
+              aria-expanded={notificationOpen}
+              onClick={() => setNotificationOpen((value) => !value)}
+            >
+              <BellAlertIcon />
+              {orderingAlerts > 0 && <span>{orderingAlerts > 99 ? "99+" : orderingAlerts}</span>}
+            </button>
+
             <div className="so-system-state">
               <i />
               Live systems
@@ -438,6 +505,36 @@ export default function DashboardLayout({
               {filteredDestinations.length === 0 && <div className="so-command-empty">No matching Vaxeron module.</div>}
             </div>
           </section>
+        </div>
+      )}
+
+      {notificationOpen && (
+        <div className="so-notification-layer">
+          <button className="so-notification-backdrop" aria-label="Close notifications" onClick={() => setNotificationOpen(false)} />
+          <aside className="so-notification-drawer" role="dialog" aria-modal="true" aria-label="Notifications">
+            <header>
+              <div><span>Operations</span><h2>Notifications</h2></div>
+              <button type="button" aria-label="Close notifications" onClick={() => setNotificationOpen(false)}><XMarkIcon /></button>
+            </header>
+            <div className="so-notification-body">
+              {orderingAlerts > 0 ? (
+                <Link href="/dashboard/wine-cellar/ordering" className="so-notification-card" onClick={() => setNotificationOpen(false)}>
+                  <div className="so-notification-card-icon"><BellAlertIcon /></div>
+                  <div>
+                    <span>Inventory attention</span>
+                    <strong>{orderingAlerts.toLocaleString("en-GB")} wines need review</strong>
+                    <p>
+                      {Number(notificationSummary.urgent || 0).toLocaleString("en-GB")} urgent · {Number(notificationSummary.suggestions || 0).toLocaleString("en-GB")} ordering suggestions
+                    </p>
+                  </div>
+                  <i aria-hidden="true">→</i>
+                </Link>
+              ) : (
+                <div className="so-notification-empty"><CheckCircleIcon /><strong>All caught up</strong><p>No inventory notifications need your attention.</p></div>
+              )}
+            </div>
+            <footer><Link href="/dashboard/wine-cellar/ordering" onClick={() => setNotificationOpen(false)}>Open notification centre <span>→</span></Link></footer>
+          </aside>
         </div>
       )}
 

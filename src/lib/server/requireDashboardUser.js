@@ -33,6 +33,20 @@ export async function requireDashboardUser() {
   const tenant = accountIsActive
     ? await resolveTenantContext(admin, user.id)
     : null;
+  const platformResult = accountIsActive
+    ? await admin
+        .from("platform_administrators")
+        .select("role,status")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle()
+    : { data: null, error: null };
+  // The control-plane migration may be deployed immediately after the
+  // application build. Until then, customer dashboard access must continue to
+  // work normally and simply omit the internal Vaxeron navigation.
+  const platformAdministrator = platformResult.error
+    ? null
+    : platformResult.data;
   // Tenant membership is the source of workspace access. Legacy user_roles
   // remain available for feature-level permissions during the transition, but
   // a newly provisioned organization owner must not depend on a Burman-era
@@ -44,6 +58,7 @@ export async function requireDashboardUser() {
     profile,
     roles,
     tenant,
+    platformAdministrator,
     allowed,
     reason: allowed ? null : "approval",
   };

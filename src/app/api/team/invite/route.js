@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
+import { getTenantRoleForAccessRole } from "@/lib/access/roleDefinitions";
 import { scopeTenantQuery, tenantWriteFields } from "@/lib/server/tenantContext";
 
 export const dynamic = "force-dynamic";
@@ -254,11 +255,7 @@ export async function POST(request) {
     }
 
     if (tenant?.source === "membership") {
-      const tenantRole = ["administrator", "manager", "operator", "viewer"].includes(
-        role.slug
-      )
-        ? role.slug
-        : "operator";
+      const tenantRole = getTenantRoleForAccessRole(role.slug);
       const organizationMembership = await supabaseAdmin
         .from("organization_memberships")
         .upsert(

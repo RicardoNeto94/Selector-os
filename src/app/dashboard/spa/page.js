@@ -48,24 +48,24 @@ const SPA_AREAS = [
 
 export default function SpaDashboardPage() {
   return (
-    <div className="so-main-inner space-y-8 pb-10">
-      <section className="relative overflow-hidden rounded-[30px] border border-[#dbe6e0] bg-[#f4f8f5] px-6 py-7 sm:px-8 sm:py-9 lg:px-10">
+    <div className="so-main-inner space-y-5 pb-8">
+      <section className="relative overflow-hidden rounded-[20px] border border-[#dbe6e0] bg-[#f4f8f5] px-5 py-5 sm:px-7">
         <div
           className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#9fc1b5]/20 blur-3xl"
           aria-hidden="true"
         />
 
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.24em] text-[#638076]">
+            <div className="mb-2 text-[9px] font-medium uppercase tracking-[0.24em] text-[#638076]">
               Wellness operations
             </div>
 
-            <h1 className="text-[34px] font-light leading-none text-[#342720] sm:text-[42px]">
+            <h1 className="text-[31px] font-light leading-none text-[#342720] sm:text-[36px]">
               Burman Spa
             </h1>
 
-            <p className="mt-4 max-w-2xl text-[14px] leading-7 text-[#75685f]">
+            <p className="mt-2 max-w-2xl text-[12px] leading-5 text-[#75685f]">
               Manage treatments, wellness products and refreshments presented
               through the guest iPad experience.
             </p>
@@ -84,13 +84,13 @@ export default function SpaDashboardPage() {
       </section>
 
       <section>
-        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#a09287]">
               Spa catalogue
             </div>
 
-            <h2 className="mt-2 text-[24px] font-medium text-[#3b2c25]">
+            <h2 className="mt-1 text-[21px] font-medium text-[#3b2c25]">
               Manage the guest experience
             </h2>
           </div>
@@ -101,7 +101,7 @@ export default function SpaDashboardPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {SPA_AREAS.map((area) => {
             const Icon = area.icon;
 
@@ -109,7 +109,7 @@ export default function SpaDashboardPage() {
               <Link
                 href={area.href}
                 key={area.href}
-                className="group relative min-h-[280px] overflow-hidden rounded-[26px] border border-[#e7ddd4] bg-white/80 p-6 shadow-[0_16px_50px_rgba(70,51,39,0.05)] transition duration-300 hover:-translate-y-1 hover:border-[#d9c4af] hover:shadow-[0_24px_70px_rgba(70,51,39,0.09)]"
+                className="group relative min-h-[205px] overflow-hidden rounded-[18px] border border-[#e7ddd4] bg-white/78 p-5 transition duration-200 hover:border-[#b9ccc5] hover:bg-white"
               >
                 <div
                   className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${area.accent} opacity-65`}
@@ -118,7 +118,7 @@ export default function SpaDashboardPage() {
 
                 <div className="relative flex h-full flex-col">
                   <div
-                    className={`mb-8 flex h-11 w-11 items-center justify-center rounded-2xl ${area.iconBackground} ${area.iconColor}`}
+                    className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${area.iconBackground} ${area.iconColor}`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
@@ -127,15 +127,15 @@ export default function SpaDashboardPage() {
                     {area.eyebrow}
                   </div>
 
-                  <h3 className="mt-3 text-[25px] font-medium tracking-[-0.02em] text-[#3a2c25]">
+                  <h3 className="mt-2 text-[21px] font-medium tracking-[-0.02em] text-[#3a2c25]">
                     {area.title}
                   </h3>
 
-                  <p className="mt-3 max-w-sm text-[13px] leading-6 text-[#7b6f66]">
+                  <p className="mt-2 max-w-sm text-[12px] leading-5 text-[#7b6f66]">
                     {area.description}
                   </p>
 
-                  <div className="mt-auto flex items-center justify-between pt-8">
+                  <div className="mt-auto flex items-center justify-between pt-4">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#944a39]">
                       Open editor
                     </span>
@@ -151,51 +151,6 @@ export default function SpaDashboardPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="rounded-[26px] border border-[#e7ddd4] bg-[#201a17] px-6 py-7 text-[#f7f1eb] sm:px-8">
-          <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#cbaa76]">
-            Guest experience
-          </div>
-
-          <div className="mt-5 grid gap-8 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div>
-              <h2 className="max-w-xl text-[28px] font-light leading-tight">
-                Preview the live spa experience before publishing updates.
-              </h2>
-
-              <p className="mt-4 max-w-xl text-[13px] leading-6 text-[#c8bdb5]">
-                Review treatments, self-care products and refreshments exactly
-                as guests will see them on the in-room iPad.
-              </p>
-            </div>
-
-            <a
-              href="/spa/burman"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-white hover:text-[#201a17]"
-            >
-              Preview spa
-              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-            </a>
-          </div>
-        </div>
-
-        <div className="rounded-[26px] border border-[#e7ddd4] bg-[#f5efe8] px-6 py-7 sm:px-8">
-          <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#a09287]">
-            Publishing note
-          </div>
-
-          <h2 className="mt-4 text-[21px] font-medium text-[#3b2c25]">
-            Keep guest content current
-          </h2>
-
-          <p className="mt-3 text-[13px] leading-6 text-[#7c7067]">
-            Changes made in each editor are reflected in the corresponding
-            guest-facing spa catalogue.
-          </p>
-        </div>
-      </section>
     </div>
   );
 }

@@ -25,9 +25,12 @@ test("guest hosts reject private Vaxeron surfaces", () => {
   for (const pathname of [
     "/dashboard",
     "/dashboard/wines",
+    "/platform-admin",
+    "/platform-admin/customers",
     "/api/compucash/status",
     "/api/cron/compucash",
     "/api/team/invite",
+    "/api/platform/customers",
     "/api/wines/descriptions",
     "/sign-in",
   ]) {

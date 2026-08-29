@@ -1,0 +1,54 @@
+.ringLayout { display:grid; grid-template-columns:minmax(210px,.8fr) minmax(240px,1fr); align-items:center; gap:28px; }
+.ringShell { position:relative; width:min(100%,270px); aspect-ratio:1; margin:auto; }
+.ringSvg { display:block; width:100%; height:100%; overflow:visible; transform:rotate(-90deg); filter:drop-shadow(0 14px 20px rgba(41,68,59,.08)); }
+.ringTrack { fill:none; stroke:rgba(54,87,76,.07); stroke-width:15; }
+.ringSegment { cursor:pointer; transform-origin:center; transition:stroke-width .32s ease, opacity .32s ease, filter .32s ease; animation:ringReveal .9s cubic-bezier(.2,.75,.2,1) both; }
+.ringSegmentActive { opacity:1; filter:drop-shadow(0 2px 3px rgba(36,62,53,.18)); }
+.ringSegmentMuted { opacity:.48; }
+.ringCenter { position:absolute; inset:25%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:50%; background:rgba(250,252,249,.78); border:1px solid rgba(81,111,101,.1); box-shadow:inset 0 0 30px rgba(68,102,91,.045); text-align:center; animation:centerIn .36s ease both; }
+.ringCenter span { font-size:8px; letter-spacing:.2em; text-transform:uppercase; color:#71867f; }
+.ringCenter strong { margin-top:8px; color:#29443b; font-size:31px; font-weight:500; letter-spacing:-.04em; }
+.ringCenter small { margin-top:5px; font-size:8px; color:#899691; }
+.ringLegend { display:grid; gap:5px; }
+.ringLegend button { display:grid; grid-template-columns:9px 1fr auto; align-items:center; gap:11px; width:100%; min-height:38px; padding:0 13px; border:1px solid transparent; border-radius:12px; background:transparent; color:#52665f; text-align:left; transition:background .22s ease, transform .22s ease, border-color .22s ease; }
+.ringLegend button:hover, .ringLegend .legendActive { transform:translateX(3px); border-color:rgba(65,103,90,.11); background:rgba(255,255,255,.67); }
+.ringLegend i { width:8px; height:8px; border-radius:50%; }
+.ringLegend span { font-size:10px; }
+.ringLegend strong { font-size:10px; color:#29443b; }
+
+.funnel { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:100%; }
+.funnelStep { min-width:0; padding:11px 12px 10px; border:1px solid rgba(71,104,93,.09); border-radius:13px; background:rgba(255,255,255,.47); }
+.funnelStep > div:first-child { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:7px; }
+.funnelStep span { font-size:7px; letter-spacing:.14em; color:#91a19c; }
+.funnelStep strong { overflow:hidden; color:#526b62; font-size:9px; font-weight:500; text-overflow:ellipsis; white-space:nowrap; }
+.funnelStep em { color:#29483e; font-size:14px; font-style:normal; }
+.funnelTrack { height:3px; margin-top:8px; overflow:hidden; border-radius:999px; background:rgba(50,82,71,.07); }
+.funnelTrack i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#b99a62,#557b6e); animation:barReveal .8s cubic-bezier(.2,.75,.2,1) both; transform-origin:left; }
+
+.heatmapWrap { overflow-x:auto; padding-bottom:2px; }
+.heatmap { display:grid; grid-template-columns:minmax(150px,1.35fr) repeat(var(--heatmap-columns),minmax(76px,1fr)); min-width:760px; gap:5px; }
+.heatmapCorner,.heatmapColumn { display:flex; align-items:end; min-height:31px; padding:0 8px 6px; font-size:7px; letter-spacing:.13em; text-transform:uppercase; color:#7b8e87; }
+.heatmapColumn { justify-content:center; text-align:center; }
+.heatmapRow { display:contents; }
+.heatmapLabel,.heatmapCell { min-height:41px; border:0; border-radius:9px; }
+.heatmapLabel { overflow:hidden; padding:0 11px; background:rgba(255,255,255,.48); color:#405950; font-size:9px; text-align:left; text-overflow:ellipsis; white-space:nowrap; }
+.heatmapCell { background:rgba(55,96,82,var(--cell-intensity)); color:#254238; font-size:9px; font-variant-numeric:tabular-nums; transition:transform .18s ease, box-shadow .18s ease; }
+.heatmapCell:hover,.heatmapLabel:hover { transform:translateY(-1px); box-shadow:0 7px 16px rgba(38,64,55,.09); }
+.heatmapScale { display:flex; align-items:center; justify-content:flex-end; gap:4px; margin-top:10px; color:#8b9994; font-size:7px; text-transform:uppercase; letter-spacing:.09em; }
+.heatmapScale i { width:15px; height:6px; border-radius:2px; background:#3a6657; }
+.heatmapScale i:nth-of-type(1){opacity:.12}.heatmapScale i:nth-of-type(2){opacity:.3}.heatmapScale i:nth-of-type(3){opacity:.55}.heatmapScale i:nth-of-type(4){opacity:.82}
+
+.flowList { display:grid; gap:7px; }
+.flowRow { display:grid; grid-template-columns:25px minmax(100px,1fr) minmax(100px,1.7fr) minmax(100px,1fr) auto; align-items:center; gap:10px; min-height:43px; padding:0 12px; border:1px solid rgba(72,104,94,.08); border-radius:12px; background:rgba(255,255,255,.45); }
+.flowRank { font-size:7px; letter-spacing:.13em; color:#9aaaa4; }
+.flowRow strong { overflow:hidden; color:#405950; font-size:9px; font-weight:500; text-overflow:ellipsis; white-space:nowrap; }
+.flowRow em { color:#5e746c; font-size:8px; font-style:normal; white-space:nowrap; }
+.flowLane { position:relative; height:9px; overflow:hidden; border-radius:999px; background:rgba(57,91,79,.06); }
+.flowLane i { position:absolute; inset:0 auto 0 0; border-radius:inherit; background:linear-gradient(90deg,rgba(185,154,98,.72),rgba(73,117,101,.78)); animation:barReveal .85s cubic-bezier(.2,.75,.2,1) both; transform-origin:left; }
+.flowLane span { position:absolute; right:5px; top:50%; transform:translateY(-53%); color:#fff; font-size:8px; }
+
+@keyframes ringReveal { from { stroke-dashoffset:-100; opacity:0; } }
+@keyframes centerIn { from { opacity:0; transform:scale(.92); } }
+@keyframes barReveal { from { transform:scaleX(0); } }
+@media (max-width:780px){.ringLayout{grid-template-columns:1fr}.ringShell{width:220px}.funnel{grid-template-columns:repeat(2,minmax(0,1fr))}.flowRow{grid-template-columns:20px minmax(82px,1fr) minmax(80px,1fr) minmax(82px,1fr)}.flowRow em{display:none}}
+@media (prefers-reduced-motion:reduce){.ringSegment,.ringCenter,.funnelTrack i,.flowLane i{animation:none!important;transition:none!important}}

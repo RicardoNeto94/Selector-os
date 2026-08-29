@@ -23,6 +23,7 @@ const GUEST_HOSTS = Object.freeze({
 
 const PRIVATE_PATH_PREFIXES = Object.freeze([
   "/dashboard",
+  "/platform-admin",
   "/onboarding",
   "/invite",
   "/access-pending",
@@ -36,6 +37,7 @@ const PRIVATE_PATH_PREFIXES = Object.freeze([
   "/api/generate-public-link",
   "/api/menu/delete",
   "/api/menu/publish",
+  "/api/platform",
   "/api/restaurant",
   "/api/settings",
   "/api/stripe",

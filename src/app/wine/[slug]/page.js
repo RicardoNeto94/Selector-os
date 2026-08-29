@@ -22,6 +22,12 @@ function chunkArray(array, size) {
   return chunks;
 }
 
+function scopeToMenuTenant(query, menu) {
+  let scoped = query.eq("organization_id", menu.organization_id);
+  if (menu.property_id) scoped = scoped.eq("property_id", menu.property_id);
+  return scoped;
+}
+
 export default async function Page({ params }) {
   const { slug } = await params;
 
@@ -70,14 +76,32 @@ export default async function Page({ params }) {
     );
   }
 
+  let experienceQuery = supabase
+    .from("guest_experiences")
+    .select("name,slug,renderer_key,theme,availability_rules,is_published")
+    .eq("slug", slug);
+  experienceQuery = menu.organization_id
+    ? experienceQuery.eq("organization_id", menu.organization_id)
+    : experienceQuery.is("organization_id", null);
+  const { data: experience, error: experienceError } = await experienceQuery.maybeSingle();
+
+  if (experienceError) {
+    console.log("WINE EXPERIENCE ERROR:", JSON.stringify(experienceError));
+  }
+
+  if (experience?.renderer_key === "wine_standard" && !experience.is_published) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f1e9] text-[#17221f] px-6 text-center">
+        <div><div className="text-xs tracking-[0.28em] mb-5">VAXERON · PRIVATE PREVIEW</div><h1 className="text-4xl font-serif mb-3">This wine list is being prepared.</h1><p className="opacity-60">Please return when the venue has published its selection.</p></div>
+      </div>
+    );
+  }
+
   /* =======================================================
      VENUE LOCATIONS
   ======================================================= */
 
-  const {
-    data: locations = [],
-    error: locationsError,
-  } = await supabase
+  let locationsQuery = supabase
     .from("wine_locations")
     .select(`
       id,
@@ -85,6 +109,11 @@ export default async function Page({ params }) {
       wine_menu_id
     `)
     .eq("wine_menu_id", menu.id);
+  locationsQuery = scopeToMenuTenant(locationsQuery, menu);
+  const {
+    data: locations = [],
+    error: locationsError,
+  } = await locationsQuery;
 
   if (locationsError) {
     console.log(
@@ -101,10 +130,7 @@ export default async function Page({ params }) {
      PUBLISHED SAKE PAIRINGS
   ======================================================= */
 
-  const {
-    data: pairingRows = [],
-    error: pairingError,
-  } = await supabase
+  let pairingQuery = supabase
     .from("sake_pairings")
     .select("*")
     .eq("wine_menu_id", menu.id)
@@ -112,6 +138,11 @@ export default async function Page({ params }) {
     .order("position", {
       ascending: true,
     });
+  pairingQuery = scopeToMenuTenant(pairingQuery, menu);
+  const {
+    data: pairingRows = [],
+    error: pairingError,
+  } = await pairingQuery;
 
   if (pairingError) {
     console.log(
@@ -127,10 +158,7 @@ export default async function Page({ params }) {
       .map((pairing) => pairing.id)
       .filter(Boolean);
 
-    const {
-      data: stageRows = [],
-      error: stageError,
-    } = await supabase
+    let stageQuery = supabase
       .from("sake_pairing_stages")
       .select(`
         id,
@@ -158,6 +186,11 @@ export default async function Page({ params }) {
       .order("position", {
         ascending: true,
       });
+    stageQuery = scopeToMenuTenant(stageQuery, menu);
+    const {
+      data: stageRows = [],
+      error: stageError,
+    } = await stageQuery;
 
     if (stageError) {
       console.log(
@@ -188,10 +221,7 @@ export default async function Page({ params }) {
      LIVE MENU ITEMS
   ======================================================= */
 
-  const {
-    data: menuItems = [],
-    error: menuItemsError,
-  } = await supabase
+  let menuItemsQuery = supabase
     .from("wine_menu_items")
     .select(`
       id,
@@ -206,6 +236,11 @@ export default async function Page({ params }) {
     .order("position", {
       ascending: true,
     });
+  menuItemsQuery = scopeToMenuTenant(menuItemsQuery, menu);
+  const {
+    data: menuItems = [],
+    error: menuItemsError,
+  } = await menuItemsQuery;
 
   if (menuItemsError) {
     console.log(
@@ -229,12 +264,14 @@ export default async function Page({ params }) {
   const menuItemIds = (menuItems || []).map((item) => item.id).filter(Boolean);
   const servingsByMenuItem = {};
   for (const batch of chunkArray(menuItemIds, QUERY_BATCH_SIZE)) {
-    const { data: servingRows = [], error } = await supabase
+    let servingsQuery = supabase
       .from("wine_menu_servings")
       .select("id,wine_menu_item_id,compucash_product_id,serving_cl,price,is_active")
       .in("wine_menu_item_id", batch)
       .eq("is_active", true)
       .order("serving_cl", { ascending: true });
+    servingsQuery = scopeToMenuTenant(servingsQuery, menu);
+    const { data: servingRows = [], error } = await servingsQuery;
     if (error) console.log("WINE SERVINGS ERROR:", JSON.stringify(error));
     for (const serving of servingRows) {
       servingsByMenuItem[serving.wine_menu_item_id] = [
@@ -256,10 +293,7 @@ export default async function Page({ params }) {
   let winesData = [];
 
   for (const batch of wineIdBatches) {
-    const {
-      data = [],
-      error,
-    } = await supabase
+    let winesQuery = supabase
       .from("wines")
       .select(`
         id,
@@ -275,6 +309,11 @@ export default async function Page({ params }) {
         description
       `)
       .in("id", batch);
+    winesQuery = scopeToMenuTenant(winesQuery, menu);
+    const {
+      data = [],
+      error,
+    } = await winesQuery;
 
     if (error) {
       console.log(
@@ -425,6 +464,7 @@ export default async function Page({ params }) {
   menu={menu}
   items={finalItems}
   sakePairings={sakePairings}
+  experience={experience}
 />
     </main>
   );

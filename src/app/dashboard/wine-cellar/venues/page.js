@@ -833,11 +833,10 @@ export default function VenueWinesPage() {
               Wine Operations
             </div>
 
-            <h1>Venue wine operations</h1>
+            <h1>Venue wine portfolio</h1>
 
             <p>
-              See what is live for guests, spot setup or stock issues,
-              and open the right venue workspace without hunting through data.
+              Guest coverage, stock health and service readiness across every venue.
             </p>
           </div>
 

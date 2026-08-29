@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
+import { isProtectedWorkspaceOwner } from "@/lib/access/ownership";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,26 @@ export async function DELETE(request, context) {
       .maybeSingle();
     if (membershipError) throw membershipError;
     if (!membership) return failure("This person is not a member of the current workspace.", 404);
+
+    const { data: targetProfile, error: targetProfileError } = await admin
+      .from("profiles")
+      .select("email")
+      .eq("id", userId)
+      .maybeSingle();
+    if (targetProfileError) throw targetProfileError;
+
+    // The organization owner is the root authority for a customer workspace.
+    // Administrators may manage every other member, but must never be able to
+    // remove the owner (or indirectly delete the owner's auth identity).
+    if (isProtectedWorkspaceOwner({
+      email: targetProfile?.email,
+      membershipRole: membership.role,
+    })) {
+      return failure(
+        "The workspace owner is protected and cannot be removed by another user.",
+        403
+      );
+    }
 
     if (
       membership.status === "active" &&

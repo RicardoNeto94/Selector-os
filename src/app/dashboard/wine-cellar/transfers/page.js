@@ -19,6 +19,7 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 import { fetchAllQueryRows } from "@/lib/wineInventory";
+import { MovementFlow } from "@/components/dashboard/OperationalVisuals";
 
 /* =======================================================
    HELPERS
@@ -179,7 +180,7 @@ export default function WineTransfersPage() {
     setMovementPage
   ] = useState(1);
 
-  const movementsPerPage = 100;
+  const movementsPerPage = 40;
 
   const [
   inventory,
@@ -801,6 +802,31 @@ async function executeTransfer() {
         "adjustment"
     ).length;
 
+  const transferFlows = useMemo(() => {
+    const routes = new Map();
+
+    movements.forEach((movement) => {
+      if (movement.movement_type !== "transfer") return;
+      const fromId = String(movement.from_location || "");
+      const toId = String(movement.to_location || "");
+      if (!fromId || !toId || fromId === toId) return;
+
+      const key = `${fromId}:${toId}`;
+      const current = routes.get(key) || {
+        key,
+        from: locationsMap[fromId]?.name || "Unknown location",
+        to: locationsMap[toId]?.name || "Unknown location",
+        quantity: 0,
+      };
+      current.quantity += Math.abs(Number(movement.quantity || 0));
+      routes.set(key, current);
+    });
+
+    return Array.from(routes.values())
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 6);
+  }, [locationsMap, movements]);
+
   const movementTypes = [
 
     "all",
@@ -883,7 +909,7 @@ async function executeTransfer() {
     <div
       className="
         page-fade
-        space-y-8
+        space-y-5
       "
     >
 
@@ -968,20 +994,28 @@ async function executeTransfer() {
 </div>
       </div>
 
+      {transferFlows.length > 0 && (
+        <details className="so-card movement-route-disclosure">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Transfer intelligence</div>
+              <h2 className="mt-2 text-base font-medium text-slate-800">Most active routes</h2>
+            </div>
+            <span className="rounded-full border border-slate-200 bg-white/60 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-slate-500">{transferFlows.length} routes ↓</span>
+          </summary>
+          <div className="mt-5 border-t border-slate-200/70 pt-5">
+            <MovementFlow flows={transferFlows} />
+          </div>
+        </details>
+      )}
+
       {/* =================================================
           METRICS
       ================================================= */}
 
-      <div
-        className="
-          grid
-          grid-cols-1
-          md:grid-cols-3
-          gap-4
-        "
-      >
+      <div className="so-summary-strip grid grid-cols-3">
 
-        <div className="so-card">
+        <div className="so-summary-item">
 
           <div
             className="
@@ -998,8 +1032,8 @@ async function executeTransfer() {
 
           <div
             className="
-              mt-3
-              text-3xl
+              mt-1
+              text-2xl
               font-light
               text-slate-900
             "
@@ -1011,7 +1045,7 @@ async function executeTransfer() {
 
         </div>
 
-        <div className="so-card">
+        <div className="so-summary-item">
 
           <div
             className="
@@ -1028,8 +1062,8 @@ async function executeTransfer() {
 
           <div
             className="
-              mt-3
-              text-3xl
+              mt-1
+              text-2xl
               font-light
               text-slate-900
             "
@@ -1041,7 +1075,7 @@ async function executeTransfer() {
 
         </div>
 
-        <div className="so-card">
+        <div className="so-summary-item">
 
           <div
             className="
@@ -1058,8 +1092,8 @@ async function executeTransfer() {
 
           <div
             className="
-              mt-3
-              text-3xl
+              mt-1
+              text-2xl
               font-light
               text-slate-900
             "

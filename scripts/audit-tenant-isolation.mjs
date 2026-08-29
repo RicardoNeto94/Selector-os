@@ -106,6 +106,25 @@ for (const table of tenantTables) {
   }
 }
 
+for (const table of ["wine_menus", "guest_experiences"]) {
+  const { data, error } = await admin.from(table).select("id,slug,organization_id");
+  if (error) {
+    failures.push(`${table} public slug audit: ${describeError(error)}`);
+    continue;
+  }
+  const seen = new Map();
+  for (const row of data || []) {
+    const slug = String(row.slug || "").trim().toLowerCase();
+    if (!slug) continue;
+    const previous = seen.get(slug);
+    if (previous) {
+      failures.push(`${table}: public slug \"${slug}\" is shared by rows ${previous.id} and ${row.id}`);
+    } else {
+      seen.set(slug, row);
+    }
+  }
+}
+
 const [organizations, properties, memberships] = await Promise.all([
   admin.from("organizations").select("id", { count: "exact" }).limit(1),
   admin.from("properties").select("id", { count: "exact" }).limit(1),

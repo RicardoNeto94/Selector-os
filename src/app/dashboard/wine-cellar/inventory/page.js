@@ -4,16 +4,25 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowPathIcon, CheckCircleIcon, ChevronDownIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { BOTTLE_FORMATS, bottleFormatForWine, bottleQuantity, fetchAllQueryRows, parseBottleSizeCl, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, bottleFormatForWine, bottleQuantity, fetchAllQueryRows, normalizeWineCategory, parseBottleSizeCl, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
+import { StockHeatmap } from "@/components/dashboard/OperationalVisuals";
 import "./inventory.css";
 
 export const dynamic = "force-dynamic";
 const PAGE_SIZES = [25, 50, 100];
-const TYPES = ["all", "sparkling", "white", "rosé", "red", "orange", "dessert", "fortified", "sake"];
+const TYPES = ["all", "sparkling", "white", "rosé", "red", "orange", "dessert", "fortified", "sake", "non-alcoholic"];
 const number = (value) => Number(value || 0);
 const quantity = (value) => new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(Math.abs(number(value)) < 0.001 ? 0 : number(value));
 const money = (value) => new Intl.NumberFormat("en-EE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(number(value));
 const syncDate = (value) => value ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(value)) : "Not yet completed";
+const HEATMAP_COLUMNS = [
+  { key: "red", label: "Red", category: "red" },
+  { key: "white", label: "White", category: "white" },
+  { key: "sparkling", label: "Sparkling", category: "sparkling" },
+  { key: "rosé", label: "Rosé", category: "rose" },
+  { key: "sake", label: "Sake", category: "sake" },
+  { key: "non-alcoholic", label: "Alcohol-free", category: "non-alcoholic" },
+];
 
 function Kpi({ label, value, detail, active, onClick, tone = "default" }) {
   const colour = tone === "warning" ? "text-[#a95836]" : tone === "good" ? "text-[#607758]" : "text-[#30241f]";
@@ -64,9 +73,19 @@ export default function WineInventoryPage() {
   const metrics = useMemo(() => ({ positiveUnits: wines.reduce((sum, wine) => sum + wine.stock, 0), available: wines.filter((wine) => wine.stock > 0).length, low: wines.filter((wine) => wine.stock > 0 && wine.stock <= 2).length, negative: inventory.filter((row) => bottleQuantity(row.quantity) < 0).length, value: wines.reduce((sum, wine) => sum + wine.stock * number(wine.price), 0) }), [wines, inventory]);
   const inventoryFamilies = useMemo(() => summarizeInventoryFamilies(inventory, (row) => row.quantity), [inventory]);
   const bottleFormats = useMemo(() => summarizeBottleFormats(inventory, (row) => row.quantity), [inventory]);
+  const heatmapRows = useMemo(() => locations.map((location) => {
+    const values = {};
+    HEATMAP_COLUMNS.forEach((column) => { values[column.key] = 0; });
+    inventory.forEach((row) => {
+      if (String(row.location_id) !== String(location.id)) return;
+      const column = HEATMAP_COLUMNS.find((item) => item.category === normalizeWineCategory(row.wines));
+      if (column) values[column.key] += positiveBottleQuantity(row.quantity);
+    });
+    return { key: location.id, label: location.name, values };
+  }).filter((row) => Object.values(row.values).some((value) => value > 0)), [inventory, locations]);
   const filteredWines = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return wines.filter((wine) => { const haystack = [wine.name, wine.producer, wine.country, wine.region, wine.subregion, wine.grapes, wine.vintage, wine.sku].join(" ").toLowerCase(); const locationMatch = selectedLocation === "all" || wine.inventoryRows.some((row) => row.location_id === selectedLocation && positiveBottleQuantity(row.quantity) > 0); const typeMatch = selectedType === "all" || String(wine.wine_type || "").toLowerCase() === selectedType; const formatMatch = selectedFormat === "all" || bottleFormatForWine(wine) === selectedFormat; const stockMatch = wine.stock > 0 && (stockFilter === "available" || (stockFilter === "low" && wine.stock <= 2)); return (!q || haystack.includes(q)) && locationMatch && typeMatch && formatMatch && stockMatch; }).sort((a, b) => { let av = sortBy === "stock" ? a.stock : a[sortBy]; let bv = sortBy === "stock" ? b.stock : b[sortBy]; if (sortBy === "price") { av = number(av); bv = number(bv); } if (typeof av === "string") av = av.toLowerCase(); if (typeof bv === "string") bv = bv.toLowerCase(); return av < bv ? (sortDirection === "asc" ? -1 : 1) : av > bv ? (sortDirection === "asc" ? 1 : -1) : 0; });
+    return wines.filter((wine) => { const haystack = [wine.name, wine.producer, wine.country, wine.region, wine.subregion, wine.grapes, wine.vintage, wine.sku].join(" ").toLowerCase(); const locationMatch = selectedLocation === "all" || wine.inventoryRows.some((row) => row.location_id === selectedLocation && positiveBottleQuantity(row.quantity) > 0); const normalizedType = normalizeWineCategory(wine); const typeMatch = selectedType === "all" || normalizedType === (selectedType === "rosé" ? "rose" : selectedType); const formatMatch = selectedFormat === "all" || bottleFormatForWine(wine) === selectedFormat; const stockMatch = wine.stock > 0 && (stockFilter === "available" || (stockFilter === "low" && wine.stock <= 2)); return (!q || haystack.includes(q)) && locationMatch && typeMatch && formatMatch && stockMatch; }).sort((a, b) => { let av = sortBy === "stock" ? a.stock : a[sortBy]; let bv = sortBy === "stock" ? b.stock : b[sortBy]; if (sortBy === "price") { av = number(av); bv = number(bv); } if (typeof av === "string") av = av.toLowerCase(); if (typeof bv === "string") bv = bv.toLowerCase(); return av < bv ? (sortDirection === "asc" ? -1 : 1) : av > bv ? (sortDirection === "asc" ? 1 : -1) : 0; });
   }, [wines, search, selectedLocation, selectedType, selectedFormat, stockFilter, sortBy, sortDirection]);
   const totalPages = Math.max(1, Math.ceil(filteredWines.length / pageSize)); const safePage = Math.min(page, totalPages); const start = (safePage - 1) * pageSize; const pageWines = filteredWines.slice(start, start + pageSize);
   const filteredSummary = useMemo(() => ({ units: filteredWines.reduce((sum, wine) => sum + Math.max(0, wine.stock), 0), value: filteredWines.reduce((sum, wine) => sum + Math.max(0, wine.stock) * number(wine.price), 0) }), [filteredWines]);
@@ -100,6 +119,17 @@ export default function WineInventoryPage() {
     </section>
 
     {selectedFormat === "unknown" && <SizeReviewPanel wines={wines.filter((wine) => wine.stock > 0 && bottleFormatForWine(wine) === "unknown")} savingSizeId={savingSizeId} onSave={saveWineSize} />}
+
+    {heatmapRows.length > 0 && <details className="inventory-table-card mt-5 overflow-hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 md:px-6">
+        <div><div className="text-[8px] uppercase tracking-[0.2em] text-[#71877f]">Inventory intelligence</div><h2 className="mt-1 text-[15px] font-medium text-[#29443b]">Stock concentration by location</h2></div>
+        <span className="rounded-full border border-[#dce5e0] bg-white/60 px-3 py-1.5 text-[8px] uppercase tracking-[0.12em] text-[#657a72]">Open heatmap ↓</span>
+      </summary>
+      <div className="border-t border-[#dfe7e2] px-5 py-5 md:px-6">
+        <p className="mb-4 text-[9px] leading-4 text-[#7d8d87]">Darker cells hold more physical stock. Select a cell to inspect that location and wine family in the register below.</p>
+        <StockHeatmap rows={heatmapRows} columns={HEATMAP_COLUMNS} onSelect={(locationId, type) => { setSelectedLocation(locationId); setSelectedType(type); window.setTimeout(() => document.querySelector(".inventory-table-card:last-of-type")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} />
+      </div>
+    </details>}
 
     <section className="inventory-table-card mt-5 overflow-hidden"><div className="inventory-filter-panel p-4"><div className="inventory-filter-grid grid gap-3 xl:grid-cols-[1fr_180px_210px_180px_auto]"><label className="inventory-search-field"><span className="mb-1.5 block text-[8px] uppercase tracking-[0.16em] text-[#71877f]">Search active inventory</span><input aria-label="Search active inventory" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Wine, producer, region, vintage or SKU…" className="min-h-11 w-full rounded-xl px-4 text-[11px] outline-none" /></label><Filter label="Wine type" value={selectedType} onChange={setSelectedType}>{TYPES.map((type) => <option key={type} value={type}>{type === "all" ? "All types" : type}</option>)}</Filter><Filter label="Location" value={selectedLocation} onChange={setSelectedLocation}><option value="all">All locations</option>{locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}</Filter><Filter label="Stock view" value={stockFilter} onChange={setStockFilter}><option value="available">Available stock</option><option value="low">Low stock ≤ 2</option></Filter><button type="button" onClick={() => { setSearch(""); setSelectedType("all"); setSelectedLocation("all"); setStockFilter("available"); }} className="inventory-reset self-end px-4 text-[8px] uppercase tracking-[0.18em]">Reset filters</button></div></div>
       <div className="inventory-result-bar flex flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between"><div><strong>{filteredWines.length.toLocaleString("en-GB")} wines in this view</strong><span>{quantity(filteredSummary.units)} bottles on hand · {money(filteredSummary.value)} estimated selling value</span></div><label className="flex items-center gap-2">Rows<select value={pageSize} onChange={(e) => setPageSize(number(e.target.value))}>{PAGE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></label></div>

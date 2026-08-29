@@ -777,7 +777,7 @@ export default function ExperiencesPage() {
   }
 
   return (
-    <div className="so-main-inner">
+    <div className="so-main-inner quiet-experiences-page">
       {notice && (
         <div
           className={`
@@ -800,7 +800,7 @@ export default function ExperiencesPage() {
         </div>
       )}
 
-      <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-5 flex flex-col gap-4 border-b border-[#dfe8e4] pb-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="text-[10px] uppercase tracking-[0.25em] text-[#9a8c84]">
             Guest experiences
@@ -828,8 +828,8 @@ export default function ExperiencesPage() {
         </ActionButton>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-[20px] border border-[#eadfd7] bg-white px-5 py-4">
+      <div className="so-summary-strip mb-4 grid grid-cols-2 lg:grid-cols-4">
+        <div className="so-summary-item">
           <div className="text-[9px] uppercase tracking-[0.18em] text-[#9f9189]">
             Experiences
           </div>
@@ -838,7 +838,7 @@ export default function ExperiencesPage() {
           </div>
         </div>
 
-        <div className="rounded-[20px] border border-[#eadfd7] bg-white px-5 py-4">
+        <div className="so-summary-item">
           <div className="text-[9px] uppercase tracking-[0.18em] text-[#9f9189]">
             Sections
           </div>
@@ -851,7 +851,7 @@ export default function ExperiencesPage() {
           </div>
         </div>
 
-        <div className="rounded-[20px] border border-[#eadfd7] bg-white px-5 py-4">
+        <div className="so-summary-item">
           <div className="text-[9px] uppercase tracking-[0.18em] text-[#9f9189]">
             Menu items
           </div>
@@ -860,7 +860,7 @@ export default function ExperiencesPage() {
           </div>
         </div>
 
-        <div className="rounded-[20px] border border-[#eadfd7] bg-white px-5 py-4">
+        <div className="so-summary-item">
           <div className="text-[9px] uppercase tracking-[0.18em] text-[#9f9189]">
             Active editor
           </div>
@@ -870,17 +870,17 @@ export default function ExperiencesPage() {
         </div>
       </div>
 
-      <div className="mb-8 rounded-[24px] border border-[#e8ddd5] bg-white p-5 shadow-sm">
-        <div className="mb-4">
+      <div className="mb-5 rounded-[16px] border border-[#e8ddd5] bg-white/70 px-4 py-3">
+        <div className="mb-3 flex items-end justify-between gap-4">
           <div className="text-sm font-medium text-[#3b2b25]">
             Create an experience
           </div>
           <div className="mt-1 text-xs text-[#8f8179]">
-            Add a guest journey now, then open it to build sections and items.
+            Add a guest journey, then open it to build sections and items.
           </div>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_220px_auto]">
+        <div className="grid gap-2.5 lg:grid-cols-[minmax(240px,1fr)_200px_auto]">
           <input
             className="so-input w-full"
             placeholder="Experience name"
@@ -918,7 +918,7 @@ export default function ExperiencesPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3].map((item) => (
             <div
               key={item}
@@ -951,13 +951,13 @@ export default function ExperiencesPage() {
                 key={experience.id}
                 onClick={() => setSelectedExp(experience)}
                 className="
-                  group overflow-hidden rounded-[24px] border border-[#eadfd7]
-                  bg-white text-left shadow-sm transition
-                  hover:-translate-y-0.5 hover:border-[#d8c8bd] hover:shadow-lg
+                  group overflow-hidden rounded-[18px] border border-[#eadfd7]
+                  bg-white/80 text-left transition
+                  hover:border-[#b9ccc5] hover:bg-white
                   focus:outline-none focus:ring-2 focus:ring-[#963b2c]/20
                 "
               >
-                <div className="relative h-28 overflow-hidden bg-gradient-to-br from-[#edf3ef] to-[#dce8e2]">
+                <div className="relative h-20 overflow-hidden bg-gradient-to-br from-[#edf3ef] to-[#dce8e2]">
                   {experience.image_url ? (
                     <img
                       src={experience.image_url}
@@ -975,7 +975,7 @@ export default function ExperiencesPage() {
                   </div>
                 </div>
 
-                <div className="p-5">
+                <div className="p-4">
                   <div className="text-base font-medium text-[#34251f]">
                     {experience.name}
                   </div>
@@ -986,7 +986,7 @@ export default function ExperiencesPage() {
                     <span>{experienceItemCount} items</span>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-[#f0e8e2] pt-4">
+                  <div className="mt-3 flex items-center justify-between border-t border-[#f0e8e2] pt-3">
                     <span className="text-[10px] uppercase tracking-[0.16em] text-[#963b2c]">
                       Open editor
                     </span>

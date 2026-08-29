@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
 import { scopeTenantQuery } from "@/lib/server/tenantContext";
+import { isProtectedWorkspaceOwner } from "@/lib/access/ownership";
 
 export const dynamic = "force-dynamic";
 
@@ -128,6 +129,10 @@ export async function GET(request) {
               ? "inactive"
               : profile.status || "active",
         membership_role: membership?.role || null,
+        is_protected_owner: isProtectedWorkspaceOwner({
+          email: profile.email,
+          membershipRole: membership?.role,
+        }),
         roles: userRoles
           .filter((row) => row.user_id === profile.id)
           .map((row) => row.roles)
