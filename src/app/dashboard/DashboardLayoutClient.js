@@ -26,6 +26,7 @@ import {
   XMarkIcon,
   CheckCircleIcon,
   ShieldCheckIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -125,10 +126,13 @@ export default function DashboardLayout({
   const [orderingAlerts, setOrderingAlerts] = useState(0);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notificationSummary, setNotificationSummary] = useState({});
+  const [endingSupport, setEndingSupport] = useState(false);
   const [navReady, setNavReady] = useState(false);
   const [openGroups, setOpenGroups] = useState({ experience: true, wine: true, account: true });
+  const supportMode = workspace?.source === "support" && Boolean(workspace?.supportSession);
 
   useEffect(() => {
+    if (supportMode) return undefined;
     let active = true;
     fetch("/api/wine-cellar/orders?summary=1", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
@@ -140,7 +144,7 @@ export default function DashboardLayout({
       })
       .catch(() => {});
     return () => { active = false; };
-  }, [pathname]);
+  }, [pathname, supportMode]);
 
   useEffect(() => {
     function handleCommandKey(event) {
@@ -176,9 +180,23 @@ export default function DashboardLayout({
     setNotificationOpen(false);
   }, [pathname]);
 
-  const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail]) =>
+  const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail, href]) =>
+    (!supportMode || !["/dashboard/team", "/dashboard/settings", "/dashboard/wine-cellar/ordering"].includes(href)) &&
     `${label} ${detail}`.toLowerCase().includes(commandQuery.trim().toLowerCase())
   );
+
+  async function endSupportSession() {
+    setEndingSupport(true);
+    try {
+      await fetch("/api/platform/support-sessions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: workspace?.supportSession?.id }),
+      });
+    } finally {
+      window.location.assign(`/platform-admin/customers/${workspace?.organization?.id}`);
+    }
+  }
 
   /* =====================================================
      ACTIVE ROUTE
@@ -210,7 +228,7 @@ export default function DashboardLayout({
   const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }));
 
   return (
-    <div className="so-dashboard-root">
+    <div className={`so-dashboard-root ${supportMode ? "so-dashboard-root--support" : ""}`}>
 
       {/* ===================================================
           DESKTOP / TABLET SIDEBAR
@@ -348,7 +366,7 @@ export default function DashboardLayout({
   label="Stock Issues"
               />
 
-              <NavItem
+              {!supportMode && <NavItem
               href="/dashboard/wine-cellar/ordering"
               isActive={isActive(
                 "/dashboard/wine-cellar/ordering"
@@ -356,7 +374,7 @@ export default function DashboardLayout({
               icon={BellAlertIcon}
               label="Ordering"
               badge={orderingAlerts}
-            />
+            />}
 
               <NavItem
               href="/dashboard/wine-cellar/transfers"
@@ -373,20 +391,20 @@ export default function DashboardLayout({
             =============================================== */}
 
             <NavGroup label="Workspace" open={openGroups.account} active={accountActive} onToggle={() => toggleGroup("account")}>
-              <NavItem
+              {!supportMode && <NavItem
                 href="/dashboard/team"
                 isActive={isActive("/dashboard/team")}
                 icon={UsersIcon}
                 label="Team & Access"
-              />
-              <NavItem
+              />}
+              {!supportMode && <NavItem
               href="/dashboard/settings"
               isActive={isActive(
                 "/dashboard/settings"
               )}
               icon={Cog6ToothIcon}
               label="Settings"
-              />
+              />}
               {platformAdministrator && (
                 <NavItem
                   href="/platform-admin"
@@ -456,7 +474,7 @@ export default function DashboardLayout({
               <kbd>⌘ K</kbd>
             </button>
 
-            <button
+            {!supportMode && <button
               type="button"
               className={`so-notification-button ${orderingAlerts > 0 ? "has-alerts" : ""}`}
               aria-label={orderingAlerts > 0 ? `${orderingAlerts} inventory notifications` : "Notifications"}
@@ -465,7 +483,7 @@ export default function DashboardLayout({
             >
               <BellAlertIcon />
               {orderingAlerts > 0 && <span>{orderingAlerts > 99 ? "99+" : orderingAlerts}</span>}
-            </button>
+            </button>}
 
             <div className="so-system-state">
               <i />
@@ -474,6 +492,20 @@ export default function DashboardLayout({
 
           </div>
         </header>
+
+        {supportMode && (
+          <section className="so-support-banner" role="status" aria-live="polite">
+            <div className="so-support-banner__icon"><ShieldCheckIcon /></div>
+            <div className="so-support-banner__copy">
+              <strong>Vaxeron support · read-only</strong>
+              <span>
+                {workspace?.organization?.name} / {workspace?.property?.name} · {workspace?.supportSession?.reason} · expires {new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(workspace.supportSession.expiresAt))}
+              </span>
+            </div>
+            <span className="so-support-banner__lock"><EyeIcon /> Changes locked</span>
+            <button type="button" onClick={endSupportSession} disabled={endingSupport}>{endingSupport ? "Ending…" : "Exit support mode"}</button>
+          </section>
+        )}
 
         <div className="so-main-scroll">
           {children}

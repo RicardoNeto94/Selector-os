@@ -284,6 +284,9 @@ export default function PlatformAdminPage() {
                         {!Object.values(modules).some(Boolean) && <span>No modules enabled</span>}
                       </div>
                       <div className={styles.inlineControls}>
+                        <Link className={styles.manageCustomerButton} href={`/platform-admin/customers/${customer.id}`}>
+                          Manage &amp; support <ArrowRightIcon />
+                        </Link>
                         {customer.owner?.membershipStatus === "invited" && (
                           <button
                             type="button"

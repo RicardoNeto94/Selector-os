@@ -3,6 +3,17 @@ import "server-only";
 import { createClient as createCookieClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/server/requireAdministrator";
 
+function readJwtAssuranceLevel(token) {
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64url").toString("utf8")
+    );
+    return payload?.aal || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function requirePlatformAdministrator(request) {
   const admin = createAdminClient();
   const authorization = request?.headers?.get?.("authorization");
@@ -10,14 +21,22 @@ export async function requirePlatformAdministrator(request) {
     ? authorization.slice(7)
     : null;
   let user = null;
+  let assuranceLevel = null;
 
   if (token) {
     const result = await admin.auth.getUser(token);
     user = result.data?.user ?? null;
+    // The token has already been validated by Supabase above, so its AAL claim
+    // can safely be used for the privileged step-up check.
+    assuranceLevel = user ? readJwtAssuranceLevel(token) : null;
   } else {
     const cookieClient = await createCookieClient();
     const result = await cookieClient.auth.getUser();
     user = result.data?.user ?? null;
+    if (user) {
+      const assurance = await cookieClient.auth.mfa.getAuthenticatorAssuranceLevel();
+      assuranceLevel = assurance.data?.currentLevel || null;
+    }
   }
 
   if (!user) {
@@ -40,5 +59,5 @@ export async function requirePlatformAdministrator(request) {
     };
   }
 
-  return { admin, user, platformAdmin, error: null };
+  return { admin, user, platformAdmin, assuranceLevel, error: null };
 }
