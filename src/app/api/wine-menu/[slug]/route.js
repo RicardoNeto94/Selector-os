@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isGuestWineAvailable, positiveBottleQuantity } from "@/lib/wineInventory";
 
 export const dynamic = "force-dynamic";
 
@@ -212,7 +213,7 @@ export async function GET(request, { params }) {
       { p_menu_id: menu.id }
     );
     (inventoryRows || []).forEach((row) => {
-      inventoryMap[String(row.wine_id)] = Number(row.quantity || 0);
+      inventoryMap[String(row.wine_id)] = positiveBottleQuantity(row.quantity);
     });
   }
 
@@ -226,11 +227,9 @@ export async function GET(request, { params }) {
         return null;
       }
 
-      const quantity = Number(
-        inventoryMap[wineId] || 0
-      );
+      const quantity = positiveBottleQuantity(inventoryMap[wineId]);
 
-      if (quantity <= 0) {
+      if (!isGuestWineAvailable({ quantity, listed: true })) {
         return null;
       }
 

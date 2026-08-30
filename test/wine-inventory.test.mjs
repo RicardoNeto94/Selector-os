@@ -3,6 +3,12 @@ import assert from "node:assert/strict";
 import {
   bottleFormatForWine,
   bottleQuantity,
+  guestServiceReadiness,
+  hasAvailableStock,
+  inventoryStockState,
+  isGuestWineAvailable,
+  isLowStock,
+  isOutOfStock,
   normalizeWineCategory,
   parseBottleSizeCl,
   positiveBottleQuantity,
@@ -59,6 +65,49 @@ test("preserves fractional bottles and removes insignificant database residue", 
   assert.equal(positiveBottleQuantity(0), 0);
   assert.equal(bottleQuantity(0.0004), 0);
   assert.equal(bottleQuantity(-0.0004), 0);
+});
+
+test("uses one availability rule for whole bottles, BTG fractions and residue", () => {
+  assert.equal(hasAvailableStock(1), true);
+  assert.equal(hasAvailableStock(0.1), true);
+  assert.equal(hasAvailableStock(0.0004), false);
+  assert.equal(hasAvailableStock(0), false);
+  assert.equal(hasAvailableStock(-1), false);
+  assert.equal(isOutOfStock(0.0004), true);
+  assert.equal(isOutOfStock(-1), true);
+});
+
+test("classifies low stock only when a positive physical balance exists", () => {
+  assert.equal(isLowStock(0.1), true);
+  assert.equal(isLowStock(2), true);
+  assert.equal(isLowStock(2.01), false);
+  assert.equal(isLowStock(0), false);
+  assert.equal(inventoryStockState(0), "out");
+  assert.equal(inventoryStockState(0.1), "low");
+  assert.equal(inventoryStockState(3), "available");
+});
+
+test("guest readiness requires stock and prices for each enabled service", () => {
+  assert.equal(isGuestWineAvailable({ quantity: 0.1, listed: true }), true);
+  assert.equal(isGuestWineAvailable({ quantity: 0, listed: true }), false);
+  assert.equal(isGuestWineAvailable({ quantity: 2, listed: false }), false);
+
+  assert.deepEqual(
+    guestServiceReadiness({
+      quantity: 2,
+      serviceType: "both",
+      bottlePrice: 120,
+      glassPrice: null,
+    }),
+    {
+      available: true,
+      bottleEnabled: true,
+      glassEnabled: true,
+      bottleReady: true,
+      glassReady: false,
+      ready: false,
+    }
+  );
 });
 
 test("negative exceptions do not cancel physical bottles", () => {

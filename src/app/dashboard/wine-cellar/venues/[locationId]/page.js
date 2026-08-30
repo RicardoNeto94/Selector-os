@@ -7,8 +7,9 @@ import { createPortal } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
-import { BOTTLE_FORMATS, fetchAllQueryRows, INVENTORY_ROUNDING_EPSILON, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, fetchAllQueryRows, guestServiceReadiness, hasGlassService, INVENTORY_ROUNDING_EPSILON, isLowStock, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies } from "@/lib/wineInventory";
 import { ReadinessFunnel } from "@/components/dashboard/OperationalVisuals";
+import WineDetailDrawer from "@/components/dashboard/WineDetailDrawer";
 import "../venue-wines.css";
 
 function formatQuantity(value) {
@@ -61,6 +62,10 @@ export default function VenueWinePage() {
   const [filter, setFilter] = useState("all");
   const [workspaceTab, setWorkspaceTab] = useState("wines");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedWineId, setSelectedWineId] = useState(null);
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [bulkActionBusy, setBulkActionBusy] = useState(false);
+  const [bulkActionMessage, setBulkActionMessage] = useState("");
 
   // Editable rows contain several inputs and toggles. Keeping the rendered page
   // intentionally compact avoids scroll-time layout and paint spikes while
@@ -476,6 +481,102 @@ export default function VenueWinePage() {
     setSavingWineId(null);
   }
 
+  function toggleRowSelection(wineId) {
+    setSelectedRowIds((current) =>
+      current.includes(wineId)
+        ? current.filter((id) => id !== wineId)
+        : [...current, wineId]
+    );
+    setBulkActionMessage("");
+  }
+
+  function toggleCurrentPageSelection() {
+    const pageIds = paginatedRows.map((row) => row.wineId);
+    const pageIsSelected = pageIds.length > 0 && pageIds.every((id) => selectedRowIds.includes(id));
+
+    setSelectedRowIds((current) =>
+      pageIsSelected
+        ? current.filter((id) => !pageIds.includes(id))
+        : Array.from(new Set([...current, ...pageIds]))
+    );
+    setBulkActionMessage("");
+  }
+
+  async function showSelectedOnGuestList() {
+    if (!menu || bulkActionBusy) return;
+
+    const selectedRows = rows.filter(
+      (row) => selectedRowIds.includes(row.wineId) && !row.guestVisible
+    );
+    if (!selectedRows.length) {
+      setBulkActionMessage("Every selected wine is already on the guest list.");
+      return;
+    }
+
+    setBulkActionBusy(true);
+    setBulkActionMessage("");
+    const { data, error } = await supabase
+      .from("wine_menu_items")
+      .insert(selectedRows.map((row) => ({
+        wine_menu_id: menu.id,
+        wine_id: row.wineId,
+        quantity: 0,
+        description: row.description || "",
+        price_override: row.bottlePrice,
+        service_type: row.serviceType || "bottle",
+        glass_price: hasGlassService(row.serviceType) ? row.glassPrice : null,
+      })))
+      .select("id, wine_id");
+
+    if (error) {
+      console.error("BULK ENABLE GUEST WINES ERROR:", error);
+      setBulkActionMessage("The selected wines could not be added. No stock quantities were changed.");
+      setBulkActionBusy(false);
+      return;
+    }
+
+    const menuItemByWine = new Map((data || []).map((item) => [String(item.wine_id), item.id]));
+    setRows((current) => current.map((row) => {
+      const menuItemId = menuItemByWine.get(String(row.wineId));
+      return menuItemId ? { ...row, menuItemId, guestVisible: true } : row;
+    }));
+    setBulkActionMessage(`${selectedRows.length} wine${selectedRows.length === 1 ? "" : "s"} added to the guest list.`);
+    setBulkActionBusy(false);
+  }
+
+  async function enableSelectedBtg() {
+    if (!menu || bulkActionBusy) return;
+
+    const selectedRows = rows.filter(
+      (row) => selectedRowIds.includes(row.wineId) && row.guestVisible && row.menuItemId
+    );
+    if (!selectedRows.length) {
+      setBulkActionMessage("Add the selected wines to the guest list before enabling BTG.");
+      return;
+    }
+
+    setBulkActionBusy(true);
+    setBulkActionMessage("");
+    const { error } = await supabase
+      .from("wine_menu_items")
+      .update({ service_type: "both" })
+      .in("id", selectedRows.map((row) => row.menuItemId));
+
+    if (error) {
+      console.error("BULK ENABLE BTG ERROR:", error);
+      setBulkActionMessage("BTG could not be enabled for the selected wines.");
+      setBulkActionBusy(false);
+      return;
+    }
+
+    const selectedIds = new Set(selectedRows.map((row) => row.wineId));
+    setRows((current) => current.map((row) =>
+      selectedIds.has(row.wineId) ? { ...row, serviceType: "both" } : row
+    ));
+    setBulkActionMessage(`BTG enabled for ${selectedRows.length} wine${selectedRows.length === 1 ? "" : "s"}. Add glass prices where required.`);
+    setBulkActionBusy(false);
+  }
+
   async function generateMissingDescriptions() {
     const missing = rows.filter(
       (row) => row.guestVisible && !String(row.description || "").trim()
@@ -823,7 +924,7 @@ export default function VenueWinePage() {
         .filter(
           (row) =>
             row.guestVisible &&
-            (row.serviceType === "glass" || row.serviceType === "both")
+            hasGlassService(row.serviceType)
         )
         .map((row) => row.wineId)
     );
@@ -894,14 +995,12 @@ export default function VenueWinePage() {
           row.serviceType === "both")
     ).length;
 
-    const lowStock = rows.filter(
-      (row) => row.stock <= 2
-    ).length;
+    const lowStock = rows.filter((row) => isLowStock(row.stock)).length;
 
     const missingGlassPrice = rows.filter(
       (row) =>
         row.guestVisible &&
-        (row.serviceType === "glass" || row.serviceType === "both") &&
+        hasGlassService(row.serviceType) &&
         !(Number(row.glassPrice) > 0)
     ).length;
 
@@ -927,16 +1026,24 @@ export default function VenueWinePage() {
 
     const priced = rows.filter((row) => {
       if (!row.guestVisible) return false;
-      const bottleReady = row.serviceType === "glass" || Number(row.bottlePrice) > 0;
-      const glassReady = row.serviceType === "bottle" || Number(row.glassPrice) > 0;
-      return bottleReady && glassReady;
+      return guestServiceReadiness({
+        quantity: row.stock,
+        listed: row.guestVisible,
+        serviceType: row.serviceType,
+        bottlePrice: row.bottlePrice,
+        glassPrice: row.glassPrice,
+      }).ready;
     }).length;
 
     const guestReady = rows.filter((row) => {
-      if (!row.guestVisible || !String(row.description || "").trim()) return false;
-      const bottleReady = row.serviceType === "glass" || Number(row.bottlePrice) > 0;
-      const glassReady = row.serviceType === "bottle" || Number(row.glassPrice) > 0;
-      return bottleReady && glassReady;
+      if (!String(row.description || "").trim()) return false;
+      return guestServiceReadiness({
+        quantity: row.stock,
+        listed: row.guestVisible,
+        serviceType: row.serviceType,
+        bottlePrice: row.bottlePrice,
+        glassPrice: row.glassPrice,
+      }).ready;
     }).length;
 
     const btgSignals = dedupedBtgSuggestions.length;
@@ -1010,8 +1117,7 @@ export default function VenueWinePage() {
       if (filter === "glass") {
         return (
           row.guestVisible &&
-          (row.serviceType === "glass" ||
-            row.serviceType === "both")
+          hasGlassService(row.serviceType)
         );
       }
 
@@ -1020,7 +1126,7 @@ export default function VenueWinePage() {
       }
 
       if (filter === "low") {
-        return row.stock <= 2;
+        return isLowStock(row.stock);
       }
 
       return true;
@@ -1040,6 +1146,10 @@ export default function VenueWinePage() {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filteredRows.slice(start, start + PAGE_SIZE);
   }, [filteredRows, currentPage]);
+
+  const currentPageSelected = paginatedRows.length > 0 && paginatedRows.every(
+    (row) => selectedRowIds.includes(row.wineId)
+  );
 
   useEffect(() => {
     setCurrentPage(1);
@@ -1646,9 +1756,30 @@ export default function VenueWinePage() {
               </div>
             </div>
 
+            {selectedRowIds.length > 0 && (
+              <div className="venue-bulk-actions" role="status" aria-live="polite">
+                <div>
+                  <strong>{selectedRowIds.length} selected</strong>
+                  <span>{bulkActionMessage || "Apply one safe action to several wines."}</span>
+                </div>
+                <div className="venue-bulk-action-buttons">
+                  <button type="button" onClick={showSelectedOnGuestList} disabled={!menu || bulkActionBusy}>
+                    Add to guest list
+                  </button>
+                  <button type="button" onClick={enableSelectedBtg} disabled={!menu || bulkActionBusy}>
+                    Enable BTG
+                  </button>
+                  <button type="button" className="is-quiet" onClick={() => { setSelectedRowIds([]); setBulkActionMessage(""); }} disabled={bulkActionBusy}>
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="venue-inventory-table-wrap">
               <table className="venue-inventory-table w-full text-[12px]">
                 <colgroup>
+                  <col className="venue-col-select" />
                   <col className="venue-col-wine" />
                   <col className="venue-col-type" />
                   <col className="venue-col-stock" />
@@ -1661,6 +1792,14 @@ export default function VenueWinePage() {
                 </colgroup>
                 <thead className="bg-[#faf7f4] border-b border-[#e9dfd7]">
                   <tr className="text-[9px] uppercase tracking-[0.15em] text-[#9c8c82]">
+                    <th className="py-3.5 pl-4 pr-1 text-center font-medium">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all wines on this page"
+                        checked={currentPageSelected}
+                        onChange={toggleCurrentPageSelection}
+                      />
+                    </th>
                     <th className="py-3.5 px-5 text-left font-medium">Wine</th>
                     <th className="py-3.5 px-3 text-left font-medium">Type</th>
                     <th className="py-3.5 px-3 text-center font-medium">Stock</th>
@@ -1675,7 +1814,15 @@ export default function VenueWinePage() {
 
                 <tbody className="divide-y divide-[#f0e9e3]">
                   {paginatedRows.map((row) => (
-                    <tr key={row.wineId} className={`group hover:bg-[#fcfaf8] transition ${row.stock <= 2 || (row.guestVisible && ((row.serviceType === "glass" || row.serviceType === "both") && !(Number(row.glassPrice) > 0))) ? "venue-row-needs-attention" : ""}`}>
+                    <tr key={row.wineId} className={`group hover:bg-[#fcfaf8] transition ${isLowStock(row.stock) || (row.guestVisible && hasGlassService(row.serviceType) && !(Number(row.glassPrice) > 0)) ? "venue-row-needs-attention" : ""}`}>
+                      <td className="py-3.5 pl-4 pr-1 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${row.name}`}
+                          checked={selectedRowIds.includes(row.wineId)}
+                          onChange={() => toggleRowSelection(row.wineId)}
+                        />
+                      </td>
                       <td className="py-3.5 px-5">
                         <div className="font-medium text-[#2f221c] max-w-[310px] truncate">
                           {row.name}
@@ -1704,7 +1851,7 @@ export default function VenueWinePage() {
 
                       <td className="py-3.5 px-3 text-center">
                         <span className={`inline-flex min-w-8 h-7 px-2 items-center justify-center rounded-lg text-[11px] font-medium ${
-                          row.stock <= 2
+                          isLowStock(row.stock)
                             ? "bg-orange-50 text-orange-700"
                             : "bg-[#f3eee9] text-[#57463d]"
                         }`}>
@@ -1809,6 +1956,12 @@ export default function VenueWinePage() {
                       </td>
 
                       <td className="py-3.5 px-5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedWineId(row.wineId)}
+                            className="h-9 px-3 rounded-lg border border-[#d8e3dd] bg-white text-[#45665d] text-[10px] font-medium"
+                          >Details</button>
                         {row.guestVisible && (
                           <button
                             onClick={() => saveWine(row)}
@@ -1818,6 +1971,7 @@ export default function VenueWinePage() {
                             {savingWineId === row.wineId ? "Saving..." : "Save"}
                           </button>
                         )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1852,6 +2006,8 @@ export default function VenueWinePage() {
             )}
           </section>
         )}
+
+        <WineDetailDrawer wineId={selectedWineId} open={Boolean(selectedWineId)} onClose={() => setSelectedWineId(null)} />
 
         {descriptionAssistantOpen && typeof document !== "undefined" && createPortal((
           <div className="venue-description-assistant-backdrop" role="presentation">

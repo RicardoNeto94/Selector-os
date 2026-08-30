@@ -1823,6 +1823,37 @@ body:has(.venue-detail-page) .so-workspace-bar {
   background: var(--venue-deep);
 }
 
+.venue-bulk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--venue-line);
+  background: rgba(23, 51, 44, 0.94);
+  color: #fff;
+}
+
+.venue-bulk-actions > div:first-child,
+.venue-bulk-actions strong,
+.venue-bulk-actions span { display: block; }
+.venue-bulk-actions strong { font-size: 11px; font-weight: 700; }
+.venue-bulk-actions span { margin-top: 2px; color: rgba(255,255,255,.66); font-size: 9px; }
+.venue-bulk-action-buttons { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.venue-bulk-action-buttons button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+.venue-bulk-action-buttons button:hover { background: rgba(255,255,255,.2); }
+.venue-bulk-action-buttons button.is-quiet { background: transparent; color: rgba(255,255,255,.72); }
+.venue-bulk-action-buttons button:disabled { opacity: .42; cursor: not-allowed; }
+
 .venue-detail-page .venue-inventory-panel table thead {
   display: table-header-group;
   position: static;
@@ -1840,7 +1871,8 @@ body:has(.venue-detail-page) .so-workspace-bar {
   table-layout: fixed;
 }
 
-.venue-inventory-table .venue-col-wine { width: 22%; }
+.venue-inventory-table .venue-col-select { width: 3%; }
+.venue-inventory-table .venue-col-wine { width: 20%; }
 .venue-inventory-table .venue-col-type { width: 7%; }
 .venue-inventory-table .venue-col-stock { width: 6%; }
 .venue-inventory-table .venue-col-guest { width: 8%; }
@@ -1848,6 +1880,12 @@ body:has(.venue-detail-page) .so-workspace-bar {
 .venue-inventory-table .venue-col-price { width: 8%; }
 .venue-inventory-table .venue-col-description { width: 20%; }
 .venue-inventory-table .venue-col-action { width: 8%; }
+
+.venue-inventory-table input[type="checkbox"] {
+  width: 15px !important;
+  height: 15px !important;
+  accent-color: var(--venue-deep);
+}
 
 .venue-inventory-table th,
 .venue-inventory-table td {

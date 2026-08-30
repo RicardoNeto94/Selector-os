@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
+import { hasAvailableStock, isGuestWineAvailable, positiveBottleQuantity } from "@/lib/wineInventory";
 
 import WineClientView from "./WineClientView";
 
@@ -346,7 +347,7 @@ export default async function Page({ params }) {
     );
     if (error) console.log("PUBLIC INVENTORY ERROR:", JSON.stringify(error));
     (inventoryRows || []).forEach((row) => {
-      inventoryMap[String(row.wine_id)] = Number(row.quantity || 0);
+      inventoryMap[String(row.wine_id)] = positiveBottleQuantity(row.quantity);
     });
   }
 
@@ -366,11 +367,9 @@ export default async function Page({ params }) {
         return null;
       }
 
-      const quantity = Number(
-        inventoryMap[wineId] || 0
-      );
+      const quantity = positiveBottleQuantity(inventoryMap[wineId]);
 
-      if (quantity <= 0) {
+      if (!isGuestWineAvailable({ quantity, listed: true })) {
         return null;
       }
 
@@ -448,7 +447,7 @@ export default async function Page({ params }) {
         inventoryMap
       ).filter(
         (quantity) =>
-          Number(quantity) > 0
+          hasAvailableStock(quantity)
       ).length,
     finalItemsCount:
       finalItems.length,

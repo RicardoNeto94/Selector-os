@@ -2,7 +2,7 @@ import Link from "next/link";
 import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
 import { createClient } from "@supabase/supabase-js";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
-import { bottleQuantity, positiveBottleQuantity } from "@/lib/wineInventory";
+import { bottleQuantity, hasAvailableStock, isLowStock, isOutOfStock, positiveBottleQuantity } from "@/lib/wineInventory";
 import { requireDashboardUser } from "@/lib/server/requireDashboardUser";
 import { scopeTenantQuery } from "@/lib/server/tenantContext";
 import {
@@ -71,14 +71,14 @@ export default async function DashboardPage() {
   const organisationName = tenant.property?.name || tenant.organization.name || "VAXERON Hospitality";
   const teamCount = membershipsResponse.count || 0;
   const pendingTeamCount = pendingMembershipsResponse.count || 0;
-  const positiveRows = inventoryRows.filter((row) => positiveBottleQuantity(row.quantity) > 0);
+  const positiveRows = inventoryRows.filter((row) => hasAvailableStock(row.quantity));
   const totalWineUnits = positiveRows.reduce((total, row) => total + positiveBottleQuantity(row.quantity), 0);
   const stockedWineIds = new Set(positiveRows.map((row) => String(row.wine_id)));
   const stockedWines = stockedWineIds.size;
   const stockedMenuPlacements = menuItemRows.filter((row) => stockedWineIds.has(String(row.wine_id))).length;
-  const lowStockRows = positiveRows.filter((row) => number(row.quantity) <= 2).length;
+  const lowStockRows = positiveRows.filter((row) => isLowStock(row.quantity)).length;
   const compucashValuationKeys = new Set(valuationRows.map((row) => `${row.wine_id}|${row.location_id}`));
-  const reorderSignalRows = inventoryRows.filter((row) => row.wines?.is_active && number(row.quantity) <= 0 && compucashValuationKeys.has(`${row.wine_id}|${row.location_id}`)).length;
+  const reorderSignalRows = inventoryRows.filter((row) => row.wines?.is_active && isOutOfStock(row.quantity) && compucashValuationKeys.has(`${row.wine_id}|${row.location_id}`)).length;
   const negativeRows = inventoryRows.filter((row) => bottleQuantity(row.quantity) < 0).length;
   const roundingRows = inventoryRows.filter((row) => number(row.quantity) < 0 && bottleQuantity(row.quantity) === 0).length;
   const venueMetrics = locations.map((location) => {

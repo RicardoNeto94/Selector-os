@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 import { scopeTenantQuery, tenantWriteFields } from "@/lib/server/tenantContext";
+import { isOutOfStock } from "@/lib/wineInventory";
 
 export const dynamic = "force-dynamic";
 
@@ -49,10 +50,10 @@ export async function GET(request) {
     // them as evidence prevents generated empty wine/location matrix rows from
     // becoming false ordering notifications.
     const valuationKeys = new Set(valuations.map((row) => `${row.wine_id}|${row.location_id}`));
-    const alerts = inventory.filter((row) => row.wines?.is_active && row.wine_locations && valuationKeys.has(`${row.wine_id}|${row.location_id}`) && Number(row.quantity || 0) <= 0);
+    const alerts = inventory.filter((row) => row.wines?.is_active && row.wine_locations && valuationKeys.has(`${row.wine_id}|${row.location_id}`) && isOutOfStock(row.quantity));
     const summary = {
       alerts: alerts.length,
-      urgent: alerts.filter((row) => ruleMap.has(`${row.wine_id}|${row.location_id}`) && Number(row.quantity || 0) <= 0).length,
+      urgent: alerts.filter((row) => ruleMap.has(`${row.wine_id}|${row.location_id}`) && isOutOfStock(row.quantity)).length,
       awaitingApproval: alerts.filter((row) => ruleMap.has(`${row.wine_id}|${row.location_id}`) && !activeOrderKeys.has(`${row.wine_id}|${row.location_id}`)).length,
       suggestions: alerts.filter((row) => !ruleMap.has(`${row.wine_id}|${row.location_id}`) && !activeOrderKeys.has(`${row.wine_id}|${row.location_id}`)).length,
       approved: orders.filter((order) => order.status === "approved").length,

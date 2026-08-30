@@ -22,8 +22,9 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
-import { BOTTLE_FORMATS, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, hasAvailableStock, isLowStock, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
 import { PortfolioRing } from "@/components/dashboard/OperationalVisuals";
+import WineDetailDrawer from "@/components/dashboard/WineDetailDrawer";
 import "./wine-cellar.css";
 /* =======================================================
    CONSTANTS
@@ -263,6 +264,8 @@ export default function WinesPage() {
   const [search, setSearch] =
     useState("");
 
+  const [selectedWineId, setSelectedWineId] = useState(null);
+
   const [selectedCompositionType, setSelectedCompositionType] = useState(null);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
 
@@ -295,8 +298,34 @@ export default function WinesPage() {
   ===================================================== */
 
   useEffect(() => {
+    const requestedWine = new URLSearchParams(window.location.search).get("wine");
+    if (requestedWine) setSelectedWineId(requestedWine);
     loadCommandCentre();
     loadCompuCashStatus();
+
+    const refreshVisiblePage = () => {
+      if (document.visibilityState !== "visible") return;
+      loadCompuCashStatus();
+      loadCommandCentre();
+    };
+
+    const statusRefreshTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadCompuCashStatus();
+    }, 60_000);
+
+    const inventoryRefreshTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadCommandCentre();
+    }, 5 * 60_000);
+
+    window.addEventListener("focus", refreshVisiblePage);
+    document.addEventListener("visibilitychange", refreshVisiblePage);
+
+    return () => {
+      window.clearInterval(statusRefreshTimer);
+      window.clearInterval(inventoryRefreshTimer);
+      window.removeEventListener("focus", refreshVisiblePage);
+      document.removeEventListener("visibilitychange", refreshVisiblePage);
+    };
   }, []);
 
   async function loadCompuCashStatus() {
@@ -605,10 +634,7 @@ export default function WinesPage() {
             quantity,
           };
         })
-        .filter(
-          (location) =>
-            location.quantity > 0
-        )
+        .filter((location) => hasAvailableStock(location.quantity))
         .sort(
           (a, b) =>
             b.quantity -
@@ -645,10 +671,7 @@ export default function WinesPage() {
         wine.stock || 0
       );
 
-      return (
-        stock > 0 &&
-        stock <= 6
-      );
+      return isLowStock(stock, 6);
     });
   }, [wines]);
 
@@ -664,11 +687,7 @@ export default function WinesPage() {
             wine.price || 0
           );
 
-          return (
-            stock > 0 &&
-            stock <= 3 &&
-            price >= 150
-          );
+          return isLowStock(stock, 3) && price >= 150;
         })
         .sort(
           (a, b) =>
@@ -684,8 +703,7 @@ export default function WinesPage() {
   const recentAdditions = useMemo(() => {
     return [...wines]
       .filter(
-        (wine) =>
-          Number(wine.stock || 0) > 0
+        (wine) => hasAvailableStock(wine.stock)
       )
       .sort((a, b) => {
         return (
@@ -713,7 +731,7 @@ export default function WinesPage() {
 
     return wines
       .filter((wine) => {
-        if (Number(wine.stock || 0) <= 0) {
+        if (!hasAvailableStock(wine.stock)) {
           return false;
         }
 
@@ -1418,11 +1436,10 @@ export default function WinesPage() {
                 (wine) => (
                   <button
                     key={wine.id}
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/wine-cellar/inventory"
-                      )
-                    }
+                    onClick={() => {
+                      setSelectedWineId(wine.id);
+                      setSearch("");
+                    }}
                     className="
                       w-full
                       px-5
@@ -1654,9 +1671,12 @@ export default function WinesPage() {
           <div>
             {recentAdditions.map(
               (wine) => (
-                <div
+                <button
+                  type="button"
+                  onClick={() => setSelectedWineId(wine.id)}
                   key={wine.id}
                   className="
+                    w-full text-left
                     flex
                     items-center
                     justify-between
@@ -1719,7 +1739,7 @@ export default function WinesPage() {
                       bottles
                     </div>
                   </div>
-                </div>
+                </button>
               )
             )}
           </div>
@@ -2183,6 +2203,11 @@ export default function WinesPage() {
         </div>
       </details>
 
+      <WineDetailDrawer
+        wineId={selectedWineId}
+        open={Boolean(selectedWineId)}
+        onClose={() => setSelectedWineId(null)}
+      />
     </div>
   );
 }

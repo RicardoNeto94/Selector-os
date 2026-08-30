@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
-import { bottleQuantity, positiveBottleQuantity, summarizeInventoryFamilies } from "@/lib/wineInventory";
+import { bottleQuantity, hasAvailableStock, isLowStock, positiveBottleQuantity, summarizeInventoryFamilies } from "@/lib/wineInventory";
+import { useDashboardWorkspace } from "@/components/dashboard/WorkspaceContext";
 import "./venue-wines.css";
 
 const PAGE_SIZE = 1000;
@@ -69,6 +70,7 @@ function PortfolioRing({ label, value, total, detail, tone = "sage" }) {
 export default function VenueWinesPage() {
   const supabase = createClient();
   const router = useRouter();
+  const workspace = useDashboardWorkspace();
 
   const LOCATION_TYPES = [
     ["master_cellar", "Master cellar"],
@@ -90,6 +92,7 @@ export default function VenueWinesPage() {
 
   const [locations, setLocations] = useState([]);
   const [restaurantId, setRestaurantId] = useState(null);
+  const [restaurants, setRestaurants] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [menus, setMenus] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -185,12 +188,19 @@ export default function VenueWinesPage() {
             .order("location_id", { ascending: true })
         ),
 
-        supabase
-          .from("restaurants")
-          .select("id")
-          .order("id")
-          .limit(1)
-          .maybeSingle(),
+        (() => {
+          let query = supabase
+            .from("restaurants")
+            .select("id,name,organization_id,property_id")
+            .order("name");
+          if (workspace?.organization?.id) {
+            query = query.eq("organization_id", workspace.organization.id);
+          }
+          if (workspace?.property?.id) {
+            query = query.eq("property_id", workspace.property.id);
+          }
+          return query;
+        })(),
       ]);
 
       if (locationsResult.error) throw locationsResult.error;
@@ -204,7 +214,15 @@ export default function VenueWinesPage() {
       setStoreMappings(mappingsResult.data || []);
       setMenuItems(menuItemRows);
       setInventoryValuations(valuationRows);
-      setRestaurantId(restaurantResult.data?.id || null);
+      const workspaceRestaurants = restaurantResult.data || [];
+      setRestaurants(workspaceRestaurants);
+      setRestaurantId((current) =>
+        workspaceRestaurants.some((restaurant) => restaurant.id === current)
+          ? current
+          : workspaceRestaurants.length === 1
+            ? workspaceRestaurants[0].id
+            : null
+      );
     } catch (error) {
       console.error("LOCATIONS LOAD ERROR:", error);
       setLoadError(
@@ -623,9 +641,7 @@ export default function VenueWinesPage() {
       inventoryByWine.values()
     );
 
-    const availableInventory = allInventory.filter(
-      (item) => positiveBottleQuantity(item.quantity) > 0
-    );
+    const availableInventory = allInventory.filter((item) => hasAvailableStock(item.quantity));
 
     const availableWineIds = new Set(
       availableInventory.map((item) =>
@@ -665,13 +681,7 @@ export default function VenueWinesPage() {
       valuationRows: locationValuations,
     });
 
-    const lowStock = availableInventory.filter(
-      (item) => {
-        const quantity = positiveBottleQuantity(item.quantity);
-
-        return quantity > 0 && quantity <= 2;
-      }
-    ).length;
+    const lowStock = availableInventory.filter((item) => isLowStock(item.quantity)).length;
 
     const venueMenu = location.wine_menu_id
       ? menus.find(
@@ -1005,6 +1015,30 @@ export default function VenueWinesPage() {
                   ))}
                 </select>
               </label>
+
+              {showCreate && restaurants.length > 1 && (
+                <label className="text-[9px] text-[#76655b]">
+                  <span className="mb-1.5 block uppercase tracking-[0.12em]">
+                    Venue
+                  </span>
+                  <select
+                    value={restaurantId || ""}
+                    onChange={(event) => setRestaurantId(event.target.value || null)}
+                    className="w-full rounded-xl border border-[#d9cbc0] bg-white px-3 py-2.5 text-[11px] outline-none"
+                    required
+                  >
+                    <option value="">Choose the venue</option>
+                    {restaurants.map((restaurant) => (
+                      <option key={restaurant.id} value={restaurant.id}>
+                        {restaurant.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="mt-1.5 block leading-relaxed text-[#97877c]">
+                    The new location will belong to this venue and its current workspace.
+                  </span>
+                </label>
+              )}
 
               <label className="text-[9px] text-[#76655b]">
                 <span className="mb-1.5 block uppercase tracking-[0.12em]">

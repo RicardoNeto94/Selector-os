@@ -1,0 +1,70 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { buildWineDataQualityReport } from "../src/lib/wineDataQuality.js";
+
+const completeWine = {
+  id: "wine-1",
+  name: "Estate Riesling",
+  producer: "Example Estate",
+  vintage: "2024",
+  wine_type: "white",
+  country: "Germany",
+  region: "Mosel",
+  size: "75cl",
+  sku: "W-1",
+  price: 75,
+  description: "A concise factual description.",
+  is_active: true,
+};
+
+test("reports a fully complete stocked wine as ready", () => {
+  const report = buildWineDataQualityReport({
+    wines: [completeWine],
+    inventoryRows: [{ wine_id: "wine-1", quantity: 3 }],
+    valuationRows: [{ wine_id: "wine-1", external_product_id: "100", unit_inventory_cost: 20 }],
+  });
+  assert.deepEqual(report.summary, { stockedLabels: 1, readyLabels: 1, needsAttention: 0, criticalLabels: 0, totalIssues: 0 });
+});
+
+test("ignores zero-stock labels in operational quality counts", () => {
+  const report = buildWineDataQualityReport({
+    wines: [{ ...completeWine, sku: "" }],
+    inventoryRows: [{ wine_id: "wine-1", quantity: 0 }],
+  });
+  assert.equal(report.summary.stockedLabels, 0);
+  assert.equal(report.issues.length, 0);
+});
+
+test("keeps fractional BTG stock in scope and reports guest gaps", () => {
+  const report = buildWineDataQualityReport({
+    wines: [{ ...completeWine, description: "" }],
+    inventoryRows: [{ wine_id: "wine-1", quantity: 0.1 }],
+    menuItems: [{ wine_id: "wine-1", wine_menu_id: "menu-1", service_type: "both", glass_price: null, price_override: 75, description: "", is_active: true }],
+    locations: [{ id: "venue-1", name: "Dining Room", wine_menu_id: "menu-1" }],
+  });
+  const guestIssue = report.issues.find((item) => item.category === "guest");
+  assert.ok(guestIssue);
+  assert.equal(guestIssue.severity, "critical");
+  assert.match(guestIssue.detail, /description/);
+  assert.match(guestIssue.detail, /glass price/);
+});
+
+test("flags source, size and identity gaps without multiplying them by inventory location", () => {
+  const report = buildWineDataQualityReport({
+    wines: [{ ...completeWine, sku: "", producer: "", country: "", region: "", wine_type: "", size: "" }],
+    inventoryRows: [{ wine_id: "wine-1", quantity: 1 }, { wine_id: "wine-1", quantity: 2 }],
+  });
+  assert.equal(report.issues.filter((item) => item.category === "source").length, 1);
+  assert.equal(report.issues.filter((item) => item.category === "catalogue").length, 2);
+});
+
+test("surfaces duplicate candidates but never merges them", () => {
+  const report = buildWineDataQualityReport({
+    wines: [completeWine, { ...completeWine, id: "wine-2", sku: "W-2" }],
+    inventoryRows: [{ wine_id: "wine-1", quantity: 1 }],
+  });
+  const duplicate = report.issues.find((item) => item.category === "duplicates");
+  assert.ok(duplicate);
+  assert.match(duplicate.detail, /Review before merging/);
+});

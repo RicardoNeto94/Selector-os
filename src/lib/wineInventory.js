@@ -1,5 +1,6 @@
 export const INVENTORY_ROUNDING_EPSILON = 0.001;
 export const INVENTORY_PAGE_SIZE = 1000;
+export const DEFAULT_LOW_STOCK_THRESHOLD = 2;
 
 export function bottleQuantity(value) {
   const quantity = Number(value || 0);
@@ -9,6 +10,79 @@ export function bottleQuantity(value) {
 
 export function positiveBottleQuantity(value) {
   return Math.max(0, bottleQuantity(value));
+}
+
+/**
+ * Canonical inventory availability rules.
+ *
+ * Compucash quantities are physical units. A real fractional balance (for
+ * example 0.1 of an open BTG bottle) remains available, while insignificant
+ * database residue inside INVENTORY_ROUNDING_EPSILON is treated as zero.
+ */
+export function hasAvailableStock(value) {
+  return positiveBottleQuantity(value) > 0;
+}
+
+export function isOutOfStock(value) {
+  return bottleQuantity(value) <= 0;
+}
+
+export function isLowStock(value, threshold = DEFAULT_LOW_STOCK_THRESHOLD) {
+  const quantity = positiveBottleQuantity(value);
+  const normalizedThreshold = Math.max(0, Number(threshold) || 0);
+  return quantity > 0 && quantity <= normalizedThreshold;
+}
+
+export function inventoryStockState(value, threshold = DEFAULT_LOW_STOCK_THRESHOLD) {
+  if (isOutOfStock(value)) return "out";
+  if (isLowStock(value, threshold)) return "low";
+  return "available";
+}
+
+export function hasBottleService(serviceType) {
+  return serviceType === "bottle" || serviceType === "both";
+}
+
+export function hasGlassService(serviceType) {
+  return serviceType === "glass" || serviceType === "both";
+}
+
+export function hasUsablePrice(value) {
+  return Number.isFinite(Number(value)) && Number(value) > 0;
+}
+
+export function isGuestWineAvailable({
+  quantity,
+  listed = true,
+  active = true,
+  published = true,
+} = {}) {
+  return Boolean(listed && active && published && hasAvailableStock(quantity));
+}
+
+export function guestServiceReadiness({
+  quantity,
+  listed = true,
+  active = true,
+  published = true,
+  serviceType = "bottle",
+  bottlePrice,
+  glassPrice,
+} = {}) {
+  const available = isGuestWineAvailable({ quantity, listed, active, published });
+  const bottleEnabled = hasBottleService(serviceType);
+  const glassEnabled = hasGlassService(serviceType);
+  const bottleReady = !bottleEnabled || hasUsablePrice(bottlePrice);
+  const glassReady = !glassEnabled || hasUsablePrice(glassPrice);
+
+  return {
+    available,
+    bottleEnabled,
+    glassEnabled,
+    bottleReady,
+    glassReady,
+    ready: available && bottleReady && glassReady,
+  };
 }
 
 export function sumPositiveBottles(rows, getQuantity = (row) => row?.quantity) {

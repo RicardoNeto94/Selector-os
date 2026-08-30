@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { DashboardWorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
 
 import {
   Squares2X2Icon,
@@ -27,6 +28,7 @@ import {
   CheckCircleIcon,
   ShieldCheckIcon,
   EyeIcon,
+  DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +43,7 @@ const QUICK_DESTINATIONS = [
   ["Venue Wines", "Venue stock and guest wine lists", "/dashboard/wine-cellar/venues"],
   ["Stock Control", "Inventory balances by location", "/dashboard/wine-cellar/inventory"],
   ["Stock Issues", "Reconciliation and exceptions", "/dashboard/wine-cellar/reconciliation"],
+  ["Data Quality", "Wine records and guest readiness", "/dashboard/wine-cellar/data-quality"],
   ["Ordering", "Zero-stock notifications from Compucash", "/dashboard/wine-cellar/ordering"],
   ["Movements", "Transfers and stock history", "/dashboard/wine-cellar/transfers"],
   ["Team & Access", "Users, roles and invitations", "/dashboard/team"],
@@ -231,6 +234,7 @@ export default function DashboardLayout({
   const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }));
 
   return (
+    <DashboardWorkspaceProvider workspace={workspace}>
     <div className={`so-dashboard-root ${supportMode ? "so-dashboard-root--support" : ""}`}>
 
       {/* ===================================================
@@ -367,6 +371,13 @@ export default function DashboardLayout({
   )}
   icon={ClipboardDocumentCheckIcon}
   label="Stock Issues"
+              />
+
+              <NavItem
+                href="/dashboard/wine-cellar/data-quality"
+                isActive={isActive("/dashboard/wine-cellar/data-quality")}
+                icon={DocumentMagnifyingGlassIcon}
+                label="Data Quality"
               />
 
               {!supportMode && <NavItem
@@ -688,5 +699,6 @@ export default function DashboardLayout({
       </div>
 
     </div>
+    </DashboardWorkspaceProvider>
   );
 }
