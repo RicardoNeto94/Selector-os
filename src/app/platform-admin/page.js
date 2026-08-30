@@ -201,7 +201,7 @@ export default function PlatformAdminPage() {
       <header className={styles.topbar}>
         <div className={styles.brand}>
           <Image src="/selectoros-logo.png" alt="Vaxeron" width={106} height={44} priority />
-          <div><strong>VAXERON</strong><span>Control Centre</span></div>
+          <div><strong>VAXERON</strong><span>Platform administration</span></div>
         </div>
         <div className={styles.topActions}>
           <span className={styles.secureBadge}><ShieldCheckIcon /> {platformRole.replaceAll("_", " ") || "Platform access"}</span>

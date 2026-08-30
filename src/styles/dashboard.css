@@ -1478,12 +1478,83 @@ and
 .so-nav-item--active .so-nav-icon { color: #d3bb87; }
 
 .so-sidebar-footer {
+  position: relative;
   gap: 10px;
   padding: 12px 8px 2px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.so-sidebar-user { gap: 9px; }
+.so-sidebar-user {
+  width: 100%;
+  gap: 9px;
+  padding: 7px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s ease;
+}
+
+.so-sidebar-user:hover,
+.so-sidebar-footer.is-open .so-sidebar-user {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.so-sidebar-user__chevron {
+  width: 14px;
+  margin-left: auto;
+  color: rgba(231, 236, 233, 0.42);
+  transition: transform .18s ease;
+}
+
+.so-sidebar-footer.is-open .so-sidebar-user__chevron { transform: rotate(180deg); }
+
+.so-account-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 17px;
+  background: rgba(19, 31, 28, 0.98);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+}
+
+.so-account-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 11px;
+  color: rgba(231, 236, 233, 0.72);
+  text-decoration: none;
+  transition: background .16s ease, color .16s ease;
+}
+
+.so-account-menu a:hover {
+  background: rgba(255, 255, 255, 0.065);
+  color: #fff;
+}
+
+.so-account-menu a > svg {
+  width: 18px;
+  flex: none;
+  color: #c6a667;
+}
+
+.so-account-menu a > span { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.so-account-menu strong { font-size: 9px; font-weight: 650; }
+.so-account-menu small { color: rgba(231, 236, 233, 0.38); font-size: 7px; line-height: 1.35; }
+.so-account-menu__platform { background: rgba(198, 166, 103, 0.09); }
+.so-account-menu__logout { border-top: 1px solid rgba(255, 255, 255, 0.07); }
 
 .so-user-avatar {
   width: 30px;

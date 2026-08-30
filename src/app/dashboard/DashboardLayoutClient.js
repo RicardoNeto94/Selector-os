@@ -125,6 +125,7 @@ export default function DashboardLayout({
   const [commandQuery, setCommandQuery] = useState("");
   const [orderingAlerts, setOrderingAlerts] = useState(0);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationSummary, setNotificationSummary] = useState({});
   const [endingSupport, setEndingSupport] = useState(false);
   const [navReady, setNavReady] = useState(false);
@@ -156,6 +157,7 @@ export default function DashboardLayout({
       if (event.key === "Escape") {
         setCommandOpen(false);
         setNotificationOpen(false);
+        setAccountMenuOpen(false);
       }
     }
 
@@ -178,6 +180,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     setNotificationOpen(false);
+    setAccountMenuOpen(false);
   }, [pathname]);
 
   const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail, href]) =>
@@ -405,14 +408,6 @@ export default function DashboardLayout({
               icon={Cog6ToothIcon}
               label="Settings"
               />}
-              {platformAdministrator && (
-                <NavItem
-                  href="/platform-admin"
-                  isActive={false}
-                  icon={ShieldCheckIcon}
-                  label="Control Centre"
-                />
-              )}
             </NavGroup>
 
           </nav>
@@ -423,9 +418,32 @@ export default function DashboardLayout({
             FOOTER
         ================================================= */}
 
-        <div className="so-sidebar-footer">
+        <div className={`so-sidebar-footer ${accountMenuOpen ? "is-open" : ""}`}>
+          {accountMenuOpen && (
+            <div className="so-account-menu" role="menu" aria-label="Account options">
+              {platformAdministrator && (
+                <Link href="/platform-admin" role="menuitem" className="so-account-menu__platform">
+                  <ShieldCheckIcon />
+                  <span><strong>Platform administration</strong><small>Customers, access and support</small></span>
+                </Link>
+              )}
+              <Link href="/dashboard/settings" role="menuitem">
+                <Cog6ToothIcon />
+                <span><strong>Workspace settings</strong><small>Customer configuration</small></span>
+              </Link>
+              <Link href="/logout" role="menuitem" className="so-account-menu__logout">
+                <span><strong>Log out</strong><small>End this Vaxeron session</small></span>
+              </Link>
+            </div>
+          )}
 
-          <div className="so-sidebar-user">
+          <button
+            type="button"
+            className="so-sidebar-user"
+            aria-expanded={accountMenuOpen}
+            aria-haspopup="menu"
+            onClick={() => setAccountMenuOpen((value) => !value)}
+          >
 
             <div className="so-user-avatar">
               R
@@ -442,15 +460,8 @@ export default function DashboardLayout({
               </div>
 
             </div>
-
-          </div>
-
-          <Link
-            href="/logout"
-            className="so-logout-btn"
-          >
-            Log out
-          </Link>
+            <ChevronDownIcon className="so-sidebar-user__chevron" aria-hidden="true" />
+          </button>
 
         </div>
 
