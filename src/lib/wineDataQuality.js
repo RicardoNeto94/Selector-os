@@ -1,7 +1,5 @@
 import {
-  guestServiceReadiness,
   hasAvailableStock,
-  hasUsablePrice,
   parseBottleSizeCl,
   positiveBottleQuantity,
 } from "./wineInventory.js";
@@ -39,32 +37,12 @@ function issue({ wine, stock, category, severity = "warning", title, detail, hre
 export function buildWineDataQualityReport({
   wines = [],
   inventoryRows = [],
-  menuItems = [],
-  valuationRows = [],
-  locations = [],
 } = {}) {
-  const wineById = new Map(wines.map((wine) => [String(wine.id), wine]));
   const stockByWine = new Map();
   for (const row of inventoryRows) {
     const wineId = String(row?.wine_id || "");
     if (!wineId) continue;
     stockByWine.set(wineId, (stockByWine.get(wineId) || 0) + positiveBottleQuantity(row.quantity));
-  }
-
-  const locationsByMenu = new Map(
-    locations.filter((location) => location?.wine_menu_id).map((location) => [String(location.wine_menu_id), location])
-  );
-  const valuationsByWine = new Map();
-  for (const row of valuationRows) {
-    const wineId = String(row?.wine_id || "");
-    if (!valuationsByWine.has(wineId)) valuationsByWine.set(wineId, []);
-    valuationsByWine.get(wineId).push(row);
-  }
-  const placementsByWine = new Map();
-  for (const item of menuItems) {
-    const wineId = String(item?.wine_id || "");
-    if (!placementsByWine.has(wineId)) placementsByWine.set(wineId, []);
-    placementsByWine.get(wineId).push(item);
   }
 
   const stockedWines = wines.filter((wine) => wine?.is_active !== false && hasAvailableStock(stockByWine.get(String(wine.id))));
@@ -73,13 +51,10 @@ export function buildWineDataQualityReport({
   for (const wine of stockedWines) {
     const wineId = String(wine.id);
     const stock = stockByWine.get(wineId) || 0;
-    const valuations = valuationsByWine.get(wineId) || [];
-    const placements = placementsByWine.get(wineId) || [];
     const sourceLinked = Boolean(
       text(wine.business_product_number) ||
       text(wine.business_barcode) ||
-      text(wine.sku) ||
-      valuations.some((row) => text(row.external_product_id))
+      text(wine.sku)
     );
 
     if (!sourceLinked) {
@@ -98,40 +73,6 @@ export function buildWineDataQualityReport({
       issues.push(issue({ wine, stock, category: "catalogue", title: "Core wine details incomplete", detail: `Missing ${missingIdentity.join(", ")}.` }));
     }
 
-    const hasPurchaseCost = valuations.some((row) => hasUsablePrice(row.unit_inventory_cost));
-    if (valuations.length && !hasPurchaseCost) {
-      issues.push(issue({ wine, stock, category: "commercial", title: "Purchase cost unavailable", detail: "Compucash stock is linked, but its average purchase cost is missing." }));
-    }
-
-    const guestProblems = [];
-    for (const placement of placements.filter((item) => item?.is_active !== false)) {
-      const location = locationsByMenu.get(String(placement.wine_menu_id));
-      const locationName = text(location?.name) || "a guest wine list";
-      const readiness = guestServiceReadiness({
-        quantity: stock,
-        serviceType: placement.service_type || "bottle",
-        bottlePrice: placement.price_override ?? wine.price,
-        glassPrice: placement.glass_price,
-      });
-      const missing = [];
-      if (!text(placement.description) && !text(wine.description)) missing.push("description");
-      if (!readiness.bottleReady) missing.push("bottle price");
-      if (!readiness.glassReady) missing.push("glass price");
-      if (missing.length) guestProblems.push(`${locationName}: ${missing.join(", ")}`);
-    }
-    if (guestProblems.length) {
-      const firstLocation = locationsByMenu.get(String(placements[0]?.wine_menu_id));
-      issues.push(issue({
-        wine,
-        stock,
-        category: "guest",
-        severity: guestProblems.some((value) => value.includes("price")) ? "critical" : "warning",
-        title: "Guest presentation incomplete",
-        detail: guestProblems.slice(0, 2).join(" · ") + (guestProblems.length > 2 ? ` · +${guestProblems.length - 2} more` : ""),
-        href: firstLocation?.id ? `/dashboard/wine-cellar/venues/${firstLocation.id}` : "/dashboard/wine-cellar/venues",
-        locationName: text(firstLocation?.name),
-      }));
-    }
   }
 
   const duplicates = new Map();

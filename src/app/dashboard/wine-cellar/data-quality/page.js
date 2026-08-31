@@ -18,14 +18,11 @@ export default async function WineDataQualityPage() {
   );
   const scope = (query) => scopeTenantQuery(query, access.tenant);
 
-  const [wines, inventoryRows, menuItems, valuationRows, locations] = await Promise.all([
+  const [wines, inventoryRows] = await Promise.all([
     fetchAllRows(supabase, "wines", "*", scope),
     fetchAllRows(supabase, "wine_inventory", "wine_id,location_id,quantity", scope),
-    fetchAllRows(supabase, "wine_menu_items", "id,wine_id,wine_menu_id,description,service_type,glass_price,price_override,is_active", scope),
-    fetchAllRows(supabase, "wine_inventory_valuations", "wine_id,location_id,external_product_id,unit_inventory_cost", (query) => scope(query).eq("source", "compucash")),
-    fetchAllRows(supabase, "wine_locations", "id,name,wine_menu_id", scope),
   ]);
 
-  const report = buildWineDataQualityReport({ wines, inventoryRows, menuItems, valuationRows, locations });
+  const report = buildWineDataQualityReport({ wines, inventoryRows });
   return <DataQualityClient report={report} />;
 }

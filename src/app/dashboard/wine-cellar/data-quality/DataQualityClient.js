@@ -13,10 +13,8 @@ import "./data-quality.css";
 
 const CATEGORY_LABELS = {
   all: "All issues",
-  source: "Source links",
-  catalogue: "Catalogue",
-  guest: "Guest readiness",
-  commercial: "Commercial",
+  source: "Identifiers",
+  catalogue: "Metadata & formats",
   duplicates: "Duplicates",
 };
 
@@ -54,15 +52,15 @@ export default function DataQualityClient({ report }) {
 
   return <main className="dq-page"><div className="dq-shell">
     <header className="dq-header">
-      <div><span className="dq-eyebrow">Wine Operations · Data stewardship</span><h1>Wine Data Quality</h1><p>One prioritized workspace for the records that affect stock accuracy, guest presentation and commercial reporting.</p></div>
+      <div><span className="dq-eyebrow">Wine Operations · Catalogue stewardship</span><h1>Catalogue Health</h1><p>Review only the stocked labels whose identity, bottle format or core wine metadata needs attention.</p></div>
       <div className="dq-readiness" style={{ "--readiness": `${Math.max(0, Math.min(100, readyPercent)) * 3.6}deg` }}><div><strong>{number(readyPercent, 1)}%</strong><span>ready</span></div></div>
     </header>
 
     <section className="dq-summary" aria-label="Wine data quality summary">
       <SummaryCell label="Active stocked labels" value={number(summary.stockedLabels)} detail="Only labels with positive physical stock" />
-      <SummaryCell label="Ready labels" value={number(summary.readyLabels)} detail="No current operational data warnings" tone="good" />
-      <SummaryCell label="Labels needing attention" value={number(summary.needsAttention)} detail={`${number(summary.totalIssues)} grouped issues`} tone={summary.needsAttention ? "warning" : "good"} />
-      <SummaryCell label="Critical labels" value={number(summary.criticalLabels)} detail="Source or guest-pricing blockers" tone={summary.criticalLabels ? "critical" : "good"} />
+      <SummaryCell label="Catalogue-ready labels" value={number(summary.readyLabels)} detail="Identity and physical format complete" tone="good" />
+      <SummaryCell label="Labels needing review" value={number(summary.needsAttention)} detail={`${number(summary.totalIssues)} catalogue issues`} tone={summary.needsAttention ? "warning" : "good"} />
+      <SummaryCell label="Missing identifiers" value={number(report.counts?.source)} detail="No business product number, barcode or SKU" tone={report.counts?.source ? "critical" : "good"} />
     </section>
 
     <section className="dq-workspace">
@@ -70,7 +68,7 @@ export default function DataQualityClient({ report }) {
         <nav aria-label="Data quality categories">
           {Object.entries(CATEGORY_LABELS).map(([key, label]) => <button key={key} type="button" className={category === key ? "is-active" : ""} onClick={() => chooseCategory(key)}><span>{label}</span><b>{key === "all" ? issues.length : report.counts?.[key] || 0}</b></button>)}
         </nav>
-        <label className="dq-search"><MagnifyingGlassIcon /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search wine, producer, venue or issue…" /></label>
+        <label className="dq-search"><MagnifyingGlassIcon /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search wine, producer or issue…" /></label>
       </div>
 
       <div className="dq-list-heading"><div><span>Prioritized review queue</span><strong>{number(filtered.length)} issue{filtered.length === 1 ? "" : "s"}</strong></div><p>Critical blockers appear first. Possible duplicates are review-only and are never merged automatically.</p></div>

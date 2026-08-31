@@ -28,7 +28,6 @@ import {
   CheckCircleIcon,
   ShieldCheckIcon,
   EyeIcon,
-  DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +42,6 @@ const QUICK_DESTINATIONS = [
   ["Venue Wines", "Venue stock and guest wine lists", "/dashboard/wine-cellar/venues"],
   ["Stock Control", "Inventory balances by location", "/dashboard/wine-cellar/inventory"],
   ["Stock Issues", "Reconciliation and exceptions", "/dashboard/wine-cellar/reconciliation"],
-  ["Data Quality", "Wine records and guest readiness", "/dashboard/wine-cellar/data-quality"],
   ["Ordering", "Zero-stock notifications from Compucash", "/dashboard/wine-cellar/ordering"],
   ["Movements", "Transfers and stock history", "/dashboard/wine-cellar/transfers"],
   ["Team & Access", "Users, roles and invitations", "/dashboard/team"],
@@ -340,9 +338,7 @@ export default function DashboardLayout({
             <NavGroup label="Wine operations" open={openGroups.wine} active={wineActive} onToggle={() => toggleGroup("wine")}>
               <NavItem
               href="/dashboard/wines"
-              isActive={isActive(
-                "/dashboard/wines"
-              )}
+              isActive={isActive("/dashboard/wines") || isActive("/dashboard/wine-cellar/data-quality")}
               icon={BeakerIcon}
               label="Wine Cellar"
             />
@@ -371,13 +367,6 @@ export default function DashboardLayout({
   )}
   icon={ClipboardDocumentCheckIcon}
   label="Stock Issues"
-              />
-
-              <NavItem
-                href="/dashboard/wine-cellar/data-quality"
-                isActive={isActive("/dashboard/wine-cellar/data-quality")}
-                icon={DocumentMagnifyingGlassIcon}
-                label="Data Quality"
               />
 
               {!supportMode && <NavItem

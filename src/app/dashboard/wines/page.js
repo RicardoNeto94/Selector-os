@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -25,6 +26,7 @@ import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { BOTTLE_FORMATS, hasAvailableStock, isLowStock, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
 import { PortfolioRing } from "@/components/dashboard/OperationalVisuals";
 import WineDetailDrawer from "@/components/dashboard/WineDetailDrawer";
+import { buildWineDataQualityReport } from "@/lib/wineDataQuality";
 import "./wine-cellar.css";
 /* =======================================================
    CONSTANTS
@@ -695,6 +697,14 @@ export default function WinesPage() {
             Number(a.price || 0)
         );
     }, [wines]);
+
+  const catalogueHealth = useMemo(() => buildWineDataQualityReport({
+    wines,
+    inventoryRows: wines.flatMap((wine) => (wine.inventory || []).map((row) => ({
+      ...row,
+      wine_id: wine.id,
+    }))),
+  }), [wines]);
 
   /* =====================================================
      RECENT ADDITIONS
@@ -1609,6 +1619,13 @@ export default function WinesPage() {
             <strong>Review what needs attention</strong>
           </div>
           <div className="wine-secondary-counts">
+            <Link
+              href="/dashboard/wine-cellar/data-quality"
+              className="wine-catalogue-health-link"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <strong>{formatNumber(catalogueHealth.summary.needsAttention)}</strong> catalogue review
+            </Link>
             <span><strong>{formatNumber(lowStockWines.length)}</strong> low stock</span>
             <span><strong>{formatNumber(highValueLowStock.length)}</strong> high value</span>
             <em>Open details</em>

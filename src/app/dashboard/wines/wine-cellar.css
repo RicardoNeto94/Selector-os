@@ -231,6 +231,9 @@
 .wine-secondary-counts { display: flex; align-items: center; gap: 8px; }
 .wine-secondary-counts > span { padding: 7px 10px; border-radius: 999px; background: rgba(231,239,235,.76); color: #778983; font-size: 8px; }
 .wine-secondary-counts > span strong { color: #355047; font-weight: 600; }
+.wine-catalogue-health-link { padding: 7px 11px; border: 1px solid rgba(109,136,127,.2); border-radius: 999px; background: rgba(255,255,255,.78); color: #60776f; font-size: 8px; text-decoration: none; transition: border-color .18s ease, background .18s ease, color .18s ease; }
+.wine-catalogue-health-link strong { color: #355047; font-weight: 600; }
+.wine-catalogue-health-link:hover { border-color: rgba(53,80,71,.34); background: #fff; color: #29433b; }
 .wine-secondary-counts > em { margin-left: 4px; color: #60776f; font-size: 8px; font-style: normal; letter-spacing: .08em; text-transform: uppercase; }
 .wine-secondary-counts > em::after { display: inline-block; margin-left: 7px; content: "↓"; transition: transform .2s ease; }
 .wine-secondary-details[open] .wine-secondary-counts > em::after { transform: rotate(180deg); }

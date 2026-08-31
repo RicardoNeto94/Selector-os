@@ -36,18 +36,13 @@ test("ignores zero-stock labels in operational quality counts", () => {
   assert.equal(report.issues.length, 0);
 });
 
-test("keeps fractional BTG stock in scope and reports guest gaps", () => {
+test("keeps fractional BTG stock in catalogue scope", () => {
   const report = buildWineDataQualityReport({
-    wines: [{ ...completeWine, description: "" }],
+    wines: [{ ...completeWine, producer: "" }],
     inventoryRows: [{ wine_id: "wine-1", quantity: 0.1 }],
-    menuItems: [{ wine_id: "wine-1", wine_menu_id: "menu-1", service_type: "both", glass_price: null, price_override: 75, description: "", is_active: true }],
-    locations: [{ id: "venue-1", name: "Dining Room", wine_menu_id: "menu-1" }],
   });
-  const guestIssue = report.issues.find((item) => item.category === "guest");
-  assert.ok(guestIssue);
-  assert.equal(guestIssue.severity, "critical");
-  assert.match(guestIssue.detail, /description/);
-  assert.match(guestIssue.detail, /glass price/);
+  assert.equal(report.summary.stockedLabels, 1);
+  assert.ok(report.issues.find((item) => item.category === "catalogue"));
 });
 
 test("flags source, size and identity gaps without multiplying them by inventory location", () => {
