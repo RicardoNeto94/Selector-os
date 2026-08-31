@@ -1,13 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
 export default function BurmanLanding({ menu }) {
-  const supabase = createClient();
   const base = `/menu/${menu?.public_slug}`;
   const [roomTab, setRoomTab] = useState("snacks");
 
@@ -44,16 +42,9 @@ export default function BurmanLanding({ menu }) {
     let cancelled = false;
 
     async function syncRefreshVersion() {
-      const { data, error } = await supabase
-        .from("pwa_refresh_signals")
-        .select("version")
-        .eq("channel", "burman_room_pwa")
-        .maybeSingle();
-
-      if (error) {
-        console.error("PWA REFRESH VERSION ERROR:", error);
-        return;
-      }
+      const response = await fetch("/api/pwa-refresh", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
 
       if (
         !cancelled &&
@@ -75,26 +66,6 @@ export default function BurmanLanding({ menu }) {
     }
 
     syncRefreshVersion();
-
-    const refreshChannel = supabase
-      .channel("burman-room-pwa-refresh")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "pwa_refresh_signals",
-          filter: "channel=eq.burman_room_pwa",
-        },
-        (payload) => {
-          const nextVersion = Number(payload.new?.version);
-
-          if (Number.isFinite(nextVersion)) {
-            setPwaRefreshVersion(nextVersion);
-          }
-        },
-      )
-      .subscribe();
 
     const refreshInterval = window.setInterval(() => {
       syncRefreshVersion();
@@ -118,7 +89,6 @@ export default function BurmanLanding({ menu }) {
         "visibilitychange",
         handleVisibilityChange,
       );
-      supabase.removeChannel(refreshChannel);
     };
   }, []);
 
@@ -217,95 +187,34 @@ export default function BurmanLanding({ menu }) {
   }, []);
 
   useEffect(() => {
-    if (!menu?.id) return;
+    if (!menu?.public_slug) return;
 
     const loadData = async () => {
-      const { data: cats = [] } = await supabase
-        .from("menu_categories")
-        .select("*")
-        .eq("menu_id", menu.id)
-        .order("position");
+      try {
+        const response = await fetch(
+          `/api/public-menu/${encodeURIComponent(menu.public_slug)}/experience-content`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) throw new Error(`Guest content failed (${response.status})`);
 
-      const { data: its = [] } = await supabase
-        .from("menu_items")
-        .select("*")
-        .eq("menu_id", menu.id)
-        .order("position");
-
-      setCategories(cats);
-      setItems(its);
-
-      if (its.length) {
-        const { data: prices = [] } = await supabase
-          .from("menu_item_prices")
-          .select("*")
-          .in(
-            "menu_item_id",
-            its.map((i) => i.id),
-          )
-          .order("position");
+        const data = await response.json();
+        setCategories(data.categories || []);
+        setItems(data.items || []);
+        setExperiences(data.experiences || []);
 
         const grouped = {};
-        prices.forEach((p) => {
-          if (!grouped[p.menu_item_id]) grouped[p.menu_item_id] = [];
-          grouped[p.menu_item_id].push(p);
+        (data.prices || []).forEach((price) => {
+          if (!grouped[price.menu_item_id]) grouped[price.menu_item_id] = [];
+          grouped[price.menu_item_id].push(price);
         });
-
         setPricesMap(grouped);
+      } catch (error) {
+        console.error("BURMAN GUEST CONTENT ERROR:", error);
       }
     };
 
     loadData();
   }, [menu, pwaRefreshVersion]);
-
-  // ================= EXPERIENCES DATA =================
-  useEffect(() => {
-    const loadExperiences = async () => {
-      const { data, error } = await supabase
-        .from("experiences")
-        .select(
-          `
-        id,
-        name,
-        type,
-        image_url,
-        schedule,
-        footer,
-        position,
-        experience_sections (
-          id,
-          name,
-          position,
-          type,
-          experience_items (
-            id,
-            name,
-            description,
-            position,
-            experience_prices (
-              id,
-              price,
-              label
-            )
-          )
-        )
-      `,
-        )
-        .order("position", { ascending: true });
-
-      if (error) {
-        console.error("EXPERIENCES ERROR:", error);
-      } else {
-        console.log("EXPERIENCES DATA:", data);
-        setExperiences(data);
-      }
-    };
-
-    // 🔥 ONLY RUN WHEN DINING OPENS
-    if (openDining || openRoomService) {
-      loadExperiences();
-    }
-  }, [openDining, openRoomService, pwaRefreshVersion]);
 
   // ================= SCROLL LOCK =================
   // ================= SCROLL LOCK =================

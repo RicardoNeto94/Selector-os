@@ -1,7 +1,34 @@
 import { NextResponse } from "next/server";
-import { requireAdministrator } from "@/lib/server/requireAdministrator";
+import {
+  createAdminClient,
+  requireAdministrator,
+} from "@/lib/server/requireAdministrator";
 
 const CHANNEL = "burman_room_pwa";
+
+export async function GET() {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("pwa_refresh_signals")
+      .select("version,updated_at")
+      .eq("channel", CHANNEL)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return NextResponse.json(
+      { version: data?.version ?? 0, updated_at: data?.updated_at ?? null },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    console.error("PWA REFRESH STATUS ERROR:", error);
+    return NextResponse.json(
+      { error: "Unable to load PWA refresh status." },
+      { status: 500, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+}
 
 export async function POST(request) {
   try {
