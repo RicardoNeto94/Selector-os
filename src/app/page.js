@@ -1,5 +1,6 @@
 import Link from "next/link";
 import VaxeronMotion from "@/components/VaxeronMotion";
+import { PublicFooter } from "@/components/public/PublicInfoPage";
 import "@/styles/vaxeron-new.css";
 
 const capabilities = [
@@ -21,7 +22,7 @@ export default function HomePage() {
     <VaxeronMotion />
     <header className="vx2-nav">
       <Link href="/" className="vx2-wordmark" aria-label="VAXERON home"><img src="/selectoros-logo.png" alt=""/><span>VAXERON</span></Link>
-      <nav aria-label="Primary navigation"><a href="#vision">Vision</a><a href="#platform">Platform</a><a href="#experiences">Experiences</a><a href="#access">Access</a></nav>
+      <nav aria-label="Primary navigation"><a href="#vision">Vision</a><a href="#platform">Platform</a><a href="#experiences">Experiences</a><Link href="/faq">FAQ</Link></nav>
       <div><Link href="/sign-in" className="vx2-signin">Sign in</Link><a href="#access" className="vx2-nav-cta">Request access</a></div>
     </header>
 
@@ -100,6 +101,6 @@ export default function HomePage() {
       <div data-reveal><p className="vx2-label">Selected hospitality partners</p><h2>What could VAXERON become for your property?</h2><p>Tell us about the operation, the guest journey and what you would like to connect.</p><a href="mailto:hello@vaxeron.com?subject=VAXERON%20access%20request&body=Property%20or%20company%3A%0A%0AModules%20of%20interest%3A%0A%0AWhat%20would%20you%20like%20VAXERON%20to%20help%20with%3A">Request a private introduction <span>→</span></a></div>
     </section>
 
-    <footer className="vx2-footer"><Link href="/" className="vx2-wordmark"><img src="/selectoros-logo.png" alt=""/><span>VAXERON</span></Link><p>Operational intelligence for modern hospitality.</p><nav><a href="#platform">Platform</a><a href="#experiences">Experiences</a><a href="mailto:hello@vaxeron.com">Contact</a><Link href="/sign-in">Team sign in</Link></nav><small>© {new Date().getFullYear()} VAXERON Technologies</small></footer>
+    <PublicFooter />
   </main>;
 }

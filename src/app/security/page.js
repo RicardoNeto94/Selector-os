@@ -1,0 +1,15 @@
+import PublicInfoPage from "@/components/public/PublicInfoPage";
+import { legalIdentity } from "@/lib/site/legal";
+
+export const metadata = { title: "Security and trust", description: "VAXERON's approach to platform security, tenant separation and responsible disclosure." };
+
+const sections = [
+  { title: "Security principles", content: <><p>VAXERON is being designed around least-privilege access, explicit workspace membership, server-side authorization and separation between hospitality customers. Public guest experiences expose only information intentionally published for guests; operational workspaces require authentication.</p></> },
+  { title: "Identity and access", content: <><ul><li>Invited accounts and authenticated sessions for back-office access.</li><li>Workspace roles that limit administrative and operational actions.</li><li>A protected platform-administration boundary separate from customer workspaces.</li><li>Server-side validation for sensitive requests rather than reliance on interface controls alone.</li></ul></> },
+  { title: "Tenant isolation", content: <><p>Customer records are associated with an organization and access is checked against authenticated membership. Database row-level security and tenant-scoped server operations form part of this model. Cross-tenant tests and migration reviews are treated as release-critical work.</p><p>No system should be considered infallible. If you believe tenant isolation or authorization has failed, stop testing and report it privately.</p></> },
+  { title: "Infrastructure and operations", content: <><p>VAXERON uses managed hosting, database and authentication providers and HTTPS for production traffic. Operational logging, dependency maintenance, database migrations and production configuration are reviewed as part of release work. Formal recovery objectives, audit commitments and service levels will be documented before commercial launch rather than overstated during the pilot.</p></> },
+  { title: "Responsible disclosure", content: <><p>Report a suspected vulnerability to <a href={`mailto:${legalIdentity.emails.security}?subject=Private%20security%20report`}>{legalIdentity.emails.security}</a>. Include the affected page, the observed behavior and safe reproduction details. Do not access other people&apos;s data, degrade the service, use automated high-volume testing or publish the issue before VAXERON has had a reasonable opportunity to investigate.</p></> },
+  { title: "Security enquiries", content: <><p>Pilot customers may request further information at <a href={`mailto:${legalIdentity.emails.security}`}>{legalIdentity.emails.security}</a>. A formal security schedule, incident-notification commitment and Data Processing Agreement will accompany commercial customer contracts.</p></> },
+];
+
+export default function SecurityPage(){return <PublicInfoPage eyebrow="Trust · Platform protection" title="Security at VAXERON" intro="A precise, evolving security posture for protected hospitality operations—without making promises the private pilot cannot yet evidence." sections={sections}/>}
