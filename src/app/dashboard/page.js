@@ -2,7 +2,7 @@ import Link from "next/link";
 import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
 import { createClient } from "@supabase/supabase-js";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
-import { bottleQuantity, hasAvailableStock, isLowStock, isOutOfStock, positiveBottleQuantity } from "@/lib/wineInventory";
+import { bottleQuantity, fractionalBottleQuantity, hasAvailableStock, isLowStock, isOutOfStock, positiveBottleQuantity, sumWholeBottles } from "@/lib/wineInventory";
 import { requireDashboardUser } from "@/lib/server/requireDashboardUser";
 import { scopeTenantQuery } from "@/lib/server/tenantContext";
 import {
@@ -73,6 +73,8 @@ export default async function DashboardPage() {
   const pendingTeamCount = pendingMembershipsResponse.count || 0;
   const positiveRows = inventoryRows.filter((row) => hasAvailableStock(row.quantity));
   const totalWineUnits = positiveRows.reduce((total, row) => total + positiveBottleQuantity(row.quantity), 0);
+  const unopenedBottles = sumWholeBottles(positiveRows);
+  const openBottleEquivalents = positiveRows.reduce((total, row) => total + fractionalBottleQuantity(row.quantity), 0);
   const stockedWineIds = new Set(positiveRows.map((row) => String(row.wine_id)));
   const stockedWines = stockedWineIds.size;
   const stockedMenuPlacements = menuItemRows.filter((row) => stockedWineIds.has(String(row.wine_id))).length;
@@ -97,7 +99,7 @@ export default async function DashboardPage() {
 
     <section className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[18px] border border-[#ded3c8] bg-[#ded3c8] xl:grid-cols-5">
       <StatCard label="Active Wine Labels" value={formatNumber(stockedWines)} description="Unique labels with positive physical stock" />
-      <StatCard label="Physical Bottle Stock" value={formatNumber(totalWineUnits, 2)} description={`Bottle units across ${locations.length} locations · open fractions included`} />
+      <StatCard label="Unopened Bottles" value={formatNumber(unopenedBottles)} description={`Whole bottle balances across ${locations.length} locations · ${formatNumber(openBottleEquivalents, 2)} open equivalents excluded`} />
       <StatCard label="Active Menu Placements" value={formatNumber(stockedMenuPlacements)} description="Stocked wine-to-menu entries; one label can appear more than once" />
       <StatCard label="Low-Stock Location Lines" value={formatNumber(lowStockRows)} description="Positive location balances at 2 units or fewer" tone={lowStockRows ? "warning" : "good"} />
       <StatCard label="Compucash Sync" value={syncHealthy ? "Healthy" : "Check"} description={formatDate(latestSync?.completed_at)} tone={syncHealthy ? "good" : "warning"} />
@@ -105,8 +107,8 @@ export default async function DashboardPage() {
 
     <section className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
       <div className="so-dashboard-chart-card rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">
-        <div className="flex items-start justify-between gap-4"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Live estate</div><h2 className="mt-2 text-[22px] tracking-[-0.035em]">Inventory distribution</h2><p className="mt-1 text-[9px] text-[#95867b]">Current positive CompuCash-backed physical stock by leading location.</p></div><div className="text-right"><strong className="block text-[20px] font-medium text-[#26322f]">{formatNumber(totalWineUnits, 2)}</strong><span className="text-[7px] uppercase tracking-[0.15em] text-[#909d98]">Bottle units</span></div></div>
-        <div className="so-location-chart" aria-label="Inventory bottles by location">{venueMetrics.slice(0, 7).map((location) => { const height = Math.max(6, (location.quantity / maxVenueQuantity) * 100); return <Link key={location.id} href={`/dashboard/wine-cellar/venues/${location.id}`} className="so-location-column" title={`${location.name}: ${formatNumber(location.quantity, 2)} bottles`}><div className="so-location-value">{formatNumber(location.quantity, 1)}</div><div className="so-location-track"><div className="so-location-bar" style={{ height: `${height}%` }} /></div><span>{location.name}</span></Link>; })}</div>
+        <div className="flex items-start justify-between gap-4"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Live estate</div><h2 className="mt-2 text-[22px] tracking-[-0.035em]">Inventory distribution</h2><p className="mt-1 text-[9px] text-[#95867b]">Current positive CompuCash-backed physical stock by leading location, including open fractions.</p></div><div className="text-right"><strong className="block text-[20px] font-medium text-[#26322f]">{formatNumber(totalWineUnits, 2)}</strong><span className="text-[7px] uppercase tracking-[0.15em] text-[#909d98]">Physical units incl. open</span></div></div>
+        <div className="so-location-chart" aria-label="Physical inventory units by location">{venueMetrics.slice(0, 7).map((location) => { const height = Math.max(6, (location.quantity / maxVenueQuantity) * 100); return <Link key={location.id} href={`/dashboard/wine-cellar/venues/${location.id}`} className="so-location-column" title={`${location.name}: ${formatNumber(location.quantity, 2)} physical units including open fractions`}><div className="so-location-value">{formatNumber(location.quantity, 1)}</div><div className="so-location-track"><div className="so-location-bar" style={{ height: `${height}%` }} /></div><span>{location.name}</span></Link>; })}</div>
         <div className="so-chart-footer"><span>Live inventory snapshot</span><Link href="/dashboard/wine-cellar/venues">Explore all venues →</Link></div>
       </div>
       <div className="rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">
@@ -124,7 +126,7 @@ export default async function DashboardPage() {
     <section className="mt-5"><div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">Quick actions</div><h2 className="mt-1 text-[20px] tracking-[-0.035em] md:text-[22px]">Run the operation</h2><p className="mt-1 text-[9px] text-[#95867b]">The most useful day-to-day workspaces.</p></div>
       <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         <OperationCard href="/dashboard/wines" icon={BeakerIcon} eyebrow="Wine" title="Wine Cellar" description="Manage stocked wine records, pricing and catalogue information." meta={`${formatNumber(stockedWines)} active wine labels`} />
-        <OperationCard href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} eyebrow="Inventory" title="Stock Control" description="Review live quantities across cellar and venue storage." meta={`${formatNumber(totalWineUnits, 2)} physical bottle units`} />
+        <OperationCard href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} eyebrow="Inventory" title="Stock Control" description="Review live quantities across cellar and venue storage." meta={`${formatNumber(unopenedBottles)} unopened bottles`} />
         <OperationCard href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} eyebrow="Venues" title="Venue Wines" description="Control venue selections and guest-facing availability." meta={`${locations.length} storage locations`} />
         <OperationCard href="/dashboard/wine-cellar/reconciliation" icon={ClipboardDocumentCheckIcon} eyebrow="Exceptions" title="Stock Issues" description="Review negative balances and discrepancies reported by the Compucash sync." meta={`${negativeRows} balances need review`} />
         <OperationCard href="/dashboard/wine-cellar/ordering" icon={BellAlertIcon} eyebrow="Purchasing" title="Ordering Centre" description="Review zero-stock wines suggested for replenishment by live Compucash inventory." meta={`${reorderSignalRows} suggestions to order`} />

@@ -11,10 +11,13 @@ import {
   isOutOfStock,
   normalizeWineCategory,
   parseBottleSizeCl,
+  fractionalBottleQuantity,
   positiveBottleQuantity,
   summarizeBottleFormats,
   sumNetBottles,
   sumPositiveBottles,
+  sumWholeBottles,
+  wholeBottleQuantity,
 } from "../src/lib/wineInventory.js";
 
 test("normalizes common bottle-size units", () => {
@@ -65,6 +68,18 @@ test("preserves fractional bottles and removes insignificant database residue", 
   assert.equal(positiveBottleQuantity(0), 0);
   assert.equal(bottleQuantity(0.0004), 0);
   assert.equal(bottleQuantity(-0.0004), 0);
+});
+
+test("separates whole unopened bottles from open BTG fractions", () => {
+  assert.equal(wholeBottleQuantity(3.25), 3);
+  assert.equal(wholeBottleQuantity(0.9), 0);
+  assert.equal(wholeBottleQuantity(1.9996), 2);
+  assert.equal(fractionalBottleQuantity(3.25), 0.25);
+  assert.equal(fractionalBottleQuantity(0.9), 0.9);
+  assert.equal(fractionalBottleQuantity(1.9996), 0);
+
+  const inventory = [{ quantity: 3.25 }, { quantity: 0.9 }, { quantity: 2 }, { quantity: -1 }];
+  assert.equal(sumWholeBottles(inventory), 5);
 });
 
 test("uses one availability rule for whole bottles, BTG fractions and residue", () => {

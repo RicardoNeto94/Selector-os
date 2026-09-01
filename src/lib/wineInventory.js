@@ -13,6 +13,24 @@ export function positiveBottleQuantity(value) {
 }
 
 /**
+ * Whole physical units inferred from a Compucash balance.
+ *
+ * Fractional remainders represent already-open BTG bottles, so management
+ * headlines can exclude them without changing the canonical stock balance
+ * used by venue and guest-availability workflows.
+ */
+export function wholeBottleQuantity(value) {
+  const quantity = positiveBottleQuantity(value);
+  return Math.floor(quantity + INVENTORY_ROUNDING_EPSILON);
+}
+
+export function fractionalBottleQuantity(value) {
+  const quantity = positiveBottleQuantity(value);
+  const remainder = quantity - wholeBottleQuantity(quantity);
+  return remainder > INVENTORY_ROUNDING_EPSILON ? remainder : 0;
+}
+
+/**
  * Canonical inventory availability rules.
  *
  * Compucash quantities are physical units. A real fractional balance (for
@@ -88,6 +106,13 @@ export function guestServiceReadiness({
 export function sumPositiveBottles(rows, getQuantity = (row) => row?.quantity) {
   return (rows || []).reduce(
     (total, row) => total + positiveBottleQuantity(getQuantity(row)),
+    0
+  );
+}
+
+export function sumWholeBottles(rows, getQuantity = (row) => row?.quantity) {
+  return (rows || []).reduce(
+    (total, row) => total + wholeBottleQuantity(getQuantity(row)),
     0
   );
 }

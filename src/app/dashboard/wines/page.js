@@ -23,7 +23,7 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
-import { BOTTLE_FORMATS, hasAvailableStock, isLowStock, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumNetBottles, sumPositiveBottles } from "@/lib/wineInventory";
+import { BOTTLE_FORMATS, hasAvailableStock, isLowStock, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, sumNetBottles, sumPositiveBottles, sumWholeBottles } from "@/lib/wineInventory";
 import { PortfolioRing } from "@/components/dashboard/OperationalVisuals";
 import WineDetailDrawer from "@/components/dashboard/WineDetailDrawer";
 import { buildWineDataQualityReport } from "@/lib/wineDataQuality";
@@ -500,17 +500,6 @@ export default function WinesPage() {
     );
   }, [wines]);
 
-  const inventoryFamilies = useMemo(
-    () => summarizeInventoryFamilies(
-      wines.flatMap((wine) => (wine.inventory || []).map((row) => ({
-        ...row,
-        wines: wine,
-      }))),
-      (row) => row.quantity
-    ),
-    [wines]
-  );
-
   const uniqueWines = useMemo(() => {
     return wines.filter(
       (wine) =>
@@ -537,6 +526,14 @@ export default function WinesPage() {
         name: wine.name,
         size: wine.size,
       })))
+    ),
+    [wines]
+  );
+
+  const unopenedBottles = useMemo(
+    () => sumWholeBottles(
+      wines.flatMap((wine) => wine.inventory || []),
+      (row) => row.quantity
     ),
     [wines]
   );
@@ -1508,9 +1505,9 @@ export default function WinesPage() {
 
       <section className="wine-portfolio-summary" aria-label="Wine portfolio summary">
         <div className="wine-portfolio-primary">
-          <span>Total physical units</span>
-          <strong>{formatNumber(inventoryFamilies.total.positive)}</strong>
-          <small>{formatNumber(uniqueWines)} active labels with positive physical stock</small>
+          <span>Unopened bottles</span>
+          <strong>{formatNumber(unopenedBottles)}</strong>
+          <small>{formatNumber(uniqueWines)} active labels · {formatNumber(bottleFormats.fractional)} open equivalents excluded</small>
         </div>
 
         <div className="wine-portfolio-facts" aria-label="Compucash inventory valuation">
@@ -1559,8 +1556,8 @@ export default function WinesPage() {
       <div className="wine-intelligence-grid">
         <section className="wine-analytics-card wine-composition-card">
           <div className="wine-card-heading">
-            <div><span>Portfolio analytics</span><h2>Cellar composition</h2><p>Select a category to inspect its share of physical stock.</p></div>
-            <small>{formatNumber(totalBottles)} bottles</small>
+            <div><span>Portfolio analytics</span><h2>Cellar composition</h2><p>Select a category to inspect its share of physical stock, including open fractions.</p></div>
+            <small>{formatNumber(totalBottles)} physical units</small>
           </div>
 
           <PortfolioRing
@@ -1583,7 +1580,7 @@ export default function WinesPage() {
             </div>
             <div>
               <strong>{formatNumber(selectedLocation?.quantity || 0)}</strong>
-              <span>bottles · {totalBottles > 0 ? (((selectedLocation?.quantity || 0) / totalBottles) * 100).toFixed(1) : 0}% of portfolio</span>
+              <span>physical units · {totalBottles > 0 ? (((selectedLocation?.quantity || 0) / totalBottles) * 100).toFixed(1) : 0}% of portfolio</span>
             </div>
           </div>
 
