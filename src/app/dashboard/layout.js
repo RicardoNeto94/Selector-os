@@ -14,6 +14,7 @@ export default async function DashboardLayout({ children }) {
     <DashboardLayoutClient
       workspace={access.tenant}
       platformAdministrator={access.platformAdministrator}
+      entitlements={access.entitlements}
     >
       {children}
     </DashboardLayoutClient>

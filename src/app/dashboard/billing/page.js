@@ -1,59 +1,24 @@
 // src/app/dashboard/billing/page.js
 
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import BillingClient from "./BillingClient";
+import { requireBillingAdministrator } from "@/lib/server/billingContext";
+import BillingWorkspaceClient from "./BillingWorkspaceClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function BillingPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  const { data: restaurant, error } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
-
-  if (error || !restaurant) {
-    console.error("Billing: no restaurant for user", error);
-
-    return (
-      <main className="so-main page-fade">
-        <div className="so-main-inner mx-auto w-full max-w-[900px]">
-
-          <div className="so-card border border-red-400/30 bg-red-500/10">
-
-            <h1 className="text-lg font-semibold mb-2 text-red-400">
-              No restaurant found
-            </h1>
-
-            <p className="text-sm text-red-300">
-              We couldn&apos;t find a restaurant linked to your account.
-              Finish onboarding first.
-            </p>
-
-          </div>
-
-        </div>
-      </main>
-    );
-  }
+  const access = await requireBillingAdministrator();
+  if (!access.user) redirect("/sign-in");
+  if (access.error) redirect("/dashboard/settings?billing=restricted");
 
   return (
     <main className="so-main page-fade">
-      <div className="so-main-inner mx-auto w-full max-w-[1000px]">
-
-        <BillingClient restaurant={restaurant} />
-
+      <div className="so-main-inner mx-auto w-full max-w-[1240px]">
+        <BillingWorkspaceClient
+          organization={access.tenant.organization}
+          settings={access.settings}
+          entitlements={access.entitlements}
+        />
       </div>
     </main>
   );

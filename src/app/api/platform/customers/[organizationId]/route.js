@@ -5,8 +5,9 @@ export const dynamic = "force-dynamic";
 
 const ORGANIZATION_STATUSES = new Set(["active", "suspended", "archived"]);
 const ONBOARDING_STATUSES = new Set(["invited", "in_progress", "ready", "live", "paused"]);
-const PLANS = new Set(["pilot", "starter", "professional", "enterprise"]);
+const PLANS = new Set(["pilot", "starter", "professional", "hospitality_suite", "enterprise"]);
 const INVENTORY_MODES = new Set(["manual", "csv", "api", "hybrid"]);
+const BILLING_MODES = new Set(["platform_managed", "stripe"]);
 const MODULE_KEYS = ["wine", "dining", "spa", "guest_experience"];
 
 function responseError(message, status = 400) {
@@ -105,6 +106,10 @@ export async function PATCH(request, context) {
     if (body.inventoryMode !== undefined) {
       if (!INVENTORY_MODES.has(body.inventoryMode)) return responseError("Invalid inventory mode.");
       settingsUpdate.inventory_mode = body.inventoryMode;
+    }
+    if (body.billingMode !== undefined) {
+      if (!BILLING_MODES.has(body.billingMode)) return responseError("Invalid billing mode.");
+      settingsUpdate.billing_mode = body.billingMode;
     }
     if (body.enabledModules !== undefined) {
       settingsUpdate.enabled_modules = Object.fromEntries(

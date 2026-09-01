@@ -3,6 +3,7 @@ import "server-only";
 import { createClient as createCookieClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/server/requireAdministrator";
 import { resolveTenantContext } from "@/lib/server/tenantContext";
+import { resolveEntitlements } from "@/lib/billing/catalog";
 
 export async function requireDashboardUser() {
   const cookieClient = await createCookieClient();
@@ -47,6 +48,15 @@ export async function requireDashboardUser() {
   const platformAdministrator = platformResult.error
     ? null
     : platformResult.data;
+  let platformSettings = null;
+  if (tenant?.organization?.id) {
+    const settingsResult = await admin
+      .from("organization_platform_settings")
+      .select("*")
+      .eq("organization_id", tenant.organization.id)
+      .maybeSingle();
+    if (!settingsResult.error) platformSettings = settingsResult.data;
+  }
   // Tenant membership is the source of workspace access. Legacy user_roles
   // remain available for feature-level permissions during the transition, but
   // a newly provisioned organization owner must not depend on a Burman-era
@@ -58,6 +68,21 @@ export async function requireDashboardUser() {
     profile,
     roles,
     tenant,
+    platformSettings,
+    entitlements: resolveEntitlements(
+      platformSettings || {
+        plan: "enterprise",
+        billing_mode: "platform_managed",
+        billing_status: "not_configured",
+        onboarding_status: "live",
+        enabled_modules: {
+          wine: true,
+          dining: true,
+          spa: true,
+          guest_experience: true,
+        },
+      }
+    ),
     platformAdministrator,
     allowed,
     reason: allowed ? null : "approval",

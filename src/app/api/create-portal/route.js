@@ -5,12 +5,13 @@ export const dynamic = "force-dynamic";
 import Stripe from "stripe";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { POST as openTenantBillingPortal } from "@/app/api/billing/portal/route";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
   apiVersion: "2024-06-20",
 });
 
-export async function POST() {
+async function legacyPOST() {
   try {
     const supabase = await createClient();
 
@@ -93,3 +94,11 @@ export async function POST() {
     );
   }
 }
+
+// Backward-compatible alias. Authorization and tenancy are enforced by the
+// canonical organization billing endpoint.
+export async function POST(request) {
+  return openTenantBillingPortal(request);
+}
+
+void legacyPOST;

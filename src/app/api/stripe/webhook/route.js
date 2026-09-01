@@ -1,6 +1,11 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../../lib/supabaseAdmin";
+import { stripe as sharedStripe } from "@/lib/stripe";
+import {
+  getPlanModules,
+  planFromStripePriceId,
+} from "@/lib/billing/catalog";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-06-20",
@@ -9,7 +14,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function POST(req) {
+async function legacyPOST(req) {
   const sig = req.headers.get("stripe-signature");
   const buf = await req.text();
 
@@ -152,3 +157,124 @@ export async function POST(req) {
     return new NextResponse("Webhook handler error", { status: 500 });
   }
 }
+
+function fromUnix(value) {
+  return value ? new Date(value * 1000).toISOString() : null;
+}
+
+function organizationPayload(subscription, plan) {
+  return {
+    plan,
+    enabled_modules: getPlanModules(plan),
+    billing_mode: "stripe",
+    billing_status: subscription.status,
+    stripe_customer_id: String(subscription.customer),
+    stripe_subscription_id: subscription.id,
+    stripe_price_id: subscription.items?.data?.[0]?.price?.id || null,
+    current_period_end: fromUnix(subscription.current_period_end),
+    cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
+    updated_at: new Date().toISOString(),
+  };
+}
+
+async function persistSubscription(organizationId, subscription, plan) {
+  const payload = organizationPayload(subscription, plan);
+  const { data: updatedSettings, error } = await supabaseAdmin
+    .from("organization_platform_settings")
+    .update(payload)
+    .eq("organization_id", organizationId)
+    .select("organization_id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!updatedSettings) {
+    throw new Error(`No billing settings found for organization ${organizationId}.`);
+  }
+
+  // Transitional mirror for the remaining legacy restaurant-level billing readers.
+  const { error: legacyError } = await supabaseAdmin
+    .from("restaurants")
+    .update({
+      plan: plan === "starter" ? "starter" : "pro",
+      stripe_customer_id: payload.stripe_customer_id,
+      stripe_subscription_id: payload.stripe_subscription_id,
+      stripe_price_id: payload.stripe_price_id,
+      stripe_subscription_status: payload.billing_status,
+    })
+    .eq("organization_id", organizationId);
+  if (legacyError) console.warn("Legacy billing mirror failed", legacyError);
+}
+
+async function resolveOrganizationId(subscription) {
+  if (subscription.metadata?.organization_id) return subscription.metadata.organization_id;
+  const { data, error } = await supabaseAdmin
+    .from("organization_platform_settings")
+    .select("organization_id")
+    .eq("stripe_customer_id", String(subscription.customer))
+    .maybeSingle();
+  if (error) throw error;
+  return data?.organization_id || null;
+}
+
+async function processSubscription(subscription, fallbackOrganizationId = null) {
+  const priceId = subscription.items?.data?.[0]?.price?.id || null;
+  const plan = planFromStripePriceId(priceId);
+  if (!plan) throw new Error(`Unrecognized Stripe price ${priceId || "(missing)"}.`);
+  const organizationId = fallbackOrganizationId || (await resolveOrganizationId(subscription));
+  if (!organizationId) throw new Error("Subscription is not linked to a Vaxeron organization.");
+  await persistSubscription(organizationId, subscription, plan);
+}
+
+export async function POST(req) {
+  if (!sharedStripe || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Stripe webhook is not configured." }, { status: 503 });
+  }
+
+  let event;
+  try {
+    event = sharedStripe.webhooks.constructEvent(
+      await req.text(),
+      req.headers.get("stripe-signature"),
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (error) {
+    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+  }
+
+  try {
+    const { data: processed, error: lookupError } = await supabaseAdmin
+      .from("billing_webhook_events")
+      .select("stripe_event_id")
+      .eq("stripe_event_id", event.id)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+    if (processed) return NextResponse.json({ received: true, duplicate: true });
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      if (!session.metadata?.organization_id || !session.subscription) {
+        throw new Error("Checkout is missing organization or subscription metadata.");
+      }
+      const subscription = await sharedStripe.subscriptions.retrieve(String(session.subscription));
+      await processSubscription(subscription, session.metadata.organization_id);
+    } else if (
+      [
+        "customer.subscription.created",
+        "customer.subscription.updated",
+        "customer.subscription.deleted",
+      ].includes(event.type)
+    ) {
+      await processSubscription(event.data.object);
+    }
+
+    const { error: recordError } = await supabaseAdmin
+      .from("billing_webhook_events")
+      .insert({ stripe_event_id: event.id, event_type: event.type });
+    if (recordError && recordError.code !== "23505") throw recordError;
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error("Stripe webhook processing failed", { eventId: event.id, type: event.type, error });
+    return new NextResponse("Webhook handler error", { status: 500 });
+  }
+}
+
+void legacyPOST;

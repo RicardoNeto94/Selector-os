@@ -1,16 +1,8 @@
 // src/app/api/billing/portal/route.js
 
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-import Stripe from "stripe";
-
-let stripe = null;
-if (process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2024-06-20",
-  });
-}
+import { stripe } from "@/lib/stripe";
+import { requireBillingAdministrator } from "@/lib/server/billingContext";
 
 export async function POST(request) {
   try {
@@ -21,24 +13,9 @@ export async function POST(request) {
       );
     }
 
-    const supabase = await createClient();
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const { data: restaurant, error: rError } = await supabase
-      .from("restaurants")
-      .select("*")
-      .eq("owner_id", user.id)
-      .maybeSingle();
-
-    if (rError || !restaurant || !restaurant.stripe_customer_id) {
+    const access = await requireBillingAdministrator();
+    if (access.error) return NextResponse.json({ error: access.error.message }, { status: access.error.status });
+    if (!access.settings.stripe_customer_id) {
       return NextResponse.json(
         { error: "No Stripe customer found for this workspace" },
         { status: 400 }
@@ -49,7 +26,7 @@ export async function POST(request) {
       request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL;
 
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: restaurant.stripe_customer_id,
+      customer: access.settings.stripe_customer_id,
       return_url: `${origin}/dashboard/billing`,
     });
 

@@ -28,6 +28,7 @@ import {
   CheckCircleIcon,
   ShieldCheckIcon,
   EyeIcon,
+  CreditCardIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -120,6 +121,7 @@ export default function DashboardLayout({
   children,
   workspace,
   platformAdministrator,
+  entitlements,
 }) {
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
@@ -132,6 +134,9 @@ export default function DashboardLayout({
   const [navReady, setNavReady] = useState(false);
   const [openGroups, setOpenGroups] = useState({ experience: true, wine: true, account: true });
   const supportMode = workspace?.source === "support" && Boolean(workspace?.supportSession);
+  const hasWine = Boolean(entitlements?.enabled && entitlements?.modules?.wine);
+  const hasDining = Boolean(entitlements?.enabled && entitlements?.modules?.dining);
+  const hasSpa = Boolean(entitlements?.enabled && entitlements?.modules?.spa);
 
   useEffect(() => {
     if (supportMode) return undefined;
@@ -184,10 +189,15 @@ export default function DashboardLayout({
     setAccountMenuOpen(false);
   }, [pathname]);
 
-  const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail, href]) =>
-    (!supportMode || !["/dashboard/team", "/dashboard/settings", "/dashboard/wine-cellar/ordering"].includes(href)) &&
-    `${label} ${detail}`.toLowerCase().includes(commandQuery.trim().toLowerCase())
-  );
+  const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail, href]) => {
+    const moduleAllowed =
+      (!href.startsWith("/dashboard/wine") || hasWine) &&
+      (!["/dashboard/dishes", "/dashboard/menu", "/dashboard/experiences"].some((prefix) => href.startsWith(prefix)) || hasDining) &&
+      (!href.startsWith("/dashboard/spa") || hasSpa);
+    return moduleAllowed &&
+      (!supportMode || !["/dashboard/team", "/dashboard/settings", "/dashboard/wine-cellar/ordering"].includes(href)) &&
+      `${label} ${detail}`.toLowerCase().includes(commandQuery.trim().toLowerCase());
+  });
 
   async function endSupportSession() {
     setEndingSupport(true);
@@ -293,7 +303,8 @@ export default function DashboardLayout({
                 EXPERIENCE
             =============================================== */}
 
-            <NavGroup label="Experience" open={openGroups.experience} active={experienceActive} onToggle={() => toggleGroup("experience")}>
+            {(hasDining || hasSpa) && <NavGroup label="Experience" open={openGroups.experience} active={experienceActive} onToggle={() => toggleGroup("experience")}>
+              {hasDining && <>
               <NavItem
               href="/dashboard/dishes"
               isActive={isActive(
@@ -320,8 +331,9 @@ export default function DashboardLayout({
               icon={SparklesIcon}
               label="Dining"
             />
+              </>}
 
-              <NavItem
+              {hasSpa && <NavItem
               href="/dashboard/spa"
               isActive={isActive(
                 "/dashboard/spa"
@@ -329,13 +341,15 @@ export default function DashboardLayout({
               icon={SparklesIcon}
               label="Spa"
               />
+              }
             </NavGroup>
+            }
 
             {/* ===============================================
                 WINE OPERATIONS
             =============================================== */}
 
-            <NavGroup label="Wine operations" open={openGroups.wine} active={wineActive} onToggle={() => toggleGroup("wine")}>
+            {hasWine && <NavGroup label="Wine operations" open={openGroups.wine} active={wineActive} onToggle={() => toggleGroup("wine")}>
               <NavItem
               href="/dashboard/wines"
               isActive={isActive("/dashboard/wines") || isActive("/dashboard/wine-cellar/data-quality")}
@@ -388,6 +402,7 @@ export default function DashboardLayout({
               label="Movements"
               />
             </NavGroup>
+            }
 
             {/* ===============================================
                 ACCOUNT
@@ -407,6 +422,12 @@ export default function DashboardLayout({
               )}
               icon={Cog6ToothIcon}
               label="Settings"
+              />}
+              {!supportMode && <NavItem
+                href="/dashboard/billing"
+                isActive={isActive("/dashboard/billing")}
+                icon={CreditCardIcon}
+                label="Plan & Billing"
               />}
             </NavGroup>
 
@@ -456,7 +477,7 @@ export default function DashboardLayout({
               </div>
 
               <div className="so-user-tag">
-                Premium Plan
+                {entitlements?.planDefinition?.name || "Workspace plan"}
               </div>
 
             </div>
@@ -605,6 +626,7 @@ export default function DashboardLayout({
           </span>
         </Link>
 
+        {hasWine && <>
         <Link
           href="/dashboard/wines"
           className={
@@ -684,6 +706,7 @@ export default function DashboardLayout({
             History
           </span>
         </Link>
+        </>}
 
       </div>
 

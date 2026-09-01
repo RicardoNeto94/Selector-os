@@ -10,10 +10,13 @@ import {
   CheckCircleIcon,
   CircleStackIcon,
   CloudIcon,
+  Cog6ToothIcon,
   ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
   PlusIcon,
   ShieldCheckIcon,
-  UserIcon,
+  Squares2X2Icon,
+  UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { createClient } from "@/lib/supabase/client";
@@ -59,6 +62,11 @@ function hasLiveConnection(customer) {
     || customer.latestCompucashSync?.status === "succeeded";
 }
 
+function formatInventoryMode(value) {
+  const normalized = String(value || "manual").toLowerCase();
+  return normalized === "api" ? "API" : normalized.replaceAll("_", " ");
+}
+
 export default function PlatformAdminPage() {
   const supabase = useMemo(() => createClient(), []);
   const [customers, setCustomers] = useState([]);
@@ -71,6 +79,8 @@ export default function PlatformAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [portfolioFilter, setPortfolioFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const authenticatedFetch = useCallback(async (url, options = {}) => {
     const { data, error: sessionError } = await supabase.auth.getSession();
@@ -121,6 +131,26 @@ export default function PlatformAdminPage() {
     onboarding: customers.filter((customer) => ["invited", "in_progress", "ready"].includes(customer.settings?.onboarding_status)).length,
     integrations: customers.filter(hasLiveConnection).length,
   }), [customers]);
+
+  const visibleCustomers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return customers.filter((customer) => {
+      const onboarding = customer.settings?.onboarding_status || "unconfigured";
+      const matchesFilter = portfolioFilter === "all"
+        || (portfolioFilter === "live" && customer.status === "active" && onboarding === "live")
+        || (portfolioFilter === "onboarding" && ["invited", "in_progress", "ready"].includes(onboarding))
+        || (portfolioFilter === "connected" && hasLiveConnection(customer))
+        || (portfolioFilter === "attention" && (customer.status !== "active" || ["paused", "unconfigured"].includes(onboarding)));
+      if (!matchesFilter) return false;
+      if (!query) return true;
+      return [
+        customer.name,
+        customer.properties?.[0]?.name,
+        customer.owner?.email,
+        ownerName(customer.owner),
+      ].filter(Boolean).some((value) => value.toLowerCase().includes(query));
+    });
+  }, [customers, portfolioFilter, searchQuery]);
 
   function setField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -198,7 +228,7 @@ export default function PlatformAdminPage() {
 
   return (
     <main className={styles.shell}>
-      <header className={styles.topbar}>
+      <header className={`${styles.topbar} ${styles.adminTopbar}`}>
         <div className={styles.brand}>
           <Image src="/selectoros-logo.png" alt="Vaxeron" width={106} height={44} priority />
           <div><strong>VAXERON</strong><span>Platform administration</span></div>
@@ -209,48 +239,71 @@ export default function PlatformAdminPage() {
         </div>
       </header>
 
-      <section className={styles.content}>
-        <div className={styles.hero}>
-          <div>
-            <span className={styles.eyebrow}>Vaxeron operations</span>
-            <h1>Customer Control Centre</h1>
-            <p>Create hospitality workspaces, appoint their protected owner and control the modules that become available.</p>
+      <section className={styles.platformAdminLayout}>
+        <aside className={styles.platformSidebar}>
+          <div className={styles.platformSidebarIntro}>
+            <span className={styles.eyebrow}>Platform console</span>
+            <strong>Operations</strong>
+            <small>{metrics.total} customer workspaces</small>
           </div>
-          <button type="button" className={styles.primaryButton} onClick={() => { setForm(EMPTY_FORM); setError(""); setModalOpen(true); }}>
-            <PlusIcon /> New customer
-          </button>
-        </div>
-
-        {(error || notice) && (
-          <div className={`${styles.message} ${error ? styles.messageError : styles.messageSuccess}`} role="status">
-            {error ? <ExclamationTriangleIcon /> : <CheckCircleIcon />}
-            <span>{error || notice}</span>
-            <button type="button" onClick={() => { setError(""); setNotice(""); }} aria-label="Dismiss"><XMarkIcon /></button>
+          <nav aria-label="Platform administration">
+            <button type="button" className={portfolioFilter === "all" ? styles.platformNavActive : ""} onClick={() => setPortfolioFilter("all")}><Squares2X2Icon /><span>All customers</span><i>{metrics.total}</i></button>
+            <button type="button" className={portfolioFilter === "live" ? styles.platformNavActive : ""} onClick={() => setPortfolioFilter("live")}><CheckCircleIcon /><span>Live accounts</span><i>{metrics.live}</i></button>
+            <button type="button" className={portfolioFilter === "onboarding" ? styles.platformNavActive : ""} onClick={() => setPortfolioFilter("onboarding")}><UsersIcon /><span>Onboarding</span><i>{metrics.onboarding}</i></button>
+            <button type="button" className={portfolioFilter === "connected" ? styles.platformNavActive : ""} onClick={() => setPortfolioFilter("connected")}><CloudIcon /><span>Connections</span><i>{metrics.integrations}</i></button>
+            <button type="button" className={portfolioFilter === "attention" ? styles.platformNavActive : ""} onClick={() => setPortfolioFilter("attention")}><ExclamationTriangleIcon /><span>Needs attention</span></button>
+          </nav>
+          <div className={styles.platformSidebarGroup}>
+            <span>Management</span>
+            <a href="#portfolio"><BuildingOffice2Icon />Customer portfolio</a>
+            <a href="#subscriptions"><CircleStackIcon />Subscriptions</a>
+            <a href="#support"><ShieldCheckIcon />Support access</a>
+            <a href="#settings"><Cog6ToothIcon />Platform settings</a>
           </div>
-        )}
+          <button type="button" className={styles.sidebarCreateButton} onClick={() => { setForm(EMPTY_FORM); setError(""); setModalOpen(true); }}><PlusIcon />New customer</button>
+          <div className={styles.platformRole}><ShieldCheckIcon /><div><strong>{platformRole.replaceAll("_", " ") || "Platform access"}</strong><span>Protected administration</span></div></div>
+        </aside>
 
-        <section className={styles.metrics} aria-label="Platform summary">
-          <article><BuildingOffice2Icon /><div><span>Customers</span><strong>{metrics.total}</strong></div></article>
-          <article><CheckCircleIcon /><div><span>Live</span><strong>{metrics.live}</strong></div></article>
-          <article><UserIcon /><div><span>Onboarding</span><strong>{metrics.onboarding}</strong></div></article>
-          <article><CloudIcon /><div><span>Live connections</span><strong>{metrics.integrations}</strong></div></article>
-        </section>
+        <div className={styles.platformAdminMain}>
+          <section className={styles.platformOverview} id="portfolio">
+            <div className={styles.platformOverviewHeader}>
+              <div><span className={styles.eyebrow}>Vaxeron operations</span><h1>Customer portfolio</h1><p>Provision, monitor and support every hospitality workspace from one protected console.</p></div>
+              <button type="button" className={styles.primaryButton} onClick={() => { setForm(EMPTY_FORM); setError(""); setModalOpen(true); }}><PlusIcon />New customer</button>
+            </div>
 
-        <section className={styles.directory}>
-          <header>
-            <div><span className={styles.eyebrow}>Portfolio</span><h2>Customer organizations</h2></div>
-            <button type="button" onClick={() => loadCustomers({ quiet: true })} disabled={refreshing}>
-              <ArrowPathIcon className={refreshing ? styles.spinning : ""} /> Refresh
-            </button>
-          </header>
+            {(error || notice) && (
+              <div className={`${styles.message} ${error ? styles.messageError : styles.messageSuccess}`} role="status">
+                {error ? <ExclamationTriangleIcon /> : <CheckCircleIcon />}<span>{error || notice}</span>
+                <button type="button" onClick={() => { setError(""); setNotice(""); }} aria-label="Dismiss"><XMarkIcon /></button>
+              </div>
+            )}
 
-          {loading ? (
-            <div className={styles.empty}>Loading Vaxeron customers…</div>
-          ) : customers.length === 0 ? (
-            <div className={styles.empty}><BuildingOffice2Icon /><strong>No customer organizations yet</strong><span>Create the first workspace when a customer is ready to begin onboarding.</span></div>
-          ) : (
-            <div className={styles.customerList}>
-              {customers.map((customer) => {
+            <section className={styles.platformMetricStrip} aria-label="Platform summary">
+              <button type="button" onClick={() => setPortfolioFilter("all")}><span>Customers</span><strong>{metrics.total}</strong><small>Organizations provisioned</small></button>
+              <button type="button" onClick={() => setPortfolioFilter("live")}><span>Live</span><strong>{metrics.live}</strong><small>Fully operational</small></button>
+              <button type="button" onClick={() => setPortfolioFilter("onboarding")}><span>Onboarding</span><strong>{metrics.onboarding}</strong><small>Setup in progress</small></button>
+              <button type="button" onClick={() => setPortfolioFilter("connected")}><span>Connections</span><strong>{metrics.integrations}</strong><small>Active inventory feeds</small></button>
+            </section>
+          </section>
+
+          <section className={styles.portfolioDirectory} id="customers">
+            <header className={styles.portfolioToolbar}>
+              <div><span className={styles.eyebrow}>Customer management</span><h2>{portfolioFilter === "all" ? "All organizations" : portfolioFilter.replaceAll("_", " ")}</h2></div>
+              <div className={styles.portfolioTools}>
+                <label><MagnifyingGlassIcon /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search customers, owners or properties" /></label>
+                <button type="button" onClick={() => loadCustomers({ quiet: true })} disabled={refreshing} aria-label="Refresh customers"><ArrowPathIcon className={refreshing ? styles.spinning : ""} /></button>
+              </div>
+            </header>
+
+            {loading ? (
+              <div className={styles.empty}>Loading Vaxeron customers…</div>
+            ) : customers.length === 0 ? (
+              <div className={styles.empty}><BuildingOffice2Icon /><strong>No customer organizations yet</strong><span>Create the first workspace when a customer is ready to begin onboarding.</span></div>
+            ) : visibleCustomers.length === 0 ? (
+              <div className={styles.empty}><MagnifyingGlassIcon /><strong>No matching customers</strong><span>Change the portfolio filter or search term.</span></div>
+            ) : (
+              <div className={styles.compactCustomerList}>
+                {visibleCustomers.map((customer) => {
                 const settings = customer.settings || {};
                 const modules = settings.enabled_modules || {};
                 const integration = customer.integrations.find((item) => item.status === "active");
@@ -263,50 +316,35 @@ export default function PlatformAdminPage() {
                     ? `Compucash synced ${formatDate(compucashSync.completed_at || compucashSync.started_at)}`
                     : "No live API connection";
                 return (
-                  <article className={styles.customerCard} key={customer.id}>
-                    <div className={styles.customerMain}>
-                      <div className={styles.customerIdentity}>
+                    <article className={styles.compactCustomerRow} key={customer.id}>
+                      <div className={styles.compactCustomerIdentity}>
                         <div className={styles.monogram}>{customer.name.slice(0, 1).toUpperCase()}</div>
-                        <div>
-                          <div className={styles.customerTitle}><h3>{customer.name}</h3><span className={`${styles.status} ${styles[`status_${customer.status}`]}`}>{customer.status}</span></div>
-                          <p>{customer.properties[0]?.name || "First property pending"} · created {formatDate(customer.createdAt)}</p>
-                        </div>
+                        <div><div className={styles.customerTitle}><h3>{customer.name}</h3><span className={`${styles.status} ${styles[`status_${customer.status}`]}`}>{customer.status}</span></div><p>{customer.properties[0]?.name || "First property pending"} · {ownerName(customer.owner)}</p><small>{customer.owner?.email || "No owner profile"}</small></div>
                       </div>
-                      <div className={styles.customerFacts}>
-                        <div><span>Owner</span><strong>{ownerName(customer.owner)}</strong><small>{customer.owner?.email || "No owner profile"}</small></div>
-                        <div><span>Onboarding</span><strong>{(settings.onboarding_status || "unconfigured").replaceAll("_", " ")}</strong><small>{customer.owner?.membershipStatus === "invited" ? "Invitation pending" : "Membership active"}</small></div>
-                        <div><span>Inventory</span><strong>{settings.inventory_mode || (compucashSync ? "api" : "manual")}</strong><small>{inventoryDetail}</small></div>
+                      <div className={styles.compactCustomerSignals}>
+                        <div><span>Onboarding</span><strong>{(settings.onboarding_status || "unconfigured").replaceAll("_", " ")}</strong><small>{customer.owner?.membershipStatus === "invited" ? "Invite pending" : "Membership active"}</small></div>
+                        <div><span>Inventory</span><strong>{formatInventoryMode(settings.inventory_mode || (compucashSync ? "api" : "manual"))}</strong><small>{inventoryDetail}</small></div>
+                        <div><span>Plan</span><strong>{(settings.plan || "pilot").replaceAll("_", " ")}</strong><small>{settings.billing_mode === "stripe" ? `Stripe · ${(settings.billing_status || "not configured").replaceAll("_", " ")}` : "Vaxeron managed"}</small></div>
+                        <div><span>Modules</span><strong>{Object.values(modules).filter(Boolean).length}</strong><small>{Object.entries(MODULE_LABELS).filter(([key]) => modules[key]).map(([, label]) => label).join(", ") || "None enabled"}</small></div>
                       </div>
-                    </div>
-                    <div className={styles.customerFooter}>
-                      <div className={styles.moduleList}>
-                        {Object.entries(MODULE_LABELS).filter(([key]) => modules[key]).map(([key, label]) => <span key={key}>{label}</span>)}
-                        {!Object.values(modules).some(Boolean) && <span>No modules enabled</span>}
+                      <div className={styles.compactCustomerActions}>
+                        <Link className={styles.manageCustomerButton} href={`/platform-admin/customers/${customer.id}`}>Manage <ArrowRightIcon /></Link>
+                        {customer.owner?.membershipStatus === "invited" && <button type="button" className={styles.resendButton} disabled={updatingId === customer.id} onClick={() => resendOwnerInvitation(customer)}>Resend invite</button>}
+                        <div><label><span>Stage</span><select value={settings.onboarding_status || "invited"} disabled={updatingId === customer.id} onChange={(event) => updateCustomer(customer, { onboardingStatus: event.target.value })}><option value="invited">Invited</option><option value="in_progress">In progress</option><option value="ready">Ready</option><option value="live">Live</option><option value="paused">Paused</option></select></label><label><span>Account</span><select value={customer.status} disabled={updatingId === customer.id} onChange={(event) => updateCustomer(customer, { status: event.target.value })}><option value="active">Active</option><option value="suspended">Suspended</option><option value="archived">Archived</option></select></label></div>
                       </div>
-                      <div className={styles.inlineControls}>
-                        <Link className={styles.manageCustomerButton} href={`/platform-admin/customers/${customer.id}`}>
-                          Manage &amp; support <ArrowRightIcon />
-                        </Link>
-                        {customer.owner?.membershipStatus === "invited" && (
-                          <button
-                            type="button"
-                            className={styles.resendButton}
-                            disabled={updatingId === customer.id}
-                            onClick={() => resendOwnerInvitation(customer)}
-                          >
-                            Resend owner invite
-                          </button>
-                        )}
-                        <label><span>Stage</span><select value={settings.onboarding_status || "invited"} disabled={updatingId === customer.id} onChange={(event) => updateCustomer(customer, { onboardingStatus: event.target.value })}><option value="invited">Invited</option><option value="in_progress">In progress</option><option value="ready">Ready</option><option value="live">Live</option><option value="paused">Paused</option></select></label>
-                        <label><span>Account</span><select value={customer.status} disabled={updatingId === customer.id} onChange={(event) => updateCustomer(customer, { status: event.target.value })}><option value="active">Active</option><option value="suspended">Suspended</option><option value="archived">Archived</option></select></label>
-                      </div>
-                    </div>
-                  </article>
+                    </article>
                 );
               })}
             </div>
           )}
-        </section>
+          </section>
+
+          <section className={styles.platformFooterPanels} id="subscriptions">
+            <article><CircleStackIcon /><div><span>Commercial controls</span><strong>Plans &amp; subscriptions</strong><p>Open any customer to manage billing authority, plan access and renewal status.</p></div></article>
+            <article id="support"><ShieldCheckIcon /><div><span>Protected operations</span><strong>Support access</strong><p>Customer workspaces are available through time-limited, audited support sessions.</p></div></article>
+            <article id="settings"><Cog6ToothIcon /><div><span>Platform configuration</span><strong>System settings</strong><p>Entitlements and integration access remain controlled per organization.</p></div></article>
+          </section>
+        </div>
       </section>
 
       {modalOpen && (
@@ -327,7 +365,7 @@ export default function PlatformAdminPage() {
                 <label className={styles.wide}><span>Work email</span><input required type="email" value={form.ownerEmail} onChange={(event) => setField("ownerEmail", event.target.value)} placeholder="owner@company.com" /></label>
               </div></fieldset>
               <fieldset><legend>Commercial setup</legend><div className={styles.formGrid}>
-                <label><span>Plan</span><select value={form.plan} onChange={(event) => setField("plan", event.target.value)}><option value="pilot">Pilot</option><option value="starter">Starter</option><option value="professional">Professional</option><option value="enterprise">Enterprise</option></select></label>
+                <label><span>Plan</span><select value={form.plan} onChange={(event) => setField("plan", event.target.value)}><option value="pilot">Pilot</option><option value="starter">Wine Operations</option><option value="professional">Digital Wine</option><option value="hospitality_suite">Hospitality Suite</option><option value="enterprise">Enterprise</option></select></label>
                 <label><span>Inventory source</span><select value={form.inventoryMode} onChange={(event) => setField("inventoryMode", event.target.value)}><option value="manual">Manual</option><option value="csv">CSV import</option><option value="api">API integration</option><option value="hybrid">Hybrid</option></select></label>
               </div><div className={styles.modulePicker}>{Object.entries(MODULE_LABELS).map(([key, label]) => <label key={key} className={form.enabledModules[key] ? styles.moduleSelected : ""}><input type="checkbox" checked={form.enabledModules[key]} onChange={() => toggleModule(key)} /><span>{label}</span></label>)}</div></fieldset>
               {error && <div className={`${styles.message} ${styles.messageError}`}><ExclamationTriangleIcon />{error}</div>}

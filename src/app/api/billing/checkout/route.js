@@ -1,21 +1,13 @@
 // src/app/api/billing/checkout/route.js
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-import { stripe } from "../../../../lib/stripe";
+import { stripe } from "@/lib/stripe";
+import { getPlan, normalizePlanKey, stripePriceIdForPlan } from "@/lib/billing/catalog";
+import { requireBillingAdministrator } from "@/lib/server/billingContext";
 
 export async function POST(req) {
-  const supabase = await createClient();
-
-  // 1) Auth guard
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
+  if (!stripe) return NextResponse.json({ error: "Stripe is not configured in this environment." }, { status: 503 });
+  const access = await requireBillingAdministrator();
+  if (access.error) return NextResponse.json({ error: access.error.message }, { status: access.error.status });
 
   // 2) Read body (plan)
   let body = {};
@@ -25,13 +17,12 @@ export async function POST(req) {
     body = {};
   }
 
-  const planKey = body.plan === "starter" ? "starter" : "pro";
-
-  // 3) Map plan -> Stripe price
-  const priceId =
-    planKey === "starter"
-      ? process.env.STRIPE_PRICE_STARTER_MONTHLY
-      : process.env.STRIPE_PRICE_PRO_MONTHLY;
+  const planKey = normalizePlanKey(body.plan);
+  const plan = getPlan(planKey);
+  if (!plan.checkout) {
+    return NextResponse.json({ error: "This plan requires a Vaxeron commercial agreement." }, { status: 400 });
+  }
+  const priceId = stripePriceIdForPlan(planKey);
 
   if (!priceId) {
     return NextResponse.json(
@@ -40,22 +31,43 @@ export async function POST(req) {
     );
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
+  const organizationId = access.tenant.organization.id;
 
   try {
+    let customerId = access.settings.stripe_customer_id;
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: access.user.email || undefined,
+        name: access.tenant.organization.name,
+        metadata: { organization_id: organizationId },
+      });
+      customerId = customer.id;
+      const customerUpdate = await access.admin
+        .from("organization_platform_settings")
+        .update({ stripe_customer_id: customerId, updated_at: new Date().toISOString() })
+        .eq("organization_id", organizationId);
+      if (customerUpdate.error) throw customerUpdate.error;
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer_email: user.email ?? undefined,
+      customer: customerId,
       line_items: [
         {
           price: priceId,
           quantity: 1,
         },
       ],
-      success_url: `${baseUrl}/onboarding?success=1&plan=${planKey}`,
-      cancel_url: `${baseUrl}/select-plan?canceled=1`,
+      success_url: `${baseUrl}/dashboard/billing?checkout=success`,
+      cancel_url: `${baseUrl}/dashboard/billing?checkout=canceled`,
+      allow_promotion_codes: true,
+      subscription_data: {
+        metadata: { organization_id: organizationId, plan: planKey },
+      },
       metadata: {
-        user_id: user.id,
+        organization_id: organizationId,
+        actor_user_id: access.user.id,
         plan: planKey,
         price_id: priceId,
       },
@@ -65,7 +77,6 @@ export async function POST(req) {
   } catch (err) {
     console.error("Stripe checkout session error", err);
 
-    // 👇 TEMP: show real Stripe error
     return NextResponse.json(
       {
         error:
