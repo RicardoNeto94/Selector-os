@@ -42,7 +42,11 @@ export default function BurmanLanding({ menu }) {
     let cancelled = false;
 
     async function syncRefreshVersion() {
-      const response = await fetch("/api/pwa-refresh", { cache: "no-store" });
+      if (!menu?.public_slug) return;
+      const response = await fetch(
+        `/api/pwa-refresh?menu=${encodeURIComponent(menu.public_slug)}`,
+        { cache: "no-store" },
+      );
       if (!response.ok) return;
       const data = await response.json();
 
@@ -90,7 +94,7 @@ export default function BurmanLanding({ menu }) {
         handleVisibilityChange,
       );
     };
-  }, []);
+  }, [menu?.public_slug]);
 
   // ================= DEPLOYMENT AUTO-UPDATE =================
   // Once this version is installed on an iPad, future production deployments

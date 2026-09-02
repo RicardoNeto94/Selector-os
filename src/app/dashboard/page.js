@@ -55,7 +55,7 @@ export default async function DashboardPage() {
   const pendingMemberCountQuery = tenant.source === "membership"
     ? supabase.from("organization_memberships").select("user_id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "invited")
     : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending");
-  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, menuItemRows, locationsResult, inventoryRows, valuationRows, latestSyncResult] = await Promise.all([
+  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, menuItemRows, locationsResult, inventoryRows, valuationRows, latestSyncResult, roomPwaMenuResult] = await Promise.all([
     scopeTenantQuery(supabase.from("menus").select("*", { count: "exact", head: true }), tenant),
     scopeTenantQuery(supabase.from("menu_items").select("*", { count: "exact", head: true }), tenant),
     memberCountQuery,
@@ -65,6 +65,7 @@ export default async function DashboardPage() {
     fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id,wines(is_active)", (query) => scopeTenantQuery(query, tenant)),
     fetchAllRows(supabase, "wine_inventory_valuations", "wine_id,location_id", (query) => scopeTenantQuery(query, tenant).eq("source", "compucash")),
     scopeTenantQuery(supabase.from("compucash_sync_runs").select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at").order("created_at", { ascending: false }).limit(1), tenant).maybeSingle(),
+    scopeTenantQuery(supabase.from("menus").select("name,public_slug").eq("design_type", "burman").eq("is_active", true).not("public_slug", "is", null).limit(1), tenant).maybeSingle(),
   ]);
   const locations = locationsResult.data || [];
   const latestSync = latestSyncResult.data;
@@ -137,6 +138,11 @@ export default async function DashboardPage() {
       </div>
     </section>
 
-    <PwaRefreshControl />
+    {roomPwaMenuResult.data && access.entitlements?.modules?.guest_experience && (
+      <PwaRefreshControl
+        menuSlug={roomPwaMenuResult.data.public_slug}
+        propertyName={tenant.property?.name || roomPwaMenuResult.data.name || "Property"}
+      />
+    )}
   </div></div>;
 }

@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-const CHANNEL = "burman_room_pwa";
 
 function formatTimestamp(value) {
   if (!value) return "Never published";
@@ -20,93 +18,101 @@ function formatTimestamp(value) {
   }
 }
 
-export default function PwaRefreshControl() {
-  const supabase = createClient();
+export default function PwaRefreshControl({ menuSlug, propertyName }) {
+  const supabase = useMemo(() => createClient(), []);
 
   const [version, setVersion] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [statusError, setStatusError] = useState("");
+  const [actionError, setActionError] = useState("");
+
+  const loadStatus = useCallback(async () => {
+    setLoading(true);
+    setStatusError("");
+
+    try {
+      const response = await fetch(
+        `/api/pwa-refresh?menu=${encodeURIComponent(menuSlug)}`,
+        { cache: "no-store" },
+      );
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Unable to load PWA status.");
+      }
+
+      setVersion(result?.version ?? null);
+      setUpdatedAt(result?.updated_at ?? null);
+    } catch (loadError) {
+      console.error("PWA REFRESH STATUS ERROR:", loadError);
+      setStatusError(loadError?.message || "Unable to load PWA status.");
+    } finally {
+      setLoading(false);
+    }
+  }, [menuSlug]);
 
   useEffect(() => {
     loadStatus();
-  }, []);
+  }, [loadStatus]);
 
-  async function loadStatus() {
-    setLoading(true);
-    setError("");
+  async function publishRefresh() {
+    if (publishing) return;
 
-    const { data, error: statusError } = await supabase
-      .from("pwa_refresh_signals")
-      .select("version, updated_at")
-      .eq("channel", CHANNEL)
-      .maybeSingle();
+    setPublishing(true);
+    setMessage("");
+    setActionError("");
 
-    if (statusError) {
-      console.error("PWA REFRESH STATUS ERROR:", statusError);
-      setError("Unable to load PWA status.");
-      setLoading(false);
-      return;
-    }
+    try {
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      const token = data?.session?.access_token;
+      if (!token) {
+        throw new Error("Your Vaxeron session has expired. Sign in again.");
+      }
 
-    setVersion(data?.version ?? null);
-    setUpdatedAt(data?.updated_at ?? null);
-    setLoading(false);
-  }
+      const response = await fetch("/api/pwa-refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ menuSlug }),
+      });
 
-async function publishRefresh() {
-  if (publishing) return;
+      const result = await response.json();
 
-  setPublishing(true);
-  setMessage("");
-  setError("");
+      if (!response.ok) {
+        throw new Error(
+          result?.error ||
+          `Unable to refresh the ${propertyName} room PWA.`
+        );
+      }
 
-  try {
-    const response = await fetch("/api/pwa-refresh", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result?.error ||
-          "Unable to refresh the Burman room PWA."
-      );
-    }
-
-    setVersion(result?.version ?? null);
-    setUpdatedAt(
-      result?.updated_at ??
+      setVersion(result?.version ?? null);
+      setUpdatedAt(
+        result?.updated_at ??
         new Date().toISOString()
-    );
+      );
 
-    setMessage(
-      "Refresh signal sent to all room iPads."
-    );
+      setMessage("Refresh signal sent to all room iPads.");
 
-    window.setTimeout(() => {
-      setMessage("");
-    }, 5000);
-  } catch (publishError) {
-    console.error(
-      "PWA REFRESH PUBLISH ERROR:",
-      publishError
-    );
+      window.setTimeout(() => {
+        setMessage("");
+      }, 5000);
+    } catch (publishError) {
+      console.error("PWA REFRESH PUBLISH ERROR:", publishError);
 
-    setError(
-      publishError?.message ||
-        "Unable to refresh the Burman room PWA."
-    );
-  } finally {
-    setPublishing(false);
+      setActionError(
+        publishError?.message ||
+        `Unable to refresh the ${propertyName} room PWA.`
+      );
+    } finally {
+      setPublishing(false);
+    }
   }
-}
 
   return (
     <section className="mt-7 rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] px-5 py-5 md:px-6">
@@ -117,11 +123,11 @@ async function publishRefresh() {
           </div>
 
           <h2 className="mt-2 text-[19px] tracking-[-0.03em] text-[#30241f] md:text-[22px]">
-            Burman Room PWA
+            {propertyName} Room PWA
           </h2>
 
           <p className="mt-1 max-w-[660px] text-[9px] leading-[1.65] text-[#928278]">
-            Send a live refresh signal to every open Burman room iPad.
+            Send a live refresh signal to every open {propertyName} room iPad.
             The app remains open in Guided Access while its live content
             refreshes.
           </p>
@@ -130,7 +136,7 @@ async function publishRefresh() {
             <span>
               Status:{" "}
               <strong className="font-medium text-[#61785c]">
-                {error ? "Unavailable" : "Ready"}
+                {statusError ? "Unavailable" : "Ready"}
               </strong>
             </span>
 
@@ -155,9 +161,15 @@ async function publishRefresh() {
             </div>
           )}
 
-          {error && (
+          {statusError && (
             <div className="mt-3 text-[9px] text-[#a34d3e]">
-              {error}
+              {statusError}
+            </div>
+          )}
+
+          {actionError && (
+            <div className="mt-3 text-[9px] text-[#a34d3e]">
+              {actionError}
             </div>
           )}
         </div>
