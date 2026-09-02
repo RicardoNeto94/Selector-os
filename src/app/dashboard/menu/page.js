@@ -1,33 +1,27 @@
-// src/app/dashboard/menu/page.js
-
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
+import { requireDashboardUser } from "@/lib/server/requireDashboardUser";
+import { scopeTenantQuery } from "@/lib/server/tenantContext";
 
 import MenuDashboardClient from "@/components/dashboard/MenuDashboardClient";
+import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
 
 export const dynamic = "force-dynamic";
 
 export default async function MenuDashboardPage() {
+  const access = await requireDashboardUser();
+  if (!access.allowed) return null;
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+  const restaurantResult = await scopeTenantQuery(
+    admin.from("restaurants").select("*").limit(1),
+    access.tenant,
+  ).maybeSingle();
+  const restaurant = restaurantResult.data;
 
-  // ✅ FIX auth (same pattern as other pages)
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  // 🔹 GET RESTAURANT
-  const { data: restaurant, error: restaurantError } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
-
-  if (restaurantError || !restaurant) {
+  if (restaurantResult.error || !restaurant) {
     return (
       <div className="so-page page-fade">
         <header className="so-page-header">
@@ -47,14 +41,17 @@ export default async function MenuDashboardPage() {
     );
   }
 
-  // 🔹 GET MENUS
-  const { data: menus = [] } = await supabase
-    .from("menus")
-    .select("*")
-    .eq("restaurant_id", restaurant.id)
-    .order("created_at", { ascending: true });
+  const menusResult = await scopeTenantQuery(
+    admin.from("menus").select("*").order("created_at", { ascending: true }),
+    access.tenant,
+  );
+  const menus = menusResult.data || [];
 
-  return (
+  const roomPwaMenu = menus.find(
+    (menu) => menu.design_type === "burman" && menu.is_active && menu.public_slug,
+  );
+
+  return <>
     <MenuDashboardClient
       menus={menus}
       restaurant={restaurant}
@@ -62,5 +59,6 @@ export default async function MenuDashboardPage() {
       maxMenus={null}
       isAtLimit={false}
     />
-  );
+    {roomPwaMenu && <div className="so-page pt-0"><PwaRefreshControl menuSlug={roomPwaMenu.public_slug} propertyName={restaurant.name || "Property"} /></div>}
+  </>;
 }
