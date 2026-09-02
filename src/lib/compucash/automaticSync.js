@@ -8,6 +8,7 @@ import {
 import { getCompuCashTenantRuntime } from "./server";
 import { buildChangedInventoryRows, checksumInventoryRows } from "./syncPlan";
 import { refreshCompuCashBtgSuggestions } from "./btgSuggestions";
+import { syncCompuCashActivity } from "./activitySync";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 import {
   scopeTenantQuery,
@@ -77,6 +78,23 @@ export async function runAutomaticCompuCashSync({
     storeTargets: runtime.storeTargets,
     tenant,
   });
+  let activity;
+  try {
+    activity = await syncCompuCashActivity({
+      admin,
+      client,
+      tenant,
+      storeTargets: runtime.storeTargets,
+    });
+  } catch (error) {
+    // Activity reporting must not prevent the authoritative inventory snapshot
+    // from completing. Surface the error in the sync summary for follow-up.
+    console.error("COMPUCASH ACTIVITY SYNC ERROR:", error);
+    activity = {
+      success: false,
+      error: error?.message || "Compucash activity import failed.",
+    };
+  }
 
   const summary = {
     success: true,
@@ -92,6 +110,7 @@ export async function runAutomaticCompuCashSync({
     valuationsUpdated: valuationResponse.data ?? 0,
     result,
     btgSuggestions,
+    activity,
   };
   await recordRun(admin, summary, tenant);
   if (runtime.connection?.id) {
@@ -135,7 +154,10 @@ async function recordRun(admin, run, tenant) {
     products_matched: run.productsMatched ?? 0,
     unmatched_products: run.unmatchedProducts ?? 0,
     changed_rows: run.changedRows ?? 0,
-    result: run.result ?? {},
+    result: {
+      ...(run.result ?? {}),
+      ...(run.activity ? { activity: run.activity } : {}),
+    },
     error_message: run.error ?? null,
     started_at: run.startedAt,
     completed_at: run.completedAt,

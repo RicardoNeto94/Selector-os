@@ -76,7 +76,25 @@ function movementLabel(type) {
       "Sale",
 
     return:
-      "Return"
+      "Return",
+
+    take_in:
+      "Received",
+
+    write_out:
+      "Write-out",
+
+    write_off:
+      "Write-off",
+
+    produce:
+      "Production",
+
+    credit:
+      "Credit",
+
+    take_in_order:
+      "Purchase Order"
 
   };
 
@@ -129,6 +147,12 @@ function displayQuantity(
 
   return Math.abs(quantity);
 
+}
+
+function signedActivityQuantity(type, value) {
+  const quantity = Math.abs(Number(value || 0));
+  if (["sale", "write_out", "write_off"].includes(type)) return -quantity;
+  return quantity;
 }
 
 /* =======================================================
@@ -247,7 +271,8 @@ const [
   movementRows,
   wineRows,
   locationsResult,
-  inventoryRows
+  inventoryRows,
+  compuCashRows
 ] = await Promise.all([
 
         fetchAllQueryRows(() => supabase
@@ -302,7 +327,9 @@ fetchAllQueryRows(() => supabase
     quantity
   `)
   .gt("quantity", 0)
-  .order("id"))
+  .order("id")),
+
+loadCompuCashActivity()
 
 ]);
 
@@ -317,7 +344,9 @@ fetchAllQueryRows(() => supabase
       }
 
       setMovements(
-        movementRows
+        [...movementRows, ...compuCashRows].sort(
+          (left, right) => new Date(right.created_at) - new Date(left.created_at)
+        )
       );
 
       setWines(
@@ -347,6 +376,35 @@ fetchAllQueryRows(() => supabase
 
     setLoading(false);
 
+  }
+
+  async function loadCompuCashActivity() {
+    const start = new Date();
+    start.setUTCDate(start.getUTCDate() - 90);
+    try {
+      const rows = await fetchAllQueryRows(() => supabase
+        .from("compucash_activity_rows")
+        .select("id,wine_id,event_type,event_at,quantity,from_location_id,to_location_id,from_store_name,to_store_name,sale_point_name,product_name,external_document_id,is_cancelled")
+        .gte("business_date", start.toISOString().slice(0, 10))
+        .order("event_at", { ascending: false })
+        .order("id", { ascending: false }));
+      return rows.map((row) => ({
+        id: `compucash-${row.id}`,
+        wine_id: row.wine_id,
+        from_location: row.from_location_id,
+        to_location: row.to_location_id,
+        from_name: row.from_store_name,
+        to_name: row.to_store_name || row.sale_point_name,
+        quantity: signedActivityQuantity(row.event_type, row.quantity),
+        movement_type: row.event_type,
+        notes: `${row.product_name} · CompuCash document ${row.external_document_id}${row.is_cancelled ? " · cancelled" : ""}`,
+        created_at: row.event_at,
+        source: "compucash",
+      }));
+    } catch (error) {
+      if (["42P01", "PGRST200", "PGRST205"].includes(error?.code)) return [];
+      throw error;
+    }
   }
   /* =====================================================
    MANUAL TRANSFER
@@ -749,6 +807,18 @@ async function executeTransfer() {
               movement.notes
             ).includes(
               searchValue
+            ) ||
+
+            normalize(
+              movement.from_name
+            ).includes(
+              searchValue
+            ) ||
+
+            normalize(
+              movement.to_name
+            ).includes(
+              searchValue
             );
 
           const matchesType =
@@ -835,7 +905,13 @@ async function executeTransfer() {
     "opening",
     "breakage",
     "sale",
-    "return"
+    "return",
+    "take_in",
+    "write_out",
+    "write_off",
+    "produce",
+    "credit",
+    "take_in_order"
 
   ];
 
@@ -1601,7 +1677,7 @@ async function executeTransfer() {
                                 <span>
 
                                   {
-                                    fromLocation?.name ||
+                                    fromLocation?.name || movement.from_name ||
                                     "External"
                                   }
 
@@ -1636,7 +1712,7 @@ async function executeTransfer() {
                                 <span>
 
                                   {
-                                    toLocation?.name ||
+                                    toLocation?.name || movement.to_name ||
                                     "External"
                                   }
 

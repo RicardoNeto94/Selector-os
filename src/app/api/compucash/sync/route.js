@@ -13,6 +13,7 @@ import {
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 import { scopeTenantQuery } from "@/lib/server/tenantContext";
+import { syncCompuCashActivity } from "@/lib/compucash/activitySync";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -111,6 +112,12 @@ export async function POST(request) {
       p_rows: plan.valuations,
     });
     if (valuationResponse.error) throw valuationResponse.error;
+    const activity = await syncCompuCashActivity({
+      admin,
+      client,
+      tenant: authorization.tenant,
+      storeTargets: runtime.storeTargets,
+    });
 
     return NextResponse.json({
       success: true,
@@ -119,6 +126,7 @@ export async function POST(request) {
       result: data ?? {},
       sourceGroupsUpdated: sourceGroupResponse.data ?? 0,
       valuationsUpdated: valuationResponse.data ?? 0,
+      activity,
     });
   } catch (error) {
     console.error("COMPUCASH SYNC ERROR:", error);

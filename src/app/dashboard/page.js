@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
+import SalesRefreshButton from "@/components/dashboard/SalesRefreshButton";
 import { createClient } from "@supabase/supabase-js";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 import { bottleQuantity, fractionalBottleQuantity, hasAvailableStock, isLowStock, isOutOfStock, positiveBottleQuantity, sumWholeBottles } from "@/lib/wineInventory";
@@ -9,6 +10,7 @@ import {
   ArrowRightIcon, ArrowPathIcon, BeakerIcon, BuildingStorefrontIcon,
   CheckCircleIcon, CircleStackIcon, ClipboardDocumentCheckIcon,
   ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, UsersIcon, BellAlertIcon,
+  ArrowDownTrayIcon, ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +57,8 @@ export default async function DashboardPage() {
   const pendingMemberCountQuery = tenant.source === "membership"
     ? supabase.from("organization_memberships").select("user_id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "invited")
     : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending");
-  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, menuItemRows, locationsResult, inventoryRows, valuationRows, latestSyncResult, roomPwaMenuResult] = await Promise.all([
+  const salesStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, menuItemRows, locationsResult, inventoryRows, valuationRows, latestSyncResult, roomPwaMenuResult, salesRows] = await Promise.all([
     scopeTenantQuery(supabase.from("menus").select("*", { count: "exact", head: true }), tenant),
     scopeTenantQuery(supabase.from("menu_items").select("*", { count: "exact", head: true }), tenant),
     memberCountQuery,
@@ -66,6 +69,7 @@ export default async function DashboardPage() {
     fetchAllRows(supabase, "wine_inventory_valuations", "wine_id,location_id", (query) => scopeTenantQuery(query, tenant).eq("source", "compucash")),
     scopeTenantQuery(supabase.from("compucash_sync_runs").select("status,changed_rows,products_received,products_matched,unmatched_products,error_message,completed_at").order("created_at", { ascending: false }).limit(1), tenant).maybeSingle(),
     scopeTenantQuery(supabase.from("menus").select("name,public_slug").eq("design_type", "burman").eq("is_active", true).not("public_slug", "is", null).limit(1), tenant).maybeSingle(),
+    fetchOptionalSalesRows(supabase, tenant, salesStart),
   ]);
   const locations = locationsResult.data || [];
   const latestSync = latestSyncResult.data;
@@ -91,6 +95,13 @@ export default async function DashboardPage() {
   const maxVenueQuantity = Math.max(1, ...venueMetrics.map((location) => location.quantity));
   const syncHealthy = latestSync?.status === "succeeded";
   const compucashConfigured = Boolean(process.env.COMPUCASH_BASE_URL && (process.env.COMPUCASH_CLIENT_ID || process.env.COMPUCASH_IDENTITY) && (process.env.COMPUCASH_CLIENT_SECRET || process.env.COMPUCASH_SECRET));
+  const completedSales = salesRows.filter((row) => !row.is_cancelled);
+  const salesRevenue = completedSales.reduce((sum, row) => sum + number(row.gross_amount), 0);
+  const salesUnits = completedSales.reduce((sum, row) => sum + number(row.quantity), 0);
+  const bottleEquivalentSales = completedSales.reduce((sum, row) => sum + number(row.bottle_equivalent), 0);
+  const saleDays = buildSalesDays(completedSales, 7);
+  const maxSalesRevenue = Math.max(1, ...saleDays.map((day) => day.revenue));
+  const topWines = buildTopWines(completedSales).slice(0, 4);
 
   return <div className="so-overview-page min-h-screen bg-[#f7f3ed] text-[#30241f]"><div className="mx-auto max-w-[1700px] px-5 py-4 md:px-7 lg:px-8">
     <header className="so-overview-header flex flex-col gap-3 border-b border-[#ded3c8] pb-4 lg:flex-row lg:items-end lg:justify-between">
@@ -104,6 +115,24 @@ export default async function DashboardPage() {
       <StatCard label="Active Menu Placements" value={formatNumber(stockedMenuPlacements)} description="Stocked wine-to-menu entries; one label can appear more than once" />
       <StatCard label="Low-Stock Location Lines" value={formatNumber(lowStockRows)} description="Positive location balances at 2 units or fewer" tone={lowStockRows ? "warning" : "good"} />
       <StatCard label="Compucash Sync" value={syncHealthy ? "Healthy" : "Check"} description={formatDate(latestSync?.completed_at)} tone={syncHealthy ? "good" : "warning"} />
+    </section>
+
+    <section className="mt-4 rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div><div className="text-[8px] uppercase tracking-[0.28em] text-[#a17865]">CompuCash sales · last 30 days</div><h2 className="mt-2 text-[22px] tracking-[-0.035em]">Wine sales tracker</h2><p className="mt-1 text-[9px] text-[#95867b]">Matched wine products only. Sales are reporting events and never adjust the live inventory a second time.</p></div>
+        <div className="flex gap-2"><SalesRefreshButton /><a href={`/api/compucash/sales/export?from=${salesStart}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-[#d9cbc0] bg-white px-4 text-[8px] uppercase tracking-[0.14em] text-[#6f625a]"><ArrowDownTrayIcon className="h-3.5 w-3.5" />Export CSV</a></div>
+      </div>
+      <div className="mt-4 grid gap-px overflow-hidden rounded-[16px] border border-[#e3d9d0] bg-[#e3d9d0] sm:grid-cols-3">
+        <StatCard label="Gross wine revenue" value={`€${formatNumber(salesRevenue, 2)}`} description={`${formatNumber(completedSales.length)} matched sale lines`} tone="good" />
+        <StatCard label="Sale units" value={formatNumber(salesUnits, 2)} description="POS quantities, including serving products" />
+        <StatCard label="Bottle equivalent" value={formatNumber(bottleEquivalentSales, 2)} description="Exact where serving size is mapped" />
+      </div>
+      {completedSales.length ? <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+        <div>
+          <div className="flex h-32 items-end gap-2 border-b border-[#e5dbd2] px-1" aria-label="Wine sales revenue for the last seven days">{saleDays.map((day) => <div key={day.date} className="flex h-full flex-1 flex-col justify-end gap-1"><span className="text-center text-[7px] text-[#9b8b80]">€{formatNumber(day.revenue)}</span><div className="mx-auto w-full max-w-16 rounded-t-[8px] bg-[#55766b]" style={{ height: `${Math.max(3, day.revenue / maxSalesRevenue * 88)}%` }} /><span className="pb-1 text-center text-[7px] uppercase tracking-[0.08em] text-[#9b8b80]">{day.label}</span></div>)}</div>
+        </div>
+        <div className="divide-y divide-[#ebe2da]">{topWines.map((wine, index) => <div key={wine.id} className="flex items-center gap-3 py-2.5"><span className="text-[9px] text-[#b2a197]">0{index + 1}</span><div className="min-w-0 flex-1"><div className="truncate text-[10px] text-[#40312a]">{wine.name}</div><div className="mt-0.5 truncate text-[8px] text-[#9b8b80]">{wine.producer || "Wine sale"}</div></div><div className="text-right"><div className="text-[10px] text-[#40312a]">€{formatNumber(wine.revenue, 2)}</div><div className="text-[7px] text-[#9b8b80]">{formatNumber(wine.quantity, 2)} units</div></div></div>)}</div>
+      </div> : <div className="mt-5 flex min-h-24 items-center justify-center rounded-[14px] border border-dashed border-[#ded3c8] text-[9px] text-[#95867b]"><ChartBarIcon className="mr-2 h-4 w-4" />Sales appear after the next CompuCash sync.</div>}
     </section>
 
     <section className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
@@ -145,4 +174,41 @@ export default async function DashboardPage() {
       />
     )}
   </div></div>;
+}
+
+async function fetchOptionalSalesRows(supabase, tenant, startDate) {
+  try {
+    return await fetchAllRows(
+      supabase,
+      "compucash_activity_rows",
+      "business_date,quantity,bottle_equivalent,gross_amount,is_cancelled,wine_id,wines(name,producer)",
+      (query) => scopeTenantQuery(query, tenant).eq("event_type", "sale").gte("business_date", startDate)
+    );
+  } catch (error) {
+    if (["42P01", "PGRST200", "PGRST205"].includes(error?.code)) return [];
+    throw error;
+  }
+}
+
+function buildSalesDays(rows, count) {
+  const byDate = new Map();
+  for (const row of rows) byDate.set(row.business_date, (byDate.get(row.business_date) || 0) + number(row.gross_amount));
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - (count - index - 1));
+    const key = date.toISOString().slice(0, 10);
+    return { date: key, label: new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(date), revenue: byDate.get(key) || 0 };
+  });
+}
+
+function buildTopWines(rows) {
+  const totals = new Map();
+  for (const row of rows) {
+    const key = row.wine_id || row.wines?.name || "unknown";
+    const current = totals.get(key) || { id: key, name: row.wines?.name || "Mapped wine", producer: row.wines?.producer, revenue: 0, quantity: 0 };
+    current.revenue += number(row.gross_amount);
+    current.quantity += number(row.quantity);
+    totals.set(key, current);
+  }
+  return [...totals.values()].sort((a, b) => b.revenue - a.revenue);
 }

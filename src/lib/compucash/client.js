@@ -45,6 +45,46 @@ export class CompuCashClient {
     return this.get(`/Products?${query}`);
   }
 
+  async getInvoicesByPeriod({ periodStart, periodEnd, pageSize = 100 } = {}) {
+    const results = [];
+    let pageNumber = 1;
+    let hasNext = true;
+    while (hasNext) {
+      const query = new URLSearchParams({
+        PeriodStart: periodStart,
+        PeriodEnd: periodEnd,
+        PageNumber: String(pageNumber),
+        PageSize: String(pageSize),
+      });
+      const page = await this.get(`/Invoice/ByPeriod?${query}`);
+      results.push(...(page.results ?? []));
+      hasNext = Boolean(page.hasNext);
+      pageNumber += 1;
+      if (pageNumber > 500) throw new Error("Compucash invoice paging exceeded the safety limit.");
+    }
+    return results;
+  }
+
+  async getDeliveryNotes({ periodStart, periodEnd, deliveryNoteTypes, pageSize = 100 } = {}) {
+    const results = [];
+    let pageNumber = 1;
+    let hasNext = true;
+    while (hasNext) {
+      const page = await this.post("/DeliveryNotes/Filter", {
+        periodStart,
+        periodEnd,
+        deliveryNoteTypes,
+        pageNumber,
+        pageSize,
+      });
+      results.push(...(page.results ?? []));
+      hasNext = Boolean(page.hasNext);
+      pageNumber += 1;
+      if (pageNumber > 500) throw new Error("Compucash delivery-note paging exceeded the safety limit.");
+    }
+    return results;
+  }
+
   async get(path) {
     if (!this.token) throw new Error("Authenticate before calling Compucash.");
     const response = await this.fetch(`${this.baseUrl}${path}`, {
@@ -61,6 +101,26 @@ export class CompuCashClient {
     }
     return payload.data ?? [];
   }
+
+  async post(path, body) {
+    if (!this.token) throw new Error("Authenticate before calling Compucash.");
+    const response = await this.fetch(`${this.baseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${this.token}`,
+        "accept-language": "et",
+        "content-type": "application/json",
+        "x-api-version": "1.0",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await readResponse(response, `POST ${path}`);
+    if (payload.error?.code) {
+      throw new Error(`Compucash API error ${payload.error.code}.`);
+    }
+    return payload.data ?? [];
+  }
 }
 
 async function readResponse(response, label) {
@@ -72,7 +132,10 @@ async function readResponse(response, label) {
     throw new Error(`${label} returned invalid JSON.`);
   }
   if (!response.ok) {
-    throw new Error(`${label} failed (${response.status}).`);
+    const reason = [payload?.error, payload?.error_description]
+      .filter((value) => typeof value === "string" && value.trim())
+      .join(": ");
+    throw new Error(`${label} failed (${response.status})${reason ? `: ${reason}` : "."}`);
   }
   return payload;
 }

@@ -63,6 +63,7 @@ const tenantTables = [
   "sake_pairings", "sake_pairing_stages", "wine_location_store_mappings",
   "wine_inventory_imports", "wine_inventory_import_rows",
   "wine_inventory_valuations", "compucash_sync_runs", "operation_days",
+  "compucash_activity_rows",
   "daily_bookings", "daily_labour", "daily_occupancy", "daily_sales",
   "operation_summary", "operations_insights", "employee_costs",
   "sales_days", "sales_categories", "sales_payment_methods",
