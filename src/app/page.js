@@ -12,9 +12,8 @@ const capabilities = [
 ];
 
 const experiences = [
-  ["/vaxeron/koyo-ipad-service.png", "Koyo", "A seasonal wine-and-sake journey presented with the intimacy, care and quiet theatre of omotenashi.", "Omakase wine experience"],
-  ["/vaxeron/shang-shi-ipad-service.png", "Shang Shi", "A tableside sommelier consultation connecting the live cellar with contemporary Cantonese dining.", "Sommelier-led wine programme"],
-  ["/vaxeron/burman-spa-ipad-consultation.png", "The Burman Spa", "A private wellness consultation guiding each guest towards treatments, self-care and moments of restoration.", "Personalised wellness journey"],
+  ["/vaxeron/koyo-ipad-service.png?v=5", "Nami", "A seasonal wine-and-sake journey presented with intimacy, care and the quiet theatre of omotenashi.", "Illustrative omakase experience"],
+  ["/vaxeron/evening-service.png", "Solstice", "A refined service environment showing how live operational clarity supports a composed destination restaurant.", "Illustrative dining experience"],
 ];
 
 export default function HomePage() {
@@ -44,9 +43,9 @@ export default function HomePage() {
 
     <section className="vx2-workspace" id="platform">
       <div className="vx2-workspace-copy" data-reveal><p className="vx2-label">The working view</p><h2>Clarity,<br/>at a glance.</h2><p>Live operational health, venue inventory and guest publishing—designed around the way hospitality teams actually work.</p><a href="#capabilities">Explore the platform <span>→</span></a></div>
-      <div className="vx2-device-wrap" data-reveal>
-        <div className="vx2-laptop"><div className="vx2-screen"><span className="vx2-camera"/><img src="/platform/dashboard-overview.png?v=4" alt="VAXERON operational dashboard displayed on a laptop"/></div><div className="vx2-base"><i/></div></div>
-        <small>VAXERON operational overview · Live workspace</small>
+        <div className="vx2-device-wrap" data-reveal>
+        <div className="vx2-laptop"><div className="vx2-screen"><span className="vx2-camera"/><img src="/platform/dashboard-overview.png?v=5" alt="Fictional Aurelia Hospitality wine operations dashboard displayed on a laptop"/></div><div className="vx2-base"><i/></div></div>
+        <small>Illustrative workspace · Fictional company and demo data</small>
       </div>
     </section>
 
@@ -66,22 +65,22 @@ export default function HomePage() {
     </section>
 
     <section className="vx2-experiences" id="experiences">
-      <header data-reveal><p className="vx2-label">Partner implementations</p><h2>Designed around<br/><em>their world.</em></h2><span>VAXERON provides the operational foundation. Every guest-facing service is then shaped around the partner, their setting and the way they welcome guests.</span></header>
+      <header data-reveal><p className="vx2-label">Illustrative guest journeys</p><h2>Designed around<br/><em>their world.</em></h2><span>These fictional concepts demonstrate how VAXERON can shape each guest-facing service around a property, its setting and the way it welcomes guests.</span></header>
 
       <article className="vx2-burman-case" data-reveal>
-        <div className="vx2-burman-room"><img src="/vaxeron/burman-ipad-final.png" alt="The Burman VAXERON guest experience presented on an in-room iPad"/></div>
-        <div className="vx2-burman-caption"><p className="vx2-label">The Burman Hotel · In-room experience</p><h3>The stay, thoughtfully gathered in one place.</h3><p>Created for the hotel’s in-room iPads, the experience gives every guest an immediate path to Michelin-recognised dining, room service, the spa and the details of their stay.</p><small>Original VAXERON concept · Inspired by the live installation</small></div>
+        <div className="vx2-burman-room"><img src="/vaxeron/burman-ipad-final.png?v=5" alt="Fictional Aurelia House guest experience presented on an in-room tablet"/></div>
+        <div className="vx2-burman-caption"><p className="vx2-label">Aurelia House · Illustrative in-room experience</p><h3>The stay, thoughtfully gathered in one place.</h3><p>A fictional demonstration of how an in-room tablet can give every guest an immediate path to dining, room service, wellness and the details of their stay.</p><small>Illustrative VAXERON concept · Fictional brand and content</small></div>
       </article>
 
-      <div className="vx2-partner-intro" data-reveal><p className="vx2-label">Personalised services for our partners</p><span>Part of the wider Bombay hospitality world, each destination keeps a distinct voice, service ritual and digital expression.</span></div>
+      <div className="vx2-partner-intro" data-reveal><p className="vx2-label">One platform, distinct identities</p><span>Each fictional destination keeps its own voice, service ritual and digital expression while sharing the same operational foundation.</span></div>
       <div className="vx2-experience-grid">{experiences.map(([image,title,copy,service],index)=><figure key={title} className={`vx2-exp-${index+1}`} data-reveal><div className="vx2-partner-image"><img src={image} alt={`${title} guest experience powered by VAXERON`}/><small>{service}</small></div><figcaption><span>{title}</span><p>{copy}</p></figcaption></figure>)}</div>
     </section>
 
     <section className="vx2-proof" id="inside-platform">
       <header className="vx2-proof-header" data-reveal><p className="vx2-label">Inside the platform</p><h2>From one source of truth<br/><em>to every point of service.</em></h2><p>VAXERON turns fragmented operational data into a calm, shared workspace—then carries the right information into every venue and guest experience.</p></header>
       <div className="vx2-proof-stage" data-reveal>
-        <figure className="vx2-proof-window vx2-proof-main"><div className="vx2-window-bar"><i/><i/><i/><span>Live operational workspace</span></div><img src="/platform/stock-control.png?v=4" alt="VAXERON live stock control workspace"/></figure>
-        <figure className="vx2-proof-window vx2-proof-venue"><div className="vx2-window-bar"><i/><i/><i/><span>Venue intelligence</span></div><img src="/platform/venue-inventory.png?v=4" alt="VAXERON location-level venue inventory"/></figure>
+        <figure className="vx2-proof-window vx2-proof-main"><div className="vx2-window-bar"><i/><i/><i/><span>Illustrative operational workspace</span></div><img src="/platform/stock-control.png?v=5" alt="Fictional Aurelia Hospitality stock control workspace with synthetic data"/></figure>
+        <figure className="vx2-proof-window vx2-proof-venue"><div className="vx2-window-bar"><i/><i/><i/><span>Fictional venue portfolio</span></div><img src="/platform/venue-inventory.png?v=5" alt="Fictional venue portfolio using synthetic inventory data"/></figure>
         <aside className="vx2-proof-note"><p className="vx2-label">Operational record</p><h3>Every bottle.<br/>Every venue.<br/>Every movement.</h3><p>Live quantities, service formats and movement history stay connected to the teams and experiences that depend on them.</p><ul><li>Location-level availability</li><li>Transfers and adjustments</li><li>Stock-aware publishing</li></ul></aside>
       </div>
       <ol className="vx2-proof-flow" data-reveal>
@@ -90,7 +89,7 @@ export default function HomePage() {
         <li><span>03</span><div><b>Operate confidently</b><small>Inventory, movements and teams</small></div></li>
         <li><span>04</span><div><b>Publish beautifully</b><small>Venue and guest experiences</small></div></li>
       </ol>
-      <p className="vx2-proof-caption" data-reveal>Compucash is the first live connector. The integration architecture is designed to welcome additional POS, inventory, PMS and reservation providers.</p>
+      <p className="vx2-proof-caption" data-reveal>Illustrative workspace using fictional names and synthetic data. VAXERON&apos;s integration architecture is designed for POS, inventory, PMS and reservation providers.</p>
     </section>
 
     <section className="vx2-private">

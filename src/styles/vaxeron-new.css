@@ -50,7 +50,7 @@ html{scroll-behavior:smooth}.vx2{--night:#171816;--paper:#f3f0e9;--ink:#20211e;-
 .vx2-burman-caption>small{display:inline-block;margin-top:22px;color:#858178;font-size:7px;text-transform:uppercase;letter-spacing:.13em;border-bottom:1px solid rgba(32,33,30,.22);padding-bottom:3px}
 .vx2-partner-intro{display:grid;grid-template-columns:.7fr 1fr;gap:8vw;align-items:start;margin:0 0 70px}
 .vx2-partner-intro>span{max-width:560px;color:var(--muted);font-size:14px;line-height:1.8}
-.vx2-experience-grid{grid-template-columns:1fr 1fr 1fr;column-gap:3vw;row-gap:0}
+.vx2-experience-grid{grid-template-columns:1fr 1fr;column-gap:4vw;row-gap:0}
 .vx2-experience-grid figure:nth-child(even){margin-top:70px}
 .vx2-partner-image{position:relative;overflow:hidden;background:#e6e2d9}
 .vx2-exp-1 .vx2-partner-image img,.vx2-exp-2 .vx2-partner-image img,.vx2-exp-3 .vx2-partner-image img{aspect-ratio:16/9;object-position:center}
