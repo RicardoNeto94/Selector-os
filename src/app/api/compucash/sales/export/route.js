@@ -14,11 +14,12 @@ export async function GET(request) {
   }
   const from = safeDate(request.nextUrl.searchParams.get("from")) ?? monthAgo();
   const to = safeDate(request.nextUrl.searchParams.get("to"));
+  const scope = safeScope(request.nextUrl.searchParams.get("scope"));
   const admin = createAdminClient();
   const rows = await fetchAllRows(
     admin,
     "compucash_activity_rows",
-    "business_date,event_at,external_document_id,external_row_id,product_name,quantity,bottle_equivalent,unit_price,gross_amount,vat_percent,sale_point_name,is_cancelled,wines(name,producer,vintage)",
+    "business_date,event_at,external_document_id,external_row_id,product_name,quantity,bottle_equivalent,unit_price,gross_amount,vat_percent,sale_point_name,is_cancelled,wines(name,producer,vintage,wine_type)",
     (query) => {
       let scoped = scopeTenantQuery(query, access.tenant)
         .eq("event_type", "sale")
@@ -34,7 +35,7 @@ export async function GET(request) {
     "CompuCash product", "Sale units", "Bottle equivalent", "Unit price",
     "Gross revenue", "VAT %", "Invoice", "Row", "Cancelled",
   ];
-  const csvRows = rows.map((row) => [
+  const csvRows = rows.filter((row) => matchesScope(row, scope)).map((row) => [
     row.business_date, row.event_at, row.sale_point_name, row.wines?.name,
     row.wines?.producer, row.wines?.vintage, row.product_name, row.quantity,
     row.bottle_equivalent, row.unit_price, row.gross_amount, row.vat_percent,
@@ -43,7 +44,7 @@ export async function GET(request) {
   const csv = [header, ...csvRows]
     .map((row) => row.map(csvCell).join(","))
     .join("\r\n");
-  const filename = `vaxeron-wine-sales-${from}-${to || "today"}.csv`;
+  const filename = `vaxeron-${scope}-sales-${from}-${to || "today"}.csv`;
   return new NextResponse(`\uFEFF${csv}`, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
@@ -60,6 +61,20 @@ function csvCell(value) {
 
 function safeDate(value) {
   return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+}
+
+function safeScope(value) {
+  return ["wine", "sake", "alcohol-free"].includes(value) ? value : "all";
+}
+
+function matchesScope(row, scope) {
+  if (scope === "all") return true;
+  const wineType = String(row.wines?.wine_type || "").trim().toLowerCase();
+  const isSake = wineType.includes("sake");
+  const isAlcoholFree = wineType.includes("non-alcohol") || wineType.includes("alcohol-free") || wineType.includes("alcohol free") || wineType.includes("soft-drink");
+  if (scope === "sake") return isSake;
+  if (scope === "alcohol-free") return isAlcoholFree;
+  return !isSake && !isAlcoholFree;
 }
 
 function monthAgo() {
