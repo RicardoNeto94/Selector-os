@@ -3,7 +3,7 @@ import PwaRefreshControl from "@/components/dashboard/PwaRefreshControl";
 import SalesRefreshButton from "@/components/dashboard/SalesRefreshButton";
 import { createClient } from "@supabase/supabase-js";
 import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
-import { bottleQuantity, fractionalBottleQuantity, hasAvailableStock, isLowStock, isOutOfStock, positiveBottleQuantity, sumWholeBottles } from "@/lib/wineInventory";
+import { bottleQuantity, hasAvailableStock, isLowStock, isOutOfStock, positiveBottleQuantity, sumWholeBottles } from "@/lib/wineInventory";
 import { requireDashboardUser } from "@/lib/server/requireDashboardUser";
 import { scopeTenantQuery } from "@/lib/server/tenantContext";
 import {
@@ -58,12 +58,11 @@ export default async function DashboardPage() {
     ? supabase.from("organization_memberships").select("user_id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "invited")
     : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending");
   const salesStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, menuItemRows, locationsResult, inventoryRows, valuationRows, latestSyncResult, roomPwaMenuResult, salesRows] = await Promise.all([
+  const [menusResponse, dishesResponse, membershipsResponse, pendingMembershipsResponse, locationsResult, inventoryRows, valuationRows, latestSyncResult, roomPwaMenuResult, salesRows] = await Promise.all([
     scopeTenantQuery(supabase.from("menus").select("*", { count: "exact", head: true }), tenant),
     scopeTenantQuery(supabase.from("menu_items").select("*", { count: "exact", head: true }), tenant),
     memberCountQuery,
     pendingMemberCountQuery,
-    fetchAllRows(supabase, "wine_menu_items", "wine_id", (query) => scopeTenantQuery(query, tenant)),
     scopeTenantQuery(supabase.from("wine_locations").select("id,name,location_type,wine_menu_id").order("name"), tenant),
     fetchAllRows(supabase, "wine_inventory", "wine_id,quantity,location_id,wines(is_active)", (query) => scopeTenantQuery(query, tenant)),
     fetchAllRows(supabase, "wine_inventory_valuations", "wine_id,location_id", (query) => scopeTenantQuery(query, tenant).eq("source", "compucash")),
@@ -79,10 +78,8 @@ export default async function DashboardPage() {
   const positiveRows = inventoryRows.filter((row) => hasAvailableStock(row.quantity));
   const totalWineUnits = positiveRows.reduce((total, row) => total + positiveBottleQuantity(row.quantity), 0);
   const unopenedBottles = sumWholeBottles(positiveRows);
-  const openBottleEquivalents = positiveRows.reduce((total, row) => total + fractionalBottleQuantity(row.quantity), 0);
   const stockedWineIds = new Set(positiveRows.map((row) => String(row.wine_id)));
   const stockedWines = stockedWineIds.size;
-  const stockedMenuPlacements = menuItemRows.filter((row) => stockedWineIds.has(String(row.wine_id))).length;
   const lowStockRows = positiveRows.filter((row) => isLowStock(row.quantity)).length;
   const compucashValuationKeys = new Set(valuationRows.map((row) => `${row.wine_id}|${row.location_id}`));
   const reorderSignalRows = inventoryRows.filter((row) => row.wines?.is_active && isOutOfStock(row.quantity) && compucashValuationKeys.has(`${row.wine_id}|${row.location_id}`)).length;
@@ -102,20 +99,14 @@ export default async function DashboardPage() {
   const saleDays = buildSalesDays(completedSales, 7);
   const maxSalesRevenue = Math.max(1, ...saleDays.map((day) => day.revenue));
   const topWines = buildTopWines(completedSales).slice(0, 4);
+  const venueSales = buildVenueSales(completedSales);
+  const maxVenueSalesRevenue = Math.max(1, ...venueSales.map((venue) => venue.revenue));
 
   return <div className="so-overview-page min-h-screen bg-[#f7f3ed] text-[#30241f]"><div className="mx-auto max-w-[1700px] px-5 py-4 md:px-7 lg:px-8">
     <header className="so-overview-header flex flex-col gap-3 border-b border-[#ded3c8] pb-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0"><div className="text-[8px] uppercase tracking-[0.3em] text-[#a17865]">VAXERON Operational Overview</div><h1 className="mt-1.5 text-[31px] font-medium tracking-[-0.045em] md:text-[36px]">Good to see you</h1><p className="mt-1 max-w-[680px] text-[10px] leading-[1.5] text-[#8a7b70] md:text-[11px]">{organisationName} — live inventory, guest experience and operational health in one view.</p></div>
       <div className="flex flex-wrap items-center gap-2"><div className="flex min-h-10 items-center gap-2 rounded-full border border-[#d9cbc0] bg-[#fbf8f3] px-4"><span className={`h-1.5 w-1.5 rounded-full ${syncHealthy ? "bg-[#7f9872]" : "bg-[#b86745]"}`} /><span className="text-[8px] uppercase tracking-[0.16em] text-[#817168]">{syncHealthy ? "Systems operational" : "Attention required"}</span></div><Link href="/dashboard/wine-cellar/venues" className="flex min-h-10 items-center rounded-full bg-[#963d2d] px-5 text-[9px] uppercase tracking-[0.15em] text-white">Open operations</Link></div>
     </header>
-
-    <section className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[18px] border border-[#ded3c8] bg-[#ded3c8] xl:grid-cols-5">
-      <StatCard label="Active Wine Labels" value={formatNumber(stockedWines)} description="Unique labels with positive physical stock" />
-      <StatCard label="Unopened Bottles" value={formatNumber(unopenedBottles)} description={`Whole bottle balances across ${locations.length} locations · ${formatNumber(openBottleEquivalents, 2)} open equivalents excluded`} />
-      <StatCard label="Active Menu Placements" value={formatNumber(stockedMenuPlacements)} description="Stocked wine-to-menu entries; one label can appear more than once" />
-      <StatCard label="Low-Stock Location Lines" value={formatNumber(lowStockRows)} description="Positive location balances at 2 units or fewer" tone={lowStockRows ? "warning" : "good"} />
-      <StatCard label="Compucash Sync" value={syncHealthy ? "Healthy" : "Check"} description={formatDate(latestSync?.completed_at)} tone={syncHealthy ? "good" : "warning"} />
-    </section>
 
     <section className="mt-4 rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -133,6 +124,26 @@ export default async function DashboardPage() {
         </div>
         <div className="divide-y divide-[#ebe2da]">{topWines.map((wine, index) => <div key={wine.id} className="flex items-center gap-3 py-2.5"><span className="text-[9px] text-[#b2a197]">0{index + 1}</span><div className="min-w-0 flex-1"><div className="truncate text-[10px] text-[#40312a]">{wine.name}</div><div className="mt-0.5 truncate text-[8px] text-[#9b8b80]">{wine.producer || "Wine sale"}</div></div><div className="text-right"><div className="text-[10px] text-[#40312a]">€{formatNumber(wine.revenue, 2)}</div><div className="text-[7px] text-[#9b8b80]">{formatNumber(wine.quantity, 2)} units</div></div></div>)}</div>
       </div> : <div className="mt-5 flex min-h-24 items-center justify-center rounded-[14px] border border-dashed border-[#ded3c8] text-[9px] text-[#95867b]"><ChartBarIcon className="mr-2 h-4 w-4" />Sales appear after the next CompuCash sync.</div>}
+
+      {venueSales.length > 0 && <div className="mt-5 border-t border-[#e5dbd2] pt-5">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div><div className="text-[8px] uppercase tracking-[0.24em] text-[#a17865]">Venue performance</div><h3 className="mt-1.5 text-[16px] tracking-[-0.025em] text-[#40312a]">Wine sold by venue</h3></div>
+          <div className="text-[8px] text-[#9b8b80]">CompuCash sales-point attribution · {formatNumber(venueSales.length)} venues</div>
+        </div>
+        <div className="mt-3 overflow-hidden rounded-[14px] border border-[#e3d9d0]">
+          <div className="hidden grid-cols-[minmax(180px,1.3fr)_minmax(150px,1fr)_90px_90px_90px] gap-3 border-b border-[#e8dfd7] bg-[#f6f1eb] px-4 py-2 text-[7px] uppercase tracking-[0.16em] text-[#9b8b80] md:grid">
+            <span>Venue / sales point</span><span>Top wine</span><span className="text-right">Revenue</span><span className="text-right">POS units</span><span className="text-right">Bottle eq.</span>
+          </div>
+          <div className="divide-y divide-[#ebe2da]">{venueSales.map((venue) => <div key={venue.id} className="grid gap-3 bg-white px-4 py-3 md:grid-cols-[minmax(180px,1.3fr)_minmax(150px,1fr)_90px_90px_90px] md:items-center">
+            <div className="min-w-0"><div className="flex items-center gap-2"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${venue.unassigned ? "bg-[#bd784e]" : "bg-[#66877b]"}`} /><strong className="truncate text-[10px] font-medium text-[#40312a]">{venue.name}</strong></div><div className="mt-1 h-1 overflow-hidden rounded-full bg-[#eee7e0]"><div className="h-full rounded-full bg-[#66877b]" style={{ width: `${Math.max(2, venue.revenue / maxVenueSalesRevenue * 100)}%` }} /></div><div className="mt-1 text-[7px] text-[#aa9a90]">{formatNumber(venue.lines)} sale lines{venue.unassigned ? " · mapping needed" : ""}</div></div>
+            <div className="min-w-0"><div className="truncate text-[9px] text-[#5d4d44]">{venue.topWine?.name || "No matched wine"}</div><div className="mt-0.5 text-[7px] text-[#aa9a90]">{venue.topWine ? `€${formatNumber(venue.topWine.revenue, 2)}` : "—"}</div></div>
+            <div className="flex items-baseline justify-between md:block md:text-right"><span className="text-[7px] uppercase tracking-[0.14em] text-[#aa9a90] md:hidden">Revenue</span><strong className="text-[10px] font-medium text-[#40312a]">€{formatNumber(venue.revenue, 2)}</strong></div>
+            <div className="flex items-baseline justify-between md:block md:text-right"><span className="text-[7px] uppercase tracking-[0.14em] text-[#aa9a90] md:hidden">POS units</span><span className="text-[9px] text-[#6f625a]">{formatNumber(venue.quantity, 2)}</span></div>
+            <div className="flex items-baseline justify-between md:block md:text-right"><span className="text-[7px] uppercase tracking-[0.14em] text-[#aa9a90] md:hidden">Bottle eq.</span><span className="text-[9px] text-[#6f625a]">{formatNumber(venue.bottleEquivalent, 2)}</span></div>
+          </div>)}</div>
+        </div>
+        <p className="mt-2 text-[7px] leading-4 text-[#aa9a90]">Venue attribution follows the sales point recorded on each CompuCash invoice. Unassigned rows remain visible until their sales point is configured.</p>
+      </div>}
     </section>
 
     <section className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
@@ -181,7 +192,7 @@ async function fetchOptionalSalesRows(supabase, tenant, startDate) {
     return await fetchAllRows(
       supabase,
       "compucash_activity_rows",
-      "business_date,quantity,bottle_equivalent,gross_amount,is_cancelled,wine_id,wines(name,producer)",
+      "business_date,quantity,bottle_equivalent,gross_amount,is_cancelled,wine_id,sale_point_id,sale_point_name,wines(name,producer)",
       (query) => scopeTenantQuery(query, tenant).eq("event_type", "sale").gte("business_date", startDate)
     );
   } catch (error) {
@@ -211,4 +222,43 @@ function buildTopWines(rows) {
     totals.set(key, current);
   }
   return [...totals.values()].sort((a, b) => b.revenue - a.revenue);
+}
+
+function buildVenueSales(rows) {
+  const venues = new Map();
+  for (const row of rows) {
+    const salePointName = String(row.sale_point_name || "").trim();
+    const salePointId = String(row.sale_point_id || "").trim();
+    const key = salePointId || salePointName.toLowerCase() || "unassigned";
+    const venue = venues.get(key) || {
+      id: key,
+      name: salePointName || "Unassigned sales point",
+      unassigned: !salePointId && !salePointName,
+      revenue: 0,
+      quantity: 0,
+      bottleEquivalent: 0,
+      lines: 0,
+      wines: new Map(),
+    };
+    venue.revenue += number(row.gross_amount);
+    venue.quantity += number(row.quantity);
+    venue.bottleEquivalent += number(row.bottle_equivalent);
+    venue.lines += 1;
+
+    const wineKey = row.wine_id || row.wines?.name || "unknown";
+    const wine = venue.wines.get(wineKey) || {
+      name: row.wines?.name || row.product_name || "Matched wine",
+      revenue: 0,
+    };
+    wine.revenue += number(row.gross_amount);
+    venue.wines.set(wineKey, wine);
+    venues.set(key, venue);
+  }
+
+  return [...venues.values()]
+    .map((venue) => ({
+      ...venue,
+      topWine: [...venue.wines.values()].sort((a, b) => b.revenue - a.revenue)[0] || null,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
 }
