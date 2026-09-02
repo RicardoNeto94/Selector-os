@@ -60,7 +60,6 @@ export default function DataQualityClient({ report }) {
       <SummaryCell label="Active stocked labels" value={number(summary.stockedLabels)} detail="Only labels with positive physical stock" />
       <SummaryCell label="Catalogue-ready labels" value={number(summary.readyLabels)} detail="Identity and physical format complete" tone="good" />
       <SummaryCell label="Labels needing review" value={number(summary.needsAttention)} detail={`${number(summary.totalIssues)} catalogue issues`} tone={summary.needsAttention ? "warning" : "good"} />
-      <SummaryCell label="Missing identifiers" value={number(report.counts?.source)} detail="No business product number, barcode or SKU" tone={report.counts?.source ? "critical" : "good"} />
     </section>
 
     <section className="dq-workspace">

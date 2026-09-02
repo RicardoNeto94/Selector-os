@@ -152,3 +152,21 @@ button.inventory-kpi:hover { background:rgba(241,247,243,.95); }
   .size-review-control { width: 100%; }
   .size-review-control input { flex: 1; width: auto; }
 }
+
+.inventory-loading-overview { display:flex; align-items:center; gap:13px; padding:18px 20px; border:1px solid rgba(56,87,76,.12); border-radius:17px; background:rgba(255,255,255,.58); color:#516a61; }
+.inventory-loading-overview svg { width:18px; flex:0 0 auto; }
+.inventory-loading-overview div { display:grid; gap:3px; }
+.inventory-loading-overview strong { font-size:11px; font-weight:600; }
+.inventory-loading-overview span { font-size:9px; color:#81918b; }
+.inventory-kpi-grid-primary { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.inventory-secondary-details { overflow:hidden; border:1px solid rgba(56,87,76,.12); border-radius:17px; background:rgba(255,255,255,.52); }
+.inventory-secondary-details > summary { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:13px 16px; cursor:pointer; list-style:none; }
+.inventory-secondary-details > summary::-webkit-details-marker { display:none; }
+.inventory-secondary-details > summary > div:first-child { display:grid; gap:3px; }
+.inventory-secondary-details > summary span { font-size:8px; letter-spacing:.17em; text-transform:uppercase; color:#71877f; }
+.inventory-secondary-details > summary strong { font-size:11px; font-weight:560; color:#29443b; }
+.inventory-secondary-details > summary > div:last-child { display:flex; align-items:center; gap:8px; font-size:8px; color:#71877f; }
+.inventory-secondary-details > summary svg { width:13px; transition:transform .18s ease; }
+.inventory-secondary-details[open] > summary svg { transform:rotate(180deg); }
+.inventory-secondary-details .inventory-format-grid { padding:0 12px 12px; border-top:1px solid rgba(56,87,76,.08); }
+@media (max-width:640px) { .inventory-kpi-grid-primary { grid-template-columns:1fr; } .inventory-secondary-details > summary { align-items:flex-start; } }

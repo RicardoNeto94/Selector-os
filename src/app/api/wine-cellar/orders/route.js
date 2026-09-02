@@ -51,6 +51,8 @@ export async function GET(request) {
     // becoming false ordering notifications.
     const valuationKeys = new Set(valuations.map((row) => `${row.wine_id}|${row.location_id}`));
     const alerts = inventory.filter((row) => row.wines?.is_active && row.wine_locations && valuationKeys.has(`${row.wine_id}|${row.location_id}`) && isOutOfStock(row.quantity));
+    const negativeBalances = inventory.filter((row) => Number(row.quantity || 0) < -0.001);
+    const missingSizeWineIds = new Set(inventory.filter((row) => row.wines?.is_active && Number(row.quantity || 0) > 0.001 && !String(row.wines?.size || "").trim()).map((row) => row.wine_id));
     const summary = {
       alerts: alerts.length,
       urgent: alerts.filter((row) => ruleMap.has(`${row.wine_id}|${row.location_id}`) && isOutOfStock(row.quantity)).length,
@@ -59,6 +61,8 @@ export async function GET(request) {
       approved: orders.filter((order) => order.status === "approved").length,
       ordered: orders.filter((order) => order.status === "ordered").length,
       notifications: alerts.length,
+      negativeBalances: negativeBalances.length,
+      missingBottleSizes: missingSizeWineIds.size,
     };
     if (summaryOnly) return NextResponse.json({ summary }, { headers: { "Cache-Control": "no-store" } });
 

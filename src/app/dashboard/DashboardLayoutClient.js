@@ -154,6 +154,16 @@ export default function DashboardLayout({
   }, [hasWine, supportMode]);
 
   useEffect(() => {
+    function handleOrderingSummary(event) {
+      const summary = event.detail || {};
+      setOrderingAlerts(Number(summary.notifications || 0));
+      setNotificationSummary(summary);
+    }
+    window.addEventListener("vaxeron:ordering-summary", handleOrderingSummary);
+    return () => window.removeEventListener("vaxeron:ordering-summary", handleOrderingSummary);
+  }, []);
+
+  useEffect(() => {
     function handleCommandKey(event) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();

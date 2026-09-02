@@ -208,11 +208,17 @@
 .wine-portfolio-formats button strong { margin-top: 4px; color: #314940; font-size: 14px; font-weight: 500; }
 .wine-portfolio-formats > small { grid-column: 1 / -1; margin-top: 1px; color: #95a19d; font-size: 7px; }
 .wine-format-review-link { border: 0; background: transparent; padding: 0; color: #8b6b34; font: inherit; text-decoration: underline; text-decoration-color: rgba(139,107,52,.35); text-underline-offset: 2px; }
+.wine-portfolio-stock-link { display:flex; min-width:0; flex-direction:column; justify-content:center; padding:16px 18px; color:#314940; transition:background .18s ease; }
+.wine-portfolio-stock-link:hover { background:rgba(228,239,233,.58); }
+.wine-portfolio-stock-link > span { font-size:8px; letter-spacing:.17em; text-transform:uppercase; color:#71877f; }
+.wine-portfolio-stock-link > strong { margin-top:7px; font-size:14px; font-weight:600; }
+.wine-portfolio-stock-link > small { margin-top:5px; font-size:8px; line-height:1.4; color:#84938e; }
 
 @media (max-width: 1180px) {
   .wine-portfolio-summary { grid-template-columns: minmax(180px, .65fr) minmax(390px, 1.35fr); }
   .wine-portfolio-facts { border-right: 0; }
   .wine-portfolio-formats { grid-column: 1 / -1; border-top: 1px solid rgba(74,106,95,.1); }
+  .wine-portfolio-stock-link { grid-column:1 / -1; border-top:1px solid rgba(74,106,95,.1); }
 }
 
 .wine-secondary-details {
@@ -248,6 +254,7 @@
   .wine-portfolio-summary { grid-template-columns: 1fr; }
   .wine-portfolio-primary,
   .wine-portfolio-facts { border-right: 0; border-bottom: 1px solid rgba(74,106,95,.1); }
+  .wine-portfolio-stock-link { grid-column:auto; border-top:0; }
   .wine-secondary-details > summary { align-items: flex-start; flex-direction: column; }
   .wine-secondary-counts { flex-wrap: wrap; }
 }

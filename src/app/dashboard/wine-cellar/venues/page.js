@@ -1293,9 +1293,14 @@ export default function VenueWinesPage() {
                     </div>
                   </div>
 
-                  <div className="venue-card-value">
-                    {stats.valuationAvailable ? (
-                      <>
+                  <details className="venue-card-value">
+                    <summary>
+                      <span>Financial detail</span>
+                      <em>View</em>
+                    </summary>
+                    <div className="venue-card-value-grid">
+                      {stats.valuationAvailable ? (
+                        <>
                         <div title="Current stock multiplied by Compucash average purchase cost">
                           <span>Average-cost value</span>
                           <strong>€{Math.round(stats.valuation.inventoryCost).toLocaleString()}</strong>
@@ -1306,14 +1311,15 @@ export default function VenueWinesPage() {
                           <strong>€{Math.round(stats.valuation.potentialRevenueNet).toLocaleString()}</strong>
                           <small>{Math.round(stats.valuation.saleCoverage)}% price coverage</small>
                         </div>
-                      </>
-                    ) : (
-                      <>
+                        </>
+                      ) : (
+                        <>
                         <div><span>Wine units</span><strong>{formatQuantity(stats.inventoryFamilies.wine.positive)}</strong></div>
                         <div><span>Total physical units</span><strong>{formatQuantity(stats.inventoryFamilies.total.positive)}</strong></div>
-                      </>
-                    )}
-                  </div>
+                        </>
+                      )}
+                    </div>
+                  </details>
 
                   <div className="venue-menu-control">
                     <label

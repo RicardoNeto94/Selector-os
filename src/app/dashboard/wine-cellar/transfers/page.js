@@ -961,15 +961,9 @@ async function executeTransfer() {
 
     return (
 
-      <div
-        className="
-          page-fade
-          text-slate-400
-        "
-      >
-
-        Loading movement history...
-
+      <div className="page-fade so-card flex items-center gap-3 text-slate-500" aria-live="polite">
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
+        <div><strong className="block text-sm font-medium text-slate-700">Reading movement ledger</strong><span className="mt-1 block text-xs">Loading transfers, sales and adjustments…</span></div>
       </div>
 
     );
@@ -1074,7 +1068,7 @@ async function executeTransfer() {
         <details className="so-card movement-route-disclosure">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Transfer intelligence</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Secondary analysis</div>
               <h2 className="mt-2 text-base font-medium text-slate-800">Most active routes</h2>
             </div>
             <span className="rounded-full border border-slate-200 bg-white/60 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-slate-500">{transferFlows.length} routes ↓</span>
@@ -1363,6 +1357,11 @@ async function executeTransfer() {
           p-0
         "
       >
+
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 px-5 py-4">
+          <div><div className="text-[9px] uppercase tracking-[0.2em] text-slate-400">Audit trail</div><h2 className="mt-1 text-base font-medium text-slate-800">Stock movement ledger</h2></div>
+          <span className="text-[10px] text-slate-500">{filteredMovements.length.toLocaleString("en-GB")} matching records</span>
+        </div>
 
         <div
           className="

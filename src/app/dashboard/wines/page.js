@@ -23,7 +23,7 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
-import { BOTTLE_FORMATS, hasAvailableStock, isLowStock, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, sumNetBottles, sumPositiveBottles, sumWholeBottles } from "@/lib/wineInventory";
+import { hasAvailableStock, isLowStock, normalizeWineCategory, positiveBottleQuantity, summarizeBottleFormats, sumNetBottles, sumPositiveBottles, sumWholeBottles } from "@/lib/wineInventory";
 import { PortfolioRing } from "@/components/dashboard/OperationalVisuals";
 import WineDetailDrawer from "@/components/dashboard/WineDetailDrawer";
 import { buildWineDataQualityReport } from "@/lib/wineDataQuality";
@@ -1529,24 +1529,11 @@ export default function WinesPage() {
           </div>
         </div>
 
-        <div className="wine-portfolio-formats" aria-label="Stock by bottle format">
-          {Object.entries(BOTTLE_FORMATS).filter(([key]) => key !== "unknown").map(([key, format]) => (
-            <button
-              type="button"
-              key={key}
-              className={key === "unknown" && bottleFormats[key] > 0 ? "needs-review" : ""}
-              onClick={() => router.push(`/dashboard/wine-cellar/inventory${key === "unknown" ? "?format=unknown" : ""}`)}
-              title={format.detail}
-            >
-              <span>{format.label}</span>
-              <strong>{formatNumber(bottleFormats[key])}</strong>
-            </button>
-          ))}
-          <small>
-            <button type="button" className="wine-format-review-link" onClick={() => router.push("/dashboard/wine-cellar/inventory?format=unknown")}>{formatNumber(bottleFormats.unknown)} size to review</button>
-            <span> · {formatNumber(bottleFormats.fractional)} fractional/open included above</span>
-          </small>
-        </div>
+        <Link className="wine-portfolio-stock-link" href="/dashboard/wine-cellar/inventory">
+          <span>Operational stock detail</span>
+          <strong>Open Stock Control</strong>
+          <small>Search exact quantities, locations and bottle formats →</small>
+        </Link>
       </section>
 
       {/* =================================================

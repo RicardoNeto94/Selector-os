@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowPathIcon, BellAlertIcon, CheckCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { isOutOfStock } from "@/lib/wineInventory";
 import "./ordering.css";
 
 const qty = (value) => new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(Math.max(0, Number(value || 0)));
@@ -41,8 +42,8 @@ export default function OrderingCentrePage() {
       .filter((row) => row.wines?.is_active && row.wine_locations && valuations.has(keyFor(row)))
       .map((row) => ({ ...row, current: Number(row.quantity || 0), valuation: valuations.get(keyFor(row)) }));
     const notifications = rows
-      .filter((row) => row.current <= 0)
-      .sort((a, b) => a.wine_locations.name.localeCompare(b.wine_locations.name) || a.wines.name.localeCompare(b.wines.name));
+      .filter((row) => isOutOfStock(row.current))
+      .sort((a, b) => a.wine_locations.name.localeCompare(b.wine_locations.name) || Number(b.valuation?.unit_inventory_cost || 0) - Number(a.valuation?.unit_inventory_cost || 0) || a.wines.name.localeCompare(b.wines.name));
     const locations = [...new Map(notifications.map((row) => [row.location_id, row.wine_locations])).values()]
       .sort((a, b) => a.name.localeCompare(b.name));
     return { notifications, locations };
@@ -56,6 +57,21 @@ export default function OrderingCentrePage() {
     );
   }, [model, search, location]);
   const visible = filtered.slice(0, visibleLimit);
+  const visibleGroups = useMemo(() => {
+    const groups = new Map();
+    visible.forEach((row) => {
+      if (!groups.has(row.location_id)) groups.set(row.location_id, { location: row.wine_locations, rows: [] });
+      groups.get(row.location_id).rows.push(row);
+    });
+    return Array.from(groups.values());
+  }, [visible]);
+
+  useEffect(() => {
+    if (!data) return;
+    window.dispatchEvent(new CustomEvent("vaxeron:ordering-summary", {
+      detail: { ...(data.summary || {}), notifications: model.notifications.length },
+    }));
+  }, [data, model.notifications.length]);
 
   return <div className="ordering-page"><div className="ordering-shell">
     <header className="ordering-hero">
@@ -75,13 +91,15 @@ export default function OrderingCentrePage() {
       <div className="ordering-filters"><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search wine, producer or venue…" /><select value={location} onChange={(event) => setLocation(event.target.value)}><option value="all">All locations</option>{model.locations.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>
 
       <div className="ordering-list">
-        {loading ? <Empty>Reading current Compucash quantities…</Empty> : visible.length === 0 ? <Empty>{model.notifications.length ? "No ordering suggestions match these filters." : "No zero-stock wines need ordering."}</Empty> : visible.map((row) => <article key={keyFor(row)} className="ordering-row ordering-notification-row">
-          <div className="ordering-wine"><strong>{row.wines.name}</strong><span>{[row.wines.producer, row.wines.vintage, row.wines.wine_type].filter(Boolean).join(" · ")}</span></div>
-          <div><small>Location</small><strong>{row.wine_locations.name}</strong></div>
-          <div><small>On hand</small><strong className="urgent">{qty(row.current)}</strong></div>
-          <div><small>Average cost</small><strong>{row.valuation?.unit_inventory_cost != null ? money(row.valuation.unit_inventory_cost, row.valuation.currency_code) : "—"}</strong></div>
-          <div className="ordering-suggestion"><BellAlertIcon /><span><small>Suggestion</small><strong>Reorder</strong></span></div>
-        </article>)}
+        {loading ? <Empty>Reading current Compucash quantities…</Empty> : visible.length === 0 ? <Empty>{model.notifications.length ? "No ordering suggestions match these filters." : "No zero-stock wines need ordering."}</Empty> : visibleGroups.map((group) => <section key={group.location.id} className="ordering-venue-group">
+          <header><div><span>Venue</span><strong>{group.location.name}</strong></div><b>{group.rows.length} suggestion{group.rows.length === 1 ? "" : "s"}</b></header>
+          {group.rows.map((row) => <article key={keyFor(row)} className="ordering-row ordering-notification-row">
+            <div className="ordering-wine"><strong>{row.wines.name}</strong><span>{[row.wines.producer, row.wines.vintage, row.wines.wine_type].filter(Boolean).join(" · ")}</span></div>
+            <div><small>On hand</small><strong className="urgent">{qty(row.current)}</strong></div>
+            <div><small>Average cost</small><strong>{row.valuation?.unit_inventory_cost != null ? money(row.valuation.unit_inventory_cost, row.valuation.currency_code) : "—"}</strong></div>
+            <div className="ordering-suggestion"><BellAlertIcon /><span><small>Suggested action</small><strong>Reorder</strong></span></div>
+          </article>)}
+        </section>)}
         {!loading && visible.length < filtered.length && <div className="ordering-load-more"><span>Showing {visible.length} of {filtered.length}</span><button onClick={() => setVisibleLimit((current) => current + 50)}>Show 50 more</button></div>}
       </div>
     </section>

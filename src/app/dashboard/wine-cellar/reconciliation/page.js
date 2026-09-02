@@ -2,6 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
+
 import {
   useEffect,
   useMemo,
@@ -451,6 +453,16 @@ const [loadingManualWines, setLoadingManualWines] = useState(false);
 const [savingManualLink, setSavingManualLink] = useState(false);
 const [creatingManualWine, setCreatingManualWine] = useState(false);
 const [manualLinkError, setManualLinkError] = useState("");
+const [liveIssues, setLiveIssues] = useState(null);
+
+useEffect(() => {
+  let active = true;
+  fetch("/api/wine-cellar/orders?summary=1", { cache: "no-store" })
+    .then((response) => response.ok ? response.json() : null)
+    .then((result) => { if (active) setLiveIssues(result?.summary || null); })
+    .catch(() => {});
+  return () => { active = false; };
+}, []);
 
   /* =====================================================
      READ EXCEL
@@ -2388,8 +2400,26 @@ const matchedValuationCount =
         )}
       </div>
 
-      {!file && (
-        <div className="bg-white/70 border border-[#eadfd5] rounded-[28px] min-h-[460px] flex items-center justify-center px-8 py-14">
+      {!file && (<>
+        <section className="grid gap-3 md:grid-cols-3" aria-label="Current stock exceptions">
+          <Link href="/dashboard/wine-cellar/ordering" className="rounded-[18px] border border-[#e2d8cf] bg-white/70 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+            <span className="text-[8px] uppercase tracking-[0.2em] text-[#8d7d72]">Replenishment</span>
+            <strong className="mt-2 block text-[24px] font-medium text-[#30231f]">{liveIssues ? Number(liveIssues.notifications || 0).toLocaleString("en-GB") : "—"}</strong>
+            <small className="mt-1 block text-[9px] text-[#8f8178]">Zero-stock venue alerts →</small>
+          </Link>
+          <Link href="/dashboard/wine-cellar/inventory?stock=negative" className="rounded-[18px] border border-[#ead2c4] bg-[#fff8f4]/80 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+            <span className="text-[8px] uppercase tracking-[0.2em] text-[#9a684f]">Balance exceptions</span>
+            <strong className="mt-2 block text-[24px] font-medium text-[#963b2c]">{liveIssues ? Number(liveIssues.negativeBalances || 0).toLocaleString("en-GB") : "—"}</strong>
+            <small className="mt-1 block text-[9px] text-[#9a7665]">Negative location balances →</small>
+          </Link>
+          <Link href="/dashboard/wine-cellar/inventory?format=unknown" className="rounded-[18px] border border-[#e2d8cf] bg-white/70 p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+            <span className="text-[8px] uppercase tracking-[0.2em] text-[#8d7d72]">Catalogue detail</span>
+            <strong className="mt-2 block text-[24px] font-medium text-[#30231f]">{liveIssues ? Number(liveIssues.missingBottleSizes || 0).toLocaleString("en-GB") : "—"}</strong>
+            <small className="mt-1 block text-[9px] text-[#8f8178]">Bottle sizes to complete →</small>
+          </Link>
+        </section>
+
+        <div className="bg-white/70 border border-[#eadfd5] rounded-[22px] min-h-[280px] flex items-center justify-center px-8 py-10">
           <div className="max-w-[520px] w-full text-center">
             <div className="w-14 h-14 mx-auto rounded-full border border-[#e4d7cc] flex items-center justify-center bg-[#faf7f3]">
               <DocumentChartBarIcon className="w-6 h-6 text-[#963b2c]" />
@@ -2440,7 +2470,7 @@ const matchedValuationCount =
             )}
           </div>
         </div>
-      )}
+      </>)}
 
       {file && (
         <>
