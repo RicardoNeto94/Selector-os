@@ -2492,6 +2492,47 @@ and
   gap: 2px;
 }
 
+/* =====================================================
+   READABILITY PASS
+   Keep the workspace compact while avoiding sub-10px UI copy.
+===================================================== */
+
+@media (min-width: 901px) {
+  :root { --sidebar-width: 208px; }
+
+  .so-sidebar { padding: 15px 13px 13px; }
+  .so-sidebar-brand { min-height: 72px; gap: 11px; }
+  .so-logo-wrap { width: 38px; height: 38px; flex-basis: 38px; }
+  .so-logo { width: 27px; }
+  .so-brand-copy strong { font-size: 12px; }
+  .so-brand-copy span { font-size: 8.5px; }
+  .so-sidebar-nav { gap: 3px; }
+  .so-sidebar-section-label { margin-top: 16px; font-size: 8.5px; }
+  .so-nav-group { margin-top: 9px; }
+  .so-nav-group-trigger { min-height: 34px; }
+  .so-nav-group-trigger span { font-size: 9px; letter-spacing: .21em; }
+  .so-nav-item { min-height: 39px; padding: 9px 11px; font-size: 12px; }
+  .so-nav-icon-wrap, .so-nav-icon { width: 17px; height: 17px; }
+  .so-nav-badge { min-width: 24px; height: 24px; font-size: 10px; }
+  .so-user-name { font-size: 11px; }
+  .so-user-tag { font-size: 9px; }
+  .so-workspace-context span { font-size: 9px; }
+  .so-workspace-context strong { font-size: 12px; }
+  .so-command-button span { font-size: 10.5px; }
+  .so-system-state { font-size: 9px; }
+}
+
+.so-main-scroll [class*="text-[7px]"] { font-size: 8.5px !important; }
+.so-main-scroll [class*="text-[8px]"] { font-size: 9.5px !important; }
+.so-main-scroll [class*="text-[9px]"] { font-size: 10.5px !important; }
+.so-main-scroll [class*="text-[10px]"] { font-size: 11.5px !important; }
+.so-main-scroll [class*="text-[11px]"] { font-size: 12.5px !important; }
+
+@media (max-width: 900px) {
+  .so-workspace-context strong { font-size: 12px; }
+  .so-mobile-nav-item { font-size: 10px; }
+}
+
 .so-notification-button {
   position: relative;
   display: inline-flex;

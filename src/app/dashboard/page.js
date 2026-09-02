@@ -46,7 +46,7 @@ function OperationCard({ href, icon: Icon, eyebrow, title, description, meta }) 
 }
 
 function FilterLink({ href, active, children }) {
-  return <Link href={href} className={`inline-flex min-h-8 items-center justify-center rounded-full px-3 text-[8px] tracking-[0.08em] transition ${active ? "bg-[#29483f] text-white" : "border border-[#ded3c8] bg-white text-[#77685f] hover:border-[#afc2ba]"}`}>{children}</Link>;
+  return <Link href={href} className={`inline-flex min-h-9 items-center justify-center rounded-full px-3.5 text-[10px] font-medium transition ${active ? "bg-[#29483f] text-white shadow-[0_5px_14px_rgba(41,72,63,0.16)]" : "border border-[#d9d2ca] bg-white/80 text-[#665b54] hover:border-[#9fb6ad] hover:bg-white"}`}>{children}</Link>;
 }
 
 function VenueSalesRow({ venue, maxRevenue }) {
@@ -121,30 +121,31 @@ export default async function DashboardPage({ searchParams }) {
       </div>
     </section>
 
-    <section className="mt-4 rounded-[20px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-        <div><div className="text-[8px] uppercase tracking-[0.24em] text-[#a17865]">CompuCash performance</div><h2 className="mt-1.5 text-[20px] tracking-[-0.035em]">Wine sales tracker</h2><p className="mt-1 text-[9px] text-[#95867b]">{salesPeriod.label} · {salesScopeLabel(salesScope)} · matched products only</p></div>
-        <div className="flex flex-col gap-2 xl:items-end">
-          <div className="flex flex-wrap gap-1.5">
-            {[["7", "7 days"], ["30", "30 days"], ["last-month", "Last month"]].map(([range, label]) => <FilterLink key={range} href={salesHref({ range, scope: salesScope })} active={salesPeriod.range === range}>{label}</FilterLink>)}
-            <form action="/dashboard" className="flex flex-wrap items-center gap-1.5"><input type="hidden" name="range" value="custom" /><input type="hidden" name="scope" value={salesScope} /><input aria-label="Sales start date" type="date" name="from" defaultValue={salesPeriod.range === "custom" ? salesPeriod.start : ""} className="min-h-8 rounded-full border border-[#ded3c8] bg-white px-2.5 text-[8px] text-[#77685f]" /><input aria-label="Sales end date" type="date" name="to" defaultValue={salesPeriod.range === "custom" ? salesPeriod.end : ""} className="min-h-8 rounded-full border border-[#ded3c8] bg-white px-2.5 text-[8px] text-[#77685f]" /><button className="min-h-8 rounded-full border border-[#ded3c8] bg-white px-3 text-[8px] text-[#77685f]">Apply</button></form>
-          </div>
-          <div className="flex flex-wrap gap-1.5">{[["all", "All"], ["wine", "Wine"], ["sake", "Sake"], ["alcohol-free", "Alcohol-free"]].map(([scope, label]) => <FilterLink key={scope} href={salesHref({ range: salesPeriod.range, scope, from: salesPeriod.start, to: salesPeriod.end })} active={salesScope === scope}>{label}</FilterLink>)}<SalesRefreshButton /><a href={`/api/compucash/sales/export?from=${salesPeriod.start}&to=${salesPeriod.end}&scope=${salesScope}`} className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full border border-[#d9cbc0] bg-white px-3 text-[8px] tracking-[0.08em] text-[#6f625a]"><ArrowDownTrayIcon className="h-3.5 w-3.5" />Export</a></div>
-        </div>
+    <section className="mt-4 overflow-hidden rounded-[20px] border border-[#dcd5cd] bg-[#fbf8f3] shadow-[0_12px_34px_rgba(26,46,40,0.04)]">
+      <div className="flex flex-col gap-4 px-4 py-5 md:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div><div className="text-[9px] uppercase tracking-[0.22em] text-[#8e7568]">CompuCash performance</div><h2 className="mt-1.5 text-[24px] font-medium tracking-[-0.04em]">Wine sales tracker</h2><p className="mt-1 text-[11px] text-[#82766e]">{salesPeriod.label} · {salesScopeLabel(salesScope)} · matched products only</p></div>
+        <div className="flex flex-wrap gap-2"><SalesRefreshButton /><a href={`/api/compucash/sales/export?from=${salesPeriod.start}&to=${salesPeriod.end}&scope=${salesScope}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-[#d9d2ca] bg-white px-4 text-[10px] font-medium text-[#5f5751]"><ArrowDownTrayIcon className="h-4 w-4" />Export CSV</a></div>
       </div>
-      <div className="mt-4 grid gap-px overflow-hidden rounded-[16px] border border-[#e3d9d0] bg-[#e3d9d0] sm:grid-cols-3">
+      <div className="grid gap-4 border-y border-[#e4ddd6] bg-[#f2f4f0] px-4 py-4 md:px-6 xl:grid-cols-[auto_1fr] xl:items-end">
+        <div><div className="mb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#7b8983]">Period</div><div className="flex flex-wrap gap-2">{[["7", "7 days"], ["30", "30 days"], ["last-month", "Last month"]].map(([range, label]) => <FilterLink key={range} href={salesHref({ range, scope: salesScope })} active={salesPeriod.range === range}>{label}</FilterLink>)}</div></div>
+        <div className="xl:justify-self-end"><div className="mb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#7b8983]">Custom dates</div><form action="/dashboard" className="flex flex-wrap items-center gap-2"><input type="hidden" name="range" value="custom" /><input type="hidden" name="scope" value={salesScope} /><input aria-label="Sales start date" type="date" name="from" defaultValue={salesPeriod.range === "custom" ? salesPeriod.start : ""} className="min-h-9 rounded-xl border border-[#d9d2ca] bg-white px-3 text-[10px] text-[#665b54]" /><span className="text-[10px] text-[#929d98]">to</span><input aria-label="Sales end date" type="date" name="to" defaultValue={salesPeriod.range === "custom" ? salesPeriod.end : ""} className="min-h-9 rounded-xl border border-[#d9d2ca] bg-white px-3 text-[10px] text-[#665b54]" /><button className="min-h-9 rounded-xl bg-[#dfe9e4] px-4 text-[10px] font-semibold text-[#29483f]">Apply dates</button></form></div>
+        <div className="xl:col-span-2"><div className="mb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#7b8983]">Product scope</div><div className="flex flex-wrap gap-2">{[["all", "All beverages"], ["wine", "Wine"], ["sake", "Sake"], ["alcohol-free", "Alcohol-free"]].map(([scope, label]) => <FilterLink key={scope} href={salesHref({ range: salesPeriod.range, scope, from: salesPeriod.start, to: salesPeriod.end })} active={salesScope === scope}>{label}</FilterLink>)}</div></div>
+      </div>
+      <div className="grid gap-px border-b border-[#e3d9d0] bg-[#e3d9d0] sm:grid-cols-3">
         <StatCard label="Gross revenue" value={`€${formatNumber(salesRevenue, 2)}`} description={`${formatNumber(completedSales.length)} matched lines · ${formatRevenueChange(revenueChange)}`} tone="good" />
         <StatCard label="Sale units" value={formatNumber(salesUnits, 2)} description="POS quantities, including serving products" />
         <StatCard label="Bottle equivalent" value={formatNumber(bottleEquivalentSales, 2)} description="Exact where serving size is mapped" />
       </div>
-      {completedSales.length ? <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <div>
-          <div className="flex h-32 items-end gap-2 border-b border-[#e5dbd2] px-1" aria-label="Wine sales revenue for the last seven days">{saleDays.map((day) => <div key={day.date} className="flex h-full flex-1 flex-col justify-end gap-1"><span className="text-center text-[7px] text-[#9b8b80]">€{formatNumber(day.revenue)}</span><div className="mx-auto w-full max-w-16 rounded-t-[8px] bg-[#55766b]" style={{ height: `${Math.max(3, day.revenue / maxSalesRevenue * 88)}%` }} /><span className="pb-1 text-center text-[7px] uppercase tracking-[0.08em] text-[#9b8b80]">{day.label}</span></div>)}</div>
+      <div className="p-4 md:p-6">
+      {completedSales.length ? <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="rounded-[16px] border border-[#e4ddd6] bg-white/70 p-4">
+          <div className="mb-4 flex items-center justify-between gap-3"><div><div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#7b8983]">Daily revenue</div><div className="mt-1 text-[12px] text-[#4a5a55]">Latest {saleDays.length} days in selected period</div></div><ChartBarIcon className="h-5 w-5 text-[#789086]" /></div>
+          <div className="flex h-36 items-end gap-2 border-b border-[#dfe5e1] px-1" aria-label="Wine sales revenue for the last seven days">{saleDays.map((day) => <div key={day.date} className="flex h-full flex-1 flex-col justify-end gap-1.5"><span className="text-center text-[9px] font-medium text-[#6f7d78]">€{formatNumber(day.revenue)}</span><div className="mx-auto w-full max-w-16 rounded-t-[8px] bg-gradient-to-t from-[#34584d] to-[#6f9185]" style={{ height: `${Math.max(3, day.revenue / maxSalesRevenue * 82)}%` }} /><span className="pb-2 text-center text-[9px] font-medium uppercase tracking-[0.08em] text-[#7d8984]">{day.label}</span></div>)}</div>
         </div>
-        <div className="divide-y divide-[#ebe2da]">{topWines.map((wine, index) => <div key={wine.id} className="flex items-center gap-3 py-2.5"><span className="text-[9px] text-[#b2a197]">0{index + 1}</span><div className="min-w-0 flex-1"><div className="truncate text-[10px] text-[#40312a]">{wine.name}</div><div className="mt-0.5 truncate text-[8px] text-[#9b8b80]">{wine.producer || "Wine sale"}</div></div><div className="text-right"><div className="text-[10px] text-[#40312a]">€{formatNumber(wine.revenue, 2)}</div><div className="text-[7px] text-[#9b8b80]">{formatNumber(wine.quantity, 2)} units</div></div></div>)}</div>
+        <div className="rounded-[16px] border border-[#e4ddd6] bg-white/70 p-4"><div className="mb-2"><div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#7b8983]">Top performers</div><div className="mt-1 text-[12px] text-[#4a5a55]">Wines ranked by revenue</div></div><div className="divide-y divide-[#e7e2dc]">{topWines.map((wine, index) => <div key={wine.id} className="flex items-center gap-3 py-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#edf2ef] text-[9px] font-semibold text-[#688078]">{index + 1}</span><div className="min-w-0 flex-1"><div className="truncate text-[11px] font-medium text-[#33413d]">{wine.name}</div><div className="mt-0.5 truncate text-[9px] text-[#89938f]">{wine.producer || "Wine sale"}</div></div><div className="text-right"><div className="text-[11px] font-medium text-[#33413d]">€{formatNumber(wine.revenue, 2)}</div><div className="text-[9px] text-[#89938f]">{formatNumber(wine.quantity, 2)} units</div></div></div>)}</div></div>
       </div> : <div className="mt-5 flex min-h-24 items-center justify-center rounded-[14px] border border-dashed border-[#ded3c8] text-[9px] text-[#95867b]"><ChartBarIcon className="mr-2 h-4 w-4" />Sales appear after the next CompuCash sync.</div>}
 
-      {venueSales.length > 0 && <div id="venue-performance" className="mt-5 scroll-mt-24 border-t border-[#e5dbd2] pt-5">
+      {venueSales.length > 0 && <div id="venue-performance" className="mt-6 scroll-mt-24 border-t border-[#e5dbd2] pt-5">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div><div className="text-[8px] uppercase tracking-[0.24em] text-[#a17865]">Venue performance</div><h3 className="mt-1.5 text-[16px] tracking-[-0.025em] text-[#40312a]">Wine sold by venue</h3></div>
           <div className="text-[8px] text-[#9b8b80]">CompuCash sales-point attribution · showing {Math.min(5, venueSales.length)} of {formatNumber(venueSales.length)}</div>
@@ -158,6 +159,7 @@ export default async function DashboardPage({ searchParams }) {
         {venueSales.length > 5 && <details className="mt-2 rounded-[12px] border border-[#e3d9d0] bg-white"><summary className="cursor-pointer list-none px-4 py-2.5 text-center text-[8px] uppercase tracking-[0.14em] text-[#667b74]">View all {venueSales.length} venues</summary><div className="divide-y divide-[#ebe2da] border-t border-[#ebe2da]">{venueSales.slice(5).map((venue) => <VenueSalesRow key={venue.id} venue={venue} maxRevenue={maxVenueSalesRevenue} />)}</div></details>}
         <p className="mt-2 text-[7px] leading-4 text-[#aa9a90]">Venue attribution follows the sales point recorded on each CompuCash invoice. Unassigned rows remain visible until their sales point is configured.</p>
       </div>}
+      </div>
     </section>
 
     <section className="so-dashboard-chart-card mt-4 rounded-[18px] border border-[#ded3c8] bg-[#fbf8f3] p-4 md:p-5">

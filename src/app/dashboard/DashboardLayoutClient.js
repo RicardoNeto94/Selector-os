@@ -139,7 +139,7 @@ export default function DashboardLayout({
   const hasSpa = Boolean(entitlements?.enabled && entitlements?.modules?.spa);
 
   useEffect(() => {
-    if (supportMode) return undefined;
+    if (supportMode || !hasWine) return undefined;
     let active = true;
     fetch("/api/wine-cellar/orders?summary=1", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
@@ -151,7 +151,7 @@ export default function DashboardLayout({
       })
       .catch(() => {});
     return () => { active = false; };
-  }, [pathname, supportMode]);
+  }, [hasWine, supportMode]);
 
   useEffect(() => {
     function handleCommandKey(event) {
