@@ -17,7 +17,7 @@ const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300
 
 function WinePreview({ item, name, theme, published }) {
   if (item?.bespoke && item.menu?.slug) {
-    return <div className="wine-studio-device wine-studio-device--live"><div className="wine-studio-device__camera" /><iframe src={`/wine/${item.menu.slug}`} title={`${name || item.menu.name} current guest page`} /></div>;
+    return <ScaledGuestPage slug={item.menu.slug} name={name || item.menu.name} />;
   }
 
   return <div className="wine-studio-device wine-studio-device--actual"><div className="wine-studio-device__camera" /><div className="wine-studio-actual-preview">
@@ -26,6 +26,33 @@ function WinePreview({ item, name, theme, published }) {
       menu={{ name: name || "Your wine list", slug: item?.menu?.slug }}
       items={item?.previewItems || []}
       experience={{ theme, availability_rules: item?.availabilityRules || {}, is_published: published }}
+    />
+  </div></div>;
+}
+
+function ScaledGuestPage({ slug, name }) {
+  const viewportRef = useRef(null);
+  const [scale, setScale] = useState(0.42);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return undefined;
+    const resize = () => {
+      const nextScale = Math.min(viewport.clientWidth / 1024, viewport.clientHeight / 1366);
+      setScale(Number.isFinite(nextScale) && nextScale > 0 ? nextScale : 0.42);
+    };
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
+  return <div className="wine-studio-device wine-studio-device--live"><div className="wine-studio-device__camera" /><div ref={viewportRef} className="wine-studio-ipad-viewport">
+    <iframe
+      src={`/wine/${slug}`}
+      title={`${name} current guest page`}
+      scrolling="no"
+      style={{ "--ipad-preview-scale": scale }}
     />
   </div></div>;
 }
@@ -149,7 +176,7 @@ export default function WineListStudioPage() {
           {editing && <div className="wine-studio-publish-checks"><div><span>Selected wines</span><strong>{editingReadiness.contentCount || 0}</strong></div><div><span>Available now</span><strong>{editingReadiness.availableCount || 0}</strong></div><div><span>Missing prices</span><strong>{editingReadiness.missingPriceCount || 0}</strong></div></div>}
           <label className="wine-studio-publish"><input type="checkbox" checked={form.isPublished} onChange={(event) => setForm({ ...form, isPublished: event.target.checked })} /><span><strong>Publish for guests</strong><small>{form.isPublished ? "The list will be available at its public address." : "Keep this off to save a private draft."}</small></span></label>
         </div>}
-      </section><aside className="wine-studio-live-preview"><div className="wine-studio-device-label"><DevicePhoneMobileIcon /> {previewItem?.bespoke ? "Current bespoke guest page" : "Live guest-page preview"} <span>{previewItem?.bespoke ? "Protected design" : "Unsaved changes shown"}</span></div><WinePreview item={previewItem} name={form.name} theme={form.theme} published={form.isPublished} /></aside></div>
+      </section><aside className="wine-studio-live-preview"><div className="wine-studio-device-label"><DevicePhoneMobileIcon /> {previewItem?.bespoke ? "Current bespoke guest page" : "Live guest-page preview"} <span>{previewItem?.bespoke ? "iPad portrait · 1024 × 1366" : "Unsaved changes shown"}</span></div><WinePreview item={previewItem} name={form.name} theme={form.theme} published={form.isPublished} /></aside></div>
       <footer><div className="wine-studio-footer-status"><GlobeAltIcon /><span><strong>{editing?.bespoke ? "Bespoke guest experience" : `${designerStep + 1} of ${DESIGNER_STEPS.length}`}</strong>{form.slug ? `/wine/${form.slug}` : "Private draft"}</span></div>{designerStep > 0 && !editing?.bespoke && <button type="button" className="so-btn-secondary" onClick={() => setDesignerStep((step) => step - 1)}>Back</button>}{designerStep < DESIGNER_STEPS.length - 1 ? <button type="button" className="so-btn-primary" onClick={() => setDesignerStep((step) => step + 1)} disabled={!form.name || !form.slug || (!editing && !form.locationId)}>Continue <span>→</span></button> : <button type="submit" className="so-btn-primary" disabled={saving || (!editing && !form.locationId)}>{saving ? "Saving…" : editing ? "Save experience" : "Create experience"}</button>}</footer>
     </form></div>, document.body)}
   </div>;
