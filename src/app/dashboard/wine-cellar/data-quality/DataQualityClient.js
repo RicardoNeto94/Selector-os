@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useMemo, useState, useTransition } from "react";
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
@@ -35,11 +35,28 @@ export default function DataQualityClient({ report, records = [], canEdit = fals
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [keepWineId, setKeepWineId] = useState('');
+  const [lastSaved, setLastSaved] = useState(null);
+  useEffect(() => {
+    if (!lastSaved || lastSaved.report === report) return;
+    const remaining = report.issues.filter(item => item.wineId === lastSaved.id || item.relatedWineIds?.includes(lastSaved.id));
+    setNotice(remaining.length ? `Correction saved. ${remaining.length} issue(s) still require attention: ${remaining.map(item => item.title).join(', ')}.` : 'Correction saved and verified. No catalogue issues remain for this wine.');
+    setLastSaved(null);
+  }, [report, lastSaved]);
   const record = records.find((wine) => wine.id === wineId);
   function edit(item, id = item.wineId) {
-    setActive(item); setWineId(id); setError('');
+    setActive(item); setWineId(id); setError(''); setKeepWineId('');
     const wine = records.find((entry) => entry.id === id);
     setForm(Object.fromEntries(['name','producer','wine_type','country','region','vintage','size','sku'].map((key) => [key, String(wine?.[key] ?? '')])));
+  }
+  async function retire() {
+    if (!keepWineId || !window.confirm(`Retire this zero-stock copy of ${record.name}? The chosen record is kept. Stock and history are not deleted.`)) return;
+    setSaving(true); setError('');
+    try {
+      const response = await fetch(`/api/wines/${encodeURIComponent(wineId)}`, { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ keepWineId }) });
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Could not retire duplicate.');
+      setNotice('Duplicate retired. Historical references are preserved; no stock was transferred.'); setActive(null); startTransition(() => router.refresh());
+    } catch (error) { setError(error.message); } finally { setSaving(false); }
   }
   async function save(event) {
     event.preventDefault(); setSaving(true); setError('');
@@ -49,7 +66,7 @@ export default function DataQualityClient({ report, records = [], canEdit = fals
       const response = await fetch(`/api/wines/${encodeURIComponent(wineId)}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(changes) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not save the correction.');
-      setNotice(`Saved ${record?.name || 'wine'}. The queue is recalculated from the updated catalogue.`); setActive(null);
+      setNotice(`Saved ${record?.name || 'wine'}. Checking remaining issues…`); setLastSaved({ id: wineId, report }); setActive(null);
       startTransition(() => router.refresh());
     } catch (error) { setError(error.message); } finally { setSaving(false); }
   }
@@ -114,6 +131,7 @@ export default function DataQualityClient({ report, records = [], canEdit = fals
             <div className="dq-fields">{(item.category === 'source' ? ['sku'] : item.title === 'Bottle size needs review' ? ['size'] : ['name','producer','wine_type','country','region','vintage','size']).map((key) => <label key={key}>{({ wine_type: 'Wine type', size: 'Bottle size (e.g. 75cl)', sku: 'Catalogue SKU' })[key] || key}<input disabled={!canEdit || saving || (key === 'sku' && Boolean(record.sku))} maxLength={250} value={form[key]} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} list={key === 'wine_type' ? 'dq-wine-types' : undefined} /></label>)}</div>
             <datalist id="dq-wine-types">{['Red','White','Rosé','Sparkling','Champagne','Orange','Dessert','Sake','Non-alcoholic'].map((value) => <option key={value} value={value} />)}</datalist>
             <p className="dq-help">Stock, prices and source mappings are unchanged. Source-managed details may be overwritten by a future sync; correct those in the source system too.</p>
+            {item.category === 'duplicates' && <div className="dq-retirement"><h3>Resolve a genuine duplicate</h3><p>Editing details only clears this warning when the records no longer match. Do not rename a genuine duplicate simply to hide it.</p>{record.hasStockBalance || record.sourceLinked ? <p>This copy cannot be retired here: {record.hasStockBalance ? 'it has a stock balance' : 'it is source-linked'}. Select the unlinked, zero-stock copy instead. If both copies are in use, reconcile them with the source system first.</p> : <><label>Record to keep<select value={keepWineId} disabled={saving || !canEdit} onChange={(event) => setKeepWineId(event.target.value)}><option value="">Choose the record to keep</option>{(item.relatedWineIds || []).filter(id => id !== wineId).map(id => { const keeper = records.find(row => row.id === id); return <option key={id} value={id}>{keeper?.name} · {keeper?.sku || id}</option>; })}</select></label><button type="button" disabled={!canEdit || saving || !keepWineId} onClick={retire}>Retire selected zero-stock copy</button><p>Retirement is blocked until the safety migration is installed. The server rechecks stock and source links before making any change.</p></>}</div>}
             {error && <p role="alert" className="dq-error">{error}</p>}
             <div className="dq-editor-actions">{canEdit && <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save correction'}</button>}<button type="button" disabled={saving} onClick={() => setActive(null)}>Cancel</button><Link href={`/dashboard/wines?wine=${encodeURIComponent(wineId)}`}>Open full wine record →</Link></div>
           </form>}

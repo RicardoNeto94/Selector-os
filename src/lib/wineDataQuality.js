@@ -39,6 +39,7 @@ function issue({ wine, stock, category, severity = "warning", title, detail, hre
 export function buildWineDataQualityReport({
   wines = [],
   inventoryRows = [],
+  valuationRows = [],
 } = {}) {
   const stockByWine = new Map();
   for (const row of inventoryRows) {
@@ -57,6 +58,7 @@ export function buildWineDataQualityReport({
       text(wine.business_product_number) ||
       text(wine.business_barcode) ||
       text(wine.sku)
+      || valuationRows.some((row) => String(row.wine_id) === wineId && text(row.external_product_id))
     );
 
     if (!sourceLinked) {

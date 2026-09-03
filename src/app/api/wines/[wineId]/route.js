@@ -9,6 +9,24 @@ import { parseCatalogueCorrection } from "@/lib/wineCatalogueCorrection";
 
 export const dynamic = "force-dynamic";
 
+export async function DELETE(request, { params }) {
+  try {
+    const access = await requireAdministrator(request);
+    if (access.error) return errorResponse(access.error.message, access.error.status);
+    const { wineId } = await params;
+    const { keepWineId } = await request.json();
+    if (!keepWineId || keepWineId === wineId) return errorResponse('Choose the duplicate record to keep.');
+    const { error } = await access.admin.rpc('retire_catalogue_duplicate', {
+      p_wine_id: wineId, p_keep_wine_id: keepWineId,
+      p_organization_id: access.tenant.organization.id,
+      p_property_id: access.tenant.property?.id || null,
+    });
+    if (error?.code === 'PGRST202') return errorResponse('Safe retirement requires the catalogue database migration. No record was changed. Ask the platform administrator to apply it.', 503);
+    if (error) return errorResponse(error.message, 409);
+    return NextResponse.json({ success: true });
+  } catch (error) { return errorResponse(error.message || 'Retirement failed.', 500); }
+}
+
 export async function PATCH(request, { params }) {
   try {
     const access = await requireAdministrator(request);

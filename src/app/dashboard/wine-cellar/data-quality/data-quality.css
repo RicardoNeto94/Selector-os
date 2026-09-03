@@ -17,6 +17,11 @@
 .dq-editor-actions a { font-size:14px; text-decoration:underline; }
 .dq-feedback { padding:14px 20px; background:#e1f1e6; border-radius:12px; font-size:14px; }
 .dq-error { color:#963a2c; }
+.dq-retirement { margin:20px 0; padding:18px; border:1px solid #c6d4cb; border-radius:12px; background:white; }
+.dq-retirement h3 { font-size:17px; margin:0; }
+.dq-retirement label { display:block; font-size:14px; }
+.dq-retirement select { display:block; max-width:100%; margin:10px 0; padding:12px; border:1px solid #c6d4cb; border-radius:8px; }
+.dq-retirement button { padding:12px 16px; color:#963a2c; border:1px solid #cfb2a8; border-radius:8px; background:#fff8f4; }
 .dq-editor button:disabled { opacity:.5; }
 @media(max-width:720px){.dq-fields{grid-template-columns:1fr}.dq-editor{padding:18px}}
 .dq-shell { width: min(1700px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 54px; }

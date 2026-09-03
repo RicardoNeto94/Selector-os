@@ -87,3 +87,10 @@ test('quick corrections reject stock, tenant and integration mapping changes', (
   assert.throws(() => parseCatalogueCorrection({ size: 'unknown' }), /valid bottle size/);
   assert.throws(() => parseCatalogueCorrection({ name: '' }), /required/);
 });
+test('a valuation link is a valid source identity', () => {
+  const report=buildWineDataQualityReport({wines:[{...completeWine,sku:null}],inventoryRows:[{wine_id:'wine-1',quantity:1}],valuationRows:[{wine_id:'wine-1',external_product_id:'3153'}]});
+  assert.equal(report.counts.source || 0,0);
+});
+test('archived duplicate no longer flags the retained stocked record', () => {
+  const report=buildWineDataQualityReport({wines:[completeWine,{...completeWine,id:'old',is_active:false}],inventoryRows:[{wine_id:'wine-1',quantity:1}]});assert.equal(report.counts.duplicates || 0,0);
+});
