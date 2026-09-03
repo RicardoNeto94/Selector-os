@@ -2806,7 +2806,7 @@ and
 
 .so-mobile-menu-layer { display: none; }
 
-@media (min-width: 901px) and (max-width: 1180px) {
+@media (min-width: 901px) and (max-width: 1024px) {
   :root { --sidebar-width: 72px; }
 
   .so-dashboard-root {
@@ -2835,6 +2835,7 @@ and
   .so-logo-wrap { width: 38px; height: 38px; flex-basis: 38px; }
   .so-brand-copy,
   .so-sidebar-section-label,
+  .so-nav-sub-label,
   .so-nav-group-trigger,
   .so-nav-label,
   .so-nav-badge,
