@@ -99,13 +99,22 @@ async function loadWorkspace(admin, tenant) {
     .from("guest_experiences")
     .select("id,venue_location_id,name,slug,hostname,renderer_key,theme,availability_rules,is_published,updated_at")
     .order("updated_at", { ascending: false });
+  const itemQuery = admin
+    .from("wine_menu_items")
+    .select("id,wine_menu_id,wine_id,service_type,price_override,glass_price,description,wines(price)");
+  const inventoryQuery = admin
+    .from("wine_inventory")
+    .select("wine_id,location_id,quantity")
+    .gt("quantity", 0);
 
-  const [locationsResult, menusResult, experiencesResult] = await Promise.all([
+  const [locationsResult, menusResult, experiencesResult, itemsResult, inventoryResult] = await Promise.all([
     scopeTenantQuery(locationQuery, tenant),
     scopeTenantQuery(menuQuery, tenant),
     scopeTenantQuery(experienceQuery, tenant),
+    scopeTenantQuery(itemQuery, tenant),
+    scopeTenantQuery(inventoryQuery, tenant),
   ]);
-  for (const result of [locationsResult, menusResult, experiencesResult]) {
+  for (const result of [locationsResult, menusResult, experiencesResult, itemsResult, inventoryResult]) {
     if (result.error) throw result.error;
   }
 
@@ -115,11 +124,30 @@ async function loadWorkspace(admin, tenant) {
       .filter((experience) => experience.venue_location_id)
       .map((experience) => [experience.venue_location_id, experience])
   );
+  const itemsByMenu = new Map();
+  for (const item of itemsResult.data || []) {
+    if (!itemsByMenu.has(item.wine_menu_id)) itemsByMenu.set(item.wine_menu_id, []);
+    itemsByMenu.get(item.wine_menu_id).push(item);
+  }
+  const availableWineIdsByLocation = new Map();
+  for (const row of inventoryResult.data || []) {
+    if (!availableWineIdsByLocation.has(row.location_id)) availableWineIdsByLocation.set(row.location_id, new Set());
+    availableWineIdsByLocation.get(row.location_id).add(row.wine_id);
+  }
 
   return (locationsResult.data || []).map((location) => {
     const menu = menusById.get(location.wine_menu_id) || null;
     const experience = experiencesByLocation.get(location.id) || null;
     const slug = experience?.slug || menu?.slug || location.slug;
+    const menuItems = menu ? (itemsByMenu.get(menu.id) || []) : [];
+    const availableWineIds = availableWineIdsByLocation.get(location.id) || new Set();
+    const contentWineIds = new Set(menuItems.map((item) => item.wine_id));
+    const availableCount = [...contentWineIds].filter((wineId) => availableWineIds.has(wineId)).length;
+    const missingPriceCount = menuItems.filter((item) => {
+      const bottleMissing = ["bottle", "both"].includes(item.service_type || "bottle") && item.price_override == null && item.wines?.price == null;
+      const glassMissing = ["glass", "both"].includes(item.service_type) && item.glass_price == null;
+      return bottleMissing || glassMissing;
+    }).length;
     return {
       location,
       menu,
@@ -128,6 +156,13 @@ async function loadWorkspace(admin, tenant) {
       bespoke: BESPOKE_SLUGS.has(slug) || (experience?.renderer_key === "wine" && BESPOKE_SLUGS.has(menu?.slug)),
       theme: { ...DEFAULT_THEME, ...(experience?.theme || {}) },
       availabilityRules: { ...DEFAULT_RULES, ...(experience?.availability_rules || {}) },
+      readiness: {
+        contentCount: contentWineIds.size,
+        availableCount,
+        locationStockCount: availableWineIds.size,
+        missingPriceCount,
+        publicPath: slug ? `/wine/${slug}` : null,
+      },
     };
   });
 }

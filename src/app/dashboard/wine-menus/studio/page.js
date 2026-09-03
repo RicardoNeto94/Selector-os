@@ -57,10 +57,10 @@ export default function WineListStudioPage() {
     setDesignerStep(0);
     setStudioOpen(true);
   }
-  function openEdit(item) {
+  function openEdit(item, initialStep = 0) {
     setEditing(item);
     setForm({ name: item.experience?.name || item.menu?.name || item.location.name, slug: item.slug, locationId: item.location.id, menuId: item.menu?.id, theme: { ...DEFAULT_THEME, ...(item.theme || {}) }, availabilityRules: { ...(data.defaults?.availabilityRules || {}), ...(item.availabilityRules || {}) }, isPublished: item.experience?.is_published === true });
-    setDesignerStep(0);
+    setDesignerStep(initialStep);
     setStudioOpen(true);
   }
 
@@ -85,6 +85,10 @@ export default function WineListStudioPage() {
     };
   }, [studioOpen]);
   const updateTheme = (key, value) => setForm((current) => ({ ...current, theme: { ...current.theme, [key]: value } }));
+  const configured = useMemo(() => data.lists.filter((item) => item.menu), [data.lists]);
+  const published = useMemo(() => configured.filter((item) => item.experience?.is_published), [configured]);
+  const needsAttention = useMemo(() => configured.filter((item) => !item.experience?.is_published || !item.readiness?.availableCount), [configured]);
+  const editingReadiness = editing?.readiness || {};
 
   async function save(event) {
     event.preventDefault(); setSaving(true); setError("");
@@ -98,15 +102,25 @@ export default function WineListStudioPage() {
   return <div className="wine-studio-page page-fade">
     <header className="wine-studio-hero"><div><span className="wine-studio-eyebrow">GUEST EXPERIENCE</span><h1>Digital Wine Lists</h1><p>Create, brand and publish venue wine lists without changing code. Compucash remains the source of stock truth.</p></div><button type="button" className="so-btn-primary" onClick={() => openCreate()} disabled={!unassigned.length}><PlusIcon /> Create wine list</button></header>
     <section className="wine-studio-flow" aria-label="Wine list publishing workflow">{["Choose venue", "Shape the experience", "Check availability", "Preview & publish"].map((step, index) => <div key={step}><span>{String(index + 1).padStart(2, "0")}</span><strong>{step}</strong></div>)}</section>
+    <section className="wine-studio-summary" aria-label="Digital wine-list status">
+      <div><span>Configured</span><strong>{configured.length}</strong><small>venue wine lists</small></div>
+      <div><span>Live</span><strong>{published.length}</strong><small>available to guests</small></div>
+      <div className={needsAttention.length ? "needs-attention" : "is-ready"}><span>Needs action</span><strong>{needsAttention.length}</strong><small>draft or without live wines</small></div>
+      <div><span>Venues available</span><strong>{unassigned.length}</strong><small>ready for a new list</small></div>
+    </section>
     {notice && <div className="wine-studio-notice"><CheckCircleIcon />{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><XMarkIcon /></button></div>}
     {error && <div className="wine-studio-error">{error}</div>}
-    <div className="wine-studio-section-head"><div><span className="wine-studio-eyebrow">YOUR PORTFOLIO</span><h2>Venue experiences</h2></div><p>{data.lists.filter((item) => item.menu).length} configured · {unassigned.length} venues ready to configure</p></div>
+    <div className="wine-studio-section-head"><div><span className="wine-studio-eyebrow">YOUR PORTFOLIO</span><h2>Venue experiences</h2></div><p>One place for design, content, preview and publishing.</p></div>
     {loading ? <div className="wine-studio-loading">Preparing your wine-list studio…</div> : <div className="wine-studio-grid">
-      {data.lists.filter((item) => item.menu).map((item) => <article className="wine-studio-card" key={item.location.id}>
+      {configured.map((item) => <article className="wine-studio-card" key={item.location.id}>
         <div className="wine-studio-card__top"><span className={`wine-studio-status ${item.experience?.is_published ? "is-live" : ""}`}>{item.experience?.is_published ? "Published" : "Draft"}</span><span className="wine-studio-tier">{item.bespoke ? "Bespoke" : "Standard"}</span></div>
         <div className="wine-studio-card__visual" style={{ "--card-accent": item.theme.primaryColor, "--card-bg": item.theme.backgroundColor }}><SwatchIcon /><span>{item.theme.template || "Custom"}</span></div>
-        <div className="wine-studio-card__body"><small>{item.location.name}</small><h3>{item.menu.name}</h3><p>{item.bespoke ? "A protected, individually art-directed Vaxeron experience." : "A reusable experience your team can customise and publish."}</p></div>
-        <div className="wine-studio-card__actions">{!item.bespoke && <button type="button" onClick={() => openEdit(item)}><SwatchIcon /> Design</button>}<Link href={`/dashboard/wine-menus/${item.menu.slug}/editor`}><EyeIcon /> Content</Link><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> Open</a></div>
+        <div className="wine-studio-card__body"><small>{item.location.name}</small><h3>{item.menu.name}</h3><p>{item.bespoke ? "A protected, individually art-directed Vaxeron experience." : "A reusable experience your team can customise and publish."}</p>
+          <div className="wine-studio-card__readiness"><span><strong>{item.readiness?.contentCount || 0}</strong> selected wines</span><span><strong>{item.readiness?.availableCount || 0}</strong> available now</span>{Number(item.readiness?.missingPriceCount) > 0 && <span className="is-warning"><strong>{item.readiness.missingPriceCount}</strong> missing prices</span>}</div>
+          <div className="wine-studio-card__url"><GlobeAltIcon /><span>vaxeron.com{item.readiness?.publicPath}</span></div>
+        </div>
+        <div className="wine-studio-card__actions">{!item.bespoke && <button type="button" onClick={() => openEdit(item)}><SwatchIcon /> Design</button>}<Link href={`/dashboard/wine-menus/${item.menu.slug}/editor`}><EyeIcon /> Manage wines</Link><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> {item.experience?.is_published ? "Open live" : "Preview"}</a></div>
+        {!item.bespoke && !item.experience?.is_published && <button type="button" className="wine-studio-card__primary" onClick={() => openEdit(item, 2)}>Finish and publish <span>→</span></button>}
       </article>)}
       {unassigned.length > 0 && <button className="wine-studio-card wine-studio-card--new" onClick={() => openCreate()}><span><PlusIcon /></span><strong>Create the next guest wine experience</strong><small>{unassigned.length} venue{unassigned.length === 1 ? "" : "s"} available</small></button>}
     </div>}
@@ -129,6 +143,7 @@ export default function WineListStudioPage() {
         {designerStep === 2 && <div className="wine-studio-step-panel"><div className="wine-studio-step-copy"><span>03 · GUEST VIEW</span><h3>Decide what guests see</h3><p>Only available wines appear. Choose the useful details, review the address and publish when ready.</p></div>
           <fieldset><legend>Wine details</legend><div className="wine-studio-toggles">{[["showProducer", "Producer"], ["showRegion", "Region"], ["showVintage", "Vintage"], ["showDescription", "Descriptions"]].map(([key, label]) => <label key={key}><input type="checkbox" checked={form.theme[key]} onChange={(event) => updateTheme(key, event.target.checked)} /><span>{label}</span></label>)}</div></fieldset>
           <div className="wine-studio-availability-note"><CheckCircleIcon /><div><strong>Inventory protection is active</strong><p>Positive stock appears automatically. Wines at zero are kept away from the guest list.</p></div></div>
+          {editing && <div className="wine-studio-publish-checks"><div><span>Selected wines</span><strong>{editingReadiness.contentCount || 0}</strong></div><div><span>Available now</span><strong>{editingReadiness.availableCount || 0}</strong></div><div><span>Missing prices</span><strong>{editingReadiness.missingPriceCount || 0}</strong></div></div>}
           <label className="wine-studio-publish"><input type="checkbox" checked={form.isPublished} onChange={(event) => setForm({ ...form, isPublished: event.target.checked })} /><span><strong>Publish for guests</strong><small>{form.isPublished ? "The list will be available at its public address." : "Keep this off to save a private draft."}</small></span></label>
         </div>}
       </section><aside className="wine-studio-live-preview"><div className="wine-studio-device-label"><DevicePhoneMobileIcon /> Live iPad preview <span>{DESIGNER_STEPS[designerStep]}</span></div><WinePreview name={form.name} theme={form.theme} published={form.isPublished} /></aside></div>

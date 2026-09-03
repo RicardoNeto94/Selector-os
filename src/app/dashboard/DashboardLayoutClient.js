@@ -31,6 +31,8 @@ import {
   CreditCardIcon,
   Bars3Icon,
   MapIcon,
+  GlobeAltIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +45,9 @@ const QUICK_DESTINATIONS = [
   ["Dining", "Guest dining experiences", "/dashboard/experiences"],
   ["Spa", "Treatments, products and spa experiences", "/dashboard/spa"],
   ["Wine Cellar", "Wine catalogue and records", "/dashboard/wines"],
+  ["Catalogue Health", "Prioritized wine record review", "/dashboard/wine-cellar/data-quality"],
   ["Venue Wines", "Venue stock and guest wine lists", "/dashboard/wine-cellar/venues"],
+  ["Digital Wine Lists", "Design and publish guest wine experiences", "/dashboard/wine-menus/studio"],
   ["Stock Control", "Inventory balances by location", "/dashboard/wine-cellar/inventory"],
   ["Stock Issues", "Reconciliation and exceptions", "/dashboard/wine-cellar/reconciliation"],
   ["Ordering", "Zero-stock notifications from Compucash", "/dashboard/wine-cellar/ordering"],
@@ -117,6 +121,10 @@ function NavGroup({ label, open, active, onToggle, children }) {
   );
 }
 
+function NavSubLabel({ children }) {
+  return <div className="so-nav-sub-label">{children}</div>;
+}
+
 function MobileMenuLink({ href, icon: Icon, label, detail, active, badge, onSelect }) {
   return (
     <Link href={href} className={`so-mobile-menu-link ${active ? "is-active" : ""}`} onClick={onSelect}>
@@ -154,6 +162,7 @@ export default function DashboardLayout({
   const hasWine = Boolean(entitlements?.enabled && entitlements?.modules?.wine);
   const hasDining = Boolean(entitlements?.enabled && entitlements?.modules?.dining);
   const hasSpa = Boolean(entitlements?.enabled && entitlements?.modules?.spa);
+  const hasGuestExperience = Boolean(entitlements?.enabled && entitlements?.modules?.guest_experience);
   const showWineSetup = hasWine && ["invited", "in_progress", "ready"].includes(onboardingStatus);
 
   useEffect(() => {
@@ -226,6 +235,7 @@ export default function DashboardLayout({
       (!href.startsWith("/dashboard/spa") || hasSpa);
     return moduleAllowed &&
       (href !== "/dashboard/wine-cellar/setup" || showWineSetup) &&
+      (href !== "/dashboard/wine-menus/studio" || hasGuestExperience) &&
       (!supportMode || !["/dashboard/team", "/dashboard/settings", "/dashboard/wine-cellar/ordering"].includes(href)) &&
       `${label} ${detail}`.toLowerCase().includes(commandQuery.trim().toLowerCase());
   });
@@ -387,12 +397,20 @@ export default function DashboardLayout({
                 icon={MapIcon}
                 label="Wine Setup"
               />}
+              <NavSubLabel>Catalogue</NavSubLabel>
               <NavItem
               href="/dashboard/wines"
-              isActive={isActive("/dashboard/wines") || isActive("/dashboard/wine-cellar/data-quality")}
+              isActive={isActive("/dashboard/wines")}
               icon={BeakerIcon}
               label="Wine Cellar"
             />
+
+              <NavItem
+                href="/dashboard/wine-cellar/data-quality"
+                isActive={isActive("/dashboard/wine-cellar/data-quality")}
+                icon={WrenchScrewdriverIcon}
+                label="Catalogue Health"
+              />
 
               <NavItem
               href="/dashboard/wine-cellar/venues"
@@ -403,6 +421,14 @@ export default function DashboardLayout({
               label="Venue Wines"
             />
 
+              {hasGuestExperience && <NavItem
+                href="/dashboard/wine-menus/studio"
+                isActive={isActive("/dashboard/wine-menus")}
+                icon={GlobeAltIcon}
+                label="Digital Wine Lists"
+              />}
+
+              <NavSubLabel>Stock & purchasing</NavSubLabel>
               <NavItem
               href="/dashboard/wine-cellar/inventory"
               isActive={isActive(
@@ -662,7 +688,9 @@ export default function DashboardLayout({
                 <div>
                   {showWineSetup && <MobileMenuLink href="/dashboard/wine-cellar/setup" icon={MapIcon} label="Wine Setup" detail="Guided workspace setup" active={isActive("/dashboard/wine-cellar/setup")} onSelect={() => setMobileMenuOpen(false)} />}
                   <MobileMenuLink href="/dashboard/wines" icon={BeakerIcon} label="Wine Cellar" detail="Catalogue and records" active={isActive("/dashboard/wines")} onSelect={() => setMobileMenuOpen(false)} />
+                  <MobileMenuLink href="/dashboard/wine-cellar/data-quality" icon={WrenchScrewdriverIcon} label="Catalogue Health" detail="Prioritized record review" active={isActive("/dashboard/wine-cellar/data-quality")} onSelect={() => setMobileMenuOpen(false)} />
                   <MobileMenuLink href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} label="Venue Wines" detail="Locations and wine lists" active={isActive("/dashboard/wine-cellar/venues")} onSelect={() => setMobileMenuOpen(false)} />
+                  {hasGuestExperience && <MobileMenuLink href="/dashboard/wine-menus/studio" icon={GlobeAltIcon} label="Digital Wine Lists" detail="Design and guest publishing" active={isActive("/dashboard/wine-menus")} onSelect={() => setMobileMenuOpen(false)} />}
                   <MobileMenuLink href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} label="Stock Control" detail="Inventory balances" active={isActive("/dashboard/wine-cellar/inventory")} onSelect={() => setMobileMenuOpen(false)} />
                   <MobileMenuLink href="/dashboard/wine-cellar/reconciliation" icon={ClipboardDocumentCheckIcon} label="Stock Issues" detail="Exceptions and quality" active={isActive("/dashboard/wine-cellar/reconciliation")} onSelect={() => setMobileMenuOpen(false)} />
                   {!supportMode && <MobileMenuLink href="/dashboard/wine-cellar/ordering" icon={BellAlertIcon} label="Ordering" detail="Restock notifications" active={isActive("/dashboard/wine-cellar/ordering")} badge={orderingAlerts} onSelect={() => setMobileMenuOpen(false)} />}
