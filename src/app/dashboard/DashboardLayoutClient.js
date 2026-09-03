@@ -29,6 +29,7 @@ import {
   ShieldCheckIcon,
   EyeIcon,
   CreditCardIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,7 @@ function NavItem({
   return (
     <Link
       href={href}
+      title={label}
       className={
         "so-nav-item " +
         (isActive
@@ -108,8 +110,18 @@ function NavGroup({ label, open, active, onToggle, children }) {
         <span>{label}</span>
         <ChevronDownIcon aria-hidden="true" />
       </button>
-      {open && <div className="so-nav-group-items">{children}</div>}
+      <div className="so-nav-group-items" hidden={!open}>{children}</div>
     </section>
+  );
+}
+
+function MobileMenuLink({ href, icon: Icon, label, detail, active, badge, onSelect }) {
+  return (
+    <Link href={href} className={`so-mobile-menu-link ${active ? "is-active" : ""}`} onClick={onSelect}>
+      <span className="so-mobile-menu-link__icon"><Icon aria-hidden="true" /></span>
+      <span><strong>{label}</strong><small>{detail}</small></span>
+      {Number(badge) > 0 && <i>{Number(badge) > 99 ? "99+" : badge}</i>}
+    </Link>
   );
 }
 
@@ -129,6 +141,7 @@ export default function DashboardLayout({
   const [orderingAlerts, setOrderingAlerts] = useState(0);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationSummary, setNotificationSummary] = useState({});
   const [endingSupport, setEndingSupport] = useState(false);
   const [navReady, setNavReady] = useState(false);
@@ -174,6 +187,7 @@ export default function DashboardLayout({
         setCommandOpen(false);
         setNotificationOpen(false);
         setAccountMenuOpen(false);
+        setMobileMenuOpen(false);
       }
     }
 
@@ -197,6 +211,7 @@ export default function DashboardLayout({
   useEffect(() => {
     setNotificationOpen(false);
     setAccountMenuOpen(false);
+    setMobileMenuOpen(false);
   }, [pathname]);
 
   const filteredDestinations = QUICK_DESTINATIONS.filter(([label, detail, href]) => {
@@ -612,6 +627,48 @@ export default function DashboardLayout({
         </div>
       )}
 
+      {mobileMenuOpen && (
+        <div className="so-mobile-menu-layer">
+          <button className="so-mobile-menu-backdrop" type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} />
+          <section className="so-mobile-menu-sheet" role="dialog" aria-modal="true" aria-label="All navigation">
+            <header>
+              <div><span>Workspace navigation</span><h2>All areas</h2></div>
+              <button type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)}><XMarkIcon /></button>
+            </header>
+            <div className="so-mobile-menu-groups">
+              {(hasDining || hasSpa) && <section>
+                <h3>Experience</h3>
+                <div>
+                  {hasDining && <MobileMenuLink href="/dashboard/dishes" icon={RectangleStackIcon} label="Dishes" detail="Catalogue and allergens" active={isActive("/dashboard/dishes")} onSelect={() => setMobileMenuOpen(false)} />}
+                  {hasDining && <MobileMenuLink href="/dashboard/menu" icon={SwatchIcon} label="Menus" detail="Restaurant publishing" active={isActive("/dashboard/menu")} onSelect={() => setMobileMenuOpen(false)} />}
+                  {hasDining && <MobileMenuLink href="/dashboard/experiences" icon={SparklesIcon} label="Dining" detail="Guest experiences" active={isActive("/dashboard/experiences")} onSelect={() => setMobileMenuOpen(false)} />}
+                  {hasSpa && <MobileMenuLink href="/dashboard/spa" icon={SparklesIcon} label="Spa" detail="Treatments and products" active={isActive("/dashboard/spa")} onSelect={() => setMobileMenuOpen(false)} />}
+                </div>
+              </section>}
+              {hasWine && <section>
+                <h3>Wine operations</h3>
+                <div>
+                  <MobileMenuLink href="/dashboard/wines" icon={BeakerIcon} label="Wine Cellar" detail="Catalogue and records" active={isActive("/dashboard/wines")} onSelect={() => setMobileMenuOpen(false)} />
+                  <MobileMenuLink href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} label="Venue Wines" detail="Locations and wine lists" active={isActive("/dashboard/wine-cellar/venues")} onSelect={() => setMobileMenuOpen(false)} />
+                  <MobileMenuLink href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} label="Stock Control" detail="Inventory balances" active={isActive("/dashboard/wine-cellar/inventory")} onSelect={() => setMobileMenuOpen(false)} />
+                  <MobileMenuLink href="/dashboard/wine-cellar/reconciliation" icon={ClipboardDocumentCheckIcon} label="Stock Issues" detail="Exceptions and quality" active={isActive("/dashboard/wine-cellar/reconciliation")} onSelect={() => setMobileMenuOpen(false)} />
+                  {!supportMode && <MobileMenuLink href="/dashboard/wine-cellar/ordering" icon={BellAlertIcon} label="Ordering" detail="Restock notifications" active={isActive("/dashboard/wine-cellar/ordering")} badge={orderingAlerts} onSelect={() => setMobileMenuOpen(false)} />}
+                  <MobileMenuLink href="/dashboard/wine-cellar/transfers" icon={ArrowsRightLeftIcon} label="Movements" detail="Transfers and history" active={isActive("/dashboard/wine-cellar/transfers")} onSelect={() => setMobileMenuOpen(false)} />
+                </div>
+              </section>}
+              {!supportMode && <section>
+                <h3>Workspace</h3>
+                <div>
+                  <MobileMenuLink href="/dashboard/team" icon={UsersIcon} label="Team & Access" detail="Users and permissions" active={isActive("/dashboard/team")} onSelect={() => setMobileMenuOpen(false)} />
+                  <MobileMenuLink href="/dashboard/settings" icon={Cog6ToothIcon} label="Settings" detail="Workspace configuration" active={isActive("/dashboard/settings")} onSelect={() => setMobileMenuOpen(false)} />
+                  <MobileMenuLink href="/dashboard/billing" icon={CreditCardIcon} label="Plan & Billing" detail="Subscription and plan" active={isActive("/dashboard/billing")} onSelect={() => setMobileMenuOpen(false)} />
+                </div>
+              </section>}
+            </div>
+          </section>
+        </div>
+      )}
+
       {/* ===================================================
           MOBILE NAVIGATION
       =================================================== */}
@@ -697,26 +754,18 @@ export default function DashboardLayout({
           </span>
         </Link>
 
-        <Link
-          href="/dashboard/wine-cellar/transfers"
-          className={
-            "so-mobile-nav-item " +
-            (
-              isActive(
-                "/dashboard/wine-cellar/transfers"
-              )
-                ? "so-mobile-nav-item--active"
-                : ""
-            )
-          }
-        >
-          <ArrowsRightLeftIcon className="so-mobile-nav-icon" />
-
-          <span>
-            History
-          </span>
-        </Link>
         </>}
+
+        <button
+          type="button"
+          className={`so-mobile-nav-item so-mobile-nav-more ${mobileMenuOpen ? "so-mobile-nav-item--active" : ""}`}
+          aria-label="Open all navigation"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((value) => !value)}
+        >
+          <Bars3Icon className="so-mobile-nav-icon" />
+          <span>More</span>
+        </button>
 
       </div>
 
