@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createPortal } from "react-dom";
-import { ArrowTopRightOnSquareIcon, CheckCircleIcon, DevicePhoneMobileIcon, EyeIcon, GlobeAltIcon, PlusIcon, SwatchIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, CheckCircleIcon, DevicePhoneMobileIcon, GlobeAltIcon, PlusIcon, SwatchIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import StandardWineView from "@/components/menus/wine-views/StandardWineView";
 
 const TEMPLATES = [
   ["editorial", "Editorial", "Warm, spacious and sommelier-led"],
@@ -15,16 +15,18 @@ const DESIGNER_STEPS = ["Basics", "Look & feel", "Guest publishing"];
 const DEFAULT_THEME = { template: "editorial", primaryColor: "#173a32", backgroundColor: "#f4f1e9", textColor: "#17221f", fontPairing: "editorial", density: "relaxed", logoUrl: "", currency: "EUR", welcomeMessage: "A cellar selected for this moment.", showProducer: true, showRegion: true, showVintage: true, showDescription: true };
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-function WinePreview({ name, theme, published }) {
-  const font = theme.fontPairing === "modern" ? "var(--font-sans)" : "Georgia, serif";
-  const samplePrice = new Intl.NumberFormat("en", { style: "currency", currency: theme.currency || "EUR", maximumFractionDigits: 0 }).format(145);
-  return <div className="wine-studio-device"><div className="wine-studio-device__camera" /><div className={`wine-studio-preview wine-studio-preview--${theme.template} wine-studio-preview--${theme.density}`} style={{ "--preview-accent": theme.primaryColor, "--preview-bg": theme.backgroundColor, "--preview-text": theme.textColor, fontFamily: font }}>
-    <div className="wine-studio-preview__bar"><span>{theme.logoUrl ? <img src={theme.logoUrl} alt={`${name || "Wine list"} logo`} /> : "VAXERON / WINE"}</span><span>{published ? "LIVE GUEST VIEW" : "PRIVATE PREVIEW"}</span></div>
-    <div className="wine-studio-preview__hero"><small>CURATED FOR THIS VENUE</small><h3>{name || "Your wine list"}</h3><p>{theme.welcomeMessage}</p><em>Live availability · 12 wines selected</em></div>
-    <div className="wine-studio-preview__filters"><span>All wines</span><span>By the glass</span><span>Red</span><span>White</span></div>
-    <div className="wine-studio-preview__wines">
-      {[["Château Example", "Bordeaux · France", "2020"], ["Estate Chardonnay", "Burgundy · France", "2022"], ["Vintage Selection", "Tuscany · Italy", "2019"]].map(([wine, region, vintage]) => <article key={wine}><div><strong>{wine}</strong><small>{region}</small></div><span>{theme.showVintage ? vintage : ""}</span><b>{samplePrice}</b></article>)}
-    </div>
+function WinePreview({ item, name, theme, published }) {
+  if (item?.bespoke && item.menu?.slug) {
+    return <div className="wine-studio-device wine-studio-device--live"><div className="wine-studio-device__camera" /><iframe src={`/wine/${item.menu.slug}`} title={`${name || item.menu.name} current guest page`} /></div>;
+  }
+
+  return <div className="wine-studio-device wine-studio-device--actual"><div className="wine-studio-device__camera" /><div className="wine-studio-actual-preview">
+    <StandardWineView
+      previewMode
+      menu={{ name: name || "Your wine list", slug: item?.menu?.slug }}
+      items={item?.previewItems || []}
+      experience={{ theme, availability_rules: item?.availabilityRules || {}, is_published: published }}
+    />
   </div></div>;
 }
 
@@ -89,6 +91,7 @@ export default function WineListStudioPage() {
   const published = useMemo(() => configured.filter((item) => item.experience?.is_published), [configured]);
   const needsAttention = useMemo(() => configured.filter((item) => !item.experience?.is_published || !item.readiness?.availableCount), [configured]);
   const editingReadiness = editing?.readiness || {};
+  const previewItem = editing || data.lists.find((item) => item.location.id === form.locationId) || null;
 
   async function save(event) {
     event.preventDefault(); setSaving(true); setError("");
@@ -119,7 +122,7 @@ export default function WineListStudioPage() {
           <div className="wine-studio-card__readiness"><span><strong>{item.readiness?.contentCount || 0}</strong> selected wines</span><span><strong>{item.readiness?.availableCount || 0}</strong> available now</span>{Number(item.readiness?.missingPriceCount) > 0 && <span className="is-warning"><strong>{item.readiness.missingPriceCount}</strong> missing prices</span>}</div>
           <div className="wine-studio-card__url"><GlobeAltIcon /><span>vaxeron.com{item.readiness?.publicPath}</span></div>
         </div>
-        <div className="wine-studio-card__actions"><button type="button" onClick={() => openEdit(item, item.bespoke ? 2 : 0)}><SwatchIcon /> {item.bespoke ? "Publishing" : "Design & publish"}</button><Link href={`/dashboard/wine-cellar/venues/${item.location.id}`}><EyeIcon /> Venue wines</Link><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> {item.experience?.is_published ? "Open live" : "Preview"}</a></div>
+        <div className="wine-studio-card__actions"><button type="button" onClick={() => openEdit(item, item.bespoke ? 2 : 0)}><SwatchIcon /> {item.bespoke ? "Publishing" : "Visual editor"}</button><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> {item.experience?.is_published ? "Open live" : "Preview"}</a></div>
         {!item.bespoke && !item.experience?.is_published && <button type="button" className="wine-studio-card__primary" onClick={() => openEdit(item, 2)}>Finish and publish <span>→</span></button>}
       </article>)}
       {unassigned.length > 0 && <button className="wine-studio-card wine-studio-card--new" onClick={() => openCreate()}><span><PlusIcon /></span><strong>Create the next guest wine experience</strong><small>{unassigned.length} venue{unassigned.length === 1 ? "" : "s"} available</small></button>}
@@ -141,12 +144,12 @@ export default function WineListStudioPage() {
           <div className="wine-studio-fields"><label>Typography<select value={form.theme.fontPairing} onChange={(event) => updateTheme("fontPairing", event.target.value)}><option value="editorial">Editorial serif</option><option value="modern">Modern sans</option><option value="classic">Classic hospitality</option></select></label><label>Spacing<select value={form.theme.density} onChange={(event) => updateTheme("density", event.target.value)}><option value="relaxed">Relaxed</option><option value="compact">Compact</option></select></label><label>Currency<select value={form.theme.currency} onChange={(event) => updateTheme("currency", event.target.value)}>{["EUR", "USD", "GBP", "SEK", "NOK", "DKK", "CHF"].map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></label><label>Logo URL <span className="wine-studio-optional">Optional</span><input value={form.theme.logoUrl} onChange={(event) => updateTheme("logoUrl", event.target.value)} placeholder="https://…/logo.svg" /></label></div>
         </div>}
         {designerStep === 2 && <div className="wine-studio-step-panel"><div className="wine-studio-step-copy"><span>03 · GUEST VIEW</span><h3>Decide what guests see</h3><p>Only available wines appear. Choose the useful details, review the address and publish when ready.</p></div>
-          <fieldset><legend>Wine details</legend><div className="wine-studio-toggles">{[["showProducer", "Producer"], ["showRegion", "Region"], ["showVintage", "Vintage"], ["showDescription", "Descriptions"]].map(([key, label]) => <label key={key}><input type="checkbox" checked={form.theme[key]} onChange={(event) => updateTheme(key, event.target.checked)} /><span>{label}</span></label>)}</div></fieldset>
+          {editing?.bespoke ? <div className="wine-studio-bespoke-note"><SwatchIcon /><div><strong>Protected bespoke design</strong><p>This venue’s art-directed guest interface is shown exactly in the preview. Its visual system is managed separately; this panel controls whether guests can access it.</p></div></div> : <fieldset><legend>Wine details</legend><div className="wine-studio-toggles">{[["showProducer", "Producer"], ["showRegion", "Region"], ["showVintage", "Vintage"], ["showDescription", "Descriptions"]].map(([key, label]) => <label key={key}><input type="checkbox" checked={form.theme[key]} onChange={(event) => updateTheme(key, event.target.checked)} /><span>{label}</span></label>)}</div></fieldset>}
           <div className="wine-studio-availability-note"><CheckCircleIcon /><div><strong>Inventory protection is active</strong><p>Positive stock appears automatically. Wines at zero are kept away from the guest list.</p></div></div>
           {editing && <div className="wine-studio-publish-checks"><div><span>Selected wines</span><strong>{editingReadiness.contentCount || 0}</strong></div><div><span>Available now</span><strong>{editingReadiness.availableCount || 0}</strong></div><div><span>Missing prices</span><strong>{editingReadiness.missingPriceCount || 0}</strong></div></div>}
           <label className="wine-studio-publish"><input type="checkbox" checked={form.isPublished} onChange={(event) => setForm({ ...form, isPublished: event.target.checked })} /><span><strong>Publish for guests</strong><small>{form.isPublished ? "The list will be available at its public address." : "Keep this off to save a private draft."}</small></span></label>
         </div>}
-      </section><aside className="wine-studio-live-preview"><div className="wine-studio-device-label"><DevicePhoneMobileIcon /> Live iPad preview <span>{DESIGNER_STEPS[designerStep]}</span></div><WinePreview name={form.name} theme={form.theme} published={form.isPublished} /></aside></div>
+      </section><aside className="wine-studio-live-preview"><div className="wine-studio-device-label"><DevicePhoneMobileIcon /> {previewItem?.bespoke ? "Current bespoke guest page" : "Live guest-page preview"} <span>{previewItem?.bespoke ? "Protected design" : "Unsaved changes shown"}</span></div><WinePreview item={previewItem} name={form.name} theme={form.theme} published={form.isPublished} /></aside></div>
       <footer><div className="wine-studio-footer-status"><GlobeAltIcon /><span><strong>{editing?.bespoke ? "Bespoke guest experience" : `${designerStep + 1} of ${DESIGNER_STEPS.length}`}</strong>{form.slug ? `/wine/${form.slug}` : "Private draft"}</span></div>{designerStep > 0 && !editing?.bespoke && <button type="button" className="so-btn-secondary" onClick={() => setDesignerStep((step) => step - 1)}>Back</button>}{designerStep < DESIGNER_STEPS.length - 1 ? <button type="button" className="so-btn-primary" onClick={() => setDesignerStep((step) => step + 1)} disabled={!form.name || !form.slug || (!editing && !form.locationId)}>Continue <span>→</span></button> : <button type="submit" className="so-btn-primary" disabled={saving || (!editing && !form.locationId)}>{saving ? "Saving…" : editing ? "Save experience" : "Create experience"}</button>}</footer>
     </form></div>, document.body)}
   </div>;

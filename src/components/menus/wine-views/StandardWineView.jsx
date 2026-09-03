@@ -35,7 +35,7 @@ function formatPrice(value, currency = "EUR") {
     : "";
 }
 
-export default function StandardWineView({ menu, items = [], experience }) {
+export default function StandardWineView({ menu, items = [], experience, previewMode = false }) {
   const theme = { ...DEFAULT_THEME, ...(experience?.theme || {}) };
   const rules = experience?.availability_rules || {};
   const [activeType, setActiveType] = useState("All");
@@ -56,7 +56,7 @@ export default function StandardWineView({ menu, items = [], experience }) {
     return haystack.includes(query.trim().toLowerCase());
   }), [items, activeType, query, rules.show_bottle, rules.show_btg]);
 
-  return <div className={`${styles.root} ${styles[theme.template] || ""} ${styles[theme.density] || ""}`} style={{ "--wine-accent": theme.primaryColor, "--wine-bg": theme.backgroundColor, "--wine-text": theme.textColor }}>
+  return <div className={`${styles.root} ${styles[theme.template] || ""} ${styles[theme.density] || ""} ${previewMode ? styles.preview : ""}`} style={{ "--wine-accent": theme.primaryColor, "--wine-bg": theme.backgroundColor, "--wine-text": theme.textColor }}>
     <header className={styles.header}>
       <div className={styles.brand}>{theme.logoUrl ? <img src={theme.logoUrl} alt={`${menu?.name || "Wine list"} logo`} style={{ display: "block", width: "auto", maxWidth: 150, height: 34, objectFit: "contain" }} /> : <><span>V</span><small>DIGITAL CELLAR</small></>}</div>
       <div className={styles.intro}><small>CURATED FOR THIS VENUE</small><h1>{menu?.name || experience?.name || "Wine list"}</h1><p>{theme.welcomeMessage}</p></div>

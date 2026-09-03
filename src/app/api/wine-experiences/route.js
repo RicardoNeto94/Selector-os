@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireAdministrator } from "@/lib/server/requireAdministrator";
 import { scopeTenantQuery, tenantWriteFields } from "@/lib/server/tenantContext";
+import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 
 const HEX = /^#[0-9a-f]{6}$/i;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -99,22 +100,17 @@ async function loadWorkspace(admin, tenant) {
     .from("guest_experiences")
     .select("id,venue_location_id,name,slug,hostname,renderer_key,theme,availability_rules,is_published,updated_at")
     .order("updated_at", { ascending: false });
-  const itemQuery = admin
-    .from("wine_menu_items")
-    .select("id,wine_menu_id,wine_id,service_type,price_override,glass_price,description,wines(price)");
-  const inventoryQuery = admin
-    .from("wine_inventory")
-    .select("wine_id,location_id,quantity")
-    .gt("quantity", 0);
+  const itemColumns = "id,wine_menu_id,wine_id,position,service_type,price_override,glass_price,description,wines(id,name,producer,country,region,subregion,wine_type,grapes,vintage,price,description)";
+  const inventoryColumns = "wine_id,location_id,quantity,wines(id,name,producer,country,region,subregion,wine_type,grapes,vintage,price,description)";
 
-  const [locationsResult, menusResult, experiencesResult, itemsResult, inventoryResult] = await Promise.all([
+  const [locationsResult, menusResult, experiencesResult, itemRows, inventoryRows] = await Promise.all([
     scopeTenantQuery(locationQuery, tenant),
     scopeTenantQuery(menuQuery, tenant),
     scopeTenantQuery(experienceQuery, tenant),
-    scopeTenantQuery(itemQuery, tenant),
-    scopeTenantQuery(inventoryQuery, tenant),
+    fetchAllRows(admin, "wine_menu_items", itemColumns, (query) => scopeTenantQuery(query.order("id"), tenant)),
+    fetchAllRows(admin, "wine_inventory", inventoryColumns, (query) => scopeTenantQuery(query.gt("quantity", 0).order("wine_id"), tenant)),
   ]);
-  for (const result of [locationsResult, menusResult, experiencesResult, itemsResult, inventoryResult]) {
+  for (const result of [locationsResult, menusResult, experiencesResult]) {
     if (result.error) throw result.error;
   }
 
@@ -125,12 +121,12 @@ async function loadWorkspace(admin, tenant) {
       .map((experience) => [experience.venue_location_id, experience])
   );
   const itemsByMenu = new Map();
-  for (const item of itemsResult.data || []) {
+  for (const item of itemRows) {
     if (!itemsByMenu.has(item.wine_menu_id)) itemsByMenu.set(item.wine_menu_id, []);
     itemsByMenu.get(item.wine_menu_id).push(item);
   }
   const availableWineIdsByLocation = new Map();
-  for (const row of inventoryResult.data || []) {
+  for (const row of inventoryRows) {
     if (!availableWineIdsByLocation.has(row.location_id)) availableWineIdsByLocation.set(row.location_id, new Set());
     availableWineIdsByLocation.get(row.location_id).add(row.wine_id);
   }
@@ -142,6 +138,23 @@ async function loadWorkspace(admin, tenant) {
     const menuItems = menu ? (itemsByMenu.get(menu.id) || []) : [];
     const availableWineIds = availableWineIdsByLocation.get(location.id) || new Set();
     const contentWineIds = new Set(menuItems.map((item) => item.wine_id));
+    const previewItems = menu
+      ? menuItems
+          .filter((item) => availableWineIds.has(item.wine_id))
+          .sort((left, right) => Number(left.position || 0) - Number(right.position || 0))
+      : inventoryRows
+          .filter((row) => row.location_id === location.id && Number(row.quantity) > 0 && row.wines)
+          .slice(0, 12)
+          .map((row, position) => ({
+            id: `preview-${location.id}-${row.wine_id}`,
+            wine_id: row.wine_id,
+            position,
+            service_type: "bottle",
+            price_override: row.wines?.price ?? null,
+            glass_price: null,
+            description: row.wines?.description || "",
+            wines: row.wines,
+          }));
     const availableCount = [...contentWineIds].filter((wineId) => availableWineIds.has(wineId)).length;
     const missingPriceCount = menuItems.filter((item) => {
       const bottleMissing = ["bottle", "both"].includes(item.service_type || "bottle") && item.price_override == null && item.wines?.price == null;
@@ -156,6 +169,7 @@ async function loadWorkspace(admin, tenant) {
       bespoke: BESPOKE_SLUGS.has(slug) || (experience?.renderer_key === "wine" && BESPOKE_SLUGS.has(menu?.slug)),
       theme: { ...DEFAULT_THEME, ...(experience?.theme || {}) },
       availabilityRules: { ...DEFAULT_RULES, ...(experience?.availability_rules || {}) },
+      previewItems,
       readiness: {
         contentCount: contentWineIds.size,
         availableCount,
@@ -308,7 +322,24 @@ export async function PATCH(request) {
     if (menuError) throw menuError;
     if (!menu) return NextResponse.json({ error: "Wine list was not found in this workspace." }, { status: 404 });
     if (BESPOKE_SLUGS.has(menu.slug)) {
-      return NextResponse.json({ error: "This is a bespoke Vaxeron experience. Its protected renderer is managed separately." }, { status: 409 });
+      let bespokeExperienceQuery = access.admin
+        .from("guest_experiences")
+        .select("id")
+        .eq("venue_location_id", body.locationId);
+      bespokeExperienceQuery = scopeTenantQuery(bespokeExperienceQuery, access.tenant);
+      const { data: bespokeExperience, error: bespokeLookupError } = await bespokeExperienceQuery.maybeSingle();
+      if (bespokeLookupError) throw bespokeLookupError;
+      if (!bespokeExperience) {
+        return NextResponse.json({ error: "The bespoke guest experience was not found." }, { status: 404 });
+      }
+      let bespokeUpdate = access.admin
+        .from("guest_experiences")
+        .update({ is_published: body.isPublished === true, updated_at: new Date().toISOString() })
+        .eq("id", bespokeExperience.id);
+      bespokeUpdate = scopeTenantQuery(bespokeUpdate, access.tenant);
+      const { error: bespokeUpdateError } = await bespokeUpdate;
+      if (bespokeUpdateError) throw bespokeUpdateError;
+      return NextResponse.json({ success: true });
     }
 
     let menuUpdate = access.admin.from("wine_menus").update({
