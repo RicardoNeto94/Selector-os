@@ -12,7 +12,7 @@ const TEMPLATES = [
   ["midnight", "Midnight", "Dark, intimate and cinematic"],
 ];
 const DESIGNER_STEPS = ["Basics", "Look & feel", "Guest publishing"];
-const DEFAULT_THEME = { template: "editorial", primaryColor: "#173a32", backgroundColor: "#f4f1e9", textColor: "#17221f", fontPairing: "editorial", density: "relaxed", logoUrl: "", currency: "EUR", welcomeMessage: "A cellar selected for this moment.", showProducer: true, showRegion: true, showVintage: true, showDescription: true };
+const DEFAULT_THEME = { template: "editorial", primaryColor: "#173a32", backgroundColor: "#f4f1e9", textColor: "#17221f", fontPairing: "editorial", density: "relaxed", logoUrl: "", currency: "EUR", welcomeMessage: "A cellar selected for this moment.", showProducer: true, showRegion: true, showVintage: true, showDescription: true, headerPlacement: "center", backgroundStyle: "solid", backgroundImage: "" };
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function WinePreview({ item, name, theme, published }) {
@@ -51,7 +51,6 @@ function ScaledGuestPage({ slug, name }) {
     <iframe
       src={`/wine/${slug}`}
       title={`${name} current guest page`}
-      scrolling="no"
       style={{ "--ipad-preview-scale": scale }}
     />
   </div></div>;
@@ -114,7 +113,9 @@ export default function WineListStudioPage() {
     };
   }, [studioOpen]);
   const updateTheme = (key, value) => setForm((current) => ({ ...current, theme: { ...current.theme, [key]: value } }));
-  const configured = useMemo(() => data.lists.filter((item) => item.menu), [data.lists]);
+  const applyTemplate = (template) => setForm((current) => ({ ...current, theme: { ...current.theme, template, ...(template === "midnight" ? { backgroundColor: "#101816", textColor: "#f4efe4", primaryColor: "#856c40" } : template === "minimal" ? { backgroundColor: "#ffffff", textColor: "#17221f", primaryColor: "#173a32" } : { backgroundColor: "#f4f1e9", textColor: "#17221f", primaryColor: "#173a32" }) } }));
+  const configured = useMemo(() => data.lists.filter((item) => item.menu && !item.theme?.archived), [data.lists]);
+  const archived = useMemo(() => data.lists.filter((item) => item.menu && item.theme?.archived), [data.lists]);
   const published = useMemo(() => configured.filter((item) => item.experience?.is_published), [configured]);
   const needsAttention = useMemo(() => configured.filter((item) => !item.experience?.is_published || !item.readiness?.availableCount), [configured]);
   const editingReadiness = editing?.readiness || {};
@@ -127,6 +128,17 @@ export default function WineListStudioPage() {
       const result = await response.json(); if (!response.ok) throw new Error(result.error || "Wine list could not be saved.");
       setNotice(editing ? "Wine-list design saved." : `${result.importedWines || 0} available wines imported into the new list.`); setStudioOpen(false); await load();
     } catch (saveError) { setError(saveError.message); } finally { setSaving(false); }
+  }
+
+  async function deleteList(item) {
+    if (!window.confirm(`Delete the digital list “${item.menu.name}”? Its public page will be disabled. Your venue, wines and stock are kept, and the design can be restored from Deleted lists.`)) return;
+    setSaving(true); setError("");
+    try {
+      const response = await fetch("/api/wine-experiences", { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ menuId: item.menu.id, locationId: item.location.id }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not delete the list.");
+      await load(); setNotice("Digital list deleted. Venue wines and stock are unchanged. Restore it from Deleted lists if needed.");
+    } catch (error) { setError(error.message); } finally { setSaving(false); }
   }
 
   return <div className="wine-studio-page page-fade">
@@ -149,14 +161,16 @@ export default function WineListStudioPage() {
           <div className="wine-studio-card__readiness"><span><strong>{item.readiness?.contentCount || 0}</strong> selected wines</span><span><strong>{item.readiness?.availableCount || 0}</strong> available now</span>{Number(item.readiness?.missingPriceCount) > 0 && <span className="is-warning"><strong>{item.readiness.missingPriceCount}</strong> missing prices</span>}</div>
           <div className="wine-studio-card__url"><GlobeAltIcon /><span>vaxeron.com{item.readiness?.publicPath}</span></div>
         </div>
-        <div className="wine-studio-card__actions"><button type="button" onClick={() => openEdit(item, item.bespoke ? 2 : 0)}><SwatchIcon /> {item.bespoke ? "Publishing" : "Visual editor"}</button><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> {item.experience?.is_published ? "Open live" : "Preview"}</a></div>
+        <div className="wine-studio-card__actions"><button type="button" onClick={() => openEdit(item, item.bespoke ? 2 : 0)}><SwatchIcon /> {item.bespoke ? "Publishing" : "Visual editor"}</button>{item.experience?.is_published && <a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> Open live</a>}{!item.bespoke && <button type="button" disabled={saving} onClick={() => deleteList(item)}>Delete list</button>}</div>
         {!item.bespoke && !item.experience?.is_published && <button type="button" className="wine-studio-card__primary" onClick={() => openEdit(item, 2)}>Finish and publish <span>→</span></button>}
       </article>)}
       {unassigned.length > 0 && <button className="wine-studio-card wine-studio-card--new" onClick={() => openCreate()}><span><PlusIcon /></span><strong>Create the next guest wine experience</strong><small>{unassigned.length} venue{unassigned.length === 1 ? "" : "s"} available</small></button>}
     </div>}
 
+    {!!archived.length && <details className="wine-studio-notice"><summary>Deleted lists ({archived.length})</summary>{archived.map((item) => <p key={item.menu.id}>{item.menu.name} <button type="button" onClick={() => openEdit(item)}>Restore & edit</button></p>)}</details>}
     {studioOpen && typeof document !== "undefined" && createPortal(<div className="wine-studio-modal" role="dialog" aria-modal="true" aria-label="Wine list designer"><button className="wine-studio-modal__backdrop" onClick={() => setStudioOpen(false)} aria-label="Close designer" /><form className="wine-studio-designer" onSubmit={save}>
       <header><div><span className="wine-studio-eyebrow">{editing ? "VENUE WINE EXPERIENCE" : "NEW VENUE EXPERIENCE"}</span><h2>{editing ? form.name : "Create a digital wine list"}</h2><p>Make the essential choices now. Everything can be refined later.</p></div><button type="button" onClick={() => setStudioOpen(false)} aria-label="Close"><XMarkIcon /></button></header>
+      {error && <div className="wine-studio-error" role="alert">{error}</div>}
       <nav className="wine-studio-stepper" aria-label="Designer steps">{DESIGNER_STEPS.map((step, index) => <button key={step} type="button" disabled={editing?.bespoke && index < 2} className={`${designerStep === index ? "is-current" : ""} ${designerStep > index ? "is-complete" : ""}`} onClick={() => setDesignerStep(index)}><span>{designerStep > index ? "✓" : index + 1}</span><strong>{editing?.bespoke && index < 2 ? `${step} · bespoke` : step}</strong></button>)}</nav>
       <div className="wine-studio-designer__body"><section className="wine-studio-controls">
         {designerStep === 0 && <div className="wine-studio-step-panel"><div className="wine-studio-step-copy"><span>01 · FOUNDATION</span><h3>Name the guest experience</h3><p>Connect this list to its venue and introduce the cellar in one sentence.</p></div>
@@ -166,9 +180,15 @@ export default function WineListStudioPage() {
           <label>Public address<div className="wine-studio-slug-field"><span>vaxeron.com/wine/</span><input value={form.slug} onChange={(event) => !editing && setForm({ ...form, slug: slugify(event.target.value) })} disabled={editing} required /></div></label>
         </div>}
         {designerStep === 1 && <div className="wine-studio-step-panel"><div className="wine-studio-step-copy"><span>02 · ART DIRECTION</span><h3>Shape the atmosphere</h3><p>Choose a starting style, then bring it closer to the venue’s own identity.</p></div>
-          <fieldset><legend>Starting style</legend><div className="wine-studio-templates">{TEMPLATES.map(([value, label, detail]) => <button key={value} type="button" className={form.theme.template === value ? "is-selected" : ""} onClick={() => updateTheme("template", value)}><strong>{label}</strong><small>{detail}</small></button>)}</div></fieldset>
+          <fieldset><legend>Starting style · resets palette</legend><div className="wine-studio-templates">{TEMPLATES.map(([value, label, detail]) => <button key={value} type="button" className={form.theme.template === value ? "is-selected" : ""} onClick={() => applyTemplate(value)}><strong>{label}</strong><small>{detail}</small></button>)}</div></fieldset>
           <fieldset><legend>Brand palette</legend><div className="wine-studio-colors">{[["primaryColor", "Accent"], ["backgroundColor", "Canvas"], ["textColor", "Text"]].map(([key, label]) => <label key={key}>{label}<span><input type="color" value={form.theme[key]} onChange={(event) => updateTheme(key, event.target.value)} /><input value={form.theme[key]} onChange={(event) => updateTheme(key, event.target.value)} /></span></label>)}</div></fieldset>
-          <div className="wine-studio-fields"><label>Typography<select value={form.theme.fontPairing} onChange={(event) => updateTheme("fontPairing", event.target.value)}><option value="editorial">Editorial serif</option><option value="modern">Modern sans</option><option value="classic">Classic hospitality</option></select></label><label>Spacing<select value={form.theme.density} onChange={(event) => updateTheme("density", event.target.value)}><option value="relaxed">Relaxed</option><option value="compact">Compact</option></select></label><label>Currency<select value={form.theme.currency} onChange={(event) => updateTheme("currency", event.target.value)}>{["EUR", "USD", "GBP", "SEK", "NOK", "DKK", "CHF"].map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></label><label>Logo URL <span className="wine-studio-optional">Optional</span><input value={form.theme.logoUrl} onChange={(event) => updateTheme("logoUrl", event.target.value)} placeholder="https://…/logo.svg" /></label></div>
+          <div className="wine-studio-fields">
+            <label>Typography<select value={form.theme.fontPairing} onChange={(event) => updateTheme("fontPairing", event.target.value)}>{[["editorial", "Editorial · Georgia"], ["modern", "Modern · Arial"], ["classic", "Classic · Palatino"], ["elegant", "Elegant · Didot"], ["humanist", "Humanist · Optima"], ["literary", "Literary · Baskerville"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><span className="wine-studio-optional">Device fonts with compatible fallbacks</span></label>
+            <label>Header placement<select value={form.theme.headerPlacement} onChange={(event) => updateTheme("headerPlacement", event.target.value)}>{["left", "center", "right"].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+            <label>Background<select value={form.theme.backgroundStyle} onChange={(event) => updateTheme("backgroundStyle", event.target.value)}><option value="solid">Solid colour</option><option value="gradient">Soft accent gradient</option><option value="image">Image with readability overlay</option></select></label>
+            {form.theme.backgroundStyle === "image" && <label>Background image URL<input value={form.theme.backgroundImage} onChange={(event) => updateTheme("backgroundImage", event.target.value)} placeholder="https://…/background.jpg" /></label>}
+            <label>Spacing<select value={form.theme.density} onChange={(event) => updateTheme("density", event.target.value)}><option value="relaxed">Relaxed</option><option value="compact">Compact</option></select></label><label>Currency<select value={form.theme.currency} onChange={(event) => updateTheme("currency", event.target.value)}>{["EUR", "USD", "GBP", "SEK", "NOK", "DKK", "CHF"].map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></label><label>Logo URL <span className="wine-studio-optional">Optional</span><input value={form.theme.logoUrl} onChange={(event) => updateTheme("logoUrl", event.target.value)} placeholder="https://…/logo.svg" /></label>
+          </div>
         </div>}
         {designerStep === 2 && <div className="wine-studio-step-panel"><div className="wine-studio-step-copy"><span>03 · GUEST VIEW</span><h3>Decide what guests see</h3><p>Only available wines appear. Choose the useful details, review the address and publish when ready.</p></div>
           {editing?.bespoke ? <div className="wine-studio-bespoke-note"><SwatchIcon /><div><strong>Protected bespoke design</strong><p>This venue’s art-directed guest interface is shown exactly in the preview. Its visual system is managed separately; this panel controls whether guests can access it.</p></div></div> : <fieldset><legend>Wine details</legend><div className="wine-studio-toggles">{[["showProducer", "Producer"], ["showRegion", "Region"], ["showVintage", "Vintage"], ["showDescription", "Descriptions"]].map(([key, label]) => <label key={key}><input type="checkbox" checked={form.theme[key]} onChange={(event) => updateTheme(key, event.target.checked)} /><span>{label}</span></label>)}</div></fieldset>}

@@ -2781,6 +2781,11 @@ and
    Full sidebar → compact laptop rail → mobile navigation.
 ===================================================== */
 
+.wine-studio-ipad-viewport iframe { pointer-events: auto; }
+.wine-studio-actual-preview { position: relative; overflow: hidden; }
+.wine-studio-live-preview { min-height: 0; overflow-y: auto; }
+
+
 .so-sidebar > div:first-child {
   display: flex;
   min-height: 0;

@@ -7,7 +7,7 @@ import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 const HEX = /^#[0-9a-f]{6}$/i;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const TEMPLATES = new Set(["editorial", "minimal", "midnight"]);
-const FONTS = new Set(["editorial", "modern", "classic"]);
+const FONTS = new Set(["editorial", "modern", "classic", "elegant", "humanist", "literary"]);
 const DENSITIES = new Set(["relaxed", "compact"]);
 const CURRENCIES = new Set(["EUR", "USD", "GBP", "SEK", "NOK", "DKK", "CHF"]);
 const BESPOKE_SLUGS = new Set(["shang-shi-wine", "koyo-wine"]);
@@ -26,6 +26,9 @@ const DEFAULT_THEME = {
   showRegion: true,
   showVintage: true,
   showDescription: true,
+  headerPlacement: "center",
+  backgroundStyle: "solid",
+  backgroundImage: "",
 };
 
 const DEFAULT_RULES = {
@@ -43,7 +46,7 @@ function cleanText(value, max = 120) {
 
 function cleanLogoUrl(value) {
   const logoUrl = cleanText(value, 500);
-  if (!logoUrl || logoUrl.startsWith("/") || /^https:\/\//i.test(logoUrl)) return logoUrl;
+  if (!logoUrl || /^\/(?!\/)/.test(logoUrl) || /^https:\/\//i.test(logoUrl)) return logoUrl;
   return "";
 }
 
@@ -71,6 +74,9 @@ function parseTheme(input = {}) {
     showRegion: theme.showRegion !== false,
     showVintage: theme.showVintage !== false,
     showDescription: theme.showDescription !== false,
+    headerPlacement: ["left", "center", "right"].includes(theme.headerPlacement) ? theme.headerPlacement : "center",
+    backgroundStyle: ["solid", "gradient", "image"].includes(theme.backgroundStyle) ? theme.backgroundStyle : "solid",
+    backgroundImage: cleanLogoUrl(theme.backgroundImage),
   };
 }
 
@@ -321,6 +327,10 @@ export async function PATCH(request) {
     const { data: menu, error: menuError } = await menuQuery.maybeSingle();
     if (menuError) throw menuError;
     if (!menu) return NextResponse.json({ error: "Wine list was not found in this workspace." }, { status: 404 });
+    // The caller cannot pair a valid menu with a different venue's experience.
+    const { data: linkedLocation, error: linkedError } = await scopeTenantQuery(access.admin.from("wine_locations").select("id").eq("id", body.locationId).eq("wine_menu_id", menu.id), access.tenant).maybeSingle();
+    if (linkedError) throw linkedError;
+    if (!linkedLocation) return NextResponse.json({ error: "Wine list and venue do not match." }, { status: 400 });
     if (BESPOKE_SLUGS.has(menu.slug)) {
       let bespokeExperienceQuery = access.admin
         .from("guest_experiences")
@@ -384,5 +394,30 @@ export async function PATCH(request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message || "Wine list settings could not be saved." }, { status: 500 });
+  }
+}
+
+// Recoverable deletion: retain venue curation and inventory; disable the public
+// experience in one tenant-scoped write. Saving from Deleted lists restores it.
+export async function DELETE(request) {
+  try {
+    const access = await requireAdministrator(request);
+    if (access.error) return NextResponse.json({ error: access.error.message }, { status: access.error.status });
+    const { menuId, locationId } = await request.json();
+    const { data: menu, error: menuError } = await scopeTenantQuery(access.admin.from("wine_menus").select("id,slug").eq("id", menuId), access.tenant).maybeSingle();
+    if (menuError) throw menuError;
+    if (!menu) return NextResponse.json({ error: "Wine list not found." }, { status: 404 });
+    if (BESPOKE_SLUGS.has(menu.slug)) return NextResponse.json({ error: "Bespoke lists cannot be deleted here. Unpublish it instead." }, { status: 403 });
+    const { data: location, error: locationError } = await scopeTenantQuery(access.admin.from("wine_locations").select("id").eq("id", locationId).eq("wine_menu_id", menu.id), access.tenant).maybeSingle();
+    if (locationError) throw locationError;
+    if (!location) return NextResponse.json({ error: "Wine list and venue do not match." }, { status: 400 });
+    const { data: experience, error: lookupError } = await scopeTenantQuery(access.admin.from("guest_experiences").select("id,theme").eq("venue_location_id", location.id).eq("slug", menu.slug).eq("renderer_key", "wine_standard"), access.tenant).maybeSingle();
+    if (lookupError) throw lookupError;
+    if (!experience) return NextResponse.json({ error: "Digital experience not found." }, { status: 404 });
+    const { error } = await scopeTenantQuery(access.admin.from("guest_experiences").update({ theme: { ...experience.theme, archived: true }, is_published: false, updated_at: new Date().toISOString() }).eq("id", experience.id), access.tenant);
+    if (error) throw error;
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: error.message || "Digital list could not be deleted." }, { status: 500 });
   }
 }

@@ -90,7 +90,7 @@ export default async function Page({ params }) {
     console.log("WINE EXPERIENCE ERROR:", JSON.stringify(experienceError));
   }
 
-  if (experience?.renderer_key === "wine_standard" && !experience.is_published) {
+  if (experience?.theme?.archived || (experience?.renderer_key === "wine_standard" && !experience.is_published)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f4f1e9] text-[#17221f] px-6 text-center">
         <div><div className="text-xs tracking-[0.28em] mb-5">VAXERON · PRIVATE PREVIEW</div><h1 className="text-4xl font-serif mb-3">This wine list is being prepared.</h1><p className="opacity-60">Please return when the venue has published its selection.</p></div>
