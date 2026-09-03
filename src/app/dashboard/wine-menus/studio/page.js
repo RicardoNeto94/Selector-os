@@ -69,8 +69,8 @@ export default function WineListStudioPage() {
     if (loading || !requestedLocationId || contextualDesignerOpened.current) return;
     contextualDesignerOpened.current = true;
     const requested = data.lists.find((item) => item.location.id === requestedLocationId);
-    if (!requested || requested.bespoke) return;
-    if (requested.menu) openEdit(requested);
+    if (!requested) return;
+    if (requested.menu) openEdit(requested, requested.bespoke ? 2 : 0);
     else openCreate(requestedLocationId);
   }, [data.lists, loading, searchParams]);
   useEffect(() => {
@@ -110,7 +110,7 @@ export default function WineListStudioPage() {
     </section>
     {notice && <div className="wine-studio-notice"><CheckCircleIcon />{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><XMarkIcon /></button></div>}
     {error && <div className="wine-studio-error">{error}</div>}
-    <div className="wine-studio-section-head"><div><span className="wine-studio-eyebrow">YOUR PORTFOLIO</span><h2>Venue experiences</h2></div><p>One place for design, content, preview and publishing.</p></div>
+    <div className="wine-studio-section-head"><div><span className="wine-studio-eyebrow">YOUR PORTFOLIO</span><h2>Venue experiences</h2></div><p>Design, preview and publish here. Manage wine content from its venue workspace.</p></div>
     {loading ? <div className="wine-studio-loading">Preparing your wine-list studio…</div> : <div className="wine-studio-grid">
       {configured.map((item) => <article className="wine-studio-card" key={item.location.id}>
         <div className="wine-studio-card__top"><span className={`wine-studio-status ${item.experience?.is_published ? "is-live" : ""}`}>{item.experience?.is_published ? "Published" : "Draft"}</span><span className="wine-studio-tier">{item.bespoke ? "Bespoke" : "Standard"}</span></div>
@@ -119,7 +119,7 @@ export default function WineListStudioPage() {
           <div className="wine-studio-card__readiness"><span><strong>{item.readiness?.contentCount || 0}</strong> selected wines</span><span><strong>{item.readiness?.availableCount || 0}</strong> available now</span>{Number(item.readiness?.missingPriceCount) > 0 && <span className="is-warning"><strong>{item.readiness.missingPriceCount}</strong> missing prices</span>}</div>
           <div className="wine-studio-card__url"><GlobeAltIcon /><span>vaxeron.com{item.readiness?.publicPath}</span></div>
         </div>
-        <div className="wine-studio-card__actions">{!item.bespoke && <button type="button" onClick={() => openEdit(item)}><SwatchIcon /> Design</button>}<Link href={`/dashboard/wine-menus/${item.menu.slug}/editor`}><EyeIcon /> Manage wines</Link><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> {item.experience?.is_published ? "Open live" : "Preview"}</a></div>
+        <div className="wine-studio-card__actions"><button type="button" onClick={() => openEdit(item, item.bespoke ? 2 : 0)}><SwatchIcon /> {item.bespoke ? "Publishing" : "Design & publish"}</button><Link href={`/dashboard/wine-cellar/venues/${item.location.id}`}><EyeIcon /> Venue wines</Link><a href={`/wine/${item.menu.slug}`} target="_blank" rel="noreferrer"><ArrowTopRightOnSquareIcon /> {item.experience?.is_published ? "Open live" : "Preview"}</a></div>
         {!item.bespoke && !item.experience?.is_published && <button type="button" className="wine-studio-card__primary" onClick={() => openEdit(item, 2)}>Finish and publish <span>→</span></button>}
       </article>)}
       {unassigned.length > 0 && <button className="wine-studio-card wine-studio-card--new" onClick={() => openCreate()}><span><PlusIcon /></span><strong>Create the next guest wine experience</strong><small>{unassigned.length} venue{unassigned.length === 1 ? "" : "s"} available</small></button>}
@@ -127,7 +127,7 @@ export default function WineListStudioPage() {
 
     {studioOpen && typeof document !== "undefined" && createPortal(<div className="wine-studio-modal" role="dialog" aria-modal="true" aria-label="Wine list designer"><button className="wine-studio-modal__backdrop" onClick={() => setStudioOpen(false)} aria-label="Close designer" /><form className="wine-studio-designer" onSubmit={save}>
       <header><div><span className="wine-studio-eyebrow">{editing ? "VENUE WINE EXPERIENCE" : "NEW VENUE EXPERIENCE"}</span><h2>{editing ? form.name : "Create a digital wine list"}</h2><p>Make the essential choices now. Everything can be refined later.</p></div><button type="button" onClick={() => setStudioOpen(false)} aria-label="Close"><XMarkIcon /></button></header>
-      <nav className="wine-studio-stepper" aria-label="Designer steps">{DESIGNER_STEPS.map((step, index) => <button key={step} type="button" className={`${designerStep === index ? "is-current" : ""} ${designerStep > index ? "is-complete" : ""}`} onClick={() => setDesignerStep(index)}><span>{designerStep > index ? "✓" : index + 1}</span><strong>{step}</strong></button>)}</nav>
+      <nav className="wine-studio-stepper" aria-label="Designer steps">{DESIGNER_STEPS.map((step, index) => <button key={step} type="button" disabled={editing?.bespoke && index < 2} className={`${designerStep === index ? "is-current" : ""} ${designerStep > index ? "is-complete" : ""}`} onClick={() => setDesignerStep(index)}><span>{designerStep > index ? "✓" : index + 1}</span><strong>{editing?.bespoke && index < 2 ? `${step} · bespoke` : step}</strong></button>)}</nav>
       <div className="wine-studio-designer__body"><section className="wine-studio-controls">
         {designerStep === 0 && <div className="wine-studio-step-panel"><div className="wine-studio-step-copy"><span>01 · FOUNDATION</span><h3>Name the guest experience</h3><p>Connect this list to its venue and introduce the cellar in one sentence.</p></div>
           {!editing && <label>Venue<select value={form.locationId} onChange={(event) => setForm({ ...form, locationId: event.target.value })} required>{unassigned.map((item) => <option key={item.location.id} value={item.location.id}>{item.location.name}</option>)}</select></label>}
@@ -147,7 +147,7 @@ export default function WineListStudioPage() {
           <label className="wine-studio-publish"><input type="checkbox" checked={form.isPublished} onChange={(event) => setForm({ ...form, isPublished: event.target.checked })} /><span><strong>Publish for guests</strong><small>{form.isPublished ? "The list will be available at its public address." : "Keep this off to save a private draft."}</small></span></label>
         </div>}
       </section><aside className="wine-studio-live-preview"><div className="wine-studio-device-label"><DevicePhoneMobileIcon /> Live iPad preview <span>{DESIGNER_STEPS[designerStep]}</span></div><WinePreview name={form.name} theme={form.theme} published={form.isPublished} /></aside></div>
-      <footer><div className="wine-studio-footer-status"><GlobeAltIcon /><span><strong>{designerStep + 1} of {DESIGNER_STEPS.length}</strong>{form.slug ? `/wine/${form.slug}` : "Private draft"}</span></div>{designerStep > 0 && <button type="button" className="so-btn-secondary" onClick={() => setDesignerStep((step) => step - 1)}>Back</button>}{designerStep < DESIGNER_STEPS.length - 1 ? <button type="button" className="so-btn-primary" onClick={() => setDesignerStep((step) => step + 1)} disabled={!form.name || !form.slug || (!editing && !form.locationId)}>Continue <span>→</span></button> : <button type="submit" className="so-btn-primary" disabled={saving || (!editing && !form.locationId)}>{saving ? "Saving…" : editing ? "Save experience" : "Create experience"}</button>}</footer>
+      <footer><div className="wine-studio-footer-status"><GlobeAltIcon /><span><strong>{editing?.bespoke ? "Bespoke guest experience" : `${designerStep + 1} of ${DESIGNER_STEPS.length}`}</strong>{form.slug ? `/wine/${form.slug}` : "Private draft"}</span></div>{designerStep > 0 && !editing?.bespoke && <button type="button" className="so-btn-secondary" onClick={() => setDesignerStep((step) => step - 1)}>Back</button>}{designerStep < DESIGNER_STEPS.length - 1 ? <button type="button" className="so-btn-primary" onClick={() => setDesignerStep((step) => step + 1)} disabled={!form.name || !form.slug || (!editing && !form.locationId)}>Continue <span>→</span></button> : <button type="submit" className="so-btn-primary" disabled={saving || (!editing && !form.locationId)}>{saving ? "Saving…" : editing ? "Save experience" : "Create experience"}</button>}</footer>
     </form></div>, document.body)}
   </div>;
 }

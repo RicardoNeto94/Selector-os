@@ -1184,7 +1184,6 @@ export default function VenueWinePage() {
   ].includes(location.location_type);
   const isStorageWorkspace = !supportsGuestExperience;
   const supportsSakePairing = location.name?.toLowerCase().includes("koyo");
-  const isBespokeWineExperience = ["koyo-wine", "shang-shi-wine"].includes(menu?.slug);
   const workspaceAttention = isStorageWorkspace ? stats.lowStock : stats.guestActions;
   const workspaceTabs = isStorageWorkspace
     ? [["wines", "Inventory & guest controls", stats.available]]
@@ -1265,12 +1264,10 @@ export default function VenueWinePage() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => router.push(isBespokeWineExperience
-                    ? `/dashboard/wine-menus/${menu.slug}/editor`
-                    : `/dashboard/wine-menus/studio?locationId=${location.id}`)}
+                  onClick={() => router.push(`/dashboard/wine-menus/studio?locationId=${location.id}`)}
                   className="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-[#17332c] text-[11px] font-semibold tracking-[0.04em] text-white hover:bg-[#244b40] transition shadow-sm"
                 >
-                  {menu ? "Manage Digital Wine List" : "Create Digital Wine List"}
+                  {menu ? "Design & Publish" : "Create Digital Wine List"}
                 </button>
                 {menu && (
                   <a
