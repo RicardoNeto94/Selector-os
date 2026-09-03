@@ -20,8 +20,12 @@ export const metadata = {
   },
 
   icons: {
-    icon: "/favicon.ico",
-    apple: "/burman-icon.png",
+    icon: [
+      { url: "/vaxeron-favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/vaxeron-icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/vaxeron-favicon.png",
+    apple: "/vaxeron-icon-192.png",
   },
 
   openGraph: {

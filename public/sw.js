@@ -1,8 +1,9 @@
-const CACHE_NAME = "selectoros-v6";
+const CACHE_NAME = "vaxeron-v7";
 
 const STATIC_ASSETS = [
   "/manifest.json",
-  "/favicon.ico",
+  "/vaxeron-favicon.png",
+  "/vaxeron-icon-192.png",
 ];
 
 self.addEventListener("install", (event) => {
