@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowPathIcon, CheckCircleIcon, ChevronDownIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, CheckCircleIcon, ChevronDownIcon, ExclamationTriangleIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { BOTTLE_FORMATS, bottleFormatForWine, bottleQuantity, fetchAllQueryRows, hasAvailableStock, inventoryStockState, isLowStock, normalizeWineCategory, parseBottleSizeCl, positiveBottleQuantity, summarizeBottleFormats, summarizeInventoryFamilies, sumWholeBottles } from "@/lib/wineInventory";
 import { StockHeatmap } from "@/components/dashboard/OperationalVisuals";
 import WineDetailDrawer from "@/components/dashboard/WineDetailDrawer";
+import { useDashboardWorkspace } from "@/components/dashboard/WorkspaceContext";
 import "./inventory.css";
 
 export const dynamic = "force-dynamic";
@@ -33,21 +34,29 @@ function Kpi({ label, value, detail, active, onClick, tone = "default" }) {
 
 export default function WineInventoryPage() {
   const supabase = useMemo(() => createClient(), []);
-  const [inventory, setInventory] = useState([]); const [locations, setLocations] = useState([]); const [latestSync, setLatestSync] = useState(null); const [loading, setLoading] = useState(true); const [loadError, setLoadError] = useState("");
-  const [search, setSearch] = useState(""); const [selectedLocation, setSelectedLocation] = useState("all"); const [selectedType, setSelectedType] = useState("all"); const [stockFilter, setStockFilter] = useState("available"); const [sortBy, setSortBy] = useState("name"); const [sortDirection, setSortDirection] = useState("asc"); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(25); const [selectedWineId, setSelectedWineId] = useState(null);
+  const workspace = useDashboardWorkspace();
+  const manualMode = ["manual", "hybrid"].includes(workspace?.inventoryMode);
+  const canAdjustManualInventory = workspace?.source !== "support" && (
+    ["owner", "administrator"].includes(workspace?.organization?.role) ||
+    ["administrator", "manager"].includes(workspace?.property?.role)
+  );
+  const manualInventory = manualMode && canAdjustManualInventory;
+  const [inventory, setInventory] = useState([]); const [catalogue, setCatalogue] = useState([]); const [locations, setLocations] = useState([]); const [latestSync, setLatestSync] = useState(null); const [loading, setLoading] = useState(true); const [loadError, setLoadError] = useState("");
+  const [search, setSearch] = useState(""); const [selectedLocation, setSelectedLocation] = useState("all"); const [selectedType, setSelectedType] = useState("all"); const [stockFilter, setStockFilter] = useState(manualMode ? "all" : "available"); const [sortBy, setSortBy] = useState("name"); const [sortDirection, setSortDirection] = useState("asc"); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(25); const [selectedWineId, setSelectedWineId] = useState(null); const [adjustmentWine, setAdjustmentWine] = useState(null);
   const [selectedFormat, setSelectedFormat] = useState("all"); const [savingSizeId, setSavingSizeId] = useState(null);
 
   async function loadData() {
     setLoading(true); setLoadError("");
     try {
-      const [inventoryRows, locationsResult, syncResult] = await Promise.all([
+      const [inventoryRows, catalogueRows, locationsResult, syncResult] = await Promise.all([
         fetchAllQueryRows(() => supabase.from("wine_inventory").select("id,wine_id,location_id,quantity,wines(id,name,producer,vintage,price,wine_type,country,region,subregion,grapes,size,sku),wine_locations(id,name)").order("id")),
+        fetchAllQueryRows(() => supabase.from("wines").select("id,name,producer,vintage,price,wine_type,country,region,subregion,grapes,size,sku,is_active").eq("is_active", true).order("name")),
         supabase.from("wine_locations").select("id,name,location_type").order("name"),
         supabase.from("compucash_sync_runs").select("status,completed_at,products_matched,unmatched_products,error_message").order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
       if (locationsResult.error) throw locationsResult.error;
       if (syncResult.error) console.error("COMPUCASH SYNC STATUS ERROR:", syncResult.error);
-      setInventory(inventoryRows); setLocations(locationsResult.data || []); setLatestSync(syncResult.data || null);
+      setInventory(inventoryRows); setCatalogue(catalogueRows); setLocations(locationsResult.data || []); setLatestSync(syncResult.data || null);
     } catch (error) {
       console.error("INVENTORY LOAD ERROR:", error);
       setLoadError(error?.message || "Inventory could not be loaded.");
@@ -68,9 +77,10 @@ export default function WineInventoryPage() {
 
   const wines = useMemo(() => {
     const map = new Map();
+    catalogue.forEach((wine) => { if (wine?.id) map.set(wine.id, { ...wine, stock: 0, netStock: 0, inventoryRows: [] }); });
     inventory.forEach((row) => { const wine = row.wines; if (!wine?.id) return; if (!map.has(wine.id)) map.set(wine.id, { ...wine, stock: 0, netStock: 0, inventoryRows: [] }); const entry = map.get(wine.id); entry.stock += positiveBottleQuantity(row.quantity); entry.netStock += bottleQuantity(row.quantity); entry.inventoryRows.push(row); });
     return Array.from(map.values());
-  }, [inventory]);
+  }, [catalogue, inventory]);
   const metrics = useMemo(() => ({ positiveUnits: wines.reduce((sum, wine) => sum + wine.stock, 0), available: wines.filter((wine) => hasAvailableStock(wine.stock)).length, low: wines.filter((wine) => isLowStock(wine.stock)).length, negative: inventory.filter((row) => bottleQuantity(row.quantity) < 0).length, value: wines.reduce((sum, wine) => sum + wine.stock * number(wine.price), 0) }), [wines, inventory]);
   const inventoryFamilies = useMemo(() => summarizeInventoryFamilies(inventory, (row) => row.quantity), [inventory]);
   const bottleFormats = useMemo(() => summarizeBottleFormats(inventory, (row) => row.quantity), [inventory]);
@@ -87,7 +97,7 @@ export default function WineInventoryPage() {
   }).filter((row) => Object.values(row.values).some((value) => value > 0)), [inventory, locations]);
   const filteredWines = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return wines.filter((wine) => { const haystack = [wine.name, wine.producer, wine.country, wine.region, wine.subregion, wine.grapes, wine.vintage, wine.sku].join(" ").toLowerCase(); const locationMatch = selectedLocation === "all" || wine.inventoryRows.some((row) => row.location_id === selectedLocation && (stockFilter === "negative" ? bottleQuantity(row.quantity) < -0.001 : hasAvailableStock(row.quantity))); const normalizedType = normalizeWineCategory(wine); const typeMatch = selectedType === "all" || normalizedType === (selectedType === "rosé" ? "rose" : selectedType); const formatMatch = selectedFormat === "all" || bottleFormatForWine(wine) === selectedFormat; const stockMatch = stockFilter === "negative" ? wine.inventoryRows.some((row) => bottleQuantity(row.quantity) < -0.001) : hasAvailableStock(wine.stock) && (stockFilter === "available" || (stockFilter === "low" && isLowStock(wine.stock))); return (!q || haystack.includes(q)) && locationMatch && typeMatch && formatMatch && stockMatch; }).sort((a, b) => { let av = sortBy === "stock" ? a.stock : a[sortBy]; let bv = sortBy === "stock" ? b.stock : b[sortBy]; if (sortBy === "price") { av = number(av); bv = number(bv); } if (typeof av === "string") av = av.toLowerCase(); if (typeof bv === "string") bv = bv.toLowerCase(); return av < bv ? (sortDirection === "asc" ? -1 : 1) : av > bv ? (sortDirection === "asc" ? 1 : -1) : 0; });
+    return wines.filter((wine) => { const haystack = [wine.name, wine.producer, wine.country, wine.region, wine.subregion, wine.grapes, wine.vintage, wine.sku].join(" ").toLowerCase(); const locationMatch = selectedLocation === "all" || wine.inventoryRows.some((row) => row.location_id === selectedLocation && (stockFilter === "negative" ? bottleQuantity(row.quantity) < -0.001 : stockFilter === "all" || hasAvailableStock(row.quantity))); const normalizedType = normalizeWineCategory(wine); const typeMatch = selectedType === "all" || normalizedType === (selectedType === "rosé" ? "rose" : selectedType); const formatMatch = selectedFormat === "all" || bottleFormatForWine(wine) === selectedFormat; const stockMatch = stockFilter === "all" || (stockFilter === "negative" ? wine.inventoryRows.some((row) => bottleQuantity(row.quantity) < -0.001) : hasAvailableStock(wine.stock) && (stockFilter === "available" || (stockFilter === "low" && isLowStock(wine.stock)))); return (!q || haystack.includes(q)) && locationMatch && typeMatch && formatMatch && stockMatch; }).sort((a, b) => { let av = sortBy === "stock" ? a.stock : a[sortBy]; let bv = sortBy === "stock" ? b.stock : b[sortBy]; if (sortBy === "price") { av = number(av); bv = number(bv); } if (typeof av === "string") av = av.toLowerCase(); if (typeof bv === "string") bv = bv.toLowerCase(); return av < bv ? (sortDirection === "asc" ? -1 : 1) : av > bv ? (sortDirection === "asc" ? 1 : -1) : 0; });
   }, [wines, search, selectedLocation, selectedType, selectedFormat, stockFilter, sortBy, sortDirection]);
   const totalPages = Math.max(1, Math.ceil(filteredWines.length / pageSize)); const safePage = Math.min(page, totalPages); const start = (safePage - 1) * pageSize; const pageWines = filteredWines.slice(start, start + pageSize);
   const filteredSummary = useMemo(() => ({ units: filteredWines.reduce((sum, wine) => sum + Math.max(0, wine.stock), 0), value: filteredWines.reduce((sum, wine) => sum + Math.max(0, wine.stock) * number(wine.price), 0) }), [filteredWines]);
@@ -108,11 +118,24 @@ export default function WineInventoryPage() {
     }
   }
 
+  async function saveManualStock(values) {
+    const { error } = await supabase.rpc("set_manual_wine_inventory", {
+      p_wine_id: values.wineId,
+      p_location_id: values.locationId,
+      p_quantity: values.quantity,
+      p_reason: values.reason,
+      p_notes: values.notes || null,
+    });
+    if (error) throw error;
+    await loadData();
+    setAdjustmentWine(null);
+  }
+
   return <div className="wine-inventory-page min-h-screen"><div className="wine-inventory-shell mx-auto max-w-[1700px] px-5 py-7 md:px-8 lg:px-10">
-    <header className="inventory-header flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><div className="inventory-eyebrow text-[9px] uppercase tracking-[0.34em]">Wine Operations</div><h1 className="mt-3 text-[34px] font-medium tracking-[-0.04em] md:text-[44px]">Stock Control</h1><p className="mt-2 max-w-[680px] text-[11px] leading-5">See what is available and where it is stored. Quantities are read-only because Compucash is the source of truth.</p></div><div className="flex flex-wrap gap-2"><button type="button" onClick={loadData} disabled={loading} className="inventory-secondary-action inline-flex min-h-10 items-center gap-2 px-4 text-[9px] uppercase tracking-[0.14em]"><ArrowPathIcon className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</button><Link href="/dashboard/wines" className="inventory-primary-action inline-flex min-h-10 items-center px-5 text-[9px] uppercase tracking-[0.14em] text-white">Manage wine catalogue</Link></div></header>
+    <header className="inventory-header flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><div className="inventory-eyebrow text-[9px] uppercase tracking-[0.34em]">Wine Operations</div><h1 className="mt-3 text-[34px] font-medium tracking-[-0.04em] md:text-[44px]">Stock Control</h1><p className="mt-2 max-w-[680px] text-[11px] leading-5">{manualMode ? (manualInventory ? "Count and maintain the current wine stock held at every location. Each change is recorded in Movements." : "See the manually managed stock held at every location. An administrator or inventory manager can record count changes.") : "See what is available and where it is stored. Quantities are read-only because Compucash is the source of truth."}</p></div><div className="flex flex-wrap gap-2"><button type="button" onClick={loadData} disabled={loading} className="inventory-secondary-action inline-flex min-h-10 items-center gap-2 px-4 text-[9px] uppercase tracking-[0.14em]"><ArrowPathIcon className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</button><Link href="/dashboard/wines" className="inventory-primary-action inline-flex min-h-10 items-center px-5 text-[9px] uppercase tracking-[0.14em] text-white">Manage wine catalogue</Link></div></header>
 
     {loading ? <section className="inventory-loading-overview mt-5" aria-live="polite"><ArrowPathIcon className="animate-spin" /><div><strong>Reading current inventory</strong><span>Loading balances, locations and the latest Compucash status…</span></div></section> : <>
-      <section className={`mt-5 flex flex-col gap-3 rounded-[18px] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${syncHealthy ? "border-[#d5dfcf] bg-[#eff4ec]" : "border-[#ead2c4] bg-[#f8ebe3]"}`}><div className="flex items-center gap-3">{syncHealthy ? <CheckCircleIcon className="h-5 w-5 text-[#647c5c]" /> : <ExclamationTriangleIcon className="h-5 w-5 text-[#a95836]" />}<div><div className="text-[10px] font-medium">{syncHealthy ? "Compucash inventory is connected" : "Compucash sync needs attention"}</div><div className="mt-0.5 text-[9px] text-[#7f7066]">Last completed {syncDate(latestSync?.completed_at)}</div></div></div><div className="text-[9px] text-[#7f7066]">{latestSync ? `${number(latestSync.products_matched).toLocaleString("en-GB")} matched · ${number(latestSync.unmatched_products).toLocaleString("en-GB")} unmatched` : "No synchronization history"}</div></section>
+      {manualMode ? <section className="inventory-manual-status mt-5"><PencilSquareIcon /><div><strong>Manual inventory enabled</strong><span>{manualInventory ? "Use “Set stock” beside a wine to record its current count at a location." : workspace?.source === "support" ? "Protected support sessions can inspect inventory but cannot change customer stock." : "Your role can inspect inventory but cannot change stock counts."}</span></div><Link href="/dashboard/wine-cellar/transfers">Open movement history →</Link></section> : <section className={`mt-5 flex flex-col gap-3 rounded-[18px] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${syncHealthy ? "border-[#d5dfcf] bg-[#eff4ec]" : "border-[#ead2c4] bg-[#f8ebe3]"}`}><div className="flex items-center gap-3">{syncHealthy ? <CheckCircleIcon className="h-5 w-5 text-[#647c5c]" /> : <ExclamationTriangleIcon className="h-5 w-5 text-[#a95836]" />}<div><div className="text-[10px] font-medium">{syncHealthy ? "Compucash inventory is connected" : "Compucash sync needs attention"}</div><div className="mt-0.5 text-[9px] text-[#7f7066]">Last completed {syncDate(latestSync?.completed_at)}</div></div></div><div className="text-[9px] text-[#7f7066]">{latestSync ? `${number(latestSync.products_matched).toLocaleString("en-GB")} matched · ${number(latestSync.unmatched_products).toLocaleString("en-GB")} unmatched` : "No synchronization history"}</div></section>}
 
       <section className="inventory-kpi-grid inventory-kpi-grid-primary mt-5 grid overflow-hidden"><Kpi label="Unopened bottles" value={quantity(unopenedBottles)} detail={`Whole positive balances across ${locations.length} locations`} /><Kpi label="Physical units" value={quantity(inventoryFamilies.total.positive)} detail={`${quantity(bottleFormats.fractional)} open equivalents included`} /><Kpi label="Active labels" value={metrics.available.toLocaleString("en-GB")} detail="Unique products with stock above zero" active={stockFilter === "available"} onClick={() => setStockFilter("available")} tone="good" /></section>
 
@@ -138,13 +161,64 @@ export default function WineInventoryPage() {
       </div>
     </details>}
 
-    <section className="inventory-table-card mt-5 overflow-hidden"><div className="inventory-filter-panel p-4"><div className="inventory-filter-grid grid gap-3 xl:grid-cols-[1fr_180px_210px_180px_auto]"><label className="inventory-search-field"><span className="mb-1.5 block text-[8px] uppercase tracking-[0.16em] text-[#71877f]">Search active inventory</span><input aria-label="Search active inventory" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Wine, producer, region, vintage or SKU…" className="min-h-11 w-full rounded-xl px-4 text-[11px] outline-none" /></label><Filter label="Wine type" value={selectedType} onChange={setSelectedType}>{TYPES.map((type) => <option key={type} value={type}>{type === "all" ? "All types" : type}</option>)}</Filter><Filter label="Location" value={selectedLocation} onChange={setSelectedLocation}><option value="all">All locations</option>{locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}</Filter><Filter label="Stock view" value={stockFilter} onChange={setStockFilter}><option value="available">Available stock</option><option value="low">Low stock ≤ 2</option></Filter><button type="button" onClick={() => { setSearch(""); setSelectedType("all"); setSelectedLocation("all"); setStockFilter("available"); }} className="inventory-reset self-end px-4 text-[8px] uppercase tracking-[0.18em]">Reset filters</button></div></div>
+    <section className="inventory-table-card mt-5 overflow-hidden"><div className="inventory-filter-panel p-4"><div className="inventory-filter-grid grid gap-3 xl:grid-cols-[1fr_180px_210px_180px_auto]"><label className="inventory-search-field"><span className="mb-1.5 block text-[8px] uppercase tracking-[0.16em] text-[#71877f]">Search inventory</span><input aria-label="Search inventory" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Wine, producer, region, vintage or SKU…" className="min-h-11 w-full rounded-xl px-4 text-[11px] outline-none" /></label><Filter label="Wine type" value={selectedType} onChange={setSelectedType}>{TYPES.map((type) => <option key={type} value={type}>{type === "all" ? "All types" : type}</option>)}</Filter><Filter label="Location" value={selectedLocation} onChange={setSelectedLocation}><option value="all">All locations</option>{locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}</Filter><Filter label="Stock view" value={stockFilter} onChange={setStockFilter}>{manualMode && <option value="all">All catalogue wines</option>}<option value="available">Available stock</option><option value="low">Low stock ≤ 2</option></Filter><button type="button" onClick={() => { setSearch(""); setSelectedType("all"); setSelectedLocation("all"); setStockFilter(manualMode ? "all" : "available"); }} className="inventory-reset self-end px-4 text-[8px] uppercase tracking-[0.18em]">Reset filters</button></div></div>
       <div className="inventory-result-bar flex flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between"><div><strong>{filteredWines.length.toLocaleString("en-GB")} wines in this view</strong><span>{quantity(filteredSummary.units)} physical units including open fractions · {money(filteredSummary.value)} estimated selling value</span></div><label className="flex items-center gap-2">Rows<select value={pageSize} onChange={(e) => setPageSize(number(e.target.value))}>{PAGE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></label></div>
-      {loadError ? <div className="px-5 py-16 text-center text-[11px] text-red-600">{loadError}</div> : <div className="inventory-table-wrap w-full overflow-x-auto"><table className="inventory-table w-full min-w-[760px] table-fixed border-collapse"><thead><tr><th className="w-[34%] px-5 py-4 text-left font-normal">{sortLabel("Wine", "name")}</th><th className="w-[11%] px-4 py-4 text-left font-normal">{sortLabel("Type", "wine_type")}</th><th className="w-[25%] px-4 py-4 text-left font-normal">Locations</th><th className="w-[12%] px-4 py-4 text-right font-normal">{sortLabel("Quantity", "stock")}</th><th className="w-[10%] px-4 py-4 text-right font-normal">{sortLabel("Price", "price")}</th><th className="w-[8%] px-5 py-4 text-right font-normal">Details</th></tr></thead><tbody>{loading ? <tr><td colSpan="6" className="px-5 py-16 text-center text-[11px] text-[#95867b]">Loading Compucash inventory…</td></tr> : pageWines.length ? pageWines.map((wine) => <WineRow key={wine.id} wine={wine} onOpen={() => setSelectedWineId(wine.id)} />) : <tr><td colSpan="6" className="px-5 py-16 text-center"><div className="text-[12px] font-medium">No wines match these filters</div><div className="mt-2 text-[9px] text-[#95867b]">Reset the filters or choose another location.</div></td></tr>}</tbody></table></div>}
+      {loadError ? <div className="px-5 py-16 text-center text-[11px] text-red-600">{loadError}</div> : <div className="inventory-table-wrap w-full overflow-x-auto"><table className="inventory-table w-full min-w-[760px] table-fixed border-collapse"><thead><tr><th className="w-[34%] px-5 py-4 text-left font-normal">{sortLabel("Wine", "name")}</th><th className="w-[11%] px-4 py-4 text-left font-normal">{sortLabel("Type", "wine_type")}</th><th className="w-[25%] px-4 py-4 text-left font-normal">Locations</th><th className="w-[12%] px-4 py-4 text-right font-normal">{sortLabel("Quantity", "stock")}</th><th className="w-[10%] px-4 py-4 text-right font-normal">{sortLabel("Price", "price")}</th><th className="w-[8%] px-5 py-4 text-right font-normal">Action</th></tr></thead><tbody>{loading ? <tr><td colSpan="6" className="px-5 py-16 text-center text-[11px] text-[#95867b]">Loading inventory…</td></tr> : pageWines.length ? pageWines.map((wine) => <WineRow key={wine.id} wine={wine} manualInventory={manualInventory} onAdjust={() => setAdjustmentWine(wine)} onOpen={() => setSelectedWineId(wine.id)} />) : <tr><td colSpan="6" className="px-5 py-16 text-center"><div className="text-[12px] font-medium">No wines match these filters</div><div className="mt-2 text-[9px] text-[#95867b]">Reset the filters or choose another location.</div></td></tr>}</tbody></table></div>}
       <div className="flex flex-col gap-3 border-t border-[#e4dad1] px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><div className="text-[9px] text-[#95867b]">Page {safePage} of {totalPages}</div><div className="flex items-center gap-2"><PageButton disabled={safePage === 1} onClick={() => setPage(1)}>First</PageButton><PageButton disabled={safePage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Previous</PageButton><span className="min-w-16 text-center text-[9px] text-[#806d60]">{safePage} / {totalPages}</span><PageButton disabled={safePage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>Next</PageButton><PageButton disabled={safePage === totalPages} onClick={() => setPage(totalPages)}>Last</PageButton></div></div>
     </section>
     <WineDetailDrawer wineId={selectedWineId} open={Boolean(selectedWineId)} onClose={() => setSelectedWineId(null)} />
+    {adjustmentWine && <StockAdjustmentDialog key={adjustmentWine.id} wine={adjustmentWine} locations={locations} onClose={() => setAdjustmentWine(null)} onSave={saveManualStock} />}
   </div></div>;
+}
+
+function StockAdjustmentDialog({ wine, locations, onClose, onSave }) {
+  const firstLocationId = wine.inventoryRows[0]?.location_id || locations[0]?.id || "";
+  const quantityAt = (locationId) => number(wine.inventoryRows.find((row) => row.location_id === locationId)?.quantity);
+  const [locationId, setLocationId] = useState(firstLocationId);
+  const [newQuantity, setNewQuantity] = useState(String(quantityAt(firstLocationId)));
+  const [reason, setReason] = useState(wine.inventoryRows.length ? "count" : "opening");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const currentQuantity = quantityAt(locationId);
+  const difference = number(newQuantity) - currentQuantity;
+
+  function selectLocation(value) {
+    setLocationId(value);
+    setNewQuantity(String(quantityAt(value)));
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    setError("");
+    const parsedQuantity = Number(newQuantity);
+    if (!locationId) return setError("Choose a stock location.");
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity < 0) return setError("Enter a valid quantity of zero or more.");
+    setSaving(true);
+    try {
+      await onSave({ wineId: wine.id, locationId, quantity: parsedQuantity, reason, notes: notes.trim() });
+    } catch (saveError) {
+      setError(saveError?.message || "Stock could not be updated.");
+      setSaving(false);
+    }
+  }
+
+  return <div className="inventory-adjust-layer" role="dialog" aria-modal="true" aria-labelledby="inventory-adjust-title">
+    <button type="button" className="inventory-adjust-backdrop" aria-label="Close stock adjustment" onClick={onClose} />
+    <form className="inventory-adjust-dialog" onSubmit={submit}>
+      <header><div><span>Manual inventory</span><h2 id="inventory-adjust-title">Set current stock</h2></div><button type="button" aria-label="Close" onClick={onClose}><XMarkIcon /></button></header>
+      <div className="inventory-adjust-wine"><strong>{wine.name}</strong><span>{[wine.producer, wine.vintage || "NV"].filter(Boolean).join(" · ")}</span></div>
+      <div className="inventory-adjust-fields">
+        <label><span>Location</span><select value={locationId} onChange={(event) => selectLocation(event.target.value)}>{locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}</select></label>
+        <label><span>Current bottle quantity</span><input type="number" min="0" step="0.01" inputMode="decimal" value={newQuantity} onChange={(event) => setNewQuantity(event.target.value)} autoFocus /></label>
+        <label><span>Reason</span><select value={reason} onChange={(event) => setReason(event.target.value)}><option value="count">Stock count</option><option value="opening">Opening stock</option><option value="received">Delivery received</option><option value="return">Customer return</option><option value="breakage">Breakage</option><option value="write_off">Write-off</option></select></label>
+        <label><span>Note <small>Optional</small></span><textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Add an invoice, count or operational note…" /></label>
+      </div>
+      <div className={`inventory-adjust-delta ${difference < 0 ? "is-negative" : difference > 0 ? "is-positive" : ""}`}><span>Recorded change</span><strong>{difference > 0 ? "+" : difference < 0 ? "−" : ""}{quantity(Math.abs(difference))}</strong><small>from {quantity(currentQuantity)} to {quantity(newQuantity)}</small></div>
+      {error && <div className="inventory-adjust-error">{error}</div>}
+      <footer><button type="button" onClick={onClose}>Cancel</button><button type="submit" disabled={saving || !locations.length || difference === 0}>{saving ? "Saving…" : "Save stock count"}</button></footer>
+    </form>
+  </div>;
 }
 
 function SizeReviewPanel({ wines, savingSizeId, onSave }) {
@@ -175,10 +249,10 @@ function SizeReviewPanel({ wines, savingSizeId, onSave }) {
 
 function Filter({ label, value, onChange, children }) { return <label><span className="mb-1.5 block text-[8px] uppercase tracking-[0.16em] text-[#71877f]">{label}</span><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 w-full rounded-xl px-3 text-[10px] capitalize outline-none">{children}{label === "Stock view" && <option value="negative">Negative balances</option>}</select></label>; }
 function PageButton({ children, ...props }) { return <button type="button" {...props} className="h-9 rounded-full border border-[#d9cbc0] px-3 text-[9px] disabled:opacity-30">{children}</button>; }
-function WineRow({ wine, onOpen }) {
+function WineRow({ wine, manualInventory, onAdjust, onOpen }) {
   const positiveLocations = wine.inventoryRows.filter((row) => hasAvailableStock(row.quantity)).sort((a, b) => number(b.quantity) - number(a.quantity));
   const visible = positiveLocations.slice(0, 2);
   const state = { out: "Out", low: "Low", available: "Available" }[inventoryStockState(wine.stock)];
   const stateClass = state === "Available" ? "bg-[#e6eee2] text-[#607758]" : state === "Low" ? "bg-[#f3e6da] text-[#9b603d]" : "bg-[#f1ddda] text-[#a34f42]";
-  return <tr className="inventory-wine-row"><td className="px-5 py-4 align-top"><button type="button" onClick={onOpen} className="block max-w-full text-left"><div className="inventory-wine-name text-[11px] font-medium md:text-[12px]">{wine.name || "Unnamed wine"}</div><div className="inventory-wine-meta mt-1 text-[9px]">{[wine.producer, wine.vintage || "NV"].filter(Boolean).join(" · ")}</div></button></td><td className="px-4 py-4 align-top"><span className="inventory-type-pill rounded-full px-2.5 py-1 text-[8px] capitalize">{wine.wine_type || "—"}</span></td><td className="px-4 py-4 align-top"><div className="flex flex-wrap gap-1.5">{visible.map((row) => <span key={row.id} className="inventory-location-pill rounded-full px-2.5 py-1 text-[8px]">{row.wine_locations?.name || "Unknown"} · {quantity(row.quantity)}</span>)}{positiveLocations.length > 2 && <span className="inventory-location-pill rounded-full px-2.5 py-1 text-[8px]">+{positiveLocations.length - 2}</span>}</div></td><td className="px-4 py-4 text-right align-top"><div className="text-[11px] font-medium">{quantity(wine.stock)}</div><span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[7px] uppercase tracking-[0.12em] ${stateClass}`}>{state}</span></td><td className="px-4 py-4 text-right text-[10px] align-top">{wine.price == null ? "—" : money(wine.price)}</td><td className="px-5 py-4 text-right align-top"><button type="button" onClick={onOpen} aria-label={`Open details for ${wine.name}`} className="inventory-detail-button inline-flex h-8 w-8 items-center justify-center rounded-full"><ChevronDownIcon className="h-3.5 w-3.5 -rotate-90" /></button></td></tr>;
+  return <tr className="inventory-wine-row"><td className="px-5 py-4 align-top"><button type="button" onClick={onOpen} className="block max-w-full text-left"><div className="inventory-wine-name text-[11px] font-medium md:text-[12px]">{wine.name || "Unnamed wine"}</div><div className="inventory-wine-meta mt-1 text-[9px]">{[wine.producer, wine.vintage || "NV"].filter(Boolean).join(" · ")}</div></button></td><td className="px-4 py-4 align-top"><span className="inventory-type-pill rounded-full px-2.5 py-1 text-[8px] capitalize">{wine.wine_type || "—"}</span></td><td className="px-4 py-4 align-top"><div className="flex flex-wrap gap-1.5">{visible.map((row) => <span key={row.id} className="inventory-location-pill rounded-full px-2.5 py-1 text-[8px]">{row.wine_locations?.name || "Unknown"} · {quantity(row.quantity)}</span>)}{positiveLocations.length > 2 && <span className="inventory-location-pill rounded-full px-2.5 py-1 text-[8px]">+{positiveLocations.length - 2}</span>}{!positiveLocations.length && <span className="inventory-location-pill rounded-full px-2.5 py-1 text-[8px]">Not stocked</span>}</div></td><td className="px-4 py-4 text-right align-top"><div className="text-[11px] font-medium">{quantity(wine.stock)}</div><span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[7px] uppercase tracking-[0.12em] ${stateClass}`}>{state}</span></td><td className="px-4 py-4 text-right text-[10px] align-top">{wine.price == null ? "—" : money(wine.price)}</td><td className="px-5 py-4 text-right align-top">{manualInventory ? <button type="button" onClick={onAdjust} className="inventory-adjust-button">Set stock</button> : <button type="button" onClick={onOpen} aria-label={`Open details for ${wine.name}`} className="inventory-detail-button inline-flex h-8 w-8 items-center justify-center rounded-full"><ChevronDownIcon className="h-3.5 w-3.5 -rotate-90" /></button>}</td></tr>;
 }

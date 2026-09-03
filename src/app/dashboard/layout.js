@@ -13,6 +13,7 @@ export default async function DashboardLayout({ children }) {
   return (
     <DashboardLayoutClient
       workspace={access.tenant}
+      inventoryMode={access.platformSettings?.inventory_mode || "api"}
       platformAdministrator={access.platformAdministrator}
       entitlements={access.entitlements}
     >

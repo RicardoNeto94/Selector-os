@@ -132,6 +132,7 @@ function MobileMenuLink({ href, icon: Icon, label, detail, active, badge, onSele
 export default function DashboardLayout({
   children,
   workspace,
+  inventoryMode,
   platformAdministrator,
   entitlements,
 }) {
@@ -267,7 +268,7 @@ export default function DashboardLayout({
   const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }));
 
   return (
-    <DashboardWorkspaceProvider workspace={workspace}>
+    <DashboardWorkspaceProvider workspace={{ ...workspace, inventoryMode }}>
     <div className={`so-dashboard-root ${supportMode ? "so-dashboard-root--support" : ""}`}>
 
       {/* ===================================================
