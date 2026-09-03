@@ -1529,11 +1529,6 @@ export default function WinesPage() {
           </div>
         </div>
 
-        <Link className="wine-portfolio-stock-link" href="/dashboard/wine-cellar/inventory">
-          <span>Operational stock detail</span>
-          <strong>Open Stock Control</strong>
-          <small>Search exact quantities, locations and bottle formats →</small>
-        </Link>
       </section>
 
       {/* =================================================
