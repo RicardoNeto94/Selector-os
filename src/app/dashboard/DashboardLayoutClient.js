@@ -30,12 +30,14 @@ import {
   EyeIcon,
   CreditCardIcon,
   Bars3Icon,
+  MapIcon,
 } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
 
 const QUICK_DESTINATIONS = [
   ["Dashboard", "Operational overview", "/dashboard"],
+  ["Wine Setup", "Guided venue, catalogue, stock and publishing setup", "/dashboard/wine-cellar/setup"],
   ["Dishes", "Dish catalogue and allergen details", "/dashboard/dishes"],
   ["Menus", "Restaurant menus and publishing", "/dashboard/menu"],
   ["Dining", "Guest dining experiences", "/dashboard/experiences"],
@@ -133,6 +135,7 @@ export default function DashboardLayout({
   children,
   workspace,
   inventoryMode,
+  onboardingStatus,
   platformAdministrator,
   entitlements,
 }) {
@@ -151,6 +154,7 @@ export default function DashboardLayout({
   const hasWine = Boolean(entitlements?.enabled && entitlements?.modules?.wine);
   const hasDining = Boolean(entitlements?.enabled && entitlements?.modules?.dining);
   const hasSpa = Boolean(entitlements?.enabled && entitlements?.modules?.spa);
+  const showWineSetup = hasWine && ["invited", "in_progress", "ready"].includes(onboardingStatus);
 
   useEffect(() => {
     if (supportMode || !hasWine) return undefined;
@@ -221,6 +225,7 @@ export default function DashboardLayout({
       (!["/dashboard/dishes", "/dashboard/menu", "/dashboard/experiences"].some((prefix) => href.startsWith(prefix)) || hasDining) &&
       (!href.startsWith("/dashboard/spa") || hasSpa);
     return moduleAllowed &&
+      (href !== "/dashboard/wine-cellar/setup" || showWineSetup) &&
       (!supportMode || !["/dashboard/team", "/dashboard/settings", "/dashboard/wine-cellar/ordering"].includes(href)) &&
       `${label} ${detail}`.toLowerCase().includes(commandQuery.trim().toLowerCase());
   });
@@ -268,7 +273,7 @@ export default function DashboardLayout({
   const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }));
 
   return (
-    <DashboardWorkspaceProvider workspace={{ ...workspace, inventoryMode }}>
+    <DashboardWorkspaceProvider workspace={{ ...workspace, inventoryMode, onboardingStatus }}>
     <div className={`so-dashboard-root ${supportMode ? "so-dashboard-root--support" : ""}`}>
 
       {/* ===================================================
@@ -376,6 +381,12 @@ export default function DashboardLayout({
             =============================================== */}
 
             {hasWine && <NavGroup label="Wine operations" open={openGroups.wine} active={wineActive} onToggle={() => toggleGroup("wine")}>
+              {showWineSetup && <NavItem
+                href="/dashboard/wine-cellar/setup"
+                isActive={isActive("/dashboard/wine-cellar/setup")}
+                icon={MapIcon}
+                label="Wine Setup"
+              />}
               <NavItem
               href="/dashboard/wines"
               isActive={isActive("/dashboard/wines") || isActive("/dashboard/wine-cellar/data-quality")}
@@ -649,6 +660,7 @@ export default function DashboardLayout({
               {hasWine && <section>
                 <h3>Wine operations</h3>
                 <div>
+                  {showWineSetup && <MobileMenuLink href="/dashboard/wine-cellar/setup" icon={MapIcon} label="Wine Setup" detail="Guided workspace setup" active={isActive("/dashboard/wine-cellar/setup")} onSelect={() => setMobileMenuOpen(false)} />}
                   <MobileMenuLink href="/dashboard/wines" icon={BeakerIcon} label="Wine Cellar" detail="Catalogue and records" active={isActive("/dashboard/wines")} onSelect={() => setMobileMenuOpen(false)} />
                   <MobileMenuLink href="/dashboard/wine-cellar/venues" icon={BuildingStorefrontIcon} label="Venue Wines" detail="Locations and wine lists" active={isActive("/dashboard/wine-cellar/venues")} onSelect={() => setMobileMenuOpen(false)} />
                   <MobileMenuLink href="/dashboard/wine-cellar/inventory" icon={CircleStackIcon} label="Stock Control" detail="Inventory balances" active={isActive("/dashboard/wine-cellar/inventory")} onSelect={() => setMobileMenuOpen(false)} />
