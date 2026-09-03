@@ -5,8 +5,35 @@ import { fetchAllRows } from "@/lib/supabase/fetchAllRows";
 import { summarizeInventoryValuation } from "@/lib/inventoryValuation";
 import { buildWineDataQualityReport } from "@/lib/wineDataQuality";
 import { positiveBottleQuantity } from "@/lib/wineInventory";
+import { parseCatalogueCorrection } from "@/lib/wineCatalogueCorrection";
 
 export const dynamic = "force-dynamic";
+
+export async function PATCH(request, { params }) {
+  try {
+    const access = await requireAdministrator(request);
+    if (access.error) return errorResponse(access.error.message, access.error.status);
+    const { wineId } = await params;
+    const scope = (query) => scopeTenantQuery(query, access.tenant);
+    const { data: wine, error: lookupError } = await scope(access.admin.from('wines').select('id,sku').eq('id', wineId)).maybeSingle();
+    if (lookupError) throw lookupError;
+    if (!wine) return errorResponse('Wine not found in this workspace.', 404);
+    let changes;
+    try { changes = parseCatalogueCorrection(await request.json()); }
+    catch (error) { return errorResponse(error.message); }
+    // Existing integration identifiers must not be reassigned in a quick edit.
+    if ('sku' in changes && wine.sku && changes.sku !== wine.sku) return errorResponse('Existing identifiers must be reviewed through the source integration.');
+    if (changes.sku && changes.sku !== wine.sku) {
+      const { data: duplicate, error } = await scope(access.admin.from('wines').select('id').eq('sku', changes.sku).neq('id', wineId)).limit(1).maybeSingle();
+      if (error) throw error;
+      if (duplicate) return errorResponse('That SKU already belongs to another wine in this workspace.', 409);
+    }
+    const { data, error } = await scope(access.admin.from('wines').update(changes).eq('id', wineId)).select('id').maybeSingle();
+    if (error) throw error;
+    if (!data) return errorResponse('Wine not found in this workspace.', 404);
+    return NextResponse.json({ success: true });
+  } catch (error) { return errorResponse(error.message || 'Correction could not be saved.', 500); }
+}
 
 function errorResponse(message, status = 400) {
   return NextResponse.json({ error: message }, { status });

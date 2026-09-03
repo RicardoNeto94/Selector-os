@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { buildWineDataQualityReport } from "../src/lib/wineDataQuality.js";
+import { parseCatalogueCorrection } from "../src/lib/wineCatalogueCorrection.js";
 
 const completeWine = {
   id: "wine-1",
@@ -62,4 +63,27 @@ test("surfaces duplicate candidates but never merges them", () => {
   const duplicate = report.issues.find((item) => item.category === "duplicates");
   assert.ok(duplicate);
   assert.match(duplicate.detail, /Review before merging/);
+  assert.deepEqual(duplicate.relatedWineIds, ['wine-1', 'wine-2']);
+});
+
+test('different bottle formats are not flagged as duplicates', () => {
+  const report = buildWineDataQualityReport({ wines: [completeWine, { ...completeWine, id: 'wine-2', size: '150cl' }], inventoryRows: [{ wine_id: 'wine-1', quantity: 2 }, { wine_id: 'wine-2', quantity: 1 }] });
+  assert.equal(report.counts.duplicates || 0, 0);
+});
+test('all stocked duplicate candidates count as needing attention', () => {
+  const report = buildWineDataQualityReport({ wines: [completeWine, { ...completeWine, id: 'wine-2' }], inventoryRows: [{ wine_id: 'wine-1', quantity: 2 }, { wine_id: 'wine-2', quantity: 1 }] });
+  assert.equal(report.summary.needsAttention, 2);
+  assert.equal(report.summary.readyLabels, 0);
+});
+test('validated corrections clear resolved issues on recalculation', () => {
+  const broken = { ...completeWine, producer: '', size: '' };
+  const changes = parseCatalogueCorrection({ producer: ' Correct Producer ', size: '750ml' });
+  assert.equal(changes.producer, 'Correct Producer');
+  const report = buildWineDataQualityReport({ wines: [{ ...broken, ...changes }], inventoryRows: [{ wine_id: broken.id, quantity: 1 }] });
+  assert.equal(report.issues.length, 0);
+});
+test('quick corrections reject stock, tenant and integration mapping changes', () => {
+  for (const key of ['quantity', 'organization_id', 'property_id', 'business_product_number', 'business_barcode', 'price', 'is_active']) assert.throws(() => parseCatalogueCorrection({ [key]: 'anything' }), /cannot be changed/);
+  assert.throws(() => parseCatalogueCorrection({ size: 'unknown' }), /valid bottle size/);
+  assert.throws(() => parseCatalogueCorrection({ name: '' }), /required/);
 });

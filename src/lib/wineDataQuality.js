@@ -15,10 +15,11 @@ function duplicateKey(wine) {
   const name = keyText(wine?.name);
   const producer = keyText(wine?.producer);
   const vintage = keyText(wine?.vintage || "nv");
-  return name && producer ? `${name}|${producer}|${vintage}` : "";
+  const format = parseBottleSizeCl(wine?.size, wine?.name) || 'unknown';
+  return name && producer ? `${name}|${producer}|${vintage}|${format}` : "";
 }
 
-function issue({ wine, stock, category, severity = "warning", title, detail, href = "/dashboard/wines", locationName = "" }) {
+function issue({ wine, stock, category, severity = "warning", title, detail, href = "/dashboard/wines", locationName = "", relatedWineIds = [] }) {
   return {
     id: `${category}:${wine?.id || title}:${locationName || title}`,
     wineId: wine?.id || null,
@@ -31,6 +32,7 @@ function issue({ wine, stock, category, severity = "warning", title, detail, hre
     detail,
     href,
     locationName,
+    relatedWineIds,
   };
 }
 
@@ -92,13 +94,14 @@ export function buildWineDataQualityReport({
       stock: stockedGroup.reduce((sum, wine) => sum + positiveBottleQuantity(stockByWine.get(String(wine.id))), 0),
       category: "duplicates",
       title: "Possible duplicate labels",
-      detail: `${group.length} active records share the same name, producer and vintage. Review before merging or deleting anything.`,
+      relatedWineIds: group.map((wine) => String(wine.id)),
+      detail: `${group.length} active records share the same name, producer, vintage and bottle format. Review before merging or deleting anything.`,
     }));
   }
 
   const severityOrder = { critical: 0, warning: 1, info: 2 };
   issues.sort((a, b) => (severityOrder[a.severity] - severityOrder[b.severity]) || a.wineName.localeCompare(b.wineName));
-  const affectedWineIds = new Set(issues.map((item) => item.wineId).filter(Boolean));
+  const affectedWineIds = new Set(issues.flatMap((item) => [item.wineId, ...item.relatedWineIds]).filter((id) => id && hasAvailableStock(stockByWine.get(String(id)))));
   const criticalWineIds = new Set(issues.filter((item) => item.severity === "critical").map((item) => item.wineId).filter(Boolean));
   const counts = issues.reduce((result, item) => ({ ...result, [item.category]: (result[item.category] || 0) + 1 }), {});
 

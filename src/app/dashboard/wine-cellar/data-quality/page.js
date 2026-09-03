@@ -24,5 +24,6 @@ export default async function WineDataQualityPage() {
   ]);
 
   const report = buildWineDataQualityReport({ wines, inventoryRows });
-  return <DataQualityClient report={report} />;
+  const records = wines.map(({ id, name, producer, wine_type, country, region, vintage, size, sku, business_product_number, business_barcode }) => ({ id, name, producer, wine_type, country, region, vintage, size, sku, business_product_number, business_barcode }));
+  return <DataQualityClient report={report} records={records} canEdit={["owner", "administrator"].includes(access.tenant?.organization?.role)} />;
 }
