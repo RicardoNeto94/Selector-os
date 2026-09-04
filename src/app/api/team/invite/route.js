@@ -16,6 +16,12 @@ export async function POST(request) {
     }
     const supabaseAdmin = authorizationResult.admin;
     const tenant = authorizationResult.tenant;
+    if (tenant?.source !== "membership" || !tenant.organization?.id || !tenant.property?.id) {
+      return NextResponse.json(
+        { error: "Select an active workspace before inviting a team member." },
+        { status: 403 }
+      );
+    }
     const body = await request.json();
 
     const {
@@ -244,6 +250,7 @@ export async function POST(request) {
         {
           user_id: invitedUser.id,
           role_id: role.id,
+          ...tenantWriteFields(tenant),
         },
         {
           onConflict: "user_id,role_id",
