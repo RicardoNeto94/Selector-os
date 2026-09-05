@@ -562,7 +562,7 @@ export default function BurmanLanding({ menu }) {
                 {[
                   ["overview", "Overview"],
                   ["treatments", "Treatments"],
-                  ["summer", "Summer Offer"],
+                  ["summer", "September Offer"],
                   ["information", "Information"],
                 ].map(([key, label]) => (
                   <button
@@ -711,22 +711,22 @@ export default function BurmanLanding({ menu }) {
                   </section>
                 )}
 
-                {/* SUMMER OFFER */}
+                {/* SEPTEMBER OFFER */}
                 {spaTab === "summer" && (
                   <section className="vx-spa-summer-offer">
                     <div className="vx-spa-summer-intro">
                       <span className="vx-spa-summer-kicker">
-                        LIMITED TIME OFFER
+                        SEPTEMBER SPA SPECIAL
                       </span>
 
                       <h3>
-                        Summer Glow
+                        Autumn Serenity
                         <br />
-                        Rituals
+                        Ritual
                       </h3>
 
                       <p className="vx-spa-summer-subtitle">
-                        Massage, exfoliation &amp; full spa access
+                        Specialised face massage &amp; full-body massage
                       </p>
 
                       <div className="vx-spa-summer-divider">
@@ -736,9 +736,9 @@ export default function BurmanLanding({ menu }) {
                       </div>
 
                       <p className="vx-spa-summer-copy">
-                        Our seasonal rituals are designed to leave your skin
-                        radiant, your body renewed and your mind completely at
-                        ease.
+                        A deeply restorative 90-minute ritual combining a
+                        specialised face massage with a full-body massage,
+                        completed with a glass of champagne.
                       </p>
 
                       <div className="vx-spa-summer-booking-note">
@@ -772,73 +772,35 @@ export default function BurmanLanding({ menu }) {
                       </button>
                     </div>
 
-                    <div className="vx-spa-summer-options">
-                      <article className="vx-spa-summer-card">
+                    <div className="vx-spa-summer-options vx-spa-autumn-options">
+                      <article className="vx-spa-summer-card vx-spa-autumn-card">
                         <div className="vx-spa-summer-ritual-icon">
                           <svg viewBox="0 0 72 72" aria-hidden="true">
                             <path d="M26 17c0-8 5-13 11-13 7 0 12 6 12 13 0 4-2 7-5 10v7c7 2 13 6 17 12M37 33v12M48 31c-3 3-7 5-11 5s-8-2-11-5M24 34c-7 2-13 6-17 12M20 44c2 7 2 13 0 20M54 44c-2 7-2 13 0 20M13 50c7 2 12 7 15 14M61 50c-7 2-12 7-15 14" />
                           </svg>
                         </div>
 
-                        <h4>Upper Body Ritual</h4>
+                        <span className="vx-spa-autumn-label">THE EXPERIENCE</span>
+                        <h4>Autumn Serenity Ritual</h4>
                         <p>
-                          Back, décolletage,
+                          Specialised face massage
                           <br />
-                          head &amp; neck
+                          &amp; full-body massage
                         </p>
 
                         <div className="vx-spa-summer-card-rule" />
 
                         <span className="vx-spa-summer-duration">
-                          ◷ &nbsp;45 MINUTES
+                          ◷ &nbsp;90 MINUTES
                         </span>
 
                         <div className="vx-spa-summer-card-rule" />
 
-                        <strong>€100</strong>
-                      </article>
-
-                      <article className="vx-spa-summer-card">
-                        <div className="vx-spa-summer-ritual-icon">
-                          <svg viewBox="0 0 72 72" aria-hidden="true">
-                            <path d="M44 8c-5 11-9 20-12 29-3 8-7 14-13 18-4 3-6 6-5 9 2 4 8 4 14 1 8-4 14-9 18-16M50 11c-2 11-2 22-1 31 1 8 5 13 11 17 4 2 5 5 4 7-2 4-7 3-12 0-7-4-12-9-15-15M16 48c-5-1-9 0-12 3M59 50c4-1 7 0 10 3" />
-                          </svg>
+                        <div className="vx-spa-autumn-inclusion">
+                          <span>INCLUDED</span>
+                          <p>A glass of champagne</p>
                         </div>
-
-                        <h4>Lower Body Ritual</h4>
-                        <p>
-                          Legs &amp; feet
-                          <br />
-                          &nbsp;
-                        </p>
-
-                        <div className="vx-spa-summer-card-rule" />
-
-                        <span className="vx-spa-summer-duration">
-                          ◷ &nbsp;45 MINUTES
-                        </span>
-
-                        <div className="vx-spa-summer-card-rule" />
-
-                        <strong>€100</strong>
-                      </article>
-
-                      <article className="vx-spa-summer-bundle">
-                        <span className="vx-spa-summer-ribbon">BEST VALUE</span>
-
-                        <div className="vx-spa-summer-bundle-mark" aria-hidden="true">
-                          ◇
-                        </div>
-
-                        <div className="vx-spa-summer-bundle-copy">
-                          <h4>Both Rituals</h4>
-                          <p>UPPER &amp; LOWER BODY</p>
-                        </div>
-
-                        <div className="vx-spa-summer-bundle-meta">
-                          <span>◷ &nbsp;90 MINUTES</span>
-                          <strong>€180</strong>
-                        </div>
+                        <strong>€225</strong>
                       </article>
                     </div>
                   </section>

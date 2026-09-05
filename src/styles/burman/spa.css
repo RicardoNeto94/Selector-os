@@ -1918,6 +1918,64 @@
   gap: 12px;
 }
 
+.vx-spa-autumn-options {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.vx-spa-autumn-card {
+  min-height: 402px;
+  justify-content: center;
+  padding: 34px 48px 30px;
+  border-color: rgba(181, 139, 85, .42);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(196, 157, 105, .16), transparent 32%),
+    rgba(255, 255, 255, .31);
+}
+
+.vx-spa-autumn-card .vx-spa-summer-ritual-icon {
+  margin-bottom: 14px;
+}
+
+.vx-spa-autumn-label {
+  margin-bottom: 10px;
+  color: #a77b51;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .24em;
+}
+
+.vx-spa-autumn-card h4 {
+  font-size: 25px;
+}
+
+.vx-spa-autumn-card > p {
+  min-height: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.vx-spa-autumn-inclusion {
+  margin: 15px 0 0;
+  color: #5c4c43;
+}
+
+.vx-spa-autumn-inclusion span {
+  color: #a77b51;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .2em;
+}
+
+.vx-spa-autumn-inclusion p {
+  margin: 5px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+}
+
+.vx-spa-autumn-card strong {
+  margin-top: 18px;
+}
+
 .vx-spa-summer-card {
   min-height: 282px;
   padding: 22px 24px 16px;
