@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function BurmanWeather({ compact = false }) {
+export default function BurmanWeather({ floating = false }) {
   const [weather, setWeather] = useState({
     loading: true,
     temp: "--",
@@ -89,14 +89,22 @@ export default function BurmanWeather({ compact = false }) {
     loadWeather();
   }, []);
 
-  if (compact) {
+  if (floating) {
     return (
-      <aside className="bh-stay-details" aria-label="Useful information for your stay">
-        <div><span>Tallinn weather</span><strong>{weather.loading ? "Loading weather…" : `${weather.temp}°C · ${weather.condition}`}</strong></div>
-        <div><span>Local time</span><strong>{time || "—"}</strong></div>
-        <div><span>Breakfast</span><strong>Until 11:00</strong></div>
-        <div><span>Dining assistance</span><strong>Reception · 800</strong></div>
-      </aside>
+      <div className="bh-concierge" role="complementary" aria-label="Weather and information for your stay">
+        <div className="bh-concierge-heading">
+          <span>Tallinn</span>
+          <time aria-label="Tallinn local time" dateTime={time || undefined}>{time || "—"}</time>
+        </div>
+        <div className="bh-concierge-weather">
+          <div className="bh-concierge-temperature">{weather.temp === "--" ? "—" : weather.temp}{weather.temp !== "--" && <span>°C</span>}</div>
+          <p>{weather.loading ? "Loading weather…" : weather.condition}</p>
+        </div>
+        <dl className="bh-concierge-details">
+          <div><dt>Breakfast</dt><dd>Until 11:00</dd></div>
+          <div><dt>Dining assistance</dt><dd>Reception · 800</dd></div>
+        </dl>
+      </div>
     );
   }
 

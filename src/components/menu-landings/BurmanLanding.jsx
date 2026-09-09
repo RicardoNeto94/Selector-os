@@ -315,6 +315,7 @@ export default function BurmanLanding({ menu }) {
           <div className="bh-shade" aria-hidden="true" />
           <div className="bh-home-scroll" tabIndex={0} aria-label="Your stay at The Burman">
             <div className="bh-home-content">
+              <BurmanWeather floating />
               <div className="bh-welcome">
                 <span className="bh-eyebrow">Your stay, considered.</span>
                 <h1>Welcome to<br /><em>The Burman.</em></h1>
@@ -340,7 +341,6 @@ export default function BurmanLanding({ menu }) {
                   <span className="bh-experience-arrow" aria-hidden="true">↗</span>
                 </button>
               </nav>
-              <BurmanWeather compact />
             </div>
           </div>
         </main>

@@ -40,20 +40,21 @@
 #burman-home .bh-home-scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: thin; scrollbar-color: #b5a08a transparent; }
 #burman-home .bh-home-content {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-rows: 1fr auto;
+  gap: 40px 56px;
   width: min(1440px, 100%);
   min-height: 100%;
   margin: 0 auto;
-  padding: clamp(70px, 14dvh, 180px) clamp(28px, 6vw, 92px) max(24px, env(safe-area-inset-bottom));
+  padding: 36px clamp(28px, 6vw, 92px) max(36px, env(safe-area-inset-bottom));
 }
-#burman-home .bh-welcome { max-width: 680px; }
+#burman-home .bh-welcome { grid-area: 1 / 1; align-self: end; max-width: 680px; padding-top: 100px; }
 #burman-home .bh-eyebrow { display: block; margin-bottom: 20px; color: var(--bh-gold); font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; }
 #burman-home .bh-welcome h1 { margin: 0; color: var(--bh-ivory); font: 400 clamp(42px, 5.2vw, 76px)/1.04 Georgia, serif; letter-spacing: -.035em; }
 #burman-home .bh-welcome h1 em { font-weight: 400; }
 #burman-home .bh-welcome p { margin: 24px 0 0; color: #f0e3d3; font-size: 1.0625rem; line-height: 1.65; }
-#burman-home .bh-experiences { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: clamp(36px, 5dvh, 64px); }
+#burman-home .bh-experiences { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 0; }
 #burman-home .bh-experience {
   position: relative;
   min-width: 0;
@@ -76,10 +77,31 @@
 #burman-home .bh-experience strong { color: inherit; font: 400 clamp(25px, 2.4vw, 36px)/1.2 Georgia, serif; }
 #burman-home .bh-experience-description { color: #e4d6c6; font-size: .9375rem; line-height: 1.45; }
 #burman-home .bh-experience-arrow { position: absolute; right: 0; top: 49px; font: 400 1.5rem/1 Georgia, serif; color: var(--bh-gold); transition: transform .2s ease; }
-#burman-home .bh-stay-details { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 28px; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(226,197,151,.2); }
-#burman-home .bh-stay-details > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-#burman-home .bh-stay-details span { color: #d6c2a7; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
-#burman-home .bh-stay-details strong { color: #f0e3d3; font-size: .875rem; font-weight: 400; line-height: 1.5; }
+#burman-home .bh-concierge {
+  grid-area: 1 / 2;
+  align-self: start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px;
+  border: 1px solid rgba(226,197,151,.3);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(55,43,32,.83), rgba(28,23,19,.91));
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 12px 36px rgba(12,9,6,.14);
+  color: #fff6e9;
+}
+#burman-home .bh-concierge-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+#burman-home .bh-concierge-heading > span { font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; color: #e2c597; }
+#burman-home .bh-concierge-heading time { color: #fff6e9; font-size: 1rem; font-variant-numeric: tabular-nums; }
+#burman-home .bh-concierge-weather { padding: 20px 0; }
+#burman-home .bh-concierge-temperature { color: #fff6e9; font: 400 3.5rem/1 Georgia, serif; }
+#burman-home .bh-concierge-temperature > span { display: inline-block; margin-left: 6px; font-size: 1.25rem; vertical-align: top; padding-top: 6px; }
+#burman-home .bh-concierge-weather p { margin: 10px 0 0; color: #f0e3d3; font-size: 1rem; line-height: 1.4; }
+#burman-home .bh-concierge-details { margin: 0; border-top: 1px solid rgba(226,197,151,.25); }
+#burman-home .bh-concierge-details > div { padding-top: 16px; }
+#burman-home .bh-concierge-details dt { color: #e2c597; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
+#burman-home .bh-concierge-details dd { margin: 5px 0 0; color: #fff6e9; font-size: 1rem; line-height: 1.4; }
 #burman-home :focus-visible { outline: 2px solid var(--bh-gold); outline-offset: -3px; }
 @media (hover: hover) {
   #burman-home .bh-experience:hover { border-color: var(--bh-ivory); }
@@ -89,19 +111,30 @@
   #burman-home .bh-experiences { gap: 24px; }
   #burman-home .bh-home-content { padding-inline: 36px; }
 }
+@media (max-width: 800px) {
+  #burman-home .bh-home-content { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; gap: 36px; }
+  #burman-home .bh-concierge { grid-area: 1 / 1; justify-self: end; max-width: 380px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; padding: 20px; }
+  #burman-home .bh-concierge-heading { grid-column: 1 / -1; }
+  #burman-home .bh-concierge-weather { padding: 0; }
+  #burman-home .bh-concierge-temperature { font-size: 2.75rem; }
+  #burman-home .bh-concierge-details { border: 0; border-left: 1px solid rgba(226,197,151,.25); padding-left: 20px; }
+  #burman-home .bh-concierge-details > div { padding-top: 12px; }
+  #burman-home .bh-concierge-details > div:first-child { padding-top: 0; }
+  #burman-home .bh-welcome { grid-area: 2 / 1; padding-top: 0; }
+  #burman-home .bh-experiences { grid-area: 3 / 1; }
+}
 @media (max-width: 600px) {
   #burman-home .bh-masthead { flex-basis: 64px; padding-inline: 20px; gap: 10px; }
   #burman-home .bh-masthead > span { font-size: .75rem; letter-spacing: .08em; }
   #burman-home .bh-wordmark { font-size: 16px; letter-spacing: .16em; }
-  #burman-home .bh-home-content { padding: 64px 24px max(24px, env(safe-area-inset-bottom)); }
+  #burman-home .bh-home-content { padding: 24px 24px max(24px, env(safe-area-inset-bottom)); }
   #burman-home .bh-welcome h1 { font-size: clamp(38px, 10vw, 52px); }
   #burman-home .bh-welcome p { font-size: 1rem; margin-top: 20px; }
   #burman-home .bh-desktop-break { display: none; }
-  #burman-home .bh-experiences { grid-template-columns: 1fr; gap: 0; margin-top: 32px; }
+  #burman-home .bh-experiences { grid-template-columns: 1fr; gap: 0; margin-top: 0; }
   #burman-home .bh-experience { min-height: 106px; padding: 16px 32px 16px 0; gap: 5px; }
   #burman-home .bh-experience strong { font-size: 1.75rem; }
   #burman-home .bh-experience-arrow { top: 38px; }
-  #burman-home .bh-stay-details { grid-template-columns: 1fr 1fr; gap: 20px 24px; margin-top: 8px; }
   #burman-home .bh-shade { background: linear-gradient(rgba(22,17,13,.58), rgba(22,17,13,.88) 48%, rgba(22,17,13,.96)); }
 }
 @media (max-height: 700px) and (min-width: 601px) {
@@ -110,7 +143,6 @@
   #burman-home .bh-eyebrow { margin-bottom: 12px; }
   #burman-home .bh-welcome p { margin-top: 16px; }
   #burman-home .bh-experiences { margin-top: 28px; }
-  #burman-home .bh-stay-details { margin-top: 12px; }
   #burman-home .bh-shade { background: linear-gradient(rgba(22,17,13,.48), rgba(22,17,13,.84) 48%, rgba(22,17,13,.96)); }
 }
 @media (prefers-reduced-motion: reduce) {
