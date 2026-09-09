@@ -76,7 +76,7 @@
 #burman-home .bh-experience-label { color: var(--bh-gold); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
 #burman-home .bh-experience strong { color: inherit; font: 400 clamp(25px, 2.4vw, 36px)/1.2 Georgia, serif; }
 #burman-home .bh-experience-description { color: #e4d6c6; font-size: .9375rem; line-height: 1.45; }
-#burman-home .bh-experience-arrow { position: absolute; right: 0; top: 49px; font: 400 1.5rem/1 Georgia, serif; color: var(--bh-gold); transition: transform .2s ease; }
+#burman-home .bh-experience-arrow { position: absolute; right: 0; top: 49px; display: block; width: 24px; height: 24px; color: var(--bh-gold); transition: transform .2s ease; }
 #burman-home .bh-concierge {
   grid-area: 1 / 2;
   align-self: start;

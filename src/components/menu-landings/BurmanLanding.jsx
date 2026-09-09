@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
@@ -326,19 +327,19 @@ export default function BurmanLanding({ menu }) {
                   <span className="bh-experience-label">Michelin selected</span>
                   <strong>Dining</strong>
                   <span className="bh-experience-description">Restaurants &amp; wine</span>
-                  <span className="bh-experience-arrow" aria-hidden="true">↗</span>
+                  <ArrowUpRightIcon className="bh-experience-arrow" aria-hidden="true" focusable="false" />
                 </button>
                 <button type="button" className="bh-experience" aria-haspopup="dialog" onClick={() => setOpenRoomService(true)}>
                   <span className="bh-experience-label">Available 24 hours</span>
                   <strong>Room Delicacies</strong>
                   <span className="bh-experience-description">Comforts delivered to your room</span>
-                  <span className="bh-experience-arrow" aria-hidden="true">↗</span>
+                  <ArrowUpRightIcon className="bh-experience-arrow" aria-hidden="true" focusable="false" />
                 </button>
                 <button type="button" className="bh-experience" aria-haspopup="dialog" onClick={() => setOpenSpa(true)}>
                   <span className="bh-experience-label">The Burman Spa</span>
                   <strong>Wellness</strong>
                   <span className="bh-experience-description">Spa, treatments &amp; renewal</span>
-                  <span className="bh-experience-arrow" aria-hidden="true">↗</span>
+                  <ArrowUpRightIcon className="bh-experience-arrow" aria-hidden="true" focusable="false" />
                 </button>
               </nav>
             </div>
