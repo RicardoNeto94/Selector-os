@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
@@ -21,6 +21,42 @@ export default function BurmanLanding({ menu }) {
   const [selectedDining, setSelectedDining] = useState(null);
   const [diningTab, setDiningTab] = useState("overview");
   const [spaTab, setSpaTab] = useState("overview");
+  const spaDialogRef = useRef(null);
+  const spaBodyRef = useRef(null);
+
+  useEffect(() => {
+    if (!openSpa) return;
+    const previousFocus = document.activeElement;
+    const dialog = spaDialogRef.current;
+    dialog?.querySelector("button")?.focus();
+    const handleKeys = (event) => {
+      if (event.key === "Escape") {
+        setOpenSpa(false);
+        setSpaTab("overview");
+      }
+      if (event.key !== "Tab" || !dialog) return;
+      const controls = Array.from(dialog.querySelectorAll("button:not([disabled]), a[href], [tabindex='0']"))
+        .filter((element) => element.getClientRects().length);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeys);
+    return () => {
+      document.removeEventListener("keydown", handleKeys);
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, [openSpa]);
+
+  useEffect(() => {
+    if (spaBodyRef.current) spaBodyRef.current.scrollTop = 0;
+  }, [spaTab]);
   const roomServiceExp = experiences.find((exp) => exp.type === "room_service");
 
   useEffect(() => {
@@ -509,7 +545,7 @@ export default function BurmanLanding({ menu }) {
 
       {/* SPA MODAL */}
       {openSpa && (
-        <div className="burman-modal vx-spa-modal">
+        <div className="burman-modal vx-spa-modal" id="burman-wellness" data-spa-tab={spaTab}>
           <div
             className="burman-modal-backdrop"
             onClick={() => {
@@ -518,45 +554,17 @@ export default function BurmanLanding({ menu }) {
             }}
           />
 
-          <div className="burman-modal-content">
-            <button
-              className="burman-modal-close"
-              onClick={() => {
-                setOpenSpa(false);
-                setSpaTab("overview");
-              }}
-              aria-label="Close spa"
-            >
-              ✕
-            </button>
-
+          <div className="burman-modal-content" ref={spaDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-wellness-title">
             <div className="vx-spa-shell">
-              {/* HERO */}
-              <section className="vx-spa-hero">
-                <img src="/spa.jpg" alt="The Burman Spa" />
-
-                <div className="vx-spa-hero-copy">
-                  <span className="vx-spa-kicker">THE BURMAN · WELLNESS</span>
-
-                  <h2>
-                    An oasis of
-                    <span> serenity.</span>
-                  </h2>
-
-                  <p>
-                    A bespoke wellness journey designed around renewal,
-                    tranquillity and personalised care.
-                  </p>
-
-                  <div className="vx-spa-hero-meta">
-                    BIOLOGIQUE RECHERCHE · PARIS
-                  </div>
-                </div>
-
-                <div className="vx-spa-request">
-                  
-                </div>
-              </section>
+              <div className="vx-spa-atmosphere" aria-hidden="true" />
+              <header className="vx-spa-masthead">
+                <span className="vx-spa-masthead-label">Wellness</span>
+                <h2 id="burman-wellness-title">The Burman</h2>
+                <button type="button" className="vx-spa-close" aria-label="Close spa" onClick={() => {
+                  setOpenSpa(false);
+                  setSpaTab("overview");
+                }}>Close <span aria-hidden="true">×</span></button>
+              </header>
 
               {/* TABS */}
               <nav className="vx-spa-tabs" aria-label="Spa sections">
@@ -572,6 +580,7 @@ export default function BurmanLanding({ menu }) {
                       spaTab === key ? "vx-spa-tab active" : "vx-spa-tab"
                     }
                     onClick={() => setSpaTab(key)}
+                    aria-pressed={spaTab === key}
                   >
                     {label}
                   </button>
@@ -579,16 +588,16 @@ export default function BurmanLanding({ menu }) {
               </nav>
 
               {/* BODY */}
-              <div className="vx-spa-body">
+              <div className="vx-spa-body" ref={spaBodyRef} tabIndex={0} aria-label="Spa content">
                 {/* OVERVIEW */}
                 {spaTab === "overview" && (
                   <section className="vx-spa-editorial-overview">
                     <div className="vx-spa-editorial-main">
                       <div className="vx-spa-editorial-intro">
                         <h3>
-                          Wellness,
+                          An oasis of
                           <br />
-                          considered.
+                          <em>serenity.</em>
                         </h3>
 
                         <p>
