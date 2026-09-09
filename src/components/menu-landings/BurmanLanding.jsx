@@ -25,11 +25,13 @@ export default function BurmanLanding({ menu }) {
   const spaBodyRef = useRef(null);
   const roomDialogRef = useRef(null);
   const roomBodyRef = useRef(null);
+  const diningDialogRef = useRef(null);
+  const diningBodyRef = useRef(null);
 
   useEffect(() => {
-    if (!openSpa && !openRoomService) return;
+    if (!openSpa && !openRoomService && !openDining) return;
     const previousFocus = document.activeElement;
-    const dialog = openSpa ? spaDialogRef.current : roomDialogRef.current;
+    const dialog = openSpa ? spaDialogRef.current : openRoomService ? roomDialogRef.current : diningDialogRef.current;
     dialog?.querySelector("button")?.focus();
     const handleKeys = (event) => {
       if (event.key === "Escape") {
@@ -37,6 +39,9 @@ export default function BurmanLanding({ menu }) {
         setSpaTab("overview");
         setOpenRoomService(false);
         setRoomTab("snacks");
+        setOpenDining(false);
+        setOpenDiningVenue(null);
+        setDiningTab("overview");
       }
       if (event.key !== "Tab" || !dialog) return;
       const controls = Array.from(dialog.querySelectorAll("button:not([disabled]), a[href], [tabindex='0']"))
@@ -56,7 +61,7 @@ export default function BurmanLanding({ menu }) {
       document.removeEventListener("keydown", handleKeys);
       if (previousFocus?.isConnected) previousFocus.focus();
     };
-  }, [openSpa, openRoomService]);
+  }, [openSpa, openRoomService, openDining]);
 
   useEffect(() => {
     if (spaBodyRef.current) spaBodyRef.current.scrollTop = 0;
@@ -64,6 +69,12 @@ export default function BurmanLanding({ menu }) {
   useEffect(() => {
     if (roomBodyRef.current) roomBodyRef.current.scrollTop = 0;
   }, [roomTab]);
+  useEffect(() => {
+    if (diningBodyRef.current) diningBodyRef.current.scrollTop = 0;
+  }, [diningTab, openDiningVenue]);
+  useEffect(() => {
+    if (openDiningVenue) diningDialogRef.current?.querySelector("[data-dining-return]")?.focus();
+  }, [openDiningVenue]);
   const roomServiceExp = experiences.find((exp) => exp.type === "room_service");
 
   useEffect(() => {
@@ -943,7 +954,7 @@ export default function BurmanLanding({ menu }) {
 
       {/* DINING MODAL */}
       {openDining && (
-        <div className="burman-modal vx-dining-modal">
+        <div className="burman-modal vx-dining-modal" id="burman-dining">
           <div
             className="burman-modal-backdrop"
             onClick={() => {
@@ -953,22 +964,26 @@ export default function BurmanLanding({ menu }) {
             }}
           />
 
-          <div className="burman-modal-content">
-            <button
-              className="burman-modal-close"
-              onClick={() => {
-                setOpenDining(false);
-                setOpenDiningVenue(null);
-                setDiningTab("overview");
-              }}
-              aria-label="Close dining"
-            >
-              ✕
-            </button>
-
+          <div className="burman-modal-content" ref={diningDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-dining-title">
             <div className="vx-dining-shell">
+              <header className="vx-dining-masthead">
+                {openDiningVenue ? (
+                  <button type="button" className="vx-dining-return" data-dining-return onClick={() => {
+                    setOpenDiningVenue(null);
+                    setDiningTab("overview");
+                    requestAnimationFrame(() => diningDialogRef.current?.querySelector(".vx-dining-venue")?.focus());
+                  }}>← Dining</button>
+                ) : <span className="vx-dining-masthead-label">Dining</span>}
+                <h2 id="burman-dining-title">The Burman</h2>
+                <button type="button" className="vx-dining-close" aria-label="Close dining" onClick={() => {
+                  setOpenDining(false);
+                  setOpenDiningVenue(null);
+                  setDiningTab("overview");
+                }}>Close <span aria-hidden="true">×</span></button>
+              </header>
               {!openDiningVenue ? (
-                <div className="vx-dining-discovery">
+                <div className="vx-dining-discovery" ref={diningBodyRef} tabIndex={0} aria-label="Choose a restaurant">
+                  <div className="vx-dining-atmosphere vx-dining-discovery-atmosphere" aria-hidden="true" />
                   <section className="vx-dining-discovery-copy">
                     <span className="vx-dining-kicker">MICHELIN SELECTED</span>
 
@@ -1084,32 +1099,7 @@ export default function BurmanLanding({ menu }) {
 
                     return (
                       <div key={exp.id} className="vx-dining-hub">
-                        <section className="vx-dining-hub-hero">
-                          <img src={image} alt={exp.name} />
-
-                          <button
-                            className="vx-dining-back"
-                            onClick={() => {
-                              setOpenDiningVenue(null);
-                              setDiningTab("overview");
-                            }}
-                          >
-                            ← Back to Dining
-                          </button>
-
-                          <div className="vx-dining-hub-copy">
-                            <span className="vx-dining-kicker">{cuisine}</span>
-                            <h2>{exp.name}</h2>
-                            <p>{overviewCopy}</p>
-
-                            <div className="vx-dining-hub-meta">
-                              <span>
-                                {exp.schedule || "The Burman · Tallinn"}
-                              </span>
-                            </div>
-                          </div>
-                        </section>
-
+                        <div className="vx-dining-atmosphere" style={{ backgroundImage: `url(${JSON.stringify(image)})` }} aria-hidden="true" />
                         <nav
                           className="vx-dining-tabs"
                           aria-label="Dining sections"
@@ -1133,13 +1123,20 @@ export default function BurmanLanding({ menu }) {
                                   : "vx-dining-tab"
                               }
                               onClick={() => setDiningTab(key)}
+                              aria-pressed={diningTab === key}
                             >
                               {label}
                             </button>
                           ))}
                         </nav>
 
-                        <div className="vx-dining-hub-body">
+                        <div className="vx-dining-hub-body" ref={diningBodyRef} tabIndex={0} aria-label={`${exp.name} information`}>
+                          <section className="vx-dining-identity">
+                            <span className="vx-dining-kicker">{cuisine}</span>
+                            <h2>{exp.name}</h2>
+                            <p>{overviewCopy}</p>
+                            <div className="vx-dining-hours">{exp.schedule || "The Burman · Tallinn"}</div>
+                          </section>
                           {diningTab === "overview" &&
                             (venueName.includes("koyo") ? (
                               <section className="vx-koyo-overview">
