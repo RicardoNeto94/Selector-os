@@ -5,6 +5,7 @@ import "@/styles/burman.css";
 import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
+import BurmanSpaOffer from "@/components/BurmanSpaOffer";
 export default function BurmanLanding({ menu }) {
   const base = `/menu/${menu?.public_slug}`;
   const [roomTab, setRoomTab] = useState("snacks");
@@ -713,97 +714,7 @@ export default function BurmanLanding({ menu }) {
 
                 {/* SEPTEMBER OFFER */}
                 {spaTab === "summer" && (
-                  <section className="vx-spa-summer-offer">
-                    <div className="vx-spa-summer-intro">
-                      <span className="vx-spa-summer-kicker">
-                        SEPTEMBER SPA SPECIAL
-                      </span>
-
-                      <h3>
-                        Autumn Serenity
-                        <br />
-                        Ritual
-                      </h3>
-
-                      <p className="vx-spa-summer-subtitle">
-                        Specialised face massage &amp; full-body massage
-                      </p>
-
-                      <div className="vx-spa-summer-divider">
-                        <span />
-                        <b>◇</b>
-                        <span />
-                      </div>
-
-                      <p className="vx-spa-summer-copy">
-                        A deeply restorative 90-minute ritual combining a
-                        specialised face massage with a full-body massage,
-                        completed with a glass of champagne.
-                      </p>
-
-                      <div className="vx-spa-summer-booking-note">
-                        <svg
-                          viewBox="0 0 48 48"
-                          aria-hidden="true"
-                          className="vx-spa-summer-note-icon"
-                        >
-                          <path d="M24 7c-4 6-9 10-16 12 5 2 8 5 10 10-1 5 0 9 6 13 6-4 7-8 6-13 2-5 5-8 10-10-7-2-12-6-16-12Z" />
-                          <path d="M24 7v35M13 18c5 2 8 6 11 11M35 18c-5 2-8 6-11 11" />
-                        </svg>
-
-                        <p>
-                          Please book through
-                          <br />
-                          hotel or spa reception.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="vx-spa-summer-cta"
-                        onClick={() =>
-                          alert(
-                            "Please contact Reception, Extension 800, to book your spa treatment.",
-                          )
-                        }
-                      >
-                        <span aria-hidden="true">⌂</span>
-                        CONTACT RECEPTION
-                      </button>
-                    </div>
-
-                    <div className="vx-spa-summer-options vx-spa-autumn-options">
-                      <article className="vx-spa-summer-card vx-spa-autumn-card">
-                        <div className="vx-spa-summer-ritual-icon">
-                          <svg viewBox="0 0 72 72" aria-hidden="true">
-                            <path d="M26 17c0-8 5-13 11-13 7 0 12 6 12 13 0 4-2 7-5 10v7c7 2 13 6 17 12M37 33v12M48 31c-3 3-7 5-11 5s-8-2-11-5M24 34c-7 2-13 6-17 12M20 44c2 7 2 13 0 20M54 44c-2 7-2 13 0 20M13 50c7 2 12 7 15 14M61 50c-7 2-12 7-15 14" />
-                          </svg>
-                        </div>
-
-                        <span className="vx-spa-autumn-label">THE EXPERIENCE</span>
-                        <h4>Autumn Serenity Ritual</h4>
-                        <p>
-                          Specialised face massage
-                          <br />
-                          &amp; full-body massage
-                        </p>
-
-                        <div className="vx-spa-summer-card-rule" />
-
-                        <span className="vx-spa-summer-duration">
-                          ◷ &nbsp;90 MINUTES
-                        </span>
-
-                        <div className="vx-spa-summer-card-rule" />
-
-                        <div className="vx-spa-autumn-inclusion">
-                          <span>INCLUDED</span>
-                          <p>A glass of champagne</p>
-                        </div>
-                        <strong>€225</strong>
-                      </article>
-                    </div>
-                  </section>
+                  <BurmanSpaOffer />
                 )}
 
                 {/* INFORMATION */}

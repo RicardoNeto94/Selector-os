@@ -1,6 +1,7 @@
 @import "./burman/dining.css";
 @import "./burman/room-service.css";
 @import "./burman/spa.css";
+@import "./burman/spa-offer.css";
 /* ================= GLOBAL ================= */
 
 html, body{
