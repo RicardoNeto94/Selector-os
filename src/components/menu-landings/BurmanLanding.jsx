@@ -23,16 +23,20 @@ export default function BurmanLanding({ menu }) {
   const [spaTab, setSpaTab] = useState("overview");
   const spaDialogRef = useRef(null);
   const spaBodyRef = useRef(null);
+  const roomDialogRef = useRef(null);
+  const roomBodyRef = useRef(null);
 
   useEffect(() => {
-    if (!openSpa) return;
+    if (!openSpa && !openRoomService) return;
     const previousFocus = document.activeElement;
-    const dialog = spaDialogRef.current;
+    const dialog = openSpa ? spaDialogRef.current : roomDialogRef.current;
     dialog?.querySelector("button")?.focus();
     const handleKeys = (event) => {
       if (event.key === "Escape") {
         setOpenSpa(false);
         setSpaTab("overview");
+        setOpenRoomService(false);
+        setRoomTab("snacks");
       }
       if (event.key !== "Tab" || !dialog) return;
       const controls = Array.from(dialog.querySelectorAll("button:not([disabled]), a[href], [tabindex='0']"))
@@ -52,11 +56,14 @@ export default function BurmanLanding({ menu }) {
       document.removeEventListener("keydown", handleKeys);
       if (previousFocus?.isConnected) previousFocus.focus();
     };
-  }, [openSpa]);
+  }, [openSpa, openRoomService]);
 
   useEffect(() => {
     if (spaBodyRef.current) spaBodyRef.current.scrollTop = 0;
   }, [spaTab]);
+  useEffect(() => {
+    if (roomBodyRef.current) roomBodyRef.current.scrollTop = 0;
+  }, [roomTab]);
   const roomServiceExp = experiences.find((exp) => exp.type === "room_service");
 
   useEffect(() => {
@@ -370,7 +377,7 @@ export default function BurmanLanding({ menu }) {
 
       {/* ROOM SERVICE MODAL */}
       {openRoomService && (
-        <div className="burman-modal vx-room-modal">
+        <div className="burman-modal vx-room-modal" id="burman-room-delicacies">
           <div
             className="burman-modal-backdrop"
             onClick={() => {
@@ -379,38 +386,17 @@ export default function BurmanLanding({ menu }) {
             }}
           />
 
-          <div className="burman-modal-content">
-            <button
-              className="burman-modal-close"
-              onClick={() => {
-                setOpenRoomService(false);
-                setRoomTab("snacks");
-              }}
-              aria-label="Close room service"
-            >
-              ✕
-            </button>
-
+          <div className="burman-modal-content" ref={roomDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-room-title">
             <div className="vx-room-shell">
-              {/* HERO */}
-              <section className="vx-room-hero">
-                <img src="/homepage/room-service.png" alt="Room Delicacies" />
-
-                <div className="vx-room-hero-copy">
-                  <span className="vx-room-kicker">THE BURMAN · IN ROOM</span>
-
-                  <h2>Room Delicacies</h2>
-
-                  <p>
-                    Curated comforts, thoughtful details and refined in-room
-                    selections designed around your stay.
-                  </p>
-
-                  <div className="vx-room-hero-meta">
-                    <span>Available 24 hours</span>
-                  </div>
-                </div>
-              </section>
+              <div className="vx-room-atmosphere" aria-hidden="true" />
+              <header className="vx-room-masthead">
+                <span className="vx-room-masthead-label">Room Delicacies</span>
+                <h2 id="burman-room-title">The Burman</h2>
+                <button type="button" className="vx-room-close" aria-label="Close room service" onClick={() => {
+                  setOpenRoomService(false);
+                  setRoomTab("snacks");
+                }}>Close <span aria-hidden="true">×</span></button>
+              </header>
 
               {/* TABS */}
               <nav
@@ -428,6 +414,7 @@ export default function BurmanLanding({ menu }) {
                       roomTab === key ? "vx-room-tab active" : "vx-room-tab"
                     }
                     onClick={() => setRoomTab(key)}
+                    aria-pressed={roomTab === key}
                   >
                     {label}
                   </button>
@@ -435,14 +422,14 @@ export default function BurmanLanding({ menu }) {
               </nav>
 
               {/* CONTENT */}
-              <div className="vx-room-body">
+              <div className="vx-room-body" ref={roomBodyRef} tabIndex={0} aria-label="Room delicacies content">
                 {/* SNACKS / DRINKS / AMENITIES */}
                 {["snacks", "drinks"].includes(roomTab) && (
                   <section className="vx-room-menu">
                     <div className="vx-room-menu-heading">
                       <span className="vx-room-section-label">
                         {roomTab === "snacks"
-                          ? "IN ROOM DINING"
+                          ? "IN ROOM DINING · AVAILABLE 24 HOURS"
                           : roomTab === "drinks"
                             ? "REFRESHMENTS"
                             : "CURATED COMFORTS"}

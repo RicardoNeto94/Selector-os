@@ -3,6 +3,7 @@
 @import "./burman/spa.css";
 @import "./burman/spa-offer.css";
 @import "./burman/spa-immersive.css";
+@import "./burman/room-immersive.css";
 /* ================= GLOBAL ================= */
 
 html, body{

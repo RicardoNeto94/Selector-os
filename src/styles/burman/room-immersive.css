@@ -1,0 +1,155 @@
+/* Room Delicacies shares Wellness's photographic, ivory-masthead language.
+   Scope every rule so the separate dining and spa experiences stay unchanged. */
+#burman-room-delicacies > .burman-modal-content {
+  width: min(1180px, calc(100vw - 40px));
+  height: min(850px, calc(100dvh - 40px));
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #211a16 !important;
+}
+#burman-room-delicacies .vx-room-shell {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #211a16;
+  color: #fff6e9;
+}
+#burman-room-delicacies .vx-room-atmosphere {
+  position: absolute;
+  inset: 68px 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/homepage/room-service.png') center / cover no-repeat;
+}
+#burman-room-delicacies .vx-room-atmosphere::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  filter: blur(20px);
+  transform: scale(1.045);
+  mask-image: linear-gradient(transparent 12%, #000 70%);
+  -webkit-mask-image: linear-gradient(transparent 12%, #000 70%);
+}
+#burman-room-delicacies .vx-room-atmosphere::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(23,17,13,.74), rgba(23,17,13,.84) 45%, rgba(23,17,13,.94));
+}
+#burman-room-delicacies .vx-room-masthead {
+  flex: 0 0 68px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 0 clamp(20px, 3vw, 38px);
+  background: #f6f0e6;
+  color: #342a22;
+}
+#burman-room-delicacies .vx-room-masthead h2 {
+  margin: 0;
+  font: 400 clamp(17px, 2vw, 23px)/1.2 Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  color: inherit;
+}
+#burman-room-delicacies .vx-room-masthead-label { font-size: .75rem; letter-spacing: .15em; text-transform: uppercase; }
+#burman-room-delicacies .vx-room-close {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  border: 0;
+  padding: 0 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+#burman-room-delicacies .vx-room-close span { font-size: 1.5rem; }
+#burman-room-delicacies .vx-room-tabs {
+  background: rgba(24,17,12,.25);
+  border: 0;
+  height: auto;
+  min-height: 56px;
+  flex: 0 0 auto;
+  padding: 0 24px;
+  gap: clamp(24px, 4vw, 50px);
+  overflow-x: auto;
+}
+#burman-room-delicacies .vx-room-tab {
+  flex-shrink: 0;
+  height: 56px;
+  color: #f5e9d9;
+  font-size: 1rem;
+  letter-spacing: .015em;
+  text-transform: none;
+}
+#burman-room-delicacies .vx-room-tab.active { color: #fff; }
+#burman-room-delicacies .vx-room-tab::after { background: #e8cb9e; }
+#burman-room-delicacies button:focus-visible,
+#burman-room-delicacies .vx-room-body:focus-visible { outline: 2px solid #bf995f; outline-offset: -3px; }
+#burman-room-delicacies .vx-room-body {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #b5a08a transparent;
+  background: transparent;
+}
+#burman-room-delicacies .vx-room-body::-webkit-scrollbar { display: block; width: 6px; }
+#burman-room-delicacies .vx-room-body::-webkit-scrollbar-thumb { background: #b5a08a; border-radius: 3px; }
+#burman-room-delicacies .vx-room-menu,
+#burman-room-delicacies .vx-room-pillow { width: auto; margin: 0; padding: 36px clamp(28px, 5vw, 64px) 48px; }
+#burman-room-delicacies .vx-room-menu-heading { text-align: left; margin-bottom: 36px; }
+#burman-room-delicacies .vx-room-section-label { color: #e2c597; font-size: .75rem; letter-spacing: .12em; }
+#burman-room-delicacies .vx-room-menu-heading h3 { color: #fff6e9; font-size: clamp(32px, 3.5vw, 46px); line-height: 1.15; }
+#burman-room-delicacies .vx-room-menu-heading p { color: #eee0ce; font-size: 1rem; margin: 16px 0 0; }
+#burman-room-delicacies .vx-room-menu-section { margin-bottom: 40px; }
+#burman-room-delicacies .vx-room-menu-section > h3 { color: #efd4ab; border-color: #897560; font-size: 1.625rem; }
+#burman-room-delicacies .vx-room-menu-item { border-color: #786451; gap: 24px; }
+#burman-room-delicacies .vx-room-menu-item h4 { color: #fff6e9; font-size: 1.25rem; }
+#burman-room-delicacies .vx-room-menu-item p { color: #f0e3d3; font-size: 1rem; line-height: 1.65; }
+#burman-room-delicacies .vx-room-price,
+#burman-room-delicacies .vx-room-price > span { color: #fff6e9; font-size: 1rem; }
+#burman-room-delicacies .vx-room-disclaimer { color: #e4d6c6; border-color: #786451; font-size: .875rem; text-align: left; }
+#burman-room-delicacies .vx-room-empty { color: #f0e3d3; font-size: 1rem; }
+/* Pillow choices become editorial columns, not nested cards. */
+#burman-room-delicacies .vx-pillow-intro { margin: 0 0 32px; max-width: 620px; text-align: left; }
+#burman-room-delicacies .vx-pillow-intro p,
+#burman-room-delicacies .vx-pillow-card-content p { color: #f0e3d3; font-size: 1rem; }
+#burman-room-delicacies .vx-pillow-grid { gap: 32px 48px; }
+#burman-room-delicacies .vx-pillow-card { background: transparent; border: 0; border-top: 1px solid #897560; border-radius: 0; padding: 24px 0 0; }
+#burman-room-delicacies .vx-pillow-number,
+#burman-room-delicacies .vx-pillow-type { color: #e2c597; font-size: .75rem; letter-spacing: .08em; }
+#burman-room-delicacies .vx-pillow-card-content h4 { color: #fff6e9; font-size: 1.625rem; line-height: 1.2; }
+#burman-room-delicacies .vx-pillow-feel { color: #e2c597; font-size: .875rem; }
+#burman-room-delicacies .vx-pillow-card-footer { color: #e4d6c6; border-color: #786451; font-size: .875rem; }
+#burman-room-delicacies .vx-pillow-request { background: transparent; border-top: 1px solid #897560; border-radius: 0; margin-top: 36px; padding: 24px 0 0; }
+#burman-room-delicacies .vx-pillow-request span { color: #e2c597; font-size: .75rem; }
+#burman-room-delicacies .vx-pillow-request strong { color: #fff6e9; }
+#burman-room-delicacies .vx-pillow-request p,
+#burman-room-delicacies .vx-pillow-note { color: #e4d6c6; font-size: .875rem; }
+@media (max-width: 700px) {
+  #burman-room-delicacies > .burman-modal-content { width: calc(100vw - 20px); height: calc(100dvh - 24px); max-height: calc(100dvh - 24px); }
+  #burman-room-delicacies .vx-room-masthead { grid-template-columns: 1fr auto; padding: 0 20px; gap: 8px; }
+  #burman-room-delicacies .vx-room-masthead-label { display: none; }
+  #burman-room-delicacies .vx-room-tabs { justify-content: flex-start; padding: 0 20px; gap: 24px; }
+  #burman-room-delicacies .vx-room-menu-item { gap: 12px; }
+  #burman-room-delicacies .vx-room-price { max-width: 110px; white-space: normal; text-align: right; }
+  #burman-room-delicacies .vx-pillow-grid { grid-template-columns: 1fr; }
+  #burman-room-delicacies .vx-pillow-request { flex-direction: column; align-items: flex-start; gap: 16px; }
+  #burman-room-delicacies .vx-pillow-request p { text-align: left; }
+}
