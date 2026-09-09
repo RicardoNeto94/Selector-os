@@ -83,22 +83,22 @@
   width: 100%;
   box-sizing: border-box;
   padding: 24px;
-  border: 1px solid rgba(226,197,151,.3);
+  border: 1px solid rgba(246,240,230,.14);
   border-radius: 14px;
-  background: linear-gradient(145deg, rgba(55,43,32,.83), rgba(28,23,19,.91));
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  box-shadow: 0 12px 36px rgba(12,9,6,.14);
+  background: linear-gradient(145deg, rgba(55,43,32,.38), rgba(28,23,19,.54));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: none;
   color: #fff6e9;
 }
 #burman-home .bh-concierge-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 #burman-home .bh-concierge-heading > span { font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; color: #e2c597; }
 #burman-home .bh-concierge-heading time { color: #fff6e9; font-size: 1rem; font-variant-numeric: tabular-nums; }
 #burman-home .bh-concierge-weather { padding: 20px 0; }
-#burman-home .bh-concierge-temperature { color: #fff6e9; font: 400 3.5rem/1 Georgia, serif; }
+#burman-home .bh-concierge-temperature { color: #fff6e9; font: 400 3rem/1 Georgia, serif; }
 #burman-home .bh-concierge-temperature > span { display: inline-block; margin-left: 6px; font-size: 1.25rem; vertical-align: top; padding-top: 6px; }
 #burman-home .bh-concierge-weather p { margin: 10px 0 0; color: #f0e3d3; font-size: 1rem; line-height: 1.4; }
-#burman-home .bh-concierge-details { margin: 0; border-top: 1px solid rgba(226,197,151,.25); }
+#burman-home .bh-concierge-details { margin: 0; border-top: 1px solid rgba(246,240,230,.14); }
 #burman-home .bh-concierge-details > div { padding-top: 16px; }
 #burman-home .bh-concierge-details dt { color: #e2c597; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
 #burman-home .bh-concierge-details dd { margin: 5px 0 0; color: #fff6e9; font-size: 1rem; line-height: 1.4; }
@@ -117,7 +117,7 @@
   #burman-home .bh-concierge-heading { grid-column: 1 / -1; }
   #burman-home .bh-concierge-weather { padding: 0; }
   #burman-home .bh-concierge-temperature { font-size: 2.75rem; }
-  #burman-home .bh-concierge-details { border: 0; border-left: 1px solid rgba(226,197,151,.25); padding-left: 20px; }
+  #burman-home .bh-concierge-details { border: 0; border-left: 1px solid rgba(246,240,230,.14); padding-left: 20px; }
   #burman-home .bh-concierge-details > div { padding-top: 12px; }
   #burman-home .bh-concierge-details > div:first-child { padding-top: 0; }
   #burman-home .bh-welcome { grid-area: 2 / 1; padding-top: 0; }
