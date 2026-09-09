@@ -308,6 +308,37 @@ background:rgba(255,255,255,0.16);
   z-index:1;
 }
 
+/* Keep the guest page out of focus while any Burman dialog is open.
+   Animate the tint, not opacity/filter, so blur is present from the first frame. */
+.burman-root .burman-modal > .burman-modal-backdrop {
+  background: rgba(18, 14, 11, .42);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  animation: burmanBackdropReveal 320ms ease-out both;
+}
+
+.burman-root :is(#burman-dining, #burman-room-delicacies, #burman-wellness) > .burman-modal-content {
+  transform-origin: center;
+  animation: burmanDialogReveal 460ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes burmanBackdropReveal {
+  from { background-color: rgba(18, 14, 11, .16); }
+  to { background-color: rgba(18, 14, 11, .42); }
+}
+
+@keyframes burmanDialogReveal {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burman-root .burman-modal > .burman-modal-backdrop,
+  .burman-root :is(#burman-dining, #burman-room-delicacies, #burman-wellness) > .burman-modal-content {
+    animation: none;
+  }
+}
+
 .burman-modal-content{
   position:relative;
   z-index:2;

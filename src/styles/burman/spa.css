@@ -12,20 +12,6 @@
   background: transparent !important;
 }
 
-.vx-spa-modal > .burman-modal-backdrop {
-  background: rgba(8, 6, 4, .16) !important;
-
-  backdrop-filter:
-    blur(18px)
-    brightness(.72)
-    saturate(.9) !important;
-
-  -webkit-backdrop-filter:
-    blur(18px)
-    brightness(.72)
-    saturate(.9) !important;
-}
-
 .vx-spa-modal > .burman-modal-content {
   position: relative;
   z-index: 2;
