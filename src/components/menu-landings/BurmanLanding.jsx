@@ -6,6 +6,7 @@ import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
 import BurmanSpaOffer from "@/components/BurmanSpaOffer";
+const BURMAN_HOME_PHOTO = "https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp";
 export default function BurmanLanding({ menu }) {
   const base = `/menu/${menu?.public_slug}`;
   const [roomTab, setRoomTab] = useState("snacks");
@@ -301,89 +302,48 @@ export default function BurmanLanding({ menu }) {
 
   return (
     <div className="burman-root">
-      {/* EVERYTHING BELOW REMAINS EXACTLY THE SAME */}
-      {/* I DID NOT TOUCH YOUR UI */}
-
       {/* ========================= HOME ========================= */}
-
-      <div className="vx-home">
-        <div className="vx-container">
-          <header className="vx-header">
-            <div className="vx-header-left">HOTEL</div>
-
-            <div className="vx-header-center">THE BURMAN</div>
-
-            <div className="vx-header-right">TALLINN</div>
-          </header>
-          <section className="vx-hero">
-            <img
-              src="https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp"
-              alt="The Burman"
-              className="vx-hero-image"
-            />
-
-            <div className="vx-hero-gradient" />
-
-            <div className="vx-weather-floating">
-              <BurmanWeather />
-            </div>
-
-            <div className="vx-hero-content">
-              <div className="vx-copy">
-                <div className="vx-eyebrow">THE BURMAN · TALLINN</div>
-
-                <h1>
-                  Welcome to
-                  <br />
-                  The Burman
-                </h1>
-
-                <p>
-                  Discover Michelin dining, refined wellness and exceptional
-                  experiences designed around your stay.
-                </p>
+      <div id="burman-home">
+        <header className="bh-masthead">
+          <span>Hotel</span>
+          <div className="bh-wordmark">The Burman</div>
+          <span>Tallinn</span>
+        </header>
+        <main className="bh-scene">
+          <img className="bh-photograph" src={BURMAN_HOME_PHOTO} alt="The Burman hotel interior" fetchPriority="high" />
+          <img className="bh-photograph bh-photograph-blur" src={BURMAN_HOME_PHOTO} alt="" aria-hidden="true" />
+          <div className="bh-shade" aria-hidden="true" />
+          <div className="bh-home-scroll" tabIndex={0} aria-label="Your stay at The Burman">
+            <div className="bh-home-content">
+              <div className="bh-welcome">
+                <span className="bh-eyebrow">Your stay, considered.</span>
+                <h1>Welcome to<br /><em>The Burman.</em></h1>
+                <p>Exceptional dining, quiet moments and thoughtful comforts.<br className="bh-desktop-break" /> Discover the experiences that make your stay yours.</p>
               </div>
+              <nav className="bh-experiences" aria-label="Hotel experiences">
+                <button type="button" className="bh-experience" aria-haspopup="dialog" onClick={() => setOpenDining(true)}>
+                  <span className="bh-experience-label">Michelin selected</span>
+                  <strong>Dining</strong>
+                  <span className="bh-experience-description">Restaurants &amp; wine</span>
+                  <span className="bh-experience-arrow" aria-hidden="true">↗</span>
+                </button>
+                <button type="button" className="bh-experience" aria-haspopup="dialog" onClick={() => setOpenRoomService(true)}>
+                  <span className="bh-experience-label">Available 24 hours</span>
+                  <strong>Room Delicacies</strong>
+                  <span className="bh-experience-description">Comforts delivered to your room</span>
+                  <span className="bh-experience-arrow" aria-hidden="true">↗</span>
+                </button>
+                <button type="button" className="bh-experience" aria-haspopup="dialog" onClick={() => setOpenSpa(true)}>
+                  <span className="bh-experience-label">The Burman Spa</span>
+                  <strong>Wellness</strong>
+                  <span className="bh-experience-description">Spa, treatments &amp; renewal</span>
+                  <span className="bh-experience-arrow" aria-hidden="true">↗</span>
+                </button>
+              </nav>
+              <BurmanWeather compact />
             </div>
-
-            <div className="vx-services">
-              <button
-                className="vx-service"
-                onClick={() => setOpenDining(true)}
-              >
-                <img src="/homepage/dining.jpg" alt="Dining" />
-
-                <span>MICHELIN SELECTED</span>
-
-                <h3>Dining</h3>
-
-                <p>Restaurants & Wine</p>
-              </button>
-
-              <button
-                className="vx-service"
-                onClick={() => setOpenRoomService(true)}
-              >
-                <img src="/homepage/room-service.png" alt="Room Service" />
-
-                <span>24 HOURS</span>
-
-                <h3>Room Delicacies</h3>
-
-                <p>Curated Selections</p>
-              </button>
-
-              <button className="vx-service" onClick={() => setOpenSpa(true)}>
-                <img src="/homepage/spa.jpg" alt="Spa" />
-
-                <span>BURMAN SPA</span>
-
-                <h3>Wellness</h3>
-
-                <p>Spa & Treatments</p>
-              </button>
-            </div>
-          </section>
-        </div>
+          </div>
+        </main>
       </div>
 
       {/* ROOM SERVICE MODAL */}

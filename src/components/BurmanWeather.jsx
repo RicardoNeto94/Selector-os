@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function BurmanWeather() {
+export default function BurmanWeather({ compact = false }) {
   const [weather, setWeather] = useState({
     loading: true,
     temp: "--",
@@ -16,9 +16,10 @@ export default function BurmanWeather() {
   useEffect(() => {
     const updateClock = () => {
       setTime(
-        new Date().toLocaleTimeString([], {
+        new Date().toLocaleTimeString("en-GB", {
           hour: "2-digit",
           minute: "2-digit",
+          timeZone: "Europe/Tallinn",
         })
       );
     };
@@ -37,12 +38,13 @@ export default function BurmanWeather() {
         const res = await fetch(
           "https://api.open-meteo.com/v1/forecast?latitude=59.437&longitude=24.7536&current=temperature_2m,weather_code"
         );
+        if (!res.ok) throw new Error("Weather unavailable");
 
         const data = await res.json();
 
         const current = data.current;
 
-        if (!current) return;
+        if (!current) throw new Error("Weather unavailable");
 
         const conditions = {
           0: { icon: "☀️", label: "Clear Sky" },
@@ -86,6 +88,17 @@ export default function BurmanWeather() {
 
     loadWeather();
   }, []);
+
+  if (compact) {
+    return (
+      <aside className="bh-stay-details" aria-label="Useful information for your stay">
+        <div><span>Tallinn weather</span><strong>{weather.loading ? "Loading weather…" : `${weather.temp}°C · ${weather.condition}`}</strong></div>
+        <div><span>Local time</span><strong>{time || "—"}</strong></div>
+        <div><span>Breakfast</span><strong>Until 11:00</strong></div>
+        <div><span>Dining assistance</span><strong>Reception · 800</strong></div>
+      </aside>
+    );
+  }
 
   return (
     <div className="burman-weather">
