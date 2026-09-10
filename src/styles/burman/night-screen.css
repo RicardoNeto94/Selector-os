@@ -1,0 +1,81 @@
+.bh-night-content { display: contents; }
+
+.bh-night-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  height: 100dvh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(40px, env(safe-area-inset-top)) 24px max(36px, env(safe-area-inset-bottom));
+  background: #080807;
+  color: #a79a86;
+  font-family: "Playfair Display", Georgia, serif;
+  text-align: center;
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bh-night-wordmark {
+  font-size: 16px;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: #948776;
+}
+.bh-night-centre { padding: 24px 0; }
+.bh-night-location {
+  font: 12px/1.5 Arial, sans-serif;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.bh-night-clock {
+  display: block;
+  margin: 16px 0 28px;
+  font-size: clamp(64px, 11vw, 116px);
+  line-height: 1;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.04em;
+}
+.bh-night-centre h2 { margin: 0 0 12px; font-size: 28px; font-weight: 400; color: inherit; text-transform: none; letter-spacing: normal; }
+.bh-night-centre p { margin: 0; font-size: 16px; color: #948776; }
+.bh-night-wake {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #a79a86;
+  font: 14px/1.5 Arial, sans-serif;
+  letter-spacing: .08em;
+  cursor: pointer;
+}
+.bh-night-wake small { color: #948776; font-size: 12px; letter-spacing: .03em; }
+.bh-night-wake:focus-visible { outline: 1px solid #948776; outline-offset: 4px; }
+.bh-night-preview {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 99999;
+  padding: 12px 18px;
+  border: 1px solid #8a7b66;
+  border-radius: 24px;
+  background: #171511;
+  color: #e2d5bf;
+  font: 14px/1.4 Arial, sans-serif;
+  cursor: pointer;
+}
+@media (max-height: 550px) {
+  .bh-night-screen { padding-top: 20px; padding-bottom: 16px; }
+  .bh-night-centre { padding: 12px 0; }
+  .bh-night-clock { font-size: 60px; margin: 8px 0 14px; }
+  .bh-night-wake { gap: 4px; padding: 8px 16px; }
+}

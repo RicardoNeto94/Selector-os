@@ -4,6 +4,7 @@ import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import "@/styles/burman.css";
 
 import BurmanWeather from "@/components/BurmanWeather";
+import BurmanNightScreen from "@/components/BurmanNightScreen";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
 import BurmanSpaOffer from "@/components/BurmanSpaOffer";
@@ -308,6 +309,7 @@ export default function BurmanLanding({ menu }) {
   };
 
   return (
+    <BurmanNightScreen>
     <div className="burman-root">
       {/* ========================= HOME ========================= */}
       <div id="burman-home" inert={openDining || openSpa || openRoomService || openSpaInfo}>
@@ -1567,5 +1569,6 @@ export default function BurmanLanding({ menu }) {
         </motion.div>
       )}
     </div>
+    </BurmanNightScreen>
   );
 }
