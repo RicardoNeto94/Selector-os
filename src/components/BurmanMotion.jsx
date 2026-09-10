@@ -62,7 +62,7 @@ const ContentPanel = forwardRef(function ContentPanel({ children, direction, onE
     <motion.div
       {...props}
       ref={ref}
-      inert={present ? undefined : ""}
+      inert={!present}
       aria-hidden={present ? undefined : true}
       initial={{ opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : direction * 14 }}
       animate={{ opacity: 1, x: 0 }}

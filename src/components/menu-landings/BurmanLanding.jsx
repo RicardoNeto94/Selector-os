@@ -306,7 +306,7 @@ export default function BurmanLanding({ menu }) {
   return (
     <div className="burman-root">
       {/* ========================= HOME ========================= */}
-      <div id="burman-home" inert={openDining || openSpa || openRoomService || openSpaInfo ? "" : undefined}>
+      <div id="burman-home" inert={openDining || openSpa || openRoomService || openSpaInfo}>
         <header className="bh-masthead">
           <span>Hotel</span>
           <div className="bh-wordmark">The Burman</div>
