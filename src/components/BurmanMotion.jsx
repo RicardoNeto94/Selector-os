@@ -1,9 +1,9 @@
 "use client";
 
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { AnimatePresence, LayoutGroup, motion, useIsPresent, useReducedMotion } from "framer-motion";
 
-const EXIT_SECONDS = 0.24;
+const EXIT_SECONDS = 0.18;
 
 // Keep the existing dialog and focus/scroll lock mounted until its exit finishes.
 export function useBurmanModal() {
@@ -19,24 +19,24 @@ export function useBurmanModal() {
 
 export function useBurmanMotion() {
   const reducedMotion = useReducedMotion();
-  const hidden = { opacity: 0, y: reducedMotion ? 0 : 20, scale: reducedMotion ? 1 : 0.98 };
+  const hidden = { opacity: 0, y: reducedMotion ? 0 : 10, scale: 1 };
   return {
     panel: {
       closed: hidden,
       open: {
         opacity: 1, y: 0, scale: 1,
-        transition: reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 280, damping: 32, mass: 0.85 },
+        transition: reducedMotion ? { duration: 0 } : { type: "spring", duration: 0.32, bounce: 0 },
       },
       closing: { ...hidden, transition: { duration: reducedMotion ? 0 : EXIT_SECONDS, ease: [0.4, 0, 1, 1] } },
     },
     backdrop: {
-      closed: { backgroundColor: "rgba(18,14,11,0)", backdropFilter: "blur(0px)", WebkitBackdropFilter: "blur(0px)" },
+      closed: { opacity: 0 },
       open: {
-        backgroundColor: "rgba(18,14,11,0.42)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-        transition: { duration: reducedMotion ? 0 : 0.3 },
+        opacity: 1,
+        transition: { duration: reducedMotion ? 0 : 0.2 },
       },
       closing: {
-        backgroundColor: "rgba(18,14,11,0)", backdropFilter: "blur(0px)", WebkitBackdropFilter: "blur(0px)",
+        opacity: 0,
         transition: { duration: reducedMotion ? 0 : EXIT_SECONDS },
       },
     },
@@ -67,8 +67,8 @@ const ContentPanel = forwardRef(function ContentPanel({ children, direction, onE
       aria-hidden={present ? undefined : true}
       initial={{ opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : direction * 14 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: reducedMotion ? 1 : 0, x: 0, transition: { duration: reducedMotion ? 0 : 0.1 } }}
-      transition={{ duration: reducedMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: reducedMotion ? 1 : 0, x: 0, transition: { duration: reducedMotion ? 0 : 0.06 } }}
+      transition={{ duration: reducedMotion ? 0 : 0.14, ease: [0.22, 1, 0.36, 1] }}
       onAnimationComplete={() => { if (present) onEntered?.(); }}
     >{children}</motion.div>
   );
@@ -83,15 +83,13 @@ export const BurmanCrossfade = forwardRef(function BurmanCrossfade({ contentKey,
   );
 });
 
-const SHARED_TRANSITION = { type: "spring", stiffness: 240, damping: 30, mass: 0.9 };
+const SHARED_TRANSITION = { duration: 0.26, ease: [0.22, 1, 0.36, 1] };
 
-export function BurmanSharedPhoto({ venueId, src, detail = false }) {
-  const reducedMotion = useReducedMotion();
+export function BurmanSharedPhoto({ src, detail = false }) {
+  // Fade the scene without resizing a full-screen image and its blurred layers.
   return (
-    <motion.div
+    <div
       className={detail ? "vx-dining-atmosphere" : "bh-dining-shared-photo"}
-      layoutId={reducedMotion ? undefined : `venue-photo-${venueId}`}
-      transition={reducedMotion ? { duration: 0 } : SHARED_TRANSITION}
       style={{ backgroundImage: `url(${JSON.stringify(src)})` }}
       aria-hidden="true"
     />
@@ -103,6 +101,7 @@ export function BurmanSharedTitle({ venueId, detail = false, children }) {
   const Heading = detail ? motion.h2 : motion.h4;
   return (
     <Heading
+      layout="position"
       layoutId={reducedMotion ? undefined : `venue-title-${venueId}`}
       transition={reducedMotion ? { duration: 0 } : SHARED_TRANSITION}
       style={{ width: "fit-content", maxWidth: "100%" }}
@@ -113,6 +112,14 @@ export function BurmanSharedTitle({ venueId, detail = false, children }) {
 function SharedScene({ children, onEntered }) {
   const present = useIsPresent();
   const reducedMotion = useReducedMotion();
+  const enteredRef = useRef(onEntered);
+  enteredRef.current = onEntered;
+  useEffect(() => {
+    if (!present) return;
+    // Focus must not depend on an animation callback (which may be skipped).
+    const frame = requestAnimationFrame(() => enteredRef.current?.());
+    return () => cancelAnimationFrame(frame);
+  }, [present]);
   return (
     <motion.div
       className="bh-dining-shared-scene"
@@ -121,14 +128,13 @@ function SharedScene({ children, onEntered }) {
       initial={{ opacity: reducedMotion ? 1 : 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }}
-      onAnimationComplete={() => { if (present) onEntered?.(); }}
+      transition={{ duration: reducedMotion ? 0 : 0.26, ease: [0.22, 1, 0.36, 1] }}
     >{children}</motion.div>
   );
 }
 
 // Both scenes share one coordinate space during the handoff. Unlike a sequential
-// fade, overlapping lifetimes let Motion match each photograph and title.
+// fade, overlapping lifetimes let Motion connect titles while photos crossfade.
 export function BurmanSharedStage({ contentKey, children, onEntered }) {
   return (
     <LayoutGroup id="burman-dining-restaurants">
