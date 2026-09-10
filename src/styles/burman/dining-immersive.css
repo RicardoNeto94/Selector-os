@@ -99,6 +99,19 @@
 #burman-dining .vx-dining-assistance :is(p, strong) { color: #e4d6c6; font-size: .875rem; }
 #burman-dining .vx-dining-venues { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 #burman-dining .vx-dining-venue { height: 320px; border-radius: 3px; box-shadow: none; }
+#burman-dining .bh-dining-shared-photo {
+  position: absolute;
+  inset: 0;
+  background: center / cover no-repeat;
+  pointer-events: none;
+}
+#burman-dining .bh-dining-shared-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 #burman-dining .vx-dining-venue-copy { padding: 24px; }
 #burman-dining .vx-dining-venue-copy small { color: #efd4ab; font-size: .75rem; letter-spacing: .12em; }
 #burman-dining .vx-dining-venue-copy h4 { font-size: 2rem; }

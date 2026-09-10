@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useState } from "react";
-import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion, useIsPresent, useReducedMotion } from "framer-motion";
 
 const EXIT_SECONDS = 0.24;
 
@@ -61,6 +61,7 @@ const ContentPanel = forwardRef(function ContentPanel({ children, direction, onE
   return (
     <motion.div
       {...props}
+      layoutScroll
       ref={ref}
       inert={!present}
       aria-hidden={present ? undefined : true}
@@ -81,5 +82,63 @@ export const BurmanCrossfade = forwardRef(function BurmanCrossfade({ contentKey,
     </AnimatePresence>
   );
 });
+
+const SHARED_TRANSITION = { type: "spring", stiffness: 240, damping: 30, mass: 0.9 };
+
+export function BurmanSharedPhoto({ venueId, src, detail = false }) {
+  const reducedMotion = useReducedMotion();
+  return (
+    <motion.div
+      className={detail ? "vx-dining-atmosphere" : "bh-dining-shared-photo"}
+      layoutId={reducedMotion ? undefined : `venue-photo-${venueId}`}
+      transition={reducedMotion ? { duration: 0 } : SHARED_TRANSITION}
+      style={{ backgroundImage: `url(${JSON.stringify(src)})` }}
+      aria-hidden="true"
+    />
+  );
+}
+
+export function BurmanSharedTitle({ venueId, detail = false, children }) {
+  const reducedMotion = useReducedMotion();
+  const Heading = detail ? motion.h2 : motion.h4;
+  return (
+    <Heading
+      layoutId={reducedMotion ? undefined : `venue-title-${venueId}`}
+      transition={reducedMotion ? { duration: 0 } : SHARED_TRANSITION}
+      style={{ width: "fit-content", maxWidth: "100%" }}
+    >{children}</Heading>
+  );
+}
+
+function SharedScene({ children, onEntered }) {
+  const present = useIsPresent();
+  const reducedMotion = useReducedMotion();
+  return (
+    <motion.div
+      className="bh-dining-shared-scene"
+      inert={!present}
+      aria-hidden={!present || undefined}
+      initial={{ opacity: reducedMotion ? 1 : 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }}
+      onAnimationComplete={() => { if (present) onEntered?.(); }}
+    >{children}</motion.div>
+  );
+}
+
+// Both scenes share one coordinate space during the handoff. Unlike a sequential
+// fade, overlapping lifetimes let Motion match each photograph and title.
+export function BurmanSharedStage({ contentKey, children, onEntered }) {
+  return (
+    <LayoutGroup id="burman-dining-restaurants">
+      <div className="bh-dining-stage">
+        <AnimatePresence initial={false} mode="sync">
+          <SharedScene key={contentKey} onEntered={onEntered}>{children}</SharedScene>
+        </AnimatePresence>
+      </div>
+    </LayoutGroup>
+  );
+}
 
 export { motion };

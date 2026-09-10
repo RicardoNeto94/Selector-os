@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import "@/styles/burman.css";
 
@@ -7,7 +7,7 @@ import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
 import BurmanSpaOffer from "@/components/BurmanSpaOffer";
-import { motion, useBurmanModal, useBurmanMotion, BurmanTabIndicator, BurmanCrossfade } from "@/components/BurmanMotion";
+import { motion, useBurmanModal, useBurmanMotion, BurmanTabIndicator, BurmanCrossfade, BurmanSharedStage, BurmanSharedPhoto, BurmanSharedTitle } from "@/components/BurmanMotion";
 const BURMAN_HOME_PHOTO = "https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp";
 export default function BurmanLanding({ menu }) {
   const base = `/menu/${menu?.public_slug}`;
@@ -31,6 +31,10 @@ export default function BurmanLanding({ menu }) {
   const roomBodyRef = useRef(null);
   const diningDialogRef = useRef(null);
   const diningBodyRef = useRef(null);
+  const diningListScroll = useRef(0);
+  const restoreDiningList = useCallback((node) => {
+    if (node) node.scrollTop = diningListScroll.current;
+  }, []);
 
   useEffect(() => {
     if (!openSpa && !openRoomService && !openDining) return;
@@ -67,7 +71,7 @@ export default function BurmanLanding({ menu }) {
   useEffect(() => { if (!openSpa) setSpaTab("overview"); }, [openSpa]);
   useEffect(() => { if (!openRoomService) setRoomTab("snacks"); }, [openRoomService]);
   useEffect(() => {
-    if (!openDining) { setOpenDiningVenue(null); setDiningTab("overview"); }
+    if (!openDining) { setOpenDiningVenue(null); setDiningTab("overview"); diningListScroll.current = 0; }
   }, [openDining]);
 
   // Keyed content mounts at scrollTop 0; leave the outgoing page still as it fades.
@@ -923,7 +927,7 @@ export default function BurmanLanding({ menu }) {
             }}
           />
 
-          <motion.div variants={modalMotion.panel} className="burman-modal-content" ref={diningDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-dining-title">
+          <motion.div layoutRoot variants={modalMotion.panel} className="burman-modal-content" ref={diningDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-dining-title">
             <div className="vx-dining-shell">
               <header className="vx-dining-masthead">
                 {openDiningVenue ? (
@@ -937,12 +941,12 @@ export default function BurmanLanding({ menu }) {
                   setOpenDining(false);
                 }}>Close <span aria-hidden="true">×</span></button>
               </header>
-              <BurmanCrossfade contentKey={openDiningVenue || "discovery"} direction={openDiningVenue ? 1 : -1} className="bh-dining-stage" onEntered={() => {
+              <BurmanSharedStage contentKey={openDiningVenue || "discovery"} onEntered={() => {
                 if (openDiningVenue) diningDialogRef.current?.querySelector("[data-dining-return]")?.focus();
                 else diningDialogRef.current?.querySelector(`[data-venue-id="${CSS.escape(selectedDining || "")}"]`)?.focus();
               }}>
               {!openDiningVenue ? (
-                <div className="vx-dining-discovery" ref={diningBodyRef} tabIndex={0} aria-label="Choose a restaurant">
+                <motion.div layoutScroll className="vx-dining-discovery" ref={restoreDiningList} onScroll={(event) => { diningListScroll.current = event.currentTarget.scrollTop; }} tabIndex={0} aria-label="Choose a restaurant">
                   <div className="vx-dining-atmosphere vx-dining-discovery-atmosphere" aria-hidden="true" />
                   <section className="vx-dining-discovery-copy">
                     <span className="vx-dining-kicker">MICHELIN SELECTED</span>
@@ -1004,11 +1008,11 @@ export default function BurmanLanding({ menu }) {
                               setOpenDiningVenue(exp.id);
                             }}
                           >
-                            <img src={image} alt={exp.name} />
+                            <BurmanSharedPhoto venueId={exp.id} src={image} />
 
                             <div className="vx-dining-venue-copy">
                               <small>{cuisine}</small>
-                              <h4>{exp.name}</h4>
+                              <BurmanSharedTitle venueId={exp.id}>{exp.name}</BurmanSharedTitle>
 
                               {exp.schedule && <p>{exp.schedule}</p>}
 
@@ -1020,7 +1024,7 @@ export default function BurmanLanding({ menu }) {
                         );
                       })}
                   </section>
-                </div>
+                </motion.div>
               ) : (
                 experiences
                   .filter(
@@ -1060,7 +1064,7 @@ export default function BurmanLanding({ menu }) {
 
                     return (
                       <div key={exp.id} className="vx-dining-hub">
-                        <div className="vx-dining-atmosphere" style={{ backgroundImage: `url(${JSON.stringify(image)})` }} aria-hidden="true" />
+                        <BurmanSharedPhoto venueId={exp.id} src={image} detail />
                         <motion.nav layoutScroll
                           className="vx-dining-tabs"
                           aria-label="Dining sections"
@@ -1095,7 +1099,7 @@ export default function BurmanLanding({ menu }) {
                         <BurmanCrossfade contentKey={diningTab} className="vx-dining-hub-body" ref={diningBodyRef} tabIndex={0} aria-label={`${exp.name} information`}>
                           <section className="vx-dining-identity">
                             <span className="vx-dining-kicker">{cuisine}</span>
-                            <h2>{exp.name}</h2>
+                            <BurmanSharedTitle venueId={exp.id} detail>{exp.name}</BurmanSharedTitle>
                             <p>{overviewCopy}</p>
                             <div className="vx-dining-hours">{exp.schedule || "The Burman · Tallinn"}</div>
                           </section>
@@ -1557,7 +1561,7 @@ export default function BurmanLanding({ menu }) {
                     );
                   })
               )}
-              </BurmanCrossfade>
+              </BurmanSharedStage>
             </div>
           </motion.div>
         </motion.div>
