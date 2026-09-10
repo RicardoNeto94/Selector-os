@@ -7,18 +7,20 @@ import BurmanWeather from "@/components/BurmanWeather";
 import BurmanPillowMenu from "@/components/BurmanPillowMenu";
 import BurmanDiningWine from "@/components/BurmanDiningWine";
 import BurmanSpaOffer from "@/components/BurmanSpaOffer";
+import { motion, useBurmanModal, useBurmanMotion, BurmanTabIndicator, BurmanCrossfade } from "@/components/BurmanMotion";
 const BURMAN_HOME_PHOTO = "https://theburmanhotel.com/wp-content/webp-express/webp-images/uploads/2025/05/Hero-1920x1440.jpg.webp";
 export default function BurmanLanding({ menu }) {
   const base = `/menu/${menu?.public_slug}`;
   const [roomTab, setRoomTab] = useState("snacks");
 
   const [experiences, setExperiences] = useState([]);
-  const [openSpa, setOpenSpa] = useState(false);
+  const [openSpa, setOpenSpa, spaPhase] = useBurmanModal();
   const [openSpaInfo, setOpenSpaInfo] = useState(false);
-  const [openRoomService, setOpenRoomService] = useState(false);
+  const [openRoomService, setOpenRoomService, roomPhase] = useBurmanModal();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openSection, setOpenSection] = useState(null);
-  const [openDining, setOpenDining] = useState(false);
+  const [openDining, setOpenDining, diningPhase] = useBurmanModal();
+  const modalMotion = useBurmanMotion();
   const [openDiningVenue, setOpenDiningVenue] = useState(null);
   const [selectedDining, setSelectedDining] = useState(null);
   const [diningTab, setDiningTab] = useState("overview");
@@ -38,16 +40,12 @@ export default function BurmanLanding({ menu }) {
     const handleKeys = (event) => {
       if (event.key === "Escape") {
         setOpenSpa(false);
-        setSpaTab("overview");
         setOpenRoomService(false);
-        setRoomTab("snacks");
         setOpenDining(false);
-        setOpenDiningVenue(null);
-        setDiningTab("overview");
       }
       if (event.key !== "Tab" || !dialog) return;
       const controls = Array.from(dialog.querySelectorAll("button:not([disabled]), a[href], [tabindex='0']"))
-        .filter((element) => element.getClientRects().length);
+        .filter((element) => element.getClientRects().length && !element.closest("[inert]"));
       const first = controls[0];
       const last = controls[controls.length - 1];
       if (event.shiftKey && document.activeElement === first) {
@@ -65,15 +63,19 @@ export default function BurmanLanding({ menu }) {
     };
   }, [openSpa, openRoomService, openDining]);
 
+  // Reset only after dismissal, so the visible page does not jump during exit.
+  useEffect(() => { if (!openSpa) setSpaTab("overview"); }, [openSpa]);
+  useEffect(() => { if (!openRoomService) setRoomTab("snacks"); }, [openRoomService]);
   useEffect(() => {
-    if (spaBodyRef.current) spaBodyRef.current.scrollTop = 0;
-  }, [spaTab]);
-  useEffect(() => {
-    if (roomBodyRef.current) roomBodyRef.current.scrollTop = 0;
-  }, [roomTab]);
-  useEffect(() => {
-    if (diningBodyRef.current) diningBodyRef.current.scrollTop = 0;
-  }, [diningTab, openDiningVenue]);
+    if (!openDining) { setOpenDiningVenue(null); setDiningTab("overview"); }
+  }, [openDining]);
+
+  // Keyed content mounts at scrollTop 0; leave the outgoing page still as it fades.
+  const changeTab = (setTab, key, dialogRef) => {
+    setTab(key);
+    // Links inside a page can also change tabs. Move focus before that page exits.
+    requestAnimationFrame(() => dialogRef.current?.querySelector("nav button[aria-pressed='true']")?.focus());
+  };
   useEffect(() => {
     if (openDiningVenue) diningDialogRef.current?.querySelector("[data-dining-return]")?.focus();
   }, [openDiningVenue]);
@@ -304,7 +306,7 @@ export default function BurmanLanding({ menu }) {
   return (
     <div className="burman-root">
       {/* ========================= HOME ========================= */}
-      <div id="burman-home">
+      <div id="burman-home" inert={openDining || openSpa || openRoomService || openSpaInfo ? "" : undefined}>
         <header className="bh-masthead">
           <span>Hotel</span>
           <div className="bh-wordmark">The Burman</div>
@@ -349,16 +351,15 @@ export default function BurmanLanding({ menu }) {
 
       {/* ROOM SERVICE MODAL */}
       {openRoomService && (
-        <div className="burman-modal vx-room-modal" id="burman-room-delicacies">
-          <div
+        <motion.div className="burman-modal vx-room-modal" id="burman-room-delicacies" data-motion="spring" initial="closed" animate={roomPhase}>
+          <motion.div variants={modalMotion.backdrop}
             className="burman-modal-backdrop"
             onClick={() => {
               setOpenRoomService(false);
-              setRoomTab("snacks");
             }}
           />
 
-          <div className="burman-modal-content" ref={roomDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-room-title">
+          <motion.div variants={modalMotion.panel} className="burman-modal-content" ref={roomDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-room-title">
             <div className="vx-room-shell">
               <div className="vx-room-atmosphere" aria-hidden="true" />
               <header className="vx-room-masthead">
@@ -366,12 +367,11 @@ export default function BurmanLanding({ menu }) {
                 <h2 id="burman-room-title">The Burman</h2>
                 <button type="button" className="vx-room-close" aria-label="Close room service" onClick={() => {
                   setOpenRoomService(false);
-                  setRoomTab("snacks");
                 }}>Close <span aria-hidden="true">×</span></button>
               </header>
 
               {/* TABS */}
-              <nav
+              <motion.nav layoutScroll
                 className="vx-room-tabs"
                 aria-label="Room delicacies sections"
               >
@@ -385,16 +385,17 @@ export default function BurmanLanding({ menu }) {
                     className={
                       roomTab === key ? "vx-room-tab active" : "vx-room-tab"
                     }
-                    onClick={() => setRoomTab(key)}
+                    onClick={() => changeTab(setRoomTab, key, roomDialogRef)}
                     aria-pressed={roomTab === key}
                   >
                     {label}
+                    <BurmanTabIndicator group="room" active={roomTab === key} />
                   </button>
                 ))}
-              </nav>
+              </motion.nav>
 
               {/* CONTENT */}
-              <div className="vx-room-body" ref={roomBodyRef} tabIndex={0} aria-label="Room delicacies content">
+              <BurmanCrossfade contentKey={roomTab} className="vx-room-body" ref={roomBodyRef} tabIndex={0} aria-label="Room delicacies content">
                 {/* SNACKS / DRINKS / AMENITIES */}
                 {["snacks", "drinks"].includes(roomTab) && (
                   <section className="vx-room-menu">
@@ -496,24 +497,23 @@ export default function BurmanLanding({ menu }) {
                     <BurmanPillowMenu />
                   </section>
                 )}
-              </div>
+              </BurmanCrossfade>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* SPA MODAL */}
       {openSpa && (
-        <div className="burman-modal vx-spa-modal" id="burman-wellness" data-spa-tab={spaTab}>
-          <div
+        <motion.div className="burman-modal vx-spa-modal" id="burman-wellness" data-spa-tab={spaTab} data-motion="spring" initial="closed" animate={spaPhase}>
+          <motion.div variants={modalMotion.backdrop}
             className="burman-modal-backdrop"
             onClick={() => {
               setOpenSpa(false);
-              setSpaTab("overview");
             }}
           />
 
-          <div className="burman-modal-content" ref={spaDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-wellness-title">
+          <motion.div variants={modalMotion.panel} className="burman-modal-content" ref={spaDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-wellness-title">
             <div className="vx-spa-shell">
               <div className="vx-spa-atmosphere" aria-hidden="true" />
               <header className="vx-spa-masthead">
@@ -521,12 +521,11 @@ export default function BurmanLanding({ menu }) {
                 <h2 id="burman-wellness-title">The Burman</h2>
                 <button type="button" className="vx-spa-close" aria-label="Close spa" onClick={() => {
                   setOpenSpa(false);
-                  setSpaTab("overview");
                 }}>Close <span aria-hidden="true">×</span></button>
               </header>
 
               {/* TABS */}
-              <nav className="vx-spa-tabs" aria-label="Spa sections">
+              <motion.nav layoutScroll className="vx-spa-tabs" aria-label="Spa sections">
                 {[
                   ["overview", "Overview"],
                   ["treatments", "Treatments"],
@@ -538,16 +537,17 @@ export default function BurmanLanding({ menu }) {
                     className={
                       spaTab === key ? "vx-spa-tab active" : "vx-spa-tab"
                     }
-                    onClick={() => setSpaTab(key)}
+                    onClick={() => changeTab(setSpaTab, key, spaDialogRef)}
                     aria-pressed={spaTab === key}
                   >
                     {label}
+                    <BurmanTabIndicator group="spa" active={spaTab === key} />
                   </button>
                 ))}
-              </nav>
+              </motion.nav>
 
               {/* BODY */}
-              <div className="vx-spa-body" ref={spaBodyRef} tabIndex={0} aria-label="Spa content">
+              <BurmanCrossfade contentKey={spaTab} className="vx-spa-body" ref={spaBodyRef} tabIndex={0} aria-label="Spa content">
                 {/* OVERVIEW */}
                 {spaTab === "overview" && (
                   <section className="vx-spa-editorial-overview">
@@ -610,7 +610,7 @@ export default function BurmanLanding({ menu }) {
                         <button
                           type="button"
                           className="vx-spa-editorial-link"
-                          onClick={() => setSpaTab("treatments")}
+                          onClick={() => changeTab(setSpaTab, "treatments", spaDialogRef)}
                         >
                           EXPLORE TREATMENTS →
                         </button>
@@ -794,10 +794,10 @@ export default function BurmanLanding({ menu }) {
                     </div>
                   </section>
                 )}
-              </div>
+              </BurmanCrossfade>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* SPA INFO MODAL */}
@@ -915,33 +915,32 @@ export default function BurmanLanding({ menu }) {
 
       {/* DINING MODAL */}
       {openDining && (
-        <div className="burman-modal vx-dining-modal" id="burman-dining">
-          <div
+        <motion.div className="burman-modal vx-dining-modal" id="burman-dining" data-motion="spring" initial="closed" animate={diningPhase}>
+          <motion.div variants={modalMotion.backdrop}
             className="burman-modal-backdrop"
             onClick={() => {
               setOpenDining(false);
-              setOpenDiningVenue(null);
-              setDiningTab("overview");
             }}
           />
 
-          <div className="burman-modal-content" ref={diningDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-dining-title">
+          <motion.div variants={modalMotion.panel} className="burman-modal-content" ref={diningDialogRef} role="dialog" aria-modal="true" aria-labelledby="burman-dining-title">
             <div className="vx-dining-shell">
               <header className="vx-dining-masthead">
                 {openDiningVenue ? (
                   <button type="button" className="vx-dining-return" data-dining-return onClick={() => {
                     setOpenDiningVenue(null);
                     setDiningTab("overview");
-                    requestAnimationFrame(() => diningDialogRef.current?.querySelector(".vx-dining-venue")?.focus());
                   }}>← Dining</button>
                 ) : <span className="vx-dining-masthead-label">Dining</span>}
                 <h2 id="burman-dining-title">The Burman</h2>
                 <button type="button" className="vx-dining-close" aria-label="Close dining" onClick={() => {
                   setOpenDining(false);
-                  setOpenDiningVenue(null);
-                  setDiningTab("overview");
                 }}>Close <span aria-hidden="true">×</span></button>
               </header>
+              <BurmanCrossfade contentKey={openDiningVenue || "discovery"} direction={openDiningVenue ? 1 : -1} className="bh-dining-stage" onEntered={() => {
+                if (openDiningVenue) diningDialogRef.current?.querySelector("[data-dining-return]")?.focus();
+                else diningDialogRef.current?.querySelector(`[data-venue-id="${CSS.escape(selectedDining || "")}"]`)?.focus();
+              }}>
               {!openDiningVenue ? (
                 <div className="vx-dining-discovery" ref={diningBodyRef} tabIndex={0} aria-label="Choose a restaurant">
                   <div className="vx-dining-atmosphere vx-dining-discovery-atmosphere" aria-hidden="true" />
@@ -998,6 +997,7 @@ export default function BurmanLanding({ menu }) {
                           <button
                             key={exp.id}
                             className="vx-dining-venue"
+                            data-venue-id={exp.id}
                             onClick={() => {
                               setSelectedDining(exp.id);
                               setDiningTab("overview");
@@ -1061,7 +1061,7 @@ export default function BurmanLanding({ menu }) {
                     return (
                       <div key={exp.id} className="vx-dining-hub">
                         <div className="vx-dining-atmosphere" style={{ backgroundImage: `url(${JSON.stringify(image)})` }} aria-hidden="true" />
-                        <nav
+                        <motion.nav layoutScroll
                           className="vx-dining-tabs"
                           aria-label="Dining sections"
                         >
@@ -1083,15 +1083,16 @@ export default function BurmanLanding({ menu }) {
                                   ? "vx-dining-tab active"
                                   : "vx-dining-tab"
                               }
-                              onClick={() => setDiningTab(key)}
+                              onClick={() => changeTab(setDiningTab, key, diningDialogRef)}
                               aria-pressed={diningTab === key}
                             >
                               {label}
+                              <BurmanTabIndicator group="dining" active={diningTab === key} />
                             </button>
                           ))}
-                        </nav>
+                        </motion.nav>
 
-                        <div className="vx-dining-hub-body" ref={diningBodyRef} tabIndex={0} aria-label={`${exp.name} information`}>
+                        <BurmanCrossfade contentKey={diningTab} className="vx-dining-hub-body" ref={diningBodyRef} tabIndex={0} aria-label={`${exp.name} information`}>
                           <section className="vx-dining-identity">
                             <span className="vx-dining-kicker">{cuisine}</span>
                             <h2>{exp.name}</h2>
@@ -1165,7 +1166,7 @@ export default function BurmanLanding({ menu }) {
                                       type="button"
                                       className="vx-koyo-story-link"
                                       onClick={() =>
-                                        setDiningTab("experience")
+                                        changeTab(setDiningTab, "experience", diningDialogRef)
                                       }
                                     >
                                       DISCOVER THE EXPERIENCE →
@@ -1286,7 +1287,7 @@ export default function BurmanLanding({ menu }) {
                                     <button
                                       type="button"
                                       className="vx-editorial-story-link"
-                                      onClick={() => setDiningTab("menu")}
+                                      onClick={() => changeTab(setDiningTab, "menu", diningDialogRef)}
                                     >
                                       EXPLORE THE MENU →
                                     </button>
@@ -1551,14 +1552,15 @@ export default function BurmanLanding({ menu }) {
                                 )}
                               </section>
                             )}
-                        </div>
+                        </BurmanCrossfade>
                       </div>
                     );
                   })
               )}
+              </BurmanCrossfade>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

@@ -339,6 +339,34 @@ background:rgba(255,255,255,0.16);
   }
 }
 
+/* Spring-driven dialogs own their motion; do not stack legacy CSS animations. */
+.burman-root .burman-modal[data-motion="spring"] > .burman-modal-backdrop,
+.burman-root :is(#burman-dining, #burman-room-delicacies, #burman-wellness)[data-motion="spring"] > .burman-modal-content {
+  animation: none;
+}
+
+.burman-root :is(#burman-dining, #burman-room-delicacies, #burman-wellness) :is(.vx-dining-tab, .vx-room-tab, .vx-spa-tab) {
+  position: relative;
+}
+.burman-root :is(#burman-dining, #burman-room-delicacies, #burman-wellness) :is(.vx-dining-tab, .vx-room-tab, .vx-spa-tab)::after {
+  display: none;
+}
+.burman-root .bh-tab-indicator {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: #e8cb9e;
+  pointer-events: none;
+}
+#burman-dining .bh-dining-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .burman-modal-content{
   position:relative;
   z-index:2;
