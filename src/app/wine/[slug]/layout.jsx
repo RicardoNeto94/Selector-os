@@ -28,5 +28,23 @@ export async function generateMetadata({ params }) {
 }
 
 export default function WineMenuLayout({ children }) {
-  return children;
+  return (
+    <div
+      className="
+        fixed
+        inset-0
+        h-[100dvh]
+        w-screen
+        overflow-hidden
+        bg-[#00140e]
+      "
+      style={{
+        color: "#ffffff",
+        overscrollBehavior: "none",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
+      {children}
+    </div>
+  );
 }
