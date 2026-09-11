@@ -1,6 +1,8 @@
-import Link from "next/link";
 import VaxeronMotion from "@/components/VaxeronMotion";
 import { PublicFooter } from "@/components/public/PublicInfoPage";
+import MarketingHeader from "@/components/public/MarketingHeader";
+import ProductSections from "@/components/public/ProductSections";
+import productStyles from "@/components/public/Products.module.css";
 import "@/styles/vaxeron-new.css";
 
 const capabilities = [
@@ -17,13 +19,9 @@ const experiences = [
 ];
 
 export default function HomePage() {
-  return <main className="vx2">
+  return <main className={`vx2 ${productStyles.landing}`}>
     <VaxeronMotion />
-    <header className="vx2-nav">
-      <Link href="/" className="vx2-wordmark" aria-label="VAXERON home"><img src="/selectoros-logo.png" alt=""/><span>VAXERON</span></Link>
-      <nav aria-label="Primary navigation"><a href="#vision">Vision</a><a href="#platform">Platform</a><a href="#experiences">Experiences</a><Link href="/faq">FAQ</Link></nav>
-      <div><Link href="/sign-in" className="vx2-signin">Sign in</Link><a href="#access" className="vx2-nav-cta">Request access</a></div>
-    </header>
+    <MarketingHeader />
 
     <section className="vx2-hero">
       <img className="vx2-hero-image" src="/vaxeron/hospitality-arrival.png" alt="A refined contemporary hospitality arrival at night"/>
@@ -31,7 +29,7 @@ export default function HomePage() {
       <div className="vx2-hero-copy" data-reveal>
         <p>Operational intelligence for exceptional hospitality</p>
         <h1>Everything behind the experience, quietly connected.</h1>
-        <div className="vx2-hero-bottom"><span>Wine · Venues · Inventory · Guests</span><a href="#vision">Discover VAXERON <b>↓</b></a></div>
+        <div className="vx2-hero-bottom"><span>Vaxeron Wine · Vaxeron Hospitality</span><a href="#platform">Discover the products <b>↓</b></a></div>
       </div>
     </section>
 
@@ -41,13 +39,7 @@ export default function HomePage() {
       <div className="vx2-manifesto-tail" data-reveal><span>VAXERON brings the moving parts together—without flattening the identity of the property.</span><p>A shared foundation for cellar, service, content and guest experience. Clear enough for the first day. Powerful enough for what comes next.</p></div>
     </section>
 
-    <section className="vx2-workspace" id="platform">
-      <div className="vx2-workspace-copy" data-reveal><p className="vx2-label">The working view</p><h2>Clarity,<br/>at a glance.</h2><p>Live operational health, venue inventory and guest publishing—designed around the way hospitality teams actually work.</p><a href="#capabilities">Explore the platform <span>→</span></a></div>
-        <div className="vx2-device-wrap" data-reveal>
-        <div className="vx2-laptop"><div className="vx2-screen"><span className="vx2-camera"/><img src="/platform/dashboard-overview.png?v=5" alt="Fictional Aurelia Hospitality wine operations dashboard displayed on a laptop"/></div><div className="vx2-base"><i/></div></div>
-        <small>Illustrative workspace · Fictional company and demo data</small>
-      </div>
-    </section>
+    <ProductSections />
 
     <section className="vx2-service">
       <figure data-reveal><img src="/vaxeron/sommelier-service.png" alt="A sommelier preparing wine service in an intimate cellar"/><figcaption>Precision in every detail</figcaption></figure>
