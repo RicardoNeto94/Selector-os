@@ -296,7 +296,6 @@ export default async function Page({ params }) {
   for (const batch of wineIdBatches) {
     let winesQuery = supabase
       .from("wines")
-      .or("is_active.is.null,is_active.eq.true")
       .select(`
         id,
         name,
@@ -310,6 +309,7 @@ export default async function Page({ params }) {
         price,
         description
       `)
+      .or("is_active.is.null,is_active.eq.true")
       .in("id", batch);
     winesQuery = scopeToMenuTenant(winesQuery, menu);
     const {

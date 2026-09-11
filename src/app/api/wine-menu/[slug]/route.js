@@ -181,7 +181,6 @@ export async function GET(request, { params }) {
       data = [],
     } = await supabase
       .from("wines")
-      .or("is_active.is.null,is_active.eq.true")
       .select(`
         id,
         name,
@@ -195,6 +194,7 @@ export async function GET(request, { params }) {
         price,
         description
       `)
+      .or("is_active.is.null,is_active.eq.true")
       .in("id", batch);
 
     winesData.push(...data);
