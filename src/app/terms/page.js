@@ -1,7 +1,8 @@
+import { publicMetadata } from "@/lib/site/metadata";
 import PublicInfoPage from "@/components/public/PublicInfoPage";
 import { legalIdentity } from "@/lib/site/legal";
 
-export const metadata = { title: "Pilot terms", description: "Terms governing access to the VAXERON private pilot." };
+export const metadata = publicMetadata("/terms", "Pilot terms", "Terms governing access to the VAXERON private pilot.");
 
 const sections = [
   { title: "Status of these terms", content: <><p>These provisional terms apply to the current invite-only VAXERON private pilot. They are not a substitute for the SaaS agreement, order form, service levels and Data Processing Agreement that will accompany commercial service. Registered operator details will be added when the legal entity is established.</p></> },

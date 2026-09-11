@@ -7,13 +7,14 @@ export const legalIdentity = {
   jurisdiction: "Estonia",
   status: "Private pilot — legal entity registration pending",
   detailsComplete: false,
-  lastUpdated: "1 September 2026",
+  lastUpdated: "11 September 2026",
   emails: {
     general: "hello@vaxeron.com",
     support: "support@vaxeron.com",
-    privacy: "privacy@vaxeron.com",
-    security: "security@vaxeron.com",
-    billing: "billing@vaxeron.com",
+    // Use the configured general alias until dedicated inboxes are verified.
+    privacy: "hello@vaxeron.com",
+    security: "hello@vaxeron.com",
+    billing: "hello@vaxeron.com",
   },
 };
 

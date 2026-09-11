@@ -1,7 +1,7 @@
 export default function robots() {
   return {
     rules: [
-      { userAgent: "*", allow: ["/", "/pricing", "/faq", "/contact", "/privacy", "/cookies", "/terms", "/security", "/subprocessors", "/accessibility"], disallow: ["/dashboard/", "/platform-admin/", "/invite/", "/api/"] },
+      { userAgent: "*", allow: "/", disallow: ["/dashboard", "/platform-admin", "/invite", "/api/", "/sign-in", "/sign-up", "/access-pending", "/auth/", "/wine/", "/menu/", "/spa/", "/r/"] },
     ],
     sitemap: "https://vaxeron.com/sitemap.xml",
   };

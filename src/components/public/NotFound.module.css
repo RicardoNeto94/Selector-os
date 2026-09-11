@@ -1,0 +1,9 @@
+.page { min-height:100dvh; background:#f3f0e9; color:#203b33; padding:clamp(24px,6vw,80px); }
+.brand {display:flex; align-items:center; gap:16px; font-size:18px; letter-spacing:.2em; color:#203b33; text-decoration:none;}
+.brand img {object-fit:contain;}
+.page section {max-width:740px; margin:clamp(80px,15vh,200px) auto;}
+.page h1 {font-family:Georgia,serif; color:#203b33; font-size:clamp(40px,6vw,72px); line-height:1.15; margin:24px 0;}
+.page p {color:#505d55; font-size:18px; line-height:1.8;}
+.page section a {display:inline-block; margin:24px 24px 0 0; padding:14px 0; color:#203b33;}
+.page section .primary {background:#203b33; color:#fff; padding:14px 24px;}
+.page a:focus-visible {outline:3px solid #8d5e22; outline-offset:5px;}

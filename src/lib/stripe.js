@@ -1,4 +1,5 @@
 // src/lib/stripe.js
+import "server-only";
 
 import Stripe from "stripe";
 

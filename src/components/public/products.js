@@ -3,7 +3,7 @@ export const products = {
     name: "Vaxeron Wine", href: "/wine", label: "For the cellar. For the service.",
     heading: "Every bottle has a place. Every list, a purpose.",
     intro: "Bring your catalogue, venue stock and digital wine lists into one considered workspace. Less searching between systems. More confidence at the table.",
-    image: "/platform/dashboard-overview.png?v=5",
+    image: "wine-workspace",
     alt: "Vaxeron wine workspace with fictional Aurelia Hospitality inventory and cellar charts",
     caption: "Illustrative workspace · Fictional company and demonstration data",
     audience: "For sommeliers, restaurants and multi-venue wine teams",
@@ -25,7 +25,7 @@ export const products = {
     name: "Vaxeron Hospitality", href: "/hospitality", label: "Your property. Thoughtfully presented.",
     heading: "The whole stay. One considered experience.",
     intro: "Give guests an inviting way to discover dining, in-room delicacies and wellness. A digital experience that feels like your property—not another piece of software.",
-    image: "/vaxeron/burman-ipad-final.png?v=5",
+    image: "room-experience",
     alt: "Illustrative Aurelia House in-room tablet showing dining, room service and wellness",
     caption: "Illustrative in-room experience · Fictional property and content",
     audience: "For hotels, hospitality groups and guest-experience teams",
@@ -46,5 +46,5 @@ export const products = {
 };
 
 export function demoHref(name) {
-  return `mailto:hello@vaxeron.com?subject=${encodeURIComponent(`${name} — demo enquiry`)}&body=${encodeURIComponent("Property or company:\n\nYour role:\n\nWhat would you like to improve?\n\n")}`;
+  return `/contact?product=${name === "Vaxeron Wine" ? "Wine" : "Hospitality"}`;
 }

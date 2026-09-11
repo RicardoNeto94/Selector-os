@@ -1,15 +1,16 @@
 const path = require("path");
 const isDevelopment = process.env.NODE_ENV === "development";
 const scriptPolicy = isDevelopment
-  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-  : "script-src 'self' 'unsafe-inline'";
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
+  : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: [
     "default-src 'self'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'self'", "object-src 'none'",
     scriptPolicy, "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com", "img-src 'self' data: blob: https:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://api.open-meteo.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://api.open-meteo.com https://challenges.cloudflare.com",
+    "frame-src 'self' https://challenges.cloudflare.com",
     "worker-src 'self' blob:", "manifest-src 'self'",
   ].join("; ") },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

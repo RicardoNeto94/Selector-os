@@ -39,7 +39,7 @@ export async function middleware(req) {
   }
 
   if (pathname === "/sign-up") {
-    return NextResponse.redirect(new URL("/#request-access", req.url));
+    return NextResponse.redirect(new URL("/contact", req.url));
   }
 
   if (

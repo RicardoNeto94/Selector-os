@@ -1,7 +1,8 @@
+import { publicMetadata } from "@/lib/site/metadata";
 import PublicInfoPage from "@/components/public/PublicInfoPage";
 import { legalIdentity } from "@/lib/site/legal";
 
-export const metadata = { title: "Accessibility", description: "VAXERON's accessibility commitment and feedback channel." };
+export const metadata = publicMetadata("/accessibility", "Accessibility", "VAXERON's accessibility commitment and feedback channel.");
 
 const sections = [
   { title: "Our commitment", content: <><p>VAXERON aims to make its public information, guest experiences and operational tools usable by as many people as reasonably possible. Accessibility is treated as an ongoing product responsibility, not a one-time certification.</p></> },

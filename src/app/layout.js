@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import "../styles/theme.css";
 import ServiceWorkerRegister from "../components/ServiceWorkerRegister";
+import SiteConsent from "@/components/public/SiteConsent";
 
 export const metadata = {
   metadataBase: new URL("https://vaxeron.com"),
@@ -36,7 +37,7 @@ export const metadata = {
     siteName: "VAXERON",
     images: [
       {
-        url: "/vaxeron/hospitality-arrival.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
         alt: "VAXERON — operational infrastructure for modern hospitality",
@@ -51,7 +52,7 @@ export const metadata = {
     title: "VAXERON — The operating system for modern hospitality",
     description:
       "VAXERON unifies guest experience, wine programmes, inventory, and operational workflows into one connected platform for modern hospitality.",
-    images: ["/vaxeron/hospitality-arrival.png"],
+    images: ["/og.png"],
   },
 };
 
@@ -71,6 +72,7 @@ export default function RootLayout({ children }) {
         </div>
 
         <ServiceWorkerRegister />
+        <SiteConsent />
       </body>
     </html>
   );

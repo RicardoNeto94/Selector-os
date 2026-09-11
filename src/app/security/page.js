@@ -1,7 +1,8 @@
+import { publicMetadata } from "@/lib/site/metadata";
 import PublicInfoPage from "@/components/public/PublicInfoPage";
 import { legalIdentity } from "@/lib/site/legal";
 
-export const metadata = { title: "Security and trust", description: "VAXERON's approach to platform security, tenant separation and responsible disclosure." };
+export const metadata = publicMetadata("/security", "Security and trust", "VAXERON's approach to platform security, tenant separation and responsible disclosure.");
 
 const sections = [
   { title: "Security principles", content: <><p>VAXERON is being designed around least-privilege access, explicit workspace membership, server-side authorization and separation between hospitality customers. Public guest experiences expose only information intentionally published for guests; operational workspaces require authentication.</p></> },

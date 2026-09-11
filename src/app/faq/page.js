@@ -1,7 +1,8 @@
+import { publicMetadata } from "@/lib/site/metadata";
 import PublicInfoPage from "@/components/public/PublicInfoPage";
 import { legalIdentity } from "@/lib/site/legal";
 
-export const metadata = { title: "Frequently asked questions", description: "Answers about VAXERON workspaces, wine operations, guest experiences and onboarding." };
+export const metadata = publicMetadata("/faq", "Frequently asked questions", "Answers about VAXERON workspaces, wine operations, guest experiences and onboarding.");
 
 const sections = [
   { title: "What is VAXERON?", content: <p>VAXERON is an operational platform for hospitality businesses. It brings wine and cellar operations, venue-level stock, team workflows and selected guest experiences into a protected workspace.</p> },
@@ -13,7 +14,7 @@ const sections = [
   { title: "Who controls customer data?", content: <p>The hospitality customer controls the operational content it supplies and determines who may access its workspace. VAXERON processes workspace data to provide and support the requested service. Commercial customers will receive a Data Processing Agreement.</p> },
   { title: "Does VAXERON generate AI content?", content: <p>Only in enabled workflows requested by an authorized user. AI-assisted descriptions remain drafts and should be reviewed before publication. This feature may require a configured provider account or paid usage.</p> },
   { title: "What happens during onboarding?", content: <p>VAXERON creates an isolated organization, appoints its protected owner, selects modules and inventory mode, creates the first property or venue structure, and invites authorized users. Integrations and guest experiences are then configured for that customer.</p> },
-  { title: "How do I get support?", content: <p>Email <a href={`mailto:${legalIdentity.emails.support}`}>{legalIdentity.emails.support}</a>. For privacy or security matters, use the dedicated addresses on the <a href="/contact">Contact page</a>.</p> },
+  { title: "How do I get support?", content: <p>Email <a href={`mailto:${legalIdentity.emails.support}`}>{legalIdentity.emails.support}</a>. For privacy or security matters, use the contact details on the <a href="/contact">Contact page</a> and include the topic in your subject.</p> },
 ];
 
 export default function FaqPage(){return <PublicInfoPage eyebrow="Resources · First questions" title="Frequently asked questions" intro="A straightforward introduction to how VAXERON works, who it is for and what a new hospitality customer can expect." sections={sections}/>}

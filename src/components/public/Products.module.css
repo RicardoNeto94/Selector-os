@@ -95,3 +95,15 @@
   .related { align-items: flex-start; flex-direction: column; padding: 36px 24px; }
 }
 @media (prefers-reduced-motion: reduce) { .textLink svg, .primary svg { transition: none; } }
+
+/* Readable, scoped defaults; never affect guest menus or customer workspaces. */
+.landing { font-weight:400; }
+.eyebrow,.number,.journey li::marker {color:#705a35;}
+.landing :is(h1,h2,h3) { color:inherit; text-transform:none; }
+.landing .sectionIntro em {color:#555e51;}
+.landing .related {background:transparent; border-right:0;}
+.landing .related h2 {color:#203b33;}
+.landing :is(a,summary):focus-visible {outline:3px solid #936221;outline-offset:5px;}
+.landing figure {min-width:0;}
+.landing :is(section,article,figure) {scroll-margin-top:100px;}
+@media(max-width:640px) { .landing .hero h1 {font-size:clamp(34px,10vw,42px);} }

@@ -1,9 +1,14 @@
+import MarketingImage from "@/components/public/MarketingImage";
+import { publicMetadata } from "@/lib/site/metadata";
 import VaxeronMotion from "@/components/VaxeronMotion";
 import { PublicFooter } from "@/components/public/PublicInfoPage";
 import MarketingHeader from "@/components/public/MarketingHeader";
 import ProductSections from "@/components/public/ProductSections";
 import productStyles from "@/components/public/Products.module.css";
 import "@/styles/vaxeron-new.css";
+import "@/styles/vaxeron-public-readability.css";
+
+export const metadata = publicMetadata("/", "Wine & hospitality, quietly connected", "Connect cellar operations, digital wine lists and hotel guest experiences with Vaxeron. Request a demo for your restaurant, hotel or hospitality group.");
 
 const capabilities = [
   { category: "Cellar", title: "Wine & cellar intelligence", copy: "One live view of the catalogue, availability, pricing and every service format.", outcome: "Bottle and by-the-glass availability stays aligned with the cellar and the venue serving it.", proofs: ["Catalogue & vintages", "Location-level stock", "Bottle & BTG formats"] },
@@ -14,8 +19,8 @@ const capabilities = [
 ];
 
 const experiences = [
-  ["/vaxeron/koyo-ipad-service.png?v=5", "Nami", "A seasonal wine-and-sake journey presented with intimacy, care and the quiet theatre of omotenashi.", "Illustrative omakase experience"],
-  ["/vaxeron/evening-service.png", "Solstice", "A refined service environment showing how live operational clarity supports a composed destination restaurant.", "Illustrative dining experience"],
+  ["wine-experience", "Nami", "A seasonal wine-and-sake journey presented with intimacy, care and the quiet theatre of omotenashi.", "Illustrative omakase experience"],
+  ["evening", "Solstice", "A refined service environment showing how live operational clarity supports a composed destination restaurant.", "Illustrative dining experience"],
 ];
 
 export default function HomePage() {
@@ -24,12 +29,12 @@ export default function HomePage() {
     <MarketingHeader />
 
     <section className="vx2-hero">
-      <img className="vx2-hero-image" src="/vaxeron/hospitality-arrival.png" alt="A refined contemporary hospitality arrival at night"/>
+      <MarketingImage className="vx2-hero-image" name="arrival" priority sizes="100vw" alt="A refined contemporary hospitality arrival at night"/>
       <div className="vx2-hero-shade"/>
       <div className="vx2-hero-copy" data-reveal>
         <p>Operational intelligence for exceptional hospitality</p>
         <h1>Everything behind the experience, quietly connected.</h1>
-        <div className="vx2-hero-bottom"><span>Vaxeron Wine · Vaxeron Hospitality</span><a href="#platform">Discover the products <b>↓</b></a></div>
+        <div className="vx2-hero-bottom"><a className="vx2-hero-cta" href="/contact" data-demo-cta="Both">Request a demo</a><a href="#platform">Discover the products <b aria-hidden="true">↓</b></a></div>
       </div>
     </section>
 
@@ -42,7 +47,7 @@ export default function HomePage() {
     <ProductSections />
 
     <section className="vx2-service">
-      <figure data-reveal><img src="/vaxeron/sommelier-service.png" alt="A sommelier preparing wine service in an intimate cellar"/><figcaption>Precision in every detail</figcaption></figure>
+      <figure data-reveal><MarketingImage name="sommelier" alt="A sommelier preparing wine service in an intimate cellar"/><figcaption>Precision in every detail</figcaption></figure>
       <div className="vx2-service-copy" data-reveal><p className="vx2-label">From cellar to table</p><h2>Built for the details guests never need to see.</h2><p>Availability, pricing, service formats and location move through one connected system—so the experience stays composed.</p><blockquote>“The technology recedes.<br/>The hospitality remains.”</blockquote></div>
     </section>
 
@@ -52,7 +57,7 @@ export default function HomePage() {
     </section>
 
     <section className="vx2-evening">
-      <img src="/vaxeron/evening-service.png" alt="Hospitality team preparing a restaurant for evening service"/>
+      <MarketingImage name="evening" alt="Hospitality team preparing a restaurant for evening service"/>
       <div data-reveal><p>Quiet coordination</p><h2>When every team sees the same truth, service moves differently.</h2></div>
     </section>
 
@@ -60,19 +65,19 @@ export default function HomePage() {
       <header data-reveal><p className="vx2-label">Illustrative guest journeys</p><h2>Designed around<br/><em>their world.</em></h2><span>These fictional concepts demonstrate how VAXERON can shape each guest-facing service around a property, its setting and the way it welcomes guests.</span></header>
 
       <article className="vx2-burman-case" data-reveal>
-        <div className="vx2-burman-room"><img src="/vaxeron/burman-ipad-final.png?v=5" alt="Fictional Aurelia House guest experience presented on an in-room tablet"/></div>
+        <div className="vx2-burman-room"><MarketingImage name="room-experience" alt="Fictional Aurelia House guest experience presented on an in-room tablet"/></div>
         <div className="vx2-burman-caption"><p className="vx2-label">Aurelia House · Illustrative in-room experience</p><h3>The stay, thoughtfully gathered in one place.</h3><p>A fictional demonstration of how an in-room tablet can give every guest an immediate path to dining, room service, wellness and the details of their stay.</p><small>Illustrative VAXERON concept · Fictional brand and content</small></div>
       </article>
 
       <div className="vx2-partner-intro" data-reveal><p className="vx2-label">One platform, distinct identities</p><span>Each fictional destination keeps its own voice, service ritual and digital expression while sharing the same operational foundation.</span></div>
-      <div className="vx2-experience-grid">{experiences.map(([image,title,copy,service],index)=><figure key={title} className={`vx2-exp-${index+1}`} data-reveal><div className="vx2-partner-image"><img src={image} alt={`${title} guest experience powered by VAXERON`}/><small>{service}</small></div><figcaption><span>{title}</span><p>{copy}</p></figcaption></figure>)}</div>
+      <div className="vx2-experience-grid">{experiences.map(([image,title,copy,service],index)=><figure key={title} className={`vx2-exp-${index+1}`} data-reveal><div className="vx2-partner-image"><MarketingImage name={image} alt={`${title} guest experience powered by VAXERON`}/><small>{service}</small></div><figcaption><span>{title}</span><p>{copy}</p></figcaption></figure>)}</div>
     </section>
 
     <section className="vx2-proof" id="inside-platform">
       <header className="vx2-proof-header" data-reveal><p className="vx2-label">Inside the platform</p><h2>From one source of truth<br/><em>to every point of service.</em></h2><p>VAXERON turns fragmented operational data into a calm, shared workspace—then carries the right information into every venue and guest experience.</p></header>
       <div className="vx2-proof-stage" data-reveal>
-        <figure className="vx2-proof-window vx2-proof-main"><div className="vx2-window-bar"><i/><i/><i/><span>Illustrative operational workspace</span></div><img src="/platform/stock-control.png?v=5" alt="Fictional Aurelia Hospitality stock control workspace with synthetic data"/></figure>
-        <figure className="vx2-proof-window vx2-proof-venue"><div className="vx2-window-bar"><i/><i/><i/><span>Fictional venue portfolio</span></div><img src="/platform/venue-inventory.png?v=5" alt="Fictional venue portfolio using synthetic inventory data"/></figure>
+        <figure className="vx2-proof-window vx2-proof-main"><div className="vx2-window-bar"><i/><i/><i/><span>Illustrative operational workspace</span></div><MarketingImage name="stock-control" alt="Fictional Aurelia Hospitality stock control workspace with synthetic data"/></figure>
+        <figure className="vx2-proof-window vx2-proof-venue"><div className="vx2-window-bar"><i/><i/><i/><span>Fictional venue portfolio</span></div><MarketingImage name="venue-inventory" alt="Fictional venue portfolio using synthetic inventory data"/></figure>
         <aside className="vx2-proof-note"><p className="vx2-label">Operational record</p><h3>Every bottle.<br/>Every venue.<br/>Every movement.</h3><p>Live quantities, service formats and movement history stay connected to the teams and experiences that depend on them.</p><ul><li>Location-level availability</li><li>Transfers and adjustments</li><li>Stock-aware publishing</li></ul></aside>
       </div>
       <ol className="vx2-proof-flow" data-reveal>
@@ -89,7 +94,7 @@ export default function HomePage() {
     </section>
 
     <section className="vx2-access" id="access">
-      <div data-reveal><p className="vx2-label">Selected hospitality partners</p><h2>What could VAXERON become for your property?</h2><p>Tell us about the operation, the guest journey and what you would like to connect.</p><a href="mailto:hello@vaxeron.com?subject=VAXERON%20access%20request&body=Property%20or%20company%3A%0A%0AModules%20of%20interest%3A%0A%0AWhat%20would%20you%20like%20VAXERON%20to%20help%20with%3A">Request a private introduction <span>→</span></a></div>
+      <div data-reveal><p className="vx2-label">Selected hospitality partners</p><h2>What could VAXERON become for your property?</h2><p>Tell us about the operation, the guest journey and what you would like to connect.</p><a href="/contact" data-demo-cta="Both">Request a demo <span>→</span></a></div>
     </section>
 
     <PublicFooter />

@@ -1,0 +1,9 @@
+.banner { position: fixed; z-index: 2000; bottom: 20px; left: 20px; right: 20px; margin: auto; max-width: 1100px; display: flex; align-items: center; gap: 28px; padding: 24px; background: #fcfaf5; color: #203b33; border: 1px solid #617064; box-shadow: 0 8px 36px #14201930; }
+.banner h2 { font-size: 20px; text-transform: none; letter-spacing: -.02em; color: #203b33; margin: 0 0 8px; }
+.banner p { font-size: 14px; line-height: 1.7; color: #465447; margin: 0; }
+.banner a { color: #203b33; text-decoration: underline; }
+.actions { display: flex; gap: 12px; flex-shrink: 0; }
+.actions button { padding: 12px 16px; min-height: 44px; font-size: 14px; background: #203b33; border: 1px solid #203b33; color: #fff; cursor: pointer; }
+.settings { color: #e0e6df; font-size: 14px; text-align: left; background: transparent; border: 0; padding: 8px 0; cursor: pointer; }
+.banner :focus-visible, .settings:focus-visible { outline: 2px solid #a77b33; outline-offset: 4px; }
+@media(max-width:760px) { .banner { flex-direction: column; align-items: stretch; gap: 18px; padding: 20px; bottom: 12px; left: 12px; right: 12px; } .actions { flex-wrap: wrap; } .actions button { flex: 1; } }
