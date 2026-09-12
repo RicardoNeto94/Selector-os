@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { CONSENT_KEY, CONSENT_DURATION, PUBLIC_SITE_PATHS, readConsent, SITE_ORIGIN } from "@/lib/site/publicSite.mjs";
 import styles from "./SiteConsent.module.css";
+import { filterPublicAnalyticsEvent } from "@/lib/site/analyticsPrivacy.mjs";
 
 const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const configuredHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
@@ -23,13 +24,7 @@ async function loadAnalytics() {
       advanced_disable_feature_flags: true, advanced_disable_decide: true,
       opt_out_capturing_by_default: true, opt_out_persistence_by_default: true,
       ip: false, person_profiles: "never",
-      before_send: (event) => {
-        // Never send query strings, fragments, form fields or account identifiers.
-        if (!event || !["$pageview", "demo_interest"].includes(event.event)) return null;
-        const allowed = ["distinct_id", "$lib", "$lib_version", "$browser", "$os", "$device_type", "$current_url", "path", "product"];
-        event.properties = Object.fromEntries(Object.entries(event.properties || {}).filter(([name]) => allowed.includes(name)));
-        return event;
-      },
+      before_send: filterPublicAnalyticsEvent,
     }, "publicWebsite");
     analytics = posthog.publicWebsite;
     return analytics;
