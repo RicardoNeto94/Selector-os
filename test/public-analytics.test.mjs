@@ -6,10 +6,13 @@ test("both public events retain PostHog's required ingestion token and anonymous
   for (const event of ["$pageview", "demo_interest"]) {
     const result = filterPublicAnalyticsEvent({
       event, uuid: "test-event", timestamp: "2026-09-12T00:00:00Z",
-      properties: { token: "public-project-token", distinct_id: "anonymous-id", path: "/wine", product: "Wine" },
+      properties: { token: "public-project-token", distinct_id: "anonymous-id", path: "/wine", product: "Wine", $session_id: "anonymous-session", $window_id: "anonymous-window", $process_person_profile: false },
     });
     assert.equal(result.properties.token, "public-project-token");
     assert.equal(result.properties.distinct_id, "anonymous-id");
+    assert.equal(result.properties.$session_id, "anonymous-session");
+    assert.equal(result.properties.$window_id, "anonymous-window");
+    assert.equal(result.properties.$process_person_profile, false);
     assert.equal(result.uuid, "test-event");
     assert.equal(result.timestamp, "2026-09-12T00:00:00Z");
   }
